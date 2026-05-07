@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 from pathlib import Path
 import requests
@@ -6,6 +7,11 @@ import json
 def require_https(url: str):
     if not url.startswith("https://"):
         raise ValueError("出于通信安全考虑，BASE_URL 必须是 https:// 开头")
+
+def fail(message: str, code: int = 1):
+    print(f"错误：{message}", file=sys.stderr)
+    raise SystemExit(code)
+
 def main():
     parser = argparse.ArgumentParser(description="调用提交代理API并获取详细中文结果")
     parser.add_argument("--base-url", required=True)
@@ -19,15 +25,38 @@ def main():
     parser.add_argument("--poll-interval-ms", type=int, default=1000)
     parser.add_argument("--ca-cert", default=None)
     args = parser.parse_args()
-    require_https(args.base_url)
+    try:
+        require_https(args.base_url)
+    except ValueError as e:
+        fail(str(e))
+
+    if args.timeout_ms <= 0:
+        fail("--timeout-ms 必须为正整数")
+    if args.poll_interval_ms <= 0:
+        fail("--poll-interval-ms 必须为正整数")
+
     uname = os.getenv("HYDRO_API_UNAME")
     password = os.getenv("HYDRO_API_PASSWORD")
     if not uname or not password:
-        raise RuntimeError("请先设置环境变量 HYDRO_API_UNAME / HYDRO_API_PASSWORD")
-    code = Path(args.code_file).read_text(encoding="utf-8")
+        fail("请先设置环境变量 HYDRO_API_UNAME / HYDRO_API_PASSWORD")
+
+    code_path = Path(args.code_file)
+    if not code_path.is_file():
+        fail(f"代码文件不存在：{code_path}")
+    try:
+        code = code_path.read_text(encoding="utf-8")
+    except OSError as e:
+        fail(f"读取代码文件失败：{code_path}，{e}")
+
     input_text = ""
     if args.pretest and args.input_file:
-        input_text = Path(args.input_file).read_text(encoding="utf-8")
+        input_path = Path(args.input_file)
+        if not input_path.is_file():
+            fail(f"输入文件不存在：{input_path}")
+        try:
+            input_text = input_path.read_text(encoding="utf-8")
+        except OSError as e:
+            fail(f"读取输入文件失败：{input_path}，{e}")
     payload = {
         "domainId": args.domain_id,
         "uname": uname,
@@ -44,12 +73,25 @@ def main():
     verify = args.ca_cert if args.ca_cert else True
     timeout = (8, 180)
     url = f"{args.base_url.rstrip('/')}/api/problem/submit_proxy"
-    resp = requests.post(url, json=payload, timeout=timeout, verify=verify)
-    resp.raise_for_status()
-    body = resp.json()
+    try:
+        resp = requests.post(url, json=payload, timeout=timeout, verify=verify)
+        resp.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        fail(f"提交接口请求失败：{e}")
+
+    try:
+        body = resp.json()
+    except ValueError:
+        fail(f"接口返回非 JSON，HTTP {resp.status_code}，响应片段：{resp.text[:200]!r}")
+
+    if not isinstance(body, dict):
+        fail(f"接口返回格式错误，期望对象，实际：{type(body).__name__}")
+
     # 输出关键信息
     print("RID:", body.get("rid"))
     result = body.get("result", {})
+    if not isinstance(result, dict):
+        fail(f"接口返回的 result 字段格式错误，实际：{type(result).__name__}")
     print("是否完全通过:", result.get("isAccepted"))
     print("错误种类:", result.get("errorType"))
     print("状态:", (result.get("status") or {}).get("textZh"))
