@@ -13,7 +13,7 @@ prompt用法：
 
 case1:无题解无std
 ```
-/codefun2000-problem-generator  在@华为AI岗-4月8日 文件夹下，出题，pid: P4000
+/codefun2000-problem-generator  在@Problems 文件夹下，出题，pid: P4000
 
 std+题解+数据的出题框架请参考：/algorithm-contest-problemsetter
 ```
@@ -21,7 +21,7 @@ std+题解+数据的出题框架请参考：/algorithm-contest-problemsetter
 
 case2:给定题面
 ```
-/codefun2000-problem-generator  在@华为AI岗-4月8日 文件夹下，出题，题面在@xxx 中
+/codefun2000-problem-generator  在@Problems 文件夹下，出题，题面在@xxx 中
 
 std+题解+数据的出题框架请参考：/algorithm-contest-problemsetter
 ```
@@ -29,7 +29,7 @@ std+题解+数据的出题框架请参考：/algorithm-contest-problemsetter
 
 case3:给定std
 ```
-/codefun2000-problem-generator  在@华为AI岗-4月8日 文件夹下，出题，根据@std.py 来出题
+/codefun2000-problem-generator  在@Problems 文件夹下，出题，根据@std.py 来出题
 
 std+题解+数据的出题框架请参考：/algorithm-contest-problemsetter
 ```
