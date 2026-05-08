@@ -14,19 +14,9 @@ def require_https(url: str) -> None:
 def collect_files(data_dir: Path) -> dict[str, str]:
     files: dict[str, str] = {}
     for p in data_dir.iterdir():
-        if p.is_file() and (p.name.endswith(".in") or p.name.endswith(".out")):
+        if p.is_file():
             files[p.name] = p.read_text(encoding="utf-8")
     return files
-
-
-def validate_pairs(files: dict[str, str]) -> None:
-    stems: dict[str, set[str]] = {}
-    for name in files:
-        stem, ext = name.rsplit(".", 1)
-        stems.setdefault(stem, set()).add(ext)
-    for stem, exts in stems.items():
-        if not {"in", "out"}.issubset(exts):
-            raise ValueError(f"数据不成对：需要 {stem}.in 与 {stem}.out")
 
 
 def main() -> None:
@@ -34,7 +24,7 @@ def main() -> None:
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--domain-id", required=True)
     parser.add_argument("--pid", required=True)
-    parser.add_argument("--data-dir", required=True, help="含 1.in 1.out ... 的目录")
+    parser.add_argument("--data-dir", required=True, help="含测试数据文件的目录")
     parser.add_argument("--ca-cert", default=None)
     ow = parser.add_mutually_exclusive_group()
     ow.add_argument(
@@ -65,8 +55,7 @@ def main() -> None:
 
     files = collect_files(data_dir)
     if not files:
-        raise SystemExit("目录中未找到 .in/.out 文件")
-    validate_pairs(files)
+        raise SystemExit("目录中未找到可上传文件")
 
     payload = {
         "domainId": args.domain_id,
