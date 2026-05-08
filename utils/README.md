@@ -105,7 +105,7 @@ python upload_testdata.py --base-url https://codefun2000.com --domain-id system 
 | 参数 | 必填 | 说明 |
 |------|------|------|
 | `--base-url` / `--domain-id` / `--pid` | 是 | `--base-url` 见上文 |
-| `--lang` | 是 | 语言标识，如 `py.py3`、`cc.cc14o2` |
+| `--lang` | 是 | 语言标识，如 `py.py3`、`cc.cc14o2`、`java` |
 | `--code-file` | 是 | 本地源码路径 |
 | `--pretest` | 否 | 样例/自定义输入预测 |
 | `--input-file` | 否 | 与 `--pretest` 配合时的输入文件 |
