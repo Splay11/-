@@ -34,8 +34,22 @@ case3:给定std
 std+题解+数据的出题框架请参考：/algorithm-contest-problemsetter
 ```
 
+prompt用法（LeetCode 模式）：
 
-- **codefun2000-problem-uploader**：上传OJ工作流。通过本地 `utils` 脚本向 CodeFun2000 上传题解、测试数据或提交标程；缺环境/脚本/参数时会明确报错并停止。
+case1:无题解无std
+```
+/leetcode-core-code-mode 在 @Pxxxx 下出题，出题的 pid: Pxxxx，根据题意写清接口与题面，生成与仓库根一致的 template/user、config.yaml、gen.py、data，并从仓库根原样复制 compile.sh
+```
+
+
+case2:给定 std
+```
+/leetcode-core-code-mode 在 @Problems/P4000 下对齐：以 @std.cpp（或 std.py / Main.java）为权威实现，统一三语言 user 桩签名，重写 template 读入与调用，补齐题解、造数与 compile.sh / config.yaml
+```
+
+
+
+- **codefun2000-problem-uploader**：上传 OJ 工作流。通过本地 `utils` 脚本向 CodeFun2000 上传题解、测试数据、提交标程；**核心代码模式**题目还可生成 `leetcode_core_bundle_paths.json` 并上传 `compile.sh` / `config.yaml` / `template.*` / `user.*`（详见 `utils/README.md` 与本 Skill）；缺环境/脚本/参数时会明确报错并停止。
 
 
 prompt用法：
@@ -51,4 +65,9 @@ case2:只上传数据
 /codefun2000-problem-uploader  将@xxx/P4000/data 中的数据上传
 ```
 
-"# problem-maker" 
+
+case3:LeetCode 模式整套（题解 + 数据 + 后台文件）
+```
+/codefun2000-problem-uploader 将 @Problems/P4000 整套上传(包括数据，compile.sh，config.yaml，template.cc，template.py，template.java,user.cc，user.py，user.java文件)
+```
+

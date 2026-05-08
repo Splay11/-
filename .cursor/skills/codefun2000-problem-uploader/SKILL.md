@@ -1,14 +1,15 @@
 ---
 name: codefun2000-problem-uploader
 description: |
-  use this skill when the user wants to upload editorial (题解), test data, and/or submit std for online judge on CodeFun2000 via local utils scripts (upload_sol.py, upload_testdata.py, submit_code_and_get_result.py).
-  Locate scripts under workspace `./utils` (never hardcode a parent folder like 华为AI-x月x日). User explicit pid overrides folder-name pid. User may scope to data-only / solution-only / std-submit-only; skip unrelated steps and skip data/ requirement when not uploading data.
+  use this skill when the user wants to upload editorial (题解), test data, and/or submit std for online judge on CodeFun2000 via local utils scripts (upload_sol.py, upload_testdata.py, submit_code_and_get_result.py). For LeetCode-style core-code problems, also generate_leetcode_core_manifest.py + upload_leetcode_core_bundle.py (manifest leetcode_core_bundle_paths.json).
+  Locate scripts under workspace `./utils` (never hardcode a parent folder like 华为AI-x月x日). User explicit pid overrides folder-name pid. User may scope to data-only / solution-only / std-submit-only / leetcode-core-bundle-only; skip unrelated steps and skip data/ requirement when not uploading data.
   Fail closed: utils dir or required script missing, missing env, missing domain, missing pid when needed, missing data/ only when upload-data is in scope, broken pairs → fixed fatal message; then summarize outputs and warnings.
+  测例须与本地 `data/` 原样一致（上传通道不得默削数据）；造数/测例规模须在题面范围内；HTTP 413 时用 zip 导入见 §3.3。
 ---
 
 # 上传题目 Skill（CodeFun2000 / Hydro API）
 
-本 Skill 指导通过工作区内解析到的 **`utils/`** 目录下的脚本，将本地题目目录中的**题解**、**测试数据**同步到平台，并对**标程**做**在线提交评测**。
+本 Skill 指导通过工作区内解析到的 **`utils/`** 目录下的脚本，将本地题目目录中的**题解**、**测试数据**同步到平台，并对**标程**做**在线提交评测**；对 **LeetCode 核心代码模式**（函数式标程、依赖 `compile.sh` / `config.yaml` / `template.*` / `user.*` 的题目包）额外支持：**生成本地路径清单 JSON**并按清单**上传附加文件**到平台（部分文件缺失时**仍上传已找到部分**，并在报告中列出未找到项）。
 
 脚本与参数细节以 **`<utils_dir>/README.md`**（若存在）为准；**`--base-url` 固定为 `https://codefun2000.com`**。
 
@@ -37,6 +38,7 @@ description: |
 | 上传测试数据 | `upload_testdata.py` |
 | 上传题解 | `upload_sol.py` |
 | 在线评测 std | `submit_code_and_get_result.py` |
+| 上传核心代码模式附加文件（见 §3.5） | `generate_leetcode_core_manifest.py`、`upload_leetcode_core_bundle.py`（依赖同目录 `leetcode_core_bundle_common.py`） |
 
 任一必需脚本缺失：**fatal stop**，缺失项写明：`utils 目录位于 <路径>，但缺少文件：<文件名>`。
 
@@ -105,6 +107,7 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 | `std.py` | 若存在则在线提交评测（`submit_code_and_get_result.py`）。 |
 | `std.cpp` | 同上。 |
 | `Main.java` | 同上（类名须为 `public class Main`，与出题 Skill 一致）。 |
+| `leetcode_core_bundle_paths.json` | **核心代码模式**路径清单（由 `generate_leetcode_core_manifest.py` 生成；上传附加文件时由 `upload_leetcode_core_bundle.py` 读取，默认上传前会刷新）。 |
 
 ### 3.2 测试数据规则（与 `upload_testdata.py` 行为一致）
 
@@ -115,18 +118,67 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
   - 若存在不成对数据：`upload_testdata.py` 会报错退出，**不得**声称数据已全部上传成功。**推荐**：扫描到不成对时先 **fatal stop**（缺失项写明哪些 stem 不成对），避免无效请求；若用户要求先执行脚本以获取平台侧报错，允许调用一次，但**最终汇总（第 5 节）中必须**重复列出本地扫描的不成对明细与脚本输出。
   - 若用户要求「只上传成对部分」：将**仅成对**文件复制到临时目录，`--data-dir` 指向该目录；在 **第 5.2 节** 说明哪些 stem 因不成对被省略、哪些文件未参与上传。
 
-### 3.3 推荐执行顺序（Agent 须真实调用脚本）
+### 3.3 测试数据「原样上传」原则（强制）
+
+- **目标**：把本地题目目录下 `data/` 中**每一对** `stem.in` / `stem.out` 与仓库出题结果**原封不动**同步到平台（文本按 UTF-8 与脚本读入一致；**不设**「为图单次 HTTP 省事」的默认削峰、删组、缩短**题面允许范围内**已生成的测例形态或改弱数值）。
+- **禁止**：在用户**未显式授权**修改题目包或收窄上传范围时，因接口失败、体积大、超时而**擅自**改 `gen_data`、删减测点、只传子集却报告为「已全量上传」；若曾用临时目录只传部分文件，须在报告中写明**线上数据与本地 `data/` 不一致**及缺失 stem。
+- **允许的技术手段**（不改变数据内容）：`requests.Session(trust_env=False)` 规避错误系统代理、**加大读写超时**、换网络/机器重试、使用 **Python 3.9+** 执行脚本（大 JSON 与类型注解）、按 `upload_testdata.py` / `utils/README.md` 约定使用 **`--body-file`**；若 JSON 仍超过平台单次限制（常见为 **HTTP 413**，即使用 `Content-Encoding: gzip` 压缩后仍被拒），须在题目目录生成 **`P{pid}_testdata_all_pairs.zip`**（仅含成对 `*.in`/`*.out`，与本地 `data/` 一致）并指导用户走平台**打包/导入测试数据**入口完成**原样**同步，**不得**为此删减**题面范围内**已生成的测点。
+- **与「无上限」的关系（澄清）**：**「无上限」仅指**——**不得**把「HTTP/网关单次请求体大小」当作理由，去删减或削弱**已经符合 `题面.md` 数据范围**的测例；**不表示**可以突破题面自行造更大输入。本地测例仍须始终满足题面；上传侧以**实际上传成功且与本地逐文件一致**为准。若平台确有单次请求硬上限且**无**无损合并接口，须在报告中 **fail closed 式列明**，由用户走平台打包导入或运维调额，**不得**静默改弱或改越界数据替代。
+
+### 3.4 推荐执行顺序（Agent 须真实调用脚本）
 
 在 **第 0～2 节及第 3.2 节扫描结论**允许继续上传时：
 
-1. **`upload_testdata.py`**（路径为 `<utils_dir>/upload_testdata.py`）：`--data-dir` 指向 `<根目录>\data`（或经第 3.2 节处理后的临时目录），带上 `--pid`、`--domain-id`、`--base-url`；按需 `--overwrite` / `--no-overwrite`（默认覆盖见 README）。
-2. **`upload_sol.py`**：若存在 **`题解.md`**，则 `--solution-file` 指向该文件；若**不存在**，跳过此步并在报告中注明「未找到 题解.md，未上传题解」。
-3. **`submit_code_and_get_result.py`**：对**实际存在**的标程文件分别提交（每种语言一次）：
+1. **`upload_testdata.py`**（路径为 `<utils_dir>/upload_testdata.py`）：`--data-dir` 指向 `<根目录>\data`（或经第 3.2 节处理后的临时目录），带上 `--pid`、`--domain-id`、`--base-url`；按需 `--overwrite` / `--no-overwrite`（默认覆盖见 README）；**大体积 `data/` 建议加 `--body-file` 并选用 Python 3.9+**（见 `utils/README.md`）。
+2. **核心代码模式附加文件**（仅当 **§3.5.1** 命中时）：按 **§3.5.4** 调用 `generate_leetcode_core_manifest.py`（可选）与 **`upload_leetcode_core_bundle.py`**；命中但用户声明「跳过附加文件上传」时须在报告中写明依据。
+3. **`upload_sol.py`**：若存在 **`题解.md`**，则 `--solution-file` 指向该文件；若**不存在**，跳过此步并在报告中注明「未找到 题解.md，未上传题解」。
+4. **`submit_code_and_get_result.py`**：对**实际存在**的标程文件分别提交（每种语言一次）：
    - `std.py` → `--lang py.py3`，`--code-file` 指向 `std.py`
    - `std.cpp` → `--lang cc.cc14o2`，`--code-file` 指向 `std.cpp`
    - `Main.java` → `--lang` 使用平台支持的 Java 标识（若 README 未写全，以 CodeFun2000/Hydro 实际为准；常见为带 `java` 的 key，**禁止瞎编**；不确定则 fatal stop 要求用户确认 `--lang`）
 
 每步都应捕获**标准输出/标准错误**与退出码，供第 5.1 节汇总。
+
+### 3.5 核心代码模式（LeetCode 式函数题）附加文件
+
+与仓库 **`leetcode-core-code-mode`** 对齐：除 stdin/stdout 式 `data/` 与标程提交外，题目根目录还可存在 **`compile.sh`**、**`config.yaml`**、**`template.py` / `template.cc` / `template.java`**、**`user.cc` / `user.java` / `user.py`**。本 Skill 要求通过**清单 JSON** 管理依赖路径，并在上传时按清单解析本地文件。
+
+#### 3.5.1 是否进入本流程（判定）
+
+在**未**被用户收窄为「仅数据 / 仅题解 / 仅 std」时，若满足**任一**条件，则整套上传中**须**执行 §3.5.2～§3.5.3（用户显式声明「不是核心代码模式」则跳过）：
+
+1. 题目根目录存在 **`config.yaml`**（与核心代码模式交付物一致，作为默认主判据）；或  
+2. 题目根目录存在任一 **`template.{py,cc,java}`** 且存在任一 **`user.{py,cc,java}`**；或  
+3. 用户在本轮任务中**显式说明**该题为「核心代码模式 / LeetCode 模式 / 函数式标程」等；或  
+4. 已存在合法的 **`leetcode_core_bundle_paths.json`**（`kind` 为 `leetcode_core_bundle_paths`）且用户要求按该清单上传。
+
+**说明**：「标程无 `main`/无标准 IO」可作为辅助理解，**不作为**唯一自动判定条件（避免误判）；以文件结构与用户声明为准。
+
+#### 3.5.2 清单 JSON（`leetcode_core_bundle_paths.json`）
+
+- **生成**：调用 **`<utils_dir>/generate_leetcode_core_manifest.py`**，`--problem-dir` 为题目根目录；默认在题目根写入 **`leetcode_core_bundle_paths.json`**。  
+- **字段约定**（`version` 为 `1`）：  
+  - `kind`：固定 `leetcode_core_bundle_paths`  
+  - `problem_root`：题目根绝对路径  
+  - `files`：对象，**键**为平台侧文件名（如 `compile.sh`），**值**为该文件当前**绝对路径**（仅包含磁盘上存在的文件）  
+  - `missing`：数组，列出约定文件名中**当前未找到**的项（仍写入清单，便于报告）  
+- **刷新**：**`upload_leetcode_core_bundle.py` 默认**在上传前再次扫描并**覆盖写回**同一路径清单（可用 `--no-refresh-manifest` 改为严格只读已有 JSON）。Agent 也可在调用上传脚本**之前**单独跑一次 `generate_leetcode_core_manifest.py`，以便在报告里引用生成摘要。
+
+#### 3.5.3 上传行为（部分成功策略）
+
+1. 调用 **`<utils_dir>/upload_leetcode_core_bundle.py`**：`--base-url`、`--domain-id`、`--pid`、`--problem-dir` 与 `utils/README.md` 一致；`--manifest` 缺省为 `<题目根>/leetcode_core_bundle_paths.json`；**`--api-segment` 以 README 与线上一致为准**（默认见 README），若平台路径不同须显式传入。  
+2. 脚本根据清单 `files` 读取本地文本；**路径缺失、文件被删、值为空**的键**跳过**，**不把整次上传判为 fatal stop**；已成功组装的 `files` 字典**非空**时仍发起 HTTP 请求。  
+3. **若最终没有任何文件可读**（例如八项全缺）：**不伪造**上传成功；打印原因并可退出码 0 表示「跳过上传」——须在 **§5.2** 勾选「核心代码附加文件全部缺失，未发起上传」。  
+4. HTTP 非 2xx 或 JSON 业务失败：按真实输出汇总，**不得**声称附加文件已同步。
+
+#### 3.5.4 与 §3.4 整套顺序的关系
+
+在 **§3.2** 允许继续、`§3.5.1` 命中核心代码模式时，在 **`upload_testdata.py` 成功之后**、`upload_sol.py` **之前**，插入：
+
+- （推荐）`generate_leetcode_core_manifest.py`（若下一步上传脚本使用默认 `--refresh-manifest` 则可省略单独调用，但单独调用有利于日志）  
+- `upload_leetcode_core_bundle.py`
+
+其后继续 **`upload_sol.py`**、**`submit_code_and_get_result.py`**。
 
 ---
 
@@ -139,7 +191,8 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 | 「只上传数据」「仅传测试数据」等 | 仅上传测试数据 | `upload_testdata.py` | `题解.md`、标程文件、**不要求**执行题解上传与 std 提交 |
 | 「只上传题解」「仅传题解」等 | 仅上传题解 | `upload_sol.py` | `data/`、标程提交 |
 | 「只测试 std」「只提交标程」「只评测」等 | 仅在线评测 std | `submit_code_and_get_result.py`（可多次，每语言一次） | `data/`、题解上传（除非用户同时要求） |
-| 未收窄或「整套上传」等 | 整套（第 3 节） | 三者按第 3.3 节顺序 | 整套的前置条件 |
+| 「只上传核心代码包」「仅传 compile/config/template/user」等 | 仅核心代码附加文件 | `generate_leetcode_core_manifest.py`、`upload_leetcode_core_bundle.py` | `data/`、题解、标程提交（除非用户同时要求） |
+| 未收窄或「整套上传」等 | 整套（第 3 节） | 按第 3.4 节顺序（含 §3.5 命中时的附加文件步骤） | 整套的前置条件 |
 
 **规则**：
 
@@ -147,8 +200,9 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 - 收窄范围后，**仅检查与执行**该范围对应的 **第 0.2 节**脚本；未涉及的步骤不调用、也不在 fatal 条件中要求对应资源（例如「只上传题解」时不要求 `data/` 存在）。
 - **仅测试 std** 时：若用户未指定文件路径，则在**题目根目录**下查找 `std.py` / `std.cpp` / `Main.java` 中存在的文件并分别提交；若用户指定了某一文件，则只提交该文件。**若找不到任何可提交文件**，fatal stop，缺失项写明未找到标程文件。
 - **仅上传题解**时：默认 `--solution-file` 为题目根目录下 **`题解.md`**；若用户指定了其他路径，以用户路径为准；文件不存在则 fatal stop。
+- **仅上传核心代码附加文件**时：`--problem-dir` 为题目根；须存在 §0.2 对应脚本；**不要求** `data/` 与 `题解.md`；若八项约定文件均不存在，按 §3.5.3 在报告中说明「未发起上传」，**不**将「缺文件」本身列为 §1.1 fatal stop（脚本缺失、环境变量缺失、无 pid 等仍 fatal）。
 
-整套上传（第 3 节）是上述三类的组合与前置扫描超集；**一旦用户收窄范围，不得再按整套默认强制执行被用户排除的步骤**。
+整套上传（第 3 节）是上述步骤的组合与前置扫描超集；**一旦用户收窄范围，不得再按整套默认强制执行被用户排除的步骤**。
 
 ---
 
@@ -158,7 +212,7 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 
 用清晰小节整理每次调用的：
 
-- 命令意图（上传数据 / 上传题解 / 提交何种语言 std）
+- 命令意图（上传数据 / 上传核心代码附加文件 / 上传题解 / 提交何种语言 std）
 - **退出码**（若可得）
 - **脚本打印的关键信息**（如 HTTP 状态、JSON 摘要、`submit` 的 RID、`是否完全通过`、状态中文、首个失败点等），避免大段无标注 dump；关键字段应摘录。
 
@@ -171,6 +225,8 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 - **输入输出不成对**：列出 stem 或文件名（如 `1.in` 无 `1.out`）；若已通过临时目录仅传成对文件，说明哪些 stem 未上传。
 - **`题解.md` 缺失**：在**整套上传**或**仅上传题解**（且未指定其他文件）场景下分别说明：前者为「已跳过题解上传」；后者应已在执行前 fatal stop，不应静默发生。
 - **Java 类名**：若存在 `Main.java` 且非 `public class Main`，须提醒用户修正（可与出题 Skill 一致处理）。
+- **核心代码附加文件**：列出 `leetcode_core_bundle_paths.json` 中 `missing` 或扫描得到的未找到约定文件名；列出 manifest 中路径已失效被跳过的键；若 HTTP/API 失败须与「仅部分文件缺失」区分说明。
+- **核心代码附加文件全部缺失**：八项均不存在或全部不可读，未发起 `upload_leetcode_core_bundle` 的 POST 时，须明确写出，避免被理解为「已同步平台」。
 
 ---
 
@@ -181,6 +237,7 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 - 在未完成 **第 0.1 / 0.2 节** 解析与存在性检查、或 **utils / 所需脚本缺失** 时仍调用上传或提交接口。
 - **禁止**跳过环境变量检查；**禁止**在任务范围包含上传数据时跳过 `data/` 存在性检查。
 - 对不成对数据静默忽略导致用户误以为全部数据已上传。
+- 在 **`upload_leetcode_core_bundle.py`** 返回 HTTP 4xx/5xx 或响应体表明接口未实现时，仍声称「附加文件已同步到平台」。
 
 ---
 
@@ -189,3 +246,8 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 - **出题 Skill**：负责创建工作区、题面、标程、题解、造数等。
 - **本 Skill**：负责把**已有**目录内容通过 API **推送**到平台并拉取**在线评测结果**。
 - 二者可同时被同一仓库引用；本 Skill **不**替代 `algorithm-contest-problemsetter` 的造题逻辑。
+
+## 8. 与 `leetcode-core-code-mode` Skill 的关系
+
+- **`leetcode-core-code-mode`**：约定题目根下 `compile.sh`、`config.yaml`、`template.*`、`user.*` 等交付物及题解格式。
+- **本 Skill §3.5**：在识别为核心代码模式题目时，将上述文件**登记入 `leetcode_core_bundle_paths.json`** 并调用 **`upload_leetcode_core_bundle.py`** 推送到平台；接口路径与请求体字段以 **`utils/README.md`** 及线上部署为准。

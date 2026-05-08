@@ -53,7 +53,9 @@ def main() -> None:
     }
 
     verify = args.ca_cert if args.ca_cert else True
-    resp = requests.post(
+    session = requests.Session()
+    session.trust_env = False
+    resp = session.post(
         url,
         json=payload,
         timeout=(10, 120),

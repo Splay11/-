@@ -44,7 +44,9 @@ def main():
     verify = args.ca_cert if args.ca_cert else True
     timeout = (8, 180)
     url = f"{args.base_url.rstrip('/')}/api/problem/submit_proxy"
-    resp = requests.post(url, json=payload, timeout=timeout, verify=verify)
+    session = requests.Session()
+    session.trust_env = False
+    resp = session.post(url, json=payload, timeout=timeout, verify=verify)
     resp.raise_for_status()
     body = resp.json()
     # 输出关键信息

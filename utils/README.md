@@ -78,6 +78,7 @@ python upload_sol.py --base-url https://codefun2000.com --domain-id system --pid
 | `--data-dir` | 是 | 含 `1.in`、`1.out` 等的目录 |
 | `--overwrite` | 否 | 默认开启：覆盖已有测试数据 |
 | `--no-overwrite` | 否 | 题目已有 `.in/.out` 时跳过上传 |
+| `--body-file` | 否 | 将本次请求的 JSON 先写入该路径再以流式 POST，**大体积 `data/`（如单行极限输入）强烈建议指定**，并配合 **Python 3.9+** 执行；脚本内已 `trust_env=False` 以降低错误代理导致的中断 |
 | `--ca-cert` | 否 | 自签证书 CA |
 
 **示例**：
@@ -85,6 +86,9 @@ python upload_sol.py --base-url https://codefun2000.com --domain-id system --pid
 ```powershell
 # 默认覆盖已有数据并上传
 python upload_testdata.py --base-url https://codefun2000.com --domain-id system --pid P4718 --data-dir ./testdata
+
+# 大测试数据：先落盘请求体再上传（示例路径可改）
+python upload_testdata.py --base-url https://codefun2000.com --domain-id system --pid P4724 --data-dir ./Problems/P4724/data --body-file ./.upload_body_cache.json
 
 # 不覆盖已有数据
 python upload_testdata.py --base-url https://codefun2000.com --domain-id system --pid P4718 --data-dir ./testdata --no-overwrite
@@ -113,6 +117,69 @@ python upload_testdata.py --base-url https://codefun2000.com --domain-id system 
 ```powershell
 python submit_code_and_get_result.py --base-url https://codefun2000.com --domain-id system --pid P4719 --lang py.py3 --code-file ans.py
 ```
+
+---
+
+## 核心代码模式附加文件（`compile.sh` / `config.yaml` / `template.*` / `user.*`）
+
+与仓库 **`leetcode-core-code-mode`** 交付物一致：题目根目录下上述文件名与平台侧「附加评测文件」键名一致。本组脚本用于在本地生成**路径清单 JSON**，并调用平台扩展接口**按文件名上传文本内容**。
+
+### `generate_leetcode_core_manifest.py` — 生成清单
+
+**作用**：扫描题目根目录下约定文件名，写入 **`leetcode_core_bundle_paths.json`**（默认与题目根同级），记录已找到文件的**绝对路径**及 `missing` 列表。
+
+**主要参数**：
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `--problem-dir` | 是 | 题目根目录 |
+| `--out` | 否 | 清单输出路径（默认 `<题目根>/leetcode_core_bundle_paths.json`） |
+
+**示例**：
+
+```powershell
+python generate_leetcode_core_manifest.py --problem-dir ./Problems/P14207
+```
+
+### `upload_leetcode_core_bundle.py` — 按清单上传
+
+**作用**：读取清单中的 `files`（逻辑文件名 → 本地绝对路径），将**实际可读**的文件以 UTF-8 文本读入，组装为 `files` 字典，调用 **`POST {base}/api/problem/{api-segment}`**。缺失或路径失效的文件**不会**进入请求体；脚本在 stderr/stdout 中提示缺失项（**不**因部分缺失而整体失败退出，除非无可上传内容且你选择将「无文件」视为正常跳过——见脚本说明）。
+
+**主要参数**：
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `--base-url` / `--domain-id` / `--pid` | 是 | 与其它脚本一致 |
+| `--problem-dir` | 是 | 题目根；用于默认 manifest 路径及刷新扫描 |
+| `--manifest` | 否 | 清单路径（默认 `<题目根>/leetcode_core_bundle_paths.json`） |
+| `--refresh-manifest` | 否 | **默认开启**：上传前重新扫描并写回 manifest |
+| `--no-refresh-manifest` | 否 | 仅使用已有 JSON，不覆盖 |
+| `--api-segment` | 否 | 默认 `upload_leetcode_core_bundle`，完整 URL 为 `.../api/problem/upload_leetcode_core_bundle`。**若线上部署路径不同，以平台文档为准并用本参数覆盖** |
+| `--body-file` | 否 | 与 `upload_testdata.py` 相同，大 JSON 时可先落盘再流式 POST |
+| `--ca-cert` | 否 | 自签证书 CA |
+
+**请求体约定**（须与 CodeFun2000 侧实现一致；若有差异请改 `--api-segment` 或联系平台）：
+
+```json
+{
+  "domainId": "...",
+  "uname": "...",
+  "password": "...",
+  "pid": "P14207",
+  "files": {
+    "compile.sh": "文件全文",
+    "config.yaml": "..."
+  }
+}
+```
+
+**示例**：
+
+```powershell
+python upload_leetcode_core_bundle.py --base-url https://codefun2000.com --domain-id system --pid P14207 --problem-dir ./Problems/P14207
+```
+
+依赖模块：`leetcode_core_bundle_common.py`（与上两脚本同目录，勿删）。
 
 ---
 

@@ -316,11 +316,19 @@ std.cpp / std.py / Main.java（已存在的部分）
 
 生成 `<题目目录>/题解.md`。生成前若模板或规范缺失，fatal stop。
 
+### 7.3 与「LeetCode 核心代码模式」题解对齐（当仓库采用该规范时）
+
+若题目按仓库根 **`题解生成规范(核心代码模式).md`**（或由 `leetcode-core-code-mode` Skill 交付的同类题解）撰写 `题解.md`，则第 3 节中的 **Python、Java、C++** 三份示例代码均须在**核心代码与关键代码处**添加**中文注释**，且三语言注释应对同一算法节点分别说明；**禁止**仅一种语言有注释或仅签名/imports 处敷衍一行。细则以该规范文件为准，并与 **`leetcode-core-code-mode` Skill** 第 3.1 节一致。
+
 ---
 
 ## 8. 生成数据
 
 生成数据的思路与行为请严格遵守 `algorithm-contest-problemsetter` Skill 的内容，不要自行发挥，不要敷衍了事。
+
+**（与 `leetcode-core-code-mode` 协作）**：当题目以 **LeetCode 核心代码模式**交付（`template.*` + `user.*` + 函数式 `Solution`）时，除本节下文全部要求外，`gen_data.py` / `gen.py` 产出的 **每一份 `.in` 的 stdin 文本形态** 还须与该题 `题面.md`（含 **PID 抓取** 的原文）中的 **样例输入** 展示格式 **保持一致**（同类分隔符、括号/引号风格、单行或多行结构等）；`template.*` 的解析器必须按同一格式实现。细则与冲突处理见 **`leetcode-core-code-mode` Skill 第 7.0 节**。
+
+**LeetCode 模式下的数据强度（补充）**：在遵守上文「stdin 与样例同形」的前提下，**不得**仅用短样例级、小规模输入凑满 10 组；须按计划使用题面允许上限附近的 **极限数据**（例如极大的 $n$、拉满的字符串/路径长度与深度、值域上下界、长数组/长 JSON 行等），并优先将此类形态落在 **后 2 组大数据** 及必要的构造/hack 组中，以有效压测解析、I/O 与正解在满约束下的行为；若题面未给出明确上限，则按「与题意一致的最大合理规模」构造并在 `data/README.md` 中写明依据。
 
 - **基准 std 选择顺序**（选第一个可用且非空的）：`std.py` → `std.cpp` → `Main.java`（若用户只提供 C++，则应以 `std.cpp` 为造数基准，**不得**因缺少 `std.py` 而直接 fatal，除非 `algorithm-contest-problemsetter` Skill 强制要求 Python）。
 
@@ -362,6 +370,8 @@ std.cpp / std.py / Main.java（已存在的部分）
 ### 8.6 生成后自校验（强制）
 
 生成完 10 组后，必须用基准 std（或 `gen.py` 内的解题逻辑）对全部 `*.in` 重新计算并与写出的 `*.out` 做一致性校验；不一致则视为生成失败，fatal stop 并指出首个失败编号与差异摘要。
+
+**与上传的衔接**：向 CodeFun2000 同步 `data/` 时，须遵守 **`codefun2000-problem-uploader` Skill 第 3.4 节**——**原样上传**、不得以「单次请求太大」为由在未获用户授权时改弱或删减本地已生成的极限数据。
 
 ---
 
