@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-# 与 leetcode-core-code-mode Skill 及题目目录约定一致（平台侧文件名即 key）
+# 与 leetcode-core-code-mode Skill 一致：约定文件在「题目根/data/」下（与测例同目录，便于 upload_testdata）
 CORE_BUNDLE_FILENAMES: Tuple[str, ...] = (
     "compile.sh",
     "config.yaml",
@@ -29,12 +29,17 @@ def problem_root_resolve(problem_dir: Path) -> Path:
     return p
 
 
+def data_dir_of_problem(problem_root: Path) -> Path:
+    return problem_root_resolve(problem_root) / "data"
+
+
 def scan_bundle_paths(problem_root: Path) -> Tuple[Dict[str, str], List[str]]:
-    """返回 (已找到的逻辑名 -> 绝对路径字符串, 缺失的逻辑名列表)。"""
+    """在 `<题目根>/data/` 下扫描约定文件名；返回 (逻辑名 -> 绝对路径, 缺失名列表)。"""
     found: Dict[str, str] = {}
     missing: List[str] = []
+    data_dir = data_dir_of_problem(problem_root)
     for name in CORE_BUNDLE_FILENAMES:
-        fp = problem_root / name
+        fp = data_dir / name
         if fp.is_file():
             found[name] = str(fp.resolve())
         else:

@@ -16,7 +16,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=f"扫描核心代码模式约定文件并写入 {MANIFEST_NAME}",
     )
-    parser.add_argument("--problem-dir", required=True, help="题目根目录，如 Problems/P14207")
+    parser.add_argument(
+        "--problem-dir",
+        required=True,
+        help="题目根目录（如 Problems/P14207）；约定文件从 <题目根>/data/ 扫描",
+    )
     parser.add_argument(
         "--out",
         default=None,
