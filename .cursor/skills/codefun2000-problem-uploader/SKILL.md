@@ -102,7 +102,7 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 
 | 路径（相对根目录） | 用途 |
 |-------------------|------|
-| `data/` | 测试数据目录；整套上传时**必须存在**（见第 1.1 节，与任务范围绑定）。 |
+| `data/` | 测试数据目录；整套上传时**必须存在**（见第 1.1 节，与任务范围绑定）。LeetCode 核心代码模式下 **`compile.sh`、`config.yaml`、`template.*`、`user.*` 亦在此目录**，与 `.in/.out` 一并由 `upload_testdata.py` 上传。 |
 | `题解.md` | 若存在则调用 `upload_sol.py` 上传。 |
 | `std.py` | 若存在则在线提交评测（`submit_code_and_get_result.py`）。 |
 | `std.cpp` | 同上。 |
@@ -111,11 +111,10 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 
 ### 3.2 测试数据规则（与 `upload_testdata.py` 行为一致）
 
-- `upload_testdata.py` 会遍历 `data/` 下**所有**后缀为 `.in` / `.out` 的文件，并要求**每个 stem 同时存在** `stem.in` 与 `stem.out`，否则脚本会以 **「数据不成对」** 报错退出。
-- **非** `.in` / `.out` 的文件：脚本**不会上传**，但属于「data 目录下异常/未参与上传的文件」，须在**最终报告第 5.2 节** 中列出并提示用户。
+- `upload_testdata.py` 会读取 `data/` 下**每一个普通文件**并上传（**不限** `.in`/`.out`，故 **`compile.sh`、`config.yaml`、`template.*`、`user.*` 等在 `data/` 内时会一并上传**）。脚本**不**内置「成对校验」；Agent 仍应在 **§5.2** 列出所有 `.in`/`.out` 的 stem、标出缺另一半的 stem，并列出**非测例**文件名（如 `README.md`）供用户知情。
 - **执行策略**：
   - 在调用脚本前**先本地扫描** `data/`：列出所有 `.in` / `.out` 的 stem，标出**缺另一半**的 stem；列出所有**非** `.in/.out` 的文件名。
-  - 若存在不成对数据：`upload_testdata.py` 会报错退出，**不得**声称数据已全部上传成功。**推荐**：扫描到不成对时先 **fatal stop**（缺失项写明哪些 stem 不成对），避免无效请求；若用户要求先执行脚本以获取平台侧报错，允许调用一次，但**最终汇总（第 5 节）中必须**重复列出本地扫描的不成对明细与脚本输出。
+  - 若存在不成对测例：本地脚本**仍可能 HTTP 200**，但平台侧数据或评测不可靠；**不得**在未说明风险时声称「数据已完备」。**推荐**：扫描到不成对时先 **fatal stop**（缺失项写明哪些 stem 不成对），避免无效请求；若用户要求先执行脚本以获取平台侧反馈，允许调用一次，但**最终汇总（第 5 节）中必须**重复列出本地扫描的不成对明细与脚本输出。
   - 若用户要求「只上传成对部分」：将**仅成对**文件复制到临时目录，`--data-dir` 指向该目录；在 **第 5.2 节** 说明哪些 stem 因不成对被省略、哪些文件未参与上传。
 
 ### 3.3 测试数据「原样上传」原则（强制）
@@ -141,14 +140,14 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 
 ### 3.5 核心代码模式（LeetCode 式函数题）附加文件
 
-与仓库 **`leetcode-core-code-mode`** 对齐：除 stdin/stdout 式 `data/` 与标程提交外，题目根目录还可存在 **`compile.sh`**、**`config.yaml`**、**`template.py` / `template.cc` / `template.java`**、**`user.cc` / `user.java` / `user.py`**。本 Skill 要求通过**清单 JSON** 管理依赖路径，并在上传时按清单解析本地文件。
+与仓库 **`leetcode-core-code-mode`** 对齐：LeetCode 核心代码模式下 **`compile.sh`、`config.yaml`、`template.*`、`user.*` 与测例同在 `<题目根>/data/`**（一次 **`upload_testdata.py`** 即可原样上传）；另可通过**清单 JSON** 调用扩展接口上传（路径由清单解析）。**兼容旧题**：上述文件若仍仅在题目根、不在 `data/`，仍可按原 §3.5.2～§3.5.3 处理（`generate_leetcode_core_manifest` 仅扫描 `data/`，旧布局可能 `missing` 非空）。
 
 #### 3.5.1 是否进入本流程（判定）
 
 在**未**被用户收窄为「仅数据 / 仅题解 / 仅 std」时，若满足**任一**条件，则整套上传中**须**执行 §3.5.2～§3.5.3（用户显式声明「不是核心代码模式」则跳过）：
 
-1. 题目根目录存在 **`config.yaml`**（与核心代码模式交付物一致，作为默认主判据）；或  
-2. 题目根目录存在任一 **`template.{py,cc,java}`** 且存在任一 **`user.{py,cc,java}`**；或  
+1. **`<题目根>/data/config.yaml`** 存在（与核心代码模式交付物一致，**默认主判据**）；或（兼容旧题）题目根下存在 **`config.yaml`** 且 **`data/`** 下无同名文件时，视为旧布局；或  
+2. **`data/`** 下存在任一 **`template.{py,cc,java}`** 且存在任一 **`user.{py,cc,java}`**；或题目根下同时存在上述模板与 user（旧布局）；或  
 3. 用户在本轮任务中**显式说明**该题为「核心代码模式 / LeetCode 模式 / 函数式标程」等；或  
 4. 已存在合法的 **`leetcode_core_bundle_paths.json`**（`kind` 为 `leetcode_core_bundle_paths`）且用户要求按该清单上传。
 
