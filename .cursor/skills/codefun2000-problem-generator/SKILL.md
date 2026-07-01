@@ -326,7 +326,7 @@ std.cpp / std.py / Main.java（已存在的部分）
 
 生成数据的思路与行为请严格遵守 `algorithm-contest-problemsetter` Skill 的内容，不要自行发挥，不要敷衍了事。
 
-**（与 `leetcode-core-code-mode` 协作）**：当题目以 **LeetCode 核心代码模式**交付（`template.*` + `user.*` + 函数式 `Solution`）时，除本节下文全部要求外，`gen_data.py` / `gen.py` 产出的 **每一份 `.in` 的 stdin 文本形态** 还须与该题 `题面.md`（含 **PID 抓取** 的原文）中的 **样例输入** 展示格式 **保持一致**（同类分隔符、括号/引号风格、单行或多行结构等）；`template.*` 的解析器必须按同一格式实现。细则与冲突处理见 **`leetcode-core-code-mode` Skill 第 7.0 节**。
+**（与 `leetcode-core-code-mode` 协作）**：当题目以 **LeetCode 核心代码模式**交付（`template.*` + `user.*` + 函数式 `Solution`）时，**`compile.sh`、`config.yaml`、`template.*`、`user.*` 与 `.in/.out` 一律落在 `<题目目录>/data/`**（见 **`leetcode-core-code-mode` Skill**）。除本节下文全部要求外，`gen_data.py` / `gen.py` 产出的 **每一份 `.in` 的 stdin 文本形态** 还须与该题 `题面.md`（含 **PID 抓取** 的原文）中的 **样例输入** 展示格式 **保持一致**（同类分隔符、括号/引号风格、单行或多行结构等）；**`data/template.*`** 的解析器必须按同一格式实现。细则与冲突处理见 **`leetcode-core-code-mode` Skill 第 7.0 节**。
 
 **LeetCode 模式下的数据强度（补充）**：在遵守上文「stdin 与样例同形」的前提下，**不得**仅用短样例级、小规模输入凑满 10 组；须按计划使用题面允许上限附近的 **极限数据**（例如极大的 $n$、拉满的字符串/路径长度与深度、值域上下界、长数组/长 JSON 行等），并优先将此类形态落在 **后 2 组大数据** 及必要的构造/hack 组中，以有效压测解析、I/O 与正解在满约束下的行为；若题面未给出明确上限，则按「与题意一致的最大合理规模」构造并在 `data/README.md` 中写明依据。
 

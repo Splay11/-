@@ -1,7 +1,7 @@
 ---
 name: leetcode-core-code-mode
 description: |
-  用于在自建 OJ 上交付「LeetCode 核心代码模式」题目包：题面（支持 PID+get_problem.py 从网站拉取）、题解、标程、测试数据，以及 compile.sh、config.yaml、template.{cc,java,py}、user.{cc,java,py}。
+  用于在自建 OJ 上交付「LeetCode 核心代码模式」题目包：题面（支持 PID+get_problem.py 从网站拉取）、题解、标程、测试数据；OJ 侧 **`compile.sh`、`config.yaml`、`template.{cc,java,py}`、`user.{cc,java,py}` 与 `.in/.out` 一并放在 `<题目目录>/data/`**，便于与 `upload_testdata.py` 同目录一次上传。
   当用户提到「LeetCode 模式」「核心代码模式」「PID 拉题面」「template/user」「样例格式造数」时使用。
   题解：章节骨架须遵循仓库 `题解模板.md`，格式与三语言代码须遵守 `题解生成规范(核心代码模式).md`；出题质量结合 `algorithm-contest-problemsetter`（即使用户 prompt 未逐条复述，仍须执行）。
   造数须对齐 `codefun2000-problem-generator` 第 8 节，且 stdin 形态须与题面样例输入一致；缺依赖时 fail closed。
@@ -9,9 +9,9 @@ description: |
 
 # LeetCode 核心代码模式出题 Skill
 
-本 Skill 在「算法核 + 可评测交付」前提下，把一道题整理成 **与 LeetCode 类似的函数式接口**，并在题目目录下生成 **OJ 后台文件包**（`template.*` 读入并调用 `Solution`，`user.*` 仅为选手可见空壳）。
+本 Skill 在「算法核 + 可评测交付」前提下，把一道题整理成 **与 LeetCode 类似的函数式接口**，并在 **`<题目目录>/data/`** 下生成 **OJ 后台文件包**（`template.*` 读入并调用 `Solution`，`user.*` 仅为选手可见空壳；与测例 `.in/.out` 同目录）。
 
-默认语言交付：**C++ / Java / Python** 三语言；`compile.sh`、`config.yaml`、`template.*`、`user.*` 的**文件名与仓库根目录模板一致**；**`compile.sh` 必须从仓库根原样拷贝，禁止修改**。
+默认语言交付：**C++ / Java / Python** 三语言；上述文件的**文件名**与仓库根目录模板一致（**内容**上 `compile.sh` 须与仓库根 **`problem-maker/compile.sh` 完全一致**，**禁止修改**；**落盘路径**为 **`data/compile.sh`** 等，而非题目根）。
 
 ---
 
@@ -72,7 +72,7 @@ description: |
 - 找不到 **`题解生成规范(核心代码模式).md`** 或 **`题解模板.md`**（与本 Skill 同仓库的 `problem-maker/` 根下路径），且用户要求自动生成题解。
 - 无法从题面确定 **唯一的** `Solution` 公开接口；存在歧义且用户未确认。
 - 无法得到可运行标程用于造数或对拍。
-- `config.yaml` 中 `cases` 与 `data/` 中文件不一致，或 `.in`/`.out` 与标程不一致。
+- **`data/config.yaml`** 中 `cases` 与 **`data/`** 中 `.in`/`.out` 不一致，或 `.in`/`.out` 与标程不一致。
 - 用户要求 **`compile.sh` 与仓库根一致**，但工作区 **`problem-maker/compile.sh` 缺失**。
 - **第 7 节**造数完成后，任一组 `.in` 的**行结构/分隔习惯**与题面 **样例输入** 明显不一致（见 7.0），且用户未授权偏离。
 
@@ -95,19 +95,21 @@ description: |
 
 - `std.cpp` / `std.py` / `Main.java`（或团队约定名），与选手同一 `Solution` 逻辑；造数基准选择顺序同 `codefun2000-problem-generator` 第 8 节引言。
 
-### 3.3 OJ 后台文件（与仓库根**同名**）
+### 3.3 OJ 后台文件（与仓库根**同名**，**一律在 `data/` 下**）
+
+路径形如 **`<题目目录>/data/compile.sh`**、**`…/data/config.yaml`**、**`…/data/template.cc`** 等（与 **`1.in` / `1.out`** 同级）。
 
 | 文件 | 说明 |
 |------|------|
-| `compile.sh` | 与仓库根 **`problem-maker/compile.sh` 完全一致**，Agent **禁止**改一字。 |
-| `config.yaml` | `user_extra_files`、`cases`、`langs`。 |
-| `template.*` | stdin 解析 → 调 `Solution` → stdout；三语言解析**必须一致**。 |
-| `user.*` | **仅** `Solution` 空壳（`return 0` / `pass` 等）；**禁止** `main`、读入、无关 `import`/`#include`。 |
+| `data/compile.sh` | **字节级**与仓库根 **`problem-maker/compile.sh` 一致**（从该文件**原样复制**到 `data/`），Agent **禁止**改一字。 |
+| `data/config.yaml` | `user_extra_files`、`cases`、`langs`；`cases` 中每条 `input`/`output` 与**同目录**下 `.in`/`.out` 对应。 |
+| `data/template.*` | stdin 解析 → 调 `Solution` → stdout；三语言解析**必须一致**。 |
+| `data/user.*` | **仅** `Solution` 空壳（`return 0` / `pass` 等）；**禁止** `main`、读入、无关 `import`/`#include`。 |
 
 ### 3.4 数据与生成器
 
-- `data/`、**`gen.py`**（`codefun2000-problem-generator` 第 8.1 节推荐主名）；若另有 `gen_data.py` 作兼容入口，须在 `data/README.md` 写明主脚本名。
-- `config.yaml` 里每个 `input`/`output` 须在 `data/` 存在且编号连续。
+- **`gen.py`** 位于**题目根**（`codefun2000-problem-generator` 第 8.1 节推荐主名）；其输出写入 **`data/`**（含 `.in`、`.out`、以及由生成流程维护的 **`data/config.yaml`** 等）；若另有 `gen_data.py` 作兼容入口，须在 `data/README.md` 写明主脚本名。
+- **`data/config.yaml`** 里每个 `input`/`output` 须在 **`data/`** 存在同名 `.in`/`.out` 且编号连续。
 
 ---
 
@@ -117,10 +119,10 @@ description: |
 1. **算法核与接口**：用 `algorithm-contest-problemsetter` 定核与数据强度；从题面抽取并冻结 **LeetCode 式 API**（含网站/力扣式函数签名时须与之一致）。
 2. **题解**：按 **`题解模板.md`** 搭骨架，按 **`题解生成规范(核心代码模式).md`** 写内容与三语言代码，并体现 **`algorithm-contest-problemsetter`** 的测试与区分度意识。
 3. **标程**：实现 std，确保可通过样例。
-4. **template / user**：`template.*` 的解析规则 **以题面样例输入为金标准**；`user.*` 仅桩代码。
-5. **造数**：按 **第 7 节** 编写并运行 **`gen.py`**（或经 `data/README.md` 声明的等价主脚本），生成 `data/` 与 `config.yaml` 对齐。
-6. **compile.sh**：从仓库根 **原样复制**。
-7. **config.yaml**：`cases` 与 `data/` 一致。
+4. **template / user**：在 **`data/`** 下编写 **`template.*` / `user.*`**；解析规则 **以题面样例输入为金标准**；`user.*` 仅桩代码。
+5. **造数**：按 **第 7 节** 编写并运行题目根下的 **`gen.py`**（或经 `data/README.md` 声明的等价主脚本），生成 **`data/*.in`、`.out`**，并使 **`data/config.yaml`** 中 `cases` 与之对齐。
+6. **`data/compile.sh`**：从 **`problem-maker/compile.sh` 原样复制**到 **`data/compile.sh`**（禁止修改内容）。
+7. **`data/config.yaml`**：再次核对 `cases` 与同目录 `.in`/`.out` 一致。
 8. **验题**：空 `user.*` 换入标程（或等价）跑全量；多语言 std 存在时比对输出。
 
 ---
@@ -136,9 +138,8 @@ description: |
 已生成或对齐的主要文件：
 - 题面.md、题解.md
 - std（列出实际文件）
-- data/、gen.py（及 data/README.md 中声明的兼容脚本名，若有）
-- compile.sh（已与仓库根校验一致）
-- config.yaml、template.cc、template.java、template.py、user.cc、user.java、user.py
+- data/（含 `.in`/`.out`、**`compile.sh`、`config.yaml`、`template.*`、`user.*`**）、gen.py（及 data/README.md 中声明的兼容脚本名，若有）
+- **`data/compile.sh`**（已与仓库根 `problem-maker/compile.sh` 校验一致）
 
 验题摘要：（编译/对拍/样例格式抽查说明）
 ```
@@ -162,13 +163,13 @@ description: |
 
 - 从题面（含 **PID 抓取** 的原文）中定位 **样例输入**（及多组样例时的每一组）。**造数主脚本**（见第 7.1 节，如 `gen.py`）生成的 **每一份 `.in`**，其文本形态须与样例所体现的格式 **同类同构**：
   - **单行/多行**、**行顺序**、**分隔符**（空格/逗号/无分隔）、**括号与引号风格**、**等号或键名**（若有）须与官方样例一致；仅允许在**语义合法**前提下替换为不同数值/长度，**禁止**自造与样例展示冲突的另一种 I/O 方言（例如样例为 `nums = [1,2,3]` 风格却改成纯 JSON 一行，除非题面明确两种等价）。
-- **`template.cc` / `template.java` / `template.py`** 的解析逻辑必须能 **无歧义解析样例输入**；建议先用「将样例输入原文作为 `1.in`」跑通三语言 template + 标程，再扩展造数脚本。
+- **`data/template.cc` / `data/template.java` / `data/template.py`** 的解析逻辑必须能 **无歧义解析样例输入**；建议先用「将样例输入原文作为 **`data/1.in`**」跑通三语言 template + 标程，再扩展造数脚本。
 - 若题面无清晰样例输入，须在对话中标注 **「需要验题确认 stdin 格式」**，不得凭空编造；可 fatal stop 或请用户补充样例截图/原文。
 
 ### 7.1–7.4 与 codefun 第 8.1–8.4 对齐
 
-- **7.1**：题目目录下须有**完整可运行**的 Python 生成脚本（须符合 **`codefun2000-problem-generator` 第 8.1 节**：推荐主文件名为 **`gen.py`**；若保留 `gen_data.py` 仅作转调，须在 `data/README.md` 写明主脚本名）。脚本须含：按约束造 `.in`、求标准输出、写文件；覆盖六类测试思想。
-- **7.2**：**默认 10 组**数据 `1.in`…`10.in` 及对应 `.out`；若用户或已有 `config.yaml` 明确为其它组数，则 **`config.yaml` 的 `cases` 与造数脚本输出须一致**，并在 `data/README.md` 说明原因。
+- **7.1**：题目根下须有**完整可运行**的 Python 生成脚本（须符合 **`codefun2000-problem-generator` 第 8.1 节**：推荐主文件名为 **`gen.py`**；若保留 `gen_data.py` 仅作转调，须在 `data/README.md` 写明主脚本名）。脚本须含：按约束向 **`data/`** 写 `.in`、求标准输出、写 `.out`，并维护或生成 **`data/config.yaml`**；覆盖六类测试思想。
+- **7.2**：**默认 10 组**数据 **`data/1.in`…`data/10.in`** 及对应 **`data/*.out`**；若用户或已有 **`data/config.yaml`** 明确为其它组数，则 **`cases` 与造数脚本输出须一致**，并在 `data/README.md` 说明原因。
 - **7.3**：前 8 组偏中小、后 2 组偏大；分布均匀。**「大」须在 `题面.md` 已给出的数据范围内压满**（极限定义见 `codefun2000-problem-generator` 第 8 节「极限数据」），不得突破题面未允许的规模。
 - **7.4**：显式 hack 设计，并在说明中写清针对哪类错解。
 
