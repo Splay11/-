@@ -4,8 +4,7 @@
  * @param {string[]} birthdays
  * @return {number}
  */
-class Solution {
-  countBirthdayGifts(month, employees, birthdays) {
+
+var countBirthdayGifts = function(month, employees, birthdays) {
     return 0;
-  }
-}
+};

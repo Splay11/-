@@ -38,18 +38,18 @@ prompt用法（LeetCode 模式）：
 
 case1:无题解无std
 ```
-/leetcode-core-code-mode 在 @Pxxxx 下出题，出题的 pid: Pxxxx，根据题意写清接口与题面；题目根下放 `gen.py` 等，**`compile.sh`、`config.yaml`、`template.*`、`user.*` 与测例一并放在 `data/`**（`compile.sh` 从仓库根 `problem-maker/compile.sh` 原样拷入 `data/`）
+/leetcode-core-code-mode 在 @Px 下出题，出题的 pid: Px，根据题意写清接口与题面；题目根下放 `gen.py` 等，**`compile.sh`、`execute.sh`、`config.yaml`、`template.*`、`user.*` 与测例一并放在 `data/`**（`compile.sh`和`execute.sh`从 `problem-maker/核心代码模式模板/`目录下 原样拷入 `data/`）
 ```
 
 
 case2:给定 std
 ```
-/leetcode-core-code-mode 在 @Problems/P4000 下对齐：以 @std.cpp（或 std.py / Main.java / std.js / std.c）为权威实现，统一五语言 user 桩签名，重写 template 读入与调用，补齐题解、造数；**`compile.sh` / `config.yaml` / `template.*` / `user.*` 均落在 `data/`**
+/leetcode-core-code-mode 在 @Problems/P4000 下对齐：以 @std.cpp（或 std.py / Main.java / std.js / std.c）为权威实现，统一五语言 user 桩签名，重写 template 读入与调用，补齐题解、造数；**`compile.sh` / `execute.sh` / `config.yaml` / `template.*` / `user.*` 均落在 `data/`**
 ```
 
 
 
-- **codefun2000-problem-uploader**：上传 OJ 工作流。通过本地 `utils` 脚本向 CodeFun2000 上传题解、测试数据、提交标程；**核心代码模式**下 **`compile.sh` 等与测例同在 `data/`** 时，一次 `upload_testdata.py` 即可带上；另可生成 `leetcode_core_bundle_paths.json`（扫描 `data/` 内约定名）供扩展上传（详见 `utils/README.md`）；缺环境/脚本/参数时会明确报错并停止。
+- **codefun2000-problem-uploader**：上传 OJ 工作流。通过本地 `utils` 脚本向 CodeFun2000 上传题解、测试数据、提交标程；**核心代码模式**下 **`compile.sh`、`execute.sh`、`config.yaml`、`template.*`、`user.*` 与测例同在 `data/`** 时，一次 `upload_testdata.py` 即可一并上传；缺环境/脚本/参数时会明确报错并停止。
 
 
 prompt用法：
@@ -68,6 +68,6 @@ case2:只上传数据
 
 case3:LeetCode 模式整套（题解 + 数据 + 后台文件）
 ```
-/codefun2000-problem-uploader 将 @Problems/P4000 整套上传（测例与 **位于 `data/` 的** compile.sh、config.yaml、template.*、user.* 等由 `upload_testdata.py` 一并上传）
+/codefun2000-problem-uploader 将 @Problems/P4000 整套上传（测例与 **位于 `data/` 的** compile.sh、execute.sh、config.yaml、template.*、user.* 等由 `upload_testdata.py` 一并上传）
 ```
 

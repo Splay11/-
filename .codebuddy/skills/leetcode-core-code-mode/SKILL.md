@@ -1,7 +1,7 @@
 ---
 name: leetcode-core-code-mode
 description: |
-  用于在自建 OJ 上交付「LeetCode 核心代码模式」题目包：题面（支持 PID+get_problem.py 从网站拉取）、题解、标程、测试数据；OJ 侧 **`compile.sh`、`config.yaml`、`template.{cc,java,py,js,c}`、`user.{cc,java,py,js,c}` 与 `.in/.out` 一并放在 `<题目目录>/data/`**，便于与 `upload_testdata.py` 同目录一次上传。
+  用于在自建 OJ 上交付「LeetCode 核心代码模式」题目包：题面（支持 PID+get_problem.py 从网站拉取）、题解、标程、测试数据；OJ 侧 **`compile.sh`、`execute.sh`、`config.yaml`、`template.{cc,java,py,js,c}`、`user.{cc,java,py,js,c}` 与 `.in/.out` 一并放在 `<题目目录>/data/`**，便于与 `upload_testdata.py` 同目录一次上传。
   当用户提到「LeetCode 模式」「核心代码模式」「PID 拉题面」「template/user」「样例格式造数」时使用。
   题解：章节骨架须遵循仓库 `题解模板.md`，格式与五语言代码须遵守 `题解生成规范(核心代码模式).md`；出题质量结合 `algorithm-contest-problemsetter`（即使用户 prompt 未逐条复述，仍须执行）。
   造数须对齐 `codefun2000-problem-generator` 第 8 节，且 stdin 形态须与题面样例输入一致；缺依赖时 fail closed。
@@ -11,7 +11,7 @@ description: |
 
 本 Skill 在「算法核 + 可评测交付」前提下，把一道题整理成 **与 LeetCode 类似的函数式接口**，并在 **`<题目目录>/data/`** 下生成 **OJ 后台文件包**（`template.*` 读入并调用 `Solution`，`user.*` 仅为选手可见空壳；与测例 `.in/.out` 同目录）。
 
-默认语言交付：**C++ / Java / Python / JavaScript / C** 五语言；上述文件的**文件名**与仓库根目录模板一致（**内容**上 `compile.sh` 须与仓库根 **`problem-maker/compile.sh` 完全一致**，**禁止修改**；**落盘路径**为 **`data/compile.sh`** 等，而非题目根）。
+默认语言交付：**C++ / Java / Python / JavaScript / C** 五语言；上述文件的**文件名**与仓库根目录模板一致（**内容**上 `compile.sh` 须与仓库根 **`problem-maker/compile.sh` 完全一致**，`execute.sh` 须与 **`核心代码模式模板/execute.sh` 完全一致**，**禁止修改**；**落盘路径**为 **`data/compile.sh`**、**`data/execute.sh`** 等，而非题目根）。
 
 ---
 
@@ -74,6 +74,7 @@ description: |
 - 无法得到可运行标程用于造数或对拍。
 - **`data/config.yaml`** 中 `cases` 与 **`data/`** 中 `.in`/`.out` 不一致，或 `.in`/`.out` 与标程不一致。
 - 用户要求 **`compile.sh` 与仓库根一致**，但工作区 **`problem-maker/compile.sh` 缺失**。
+- 用户要求 **`execute.sh` 与模板一致**，但工作区 **`核心代码模式模板/execute.sh` 缺失**。
 - **第 7 节**造数完成后，任一组 `.in` 的**行结构/分隔习惯**与题面 **样例输入** 明显不一致（见 7.0），且用户未授权偏离。
 
 执行抓取或安装依赖前，**必须先**阅读并遵守 **`utils/README.md`**。
@@ -97,11 +98,12 @@ description: |
 
 ### 3.3 OJ 后台文件（与仓库根**同名**，**一律在 `data/` 下**）
 
-路径形如 **`<题目目录>/data/compile.sh`**、**`…/data/config.yaml`**、**`…/data/template.cc`** 等（与 **`1.in` / `1.out`** 同级）。
+路径形如 **`<题目目录>/data/compile.sh`**、**`…/data/execute.sh`**、**`…/data/config.yaml`**、**`…/data/template.cc`** 等（与 **`1.in` / `1.out`** 同级）。
 
 | 文件 | 说明 |
 |------|------|
 | `data/compile.sh` | **字节级**与仓库根 **`problem-maker/compile.sh` 一致**（从该文件**原样复制**到 `data/`），Agent **禁止**改一字。 |
+| `data/execute.sh` | **字节级**与 **`核心代码模式模板/execute.sh` 一致**（从该文件**原样复制**到 `data/`）；JS 语言运行脚本（`exec /usr/bin/node /w/foo`），Agent **禁止**改一字。 |
 | `data/config.yaml` | `user_extra_files`、`cases`、`langs`；`cases` 中每条 `input`/`output` 与**同目录**下 `.in`/`.out` 对应。 |
 | `data/template.*` | stdin 解析 → 调 `Solution` → stdout；三语言解析**必须一致**。 |
 | `data/user.*` | **仅** `Solution` 空壳（`return 0` / `pass` 等）；**禁止** `main`、读入、无关 `import`/`#include`。 |
@@ -122,8 +124,9 @@ description: |
 4. **template / user**：在 **`data/`** 下编写 **`template.*` / `user.*`**；解析规则 **以题面样例输入为金标准**；`user.*` 仅桩代码。
 5. **造数**：按 **第 7 节** 编写并运行题目根下的 **`gen.py`**（或经 `data/README.md` 声明的等价主脚本），生成 **`data/*.in`、`.out`**，并使 **`data/config.yaml`** 中 `cases` 与之对齐。
 6. **`data/compile.sh`**：从 **`problem-maker/compile.sh` 原样复制**到 **`data/compile.sh`**（禁止修改内容）。
-7. **`data/config.yaml`**：再次核对 `cases` 与同目录 `.in`/`.out` 一致。
-8. **验题**：空 `user.*` 换入标程（或等价）跑全量；多语言 std 存在时比对输出。
+7. **`data/execute.sh`**：从 **`核心代码模式模板/execute.sh` 原样复制**到 **`data/execute.sh`**（禁止修改内容）。
+8. **`data/config.yaml`**：再次核对 `cases` 与同目录 `.in`/`.out` 一致。
+9. **验题**：空 `user.*` 换入标程（或等价）跑全量；多语言 std 存在时比对输出。
 
 ---
 
@@ -138,8 +141,8 @@ description: |
 已生成或对齐的主要文件：
 - 题面.md、题解.md
 - std（列出实际文件）
-- data/（含 `.in`/`.out`、**`compile.sh`、`config.yaml`、`template.*`、`user.*`**）、gen.py（及 data/README.md 中声明的兼容脚本名，若有）
-- **`data/compile.sh`**（已与仓库根 `problem-maker/compile.sh` 校验一致）
+- data/（含 `.in`/`.out`、**`compile.sh`、`execute.sh`、`config.yaml`、`template.*`、`user.*`**）、gen.py（及 data/README.md 中声明的兼容脚本名，若有）
+- **`data/compile.sh`**（已与仓库根 `problem-maker/compile.sh` 校验一致）、**`data/execute.sh`**（已与 `核心代码模式模板/execute.sh` 校验一致）
 
 验题摘要：（编译/对拍/样例格式抽查说明）
 ```

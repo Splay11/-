@@ -72,6 +72,8 @@ elif [ $HYDRO_LANG = "php" ]; then
 elif [ $HYDRO_LANG = "js" ]; then
   cat user.js >> template.js
   node --check /w/template.js
+  { echo '#!/usr/bin/env node'; cat /w/template.js; } > /w/foo
+  chmod +x /w/foo
 
 elif [ $HYDRO_LANG = "rb" ]; then
   :

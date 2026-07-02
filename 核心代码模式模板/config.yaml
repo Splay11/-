@@ -5,6 +5,7 @@ user_extra_files:
   - template.cc
   - template.js
   - template.c
+  - execute.sh
   - compile.sh
   - config.yaml
   - user.cc

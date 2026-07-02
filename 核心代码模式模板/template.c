@@ -1,8 +1,8 @@
+#include "foo.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
 // 最大字符串长度
 #define MAX_LEN 100000
 #define MAX_TOKENS 1000

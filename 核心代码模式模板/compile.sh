@@ -1,81 +1,117 @@
 #!/bin/bash
+set -euo pipefail
 
-set -e
-if [ $HYDRO_LANG = "py.py3" ]; then
-  cat template.py >> foo.py
-  python3 -c "import py_compile; py_compile.compile('/w/foo.py', '/w/foo', doraise=True)"
+cd /w
 
-elif [ $HYDRO_LANG = "py" ]; then
-  cat template.py >> foo.py
-  python -c "import py_compile; py_compile.compile('/w/foo.py', '/w/foo', doraise=True)"
+make_script() {
+  local shebang="$1"
+  local source_file="$2"
+  local template_file="${3-}"
 
-elif [ $HYDRO_LANG = "py.pypy3" ]; then
-  cat template.py >> foo.py
-  /bin/bash -c "/usr/bin/pypy3 -c \"import py_compile; py_compile.compile('/w/foo.py', '/w/foo', doraise=True)\" && mv foo.py foo"
+  {
+    printf '%s\n' "$shebang"
+    cat "$source_file"
 
-elif [ $HYDRO_LANG = "java" ]; then
-  mv Main.java Solution.java
-  mv template.java Main.java
-  javac -d /w -encoding utf8 ./Main.java ./Solution.java
-  jar cvf Main.jar *.class >/dev/null
+    if [ -n "$template_file" ]; then
+      printf '\n'
+      cat "$template_file"
+    fi
 
-elif [ $HYDRO_LANG = "cc.cc98" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++98 -I/include
+    printf '\n'
+  } > foo
 
-elif [ $HYDRO_LANG = "cc.cc98o2" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++98 -O2 -I/include
+  chmod 755 foo
+}
 
-elif [ $HYDRO_LANG = "cc.cc11" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++11 -I/include
+case "${HYDRO_LANG:-}" in
+  py.py3)
+    make_script '#!/usr/bin/python3' 'foo.py' 'template.py'
+    /usr/bin/python3 -m py_compile foo
+    ;;
 
-elif [ $HYDRO_LANG = "cc.cc11o2" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++11 -O2 -I/include
+  py)
+    make_script '#!/usr/bin/python' 'foo.py' 'template.py'
+    /usr/bin/python -m py_compile foo
+    ;;
 
-elif [ $HYDRO_LANG = "cc.cc14" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++14 -I/include
+  py.pypy3)
+    make_script '#!/usr/bin/pypy3' 'foo.py' 'template.py'
+    /usr/bin/pypy3 -m py_compile foo
+    ;;
 
-elif [ $HYDRO_LANG = "cc.cc14o2" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++14 -O2 -I/include
+  java)
+    mv Main.java Solution.java
+    mv template.java Main.java
 
-elif [ $HYDRO_LANG = "cc.cc17" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++17 -I/include
+    javac -d /w -encoding utf8 /w/Main.java /w/Solution.java
 
-elif [ $HYDRO_LANG = "cc.cc17o2" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++17 -O2 -I/include
+    rm -f /w/Main.jar /w/foo
+    jar cf /w/Main.jar -C /w .
+    cp /w/Main.jar /w/foo
+    ;;
 
-elif [ $HYDRO_LANG = "cc" ]; then
-  g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++14 -I/include
+  cc.cc98)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++98 -I/include
+    ;;
 
-elif [ $HYDRO_LANG = "c" ]; then
-  cat user.c >> template.c
-  gcc template.c -o foo -lm -std=c99
+  cc.cc98o2)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++98 -O2 -I/include
+    ;;
 
-elif [ $HYDRO_LANG = "pas" ]; then
-  fpc -O2 -o/w/foo template.pas
+  cc.cc11)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++11 -I/include
+    ;;
 
-elif [ $HYDRO_LANG = "go" ]; then
-  env GOMAXPROCS=1 go build -o foo template.go
+  cc.cc11o2)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++11 -O2 -I/include
+    ;;
 
-elif [ $HYDRO_LANG = "rs" ]; then
-  rustc -O -o /w/foo /w/template.rs
+  cc.cc14)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++14 -I/include
+    ;;
 
-elif [ $HYDRO_LANG = "hs" ]; then
-  ghc -O -outputdir /tmp -o foo template.hs
+  cc.cc14o2)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++14 -O2 -I/include
+    ;;
 
-elif [ $HYDRO_LANG = "cs" ]; then
-  mcs -optimize+ -out:/w/foo /w/template.cs
+  cc.cc17)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++17 -I/include
+    ;;
 
-elif [ $HYDRO_LANG = "bash" ]; then
-  :
-elif [ $HYDRO_LANG = "php" ]; then
-  :
-elif [ $HYDRO_LANG = "js" ]; then
-  cat user.js >> template.js
-  node --check /w/template.js
+  cc.cc17o2)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++17 -O2 -I/include
+    ;;
 
-elif [ $HYDRO_LANG = "rb" ]; then
-  :
-else
-  echo "Unsupported language: $HYDRO_LANG" >&2
-  exit 1
-fi
+  cc)
+    g++ -x c++ template.cc -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c++14 -I/include
+    ;;
+
+  c)
+    gcc -x c template.c -o foo -lm -fno-stack-limit \
+      -fdiagnostics-color=always -std=c11 -I/include
+    ;;
+
+  go)
+    env GOMAXPROCS=1 go build -o /w/foo /w/template.go
+    ;;
+
+  js)
+    # 用户 foo.js 在前，template.js 在后。
+    make_script '#!/usr/bin/node' 'foo.js' 'template.js'
+    /usr/bin/node --check /w/foo
+    ;;
+
+  *)
+    echo "Unsupported language: ${HYDRO_LANG:-<empty>}" >&2
+    exit 1
+    ;;
+esac
