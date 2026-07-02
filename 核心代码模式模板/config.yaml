@@ -3,11 +3,15 @@ user_extra_files:
   - template.py
   - template.java
   - template.cc
+  - template.js
+  - template.c
   - compile.sh
   - config.yaml
   - user.cc
   - user.java
   - user.py
+  - user.js
+  - user.c
 subtasks:
   - score: 100
     if: []
@@ -36,3 +40,5 @@ langs:
   - cc.cc14o2
   - py
   - cc
+  - js
+  - c

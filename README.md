@@ -44,7 +44,7 @@ case1:无题解无std
 
 case2:给定 std
 ```
-/leetcode-core-code-mode 在 @Problems/P4000 下对齐：以 @std.cpp（或 std.py / Main.java）为权威实现，统一三语言 user 桩签名，重写 template 读入与调用，补齐题解、造数；**`compile.sh` / `config.yaml` / `template.*` / `user.*` 均落在 `data/`**
+/leetcode-core-code-mode 在 @Problems/P4000 下对齐：以 @std.cpp（或 std.py / Main.java / std.js / std.c）为权威实现，统一五语言 user 桩签名，重写 template 读入与调用，补齐题解、造数；**`compile.sh` / `config.yaml` / `template.*` / `user.*` 均落在 `data/`**
 ```
 
 

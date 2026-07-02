@@ -47,6 +47,7 @@ elif [ $HYDRO_LANG = "cc" ]; then
   g++ -x c++ template.cc -o foo -lm -fno-stack-limit -fdiagnostics-color=always -std=c++14 -I/include
 
 elif [ $HYDRO_LANG = "c" ]; then
+  cat user.c >> template.c
   gcc template.c -o foo -lm -std=c99
 
 elif [ $HYDRO_LANG = "pas" ]; then
@@ -69,7 +70,9 @@ elif [ $HYDRO_LANG = "bash" ]; then
 elif [ $HYDRO_LANG = "php" ]; then
   :
 elif [ $HYDRO_LANG = "js" ]; then
-  :
+  cat user.js >> template.js
+  node --check /w/template.js
+
 elif [ $HYDRO_LANG = "rb" ]; then
   :
 else

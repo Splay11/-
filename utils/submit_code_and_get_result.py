@@ -73,15 +73,10 @@ def main():
     verify = args.ca_cert if args.ca_cert else True
     timeout = (8, 180)
     url = f"{args.base_url.rstrip('/')}/api/problem/submit_proxy"
-<<<<<<< HEAD
-    session = requests.Session()
-    session.trust_env = False
-    resp = session.post(url, json=payload, timeout=timeout, verify=verify)
-    resp.raise_for_status()
-    body = resp.json()
-=======
     try:
-        resp = requests.post(url, json=payload, timeout=timeout, verify=verify)
+        session = requests.Session()
+        session.trust_env = False
+        resp = session.post(url, json=payload, timeout=timeout, verify=verify)
         resp.raise_for_status()
     except requests.exceptions.RequestException as e:
         fail(f"提交接口请求失败：{e}")
@@ -93,8 +88,6 @@ def main():
 
     if not isinstance(body, dict):
         fail(f"接口返回格式错误，期望对象，实际：{type(body).__name__}")
-
->>>>>>> a638131c8242a5683837a95699a8094384c40123
     # 输出关键信息
     print("RID:", body.get("rid"))
     result = body.get("result", {})

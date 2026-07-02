@@ -106,7 +106,7 @@ python upload_testdata.py --base-url https://codefun2000.com --domain-id system 
 | 参数 | 必填 | 说明 |
 |------|------|------|
 | `--base-url` / `--domain-id` / `--pid` | 是 | `--base-url` 见上文 |
-| `--lang` | 是 | 语言标识，如 `py.py3`、`cc.cc14o2`、`java` |
+| `--lang` | 是 | 语言标识，如 `py.py3`、`cc.cc14o2`、`java`、`js`、`c` |
 | `--code-file` | 是 | 本地源码路径 |
 | `--pretest` | 否 | 样例/自定义输入预测 |
 | `--input-file` | 否 | 与 `--pretest` 配合时的输入文件 |
@@ -117,6 +117,34 @@ python upload_testdata.py --base-url https://codefun2000.com --domain-id system 
 
 ```powershell
 python submit_code_and_get_result.py --base-url https://codefun2000.com --domain-id system --pid P4719 --lang py.py3 --code-file ans.py
+```
+
+---
+
+## `get_solutions.py` — 批量获取题面与题解
+
+**作用**：调用 `/api/problem/list`（POST），批量获取题目信息，含题面、管理员题解、算法标签等。
+
+**主要参数**：
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `--base-url` / `--domain-id` | 是 | `--base-url` 见上文 |
+| `--pids` | 否 | 指定 PID 列表，如 `P1001 P1002` |
+| `--query` | 否 | 查询条件 JSON，如 `{"tag":"all"}` |
+| `--latest` | 否 | 配合 `--query`，按编号倒序取最近 N 道 |
+| `--output-dir` | 否 | 输出目录，每道题写入 `<pid>_题面.md` 与 `<pid>_题解.md` |
+| `--output-json` | 否 | 输出完整 JSON 到文件 |
+| `--user` / `--password` | 否 | 覆盖环境变量 |
+
+**示例**：
+
+```powershell
+# 获取指定 PID 的题解（控制台摘要）
+python get_solutions.py --base-url https://codefun2000.com --domain-id system --pids P4000 P4890
+
+# 获取最近 5 道题，保存到目录
+python get_solutions.py --base-url https://codefun2000.com --domain-id system --query "{\"tag\":\"all\"}" --latest 5 --output-dir ./exported_solutions
 ```
 
 ---
