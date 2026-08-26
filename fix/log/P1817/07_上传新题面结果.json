@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1817",
+  "title": "第2题-最短前缀或",
+  "docId": 917,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "饿了么"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

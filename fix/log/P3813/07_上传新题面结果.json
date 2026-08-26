@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3813",
+  "title": "第2题-配额分发",
+  "docId": 3169,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "其他",
+    "构造"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "构造",
+  "videosol": "",
+  "trial_videosol": ""
+}

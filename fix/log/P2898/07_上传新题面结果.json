@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2898",
+  "title": "第2题-相似读者的借阅推荐",
+  "docId": 2532,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "knn"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "机器学习算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

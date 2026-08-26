@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4710",
+  "title": "第2题-仪器校准",
+  "docId": 3958,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "BFS"
+  ],
+  "alg_tag": "BFS",
+  "ai_alg_tags": "BFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

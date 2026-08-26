@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P2184",
+  "title": "第1题-四点乘积最大化",
+  "docId": 1291,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

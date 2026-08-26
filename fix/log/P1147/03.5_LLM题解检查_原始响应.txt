@@ -1,0 +1,288 @@
+## 解题思路
+
+本题要求对于每一个格子，假设将该格子变为水域（如果原本是岩石则变为水域，原本是水域则不变），计算此时整张地图上岩石连通块的数量。连通块的定义为上下左右相邻的岩石格子组成的集合，通过并查集可以方便地进行连通性合并与统计。
+
+由于数据范围很小（$n, m \le 40$），可以采用**暴力枚举每个格子并重新计算**的方法：
+
+1. 遍历地图上的每个格子 $(i, j)$。
+2. 对于当前格子，将其临时设为水域 `'W'`（记录原始字符以便恢复）。
+3. 初始化一个大小为 $n \times m$ 的并查集，每个元素的父节点指向自己。
+4. 遍历整个地图，对于每一个岩石格子 `'R'`，检查它的**上方**和**左方**相邻格子是否也为岩石：
+   - 如果是，则将当前格子与对应邻居所在的集合合并。
+5. 合并完成后，遍历整张地图，找到所有岩石格子所在集合的**根节点**，用哈希表或标记数组记录出现过的根。最终**不同根的数量**即为当前假设下岩石连通块的数量。
+6. 记录该数量到答案矩阵的对应位置，并将临时修改的格子恢复为原来的字符。
+7. 循环处理完所有格子后，输出答案矩阵。
+
+由于 $n, m$ 均不超过 $40$，总格子数最多 $1600$，对每个格子进行一次 $O(n \times m)$ 的遍历与并查集操作，再统计一下根的数量，总计算量约为 $(nm)^2 = 2.56\times 10^6$ 级别，并查集带路径压缩复杂度极低，完全可以在时限内通过。
+
+## 复杂度分析
+
+- **时间复杂度**：对于每个格子都需要重建并查集并扫描全图。总共 $n \times m$ 个格子，每次扫描与合并操作近似 $O(n m \cdot \alpha(n m))$，其中 $\alpha$ 为反阿克曼函数可视为常数。因此总时间复杂度为 $O((n m)^2 \cdot \alpha(n m))$，在 $n,m\le 40$ 时足够快。
+- **空间复杂度**：需要存储原始地图、并查集父节点数组以及辅助标记数组，大小均为 $O(n m)$。答案矩阵亦为 $O(n m)$，故整体空间复杂度为 $O(n m)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(10000)
+
+def solve():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    n = int(next(it))
+    m = int(next(it))
+    a = [list(next(it).strip()) for _ in range(n)]
+    ans = [[0] * m for _ in range(n)]
+    
+    parent = [0] * (n * m)
+    
+    def find(x):
+        # 路径压缩
+        if parent[x] != x:
+            parent[x] = find(parent[x])
+        return parent[x]
+    
+    def union(x, y):
+        rx = find(x)
+        ry = find(y)
+        if rx != ry:
+            parent[rx] = ry
+    
+    # 遍历每个格子
+    for i in range(n):
+        for j in range(m):
+            tmp = a[i][j]
+            a[i][j] = 'W'  # 临时变为水域
+            
+            # 初始化并查集
+            for k in range(n * m):
+                parent[k] = k
+            
+            # 合并相邻岩石
+            for x in range(n):
+                for y in range(m):
+                    if a[x][y] == 'R':
+                        idx = x * m + y
+                        if x > 0 and a[x-1][y] == 'R':
+                            union(idx, (x-1)*m + y)
+                        if y > 0 and a[x][y-1] == 'R':
+                            union(idx, x*m + (y-1))
+            
+            # 统计连通块数量
+            seen = [False] * (n * m)
+            cnt = 0
+            for x in range(n):
+                for y in range(m):
+                    if a[x][y] == 'R':
+                        root = find(x * m + y)
+                        if not seen[root]:
+                            seen[root] = True
+                            cnt += 1
+            ans[i][j] = cnt
+            a[i][j] = tmp  # 恢复
+    
+    # 输出结果
+    for row in ans:
+        print(' '.join(map(str, row)))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int n, m;
+    static char[][] a;
+    static int[] parent;
+    
+    static int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+    
+    static void union(int x, int y) {
+        int rx = find(x);
+        int ry = find(y);
+        if (rx != ry) {
+            parent[rx] = ry;
+        }
+    }
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        n = Integer.parseInt(st.nextToken());
+        m = Integer.parseInt(st.nextToken());
+        a = new char[n][m];
+        for (int i = 0; i < n; i++) {
+            a[i] = br.readLine().toCharArray();
+        }
+        
+        int[][] ans = new int[n][m];
+        parent = new int[n * m];
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                char tmp = a[i][j];
+                a[i][j] = 'W';  // 临时变为水域
+                
+                // 初始化并查集
+                for (int k = 0; k < n * m; k++) {
+                    parent[k] = k;
+                }
+                
+                // 合并相邻岩石
+                for (int x = 0; x < n; x++) {
+                    for (int y = 0; y < m; y++) {
+                        if (a[x][y] == 'R') {
+                            int idx = x * m + y;
+                            if (x > 0 && a[x-1][y] == 'R') {
+                                union(idx, (x-1)*m + y);
+                            }
+                            if (y > 0 && a[x][y-1] == 'R') {
+                                union(idx, x*m + (y-1));
+                            }
+                        }
+                    }
+                }
+                
+                // 统计连通块数量
+                boolean[] seen = new boolean[n * m];
+                int cnt = 0;
+                for (int x = 0; x < n; x++) {
+                    for (int y = 0; y < m; y++) {
+                        if (a[x][y] == 'R') {
+                            int root = find(x * m + y);
+                            if (!seen[root]) {
+                                seen[root] = true;
+                                cnt++;
+                            }
+                        }
+                    }
+                }
+                ans[i][j] = cnt;
+                a[i][j] = tmp;  // 恢复
+            }
+        }
+        
+        // 输出
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                sb.append(ans[i][j]);
+                if (j < m - 1) sb.append(' ');
+            }
+            sb.append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#pragma GCC target("avx,avx2,fma")
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int find(vector<int>& parent, int x) {
+    if (parent[x] != x) {
+        parent[x] = find(parent, parent[x]);
+    }
+    return parent[x];
+}
+
+void unite(vector<int>& parent, int x, int y) {
+    int rx = find(parent, x);
+    int ry = find(parent, y);
+    if (rx != ry) {
+        parent[rx] = ry;
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0); cout.tie(0);
+    
+    int n, m;
+    cin >> n >> m;
+    vector<vector<char>> a(n, vector<char>(m));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            cin >> a[i][j];
+        }
+    }
+    
+    vector<vector<int>> ans(n, vector<int>(m));
+    vector<int> parent(n * m);
+    
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            char tmp = a[i][j];
+            a[i][j] = 'W';  // 临时变为水域
+            
+            // 初始化并查集
+            for (int k = 0; k < n * m; ++k) {
+                parent[k] = k;
+            }
+            
+            // 合并相邻岩石
+            for (int x = 0; x < n; ++x) {
+                for (int y = 0; y < m; ++y) {
+                    if (a[x][y] == 'R') {
+                        int idx = x * m + y;
+                        if (x > 0 && a[x-1][y] == 'R') {
+                            unite(parent, idx, (x-1)*m + y);
+                        }
+                        if (y > 0 && a[x][y-1] == 'R') {
+                            unite(parent, idx, x*m + (y-1));
+                        }
+                    }
+                }
+            }
+            
+            // 统计连通块数量
+            vector<bool> seen(n * m, false);
+            int cnt = 0;
+            for (int x = 0; x < n; ++x) {
+                for (int y = 0; y < m; ++y) {
+                    if (a[x][y] == 'R') {
+                        int root = find(parent, x * m + y);
+                        if (!seen[root]) {
+                            seen[root] = true;
+                            cnt++;
+                        }
+                    }
+                }
+            }
+            ans[i][j] = cnt;
+            a[i][j] = tmp;  // 恢复
+        }
+    }
+    
+    // 输出结果
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            cout << ans[i][j] << (j == m - 1 ? '\n' : ' ');
+        }
+    }
+    
+    return 0;
+}
+```

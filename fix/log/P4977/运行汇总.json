@@ -1,0 +1,11 @@
+{
+  "pid": "P4977",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:42:57",
+  "end_time": "2026-08-19 19:42:58",
+  "new_title": "第4题-四报文异或对账",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

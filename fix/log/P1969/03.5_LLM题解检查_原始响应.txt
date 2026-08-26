@@ -1,0 +1,99 @@
+## 解题思路
+
+问题要求构造一个由 $1$ 到 $n$ 的排列，使得序列中恰好有 $m$ 个「下沉」（即相邻位置满足左边元素大于右边元素的数对数量），且 $0 \le m < n$。
+
+我们可以利用「反转前缀」的方法来简洁地构造出满足条件的序列：
+
+1. 当 $m = 0$ 时，只需要构造一个完全升序的排列：$1, 2, \dots, n$，此时没有任何下沉。
+2. 当 $m \ge 1$ 时，考虑反转前 $m+1$ 个数字组成的连续升序段 $[1, 2, \dots, m+1]$，将其变为 $[m+1, m, \dots, 1]$。在这个长度为 $m+1$ 的前缀内部，相邻元素依次是 $(m+1, m), (m, m-1), \dots, (2, 1)$，正好产生 $m$ 个下沉。
+3. 前缀之后的部分保持原始顺序：$m+2, m+3, \dots, n$，这些元素与前面部分连接时，由于前缀最后一个元素是 $1$，而后面的第一个元素是 $m+2$（一定大于 $1$），因此不会新增下沉；后段内部也是升序，同样没有下沉。
+4. 因此，整个序列 $[m+1, m, \dots, 1, m+2, m+3, \dots, n]$ 恰好含有 $m$ 个下沉，且每个数字恰好出现一次。
+
+该构造对所有 $0 \le m < n$ 均有效，满足题目要求。
+
+## 复杂度分析
+
+- 时间复杂度：构造序列需要生成 $n$ 个数字，时间复杂度为 $O(n)$。
+- 空间复杂度：需要存储长度为 $n$ 的序列，空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+def solve():
+    n, m = map(int, input().split())
+    k = m  # 需要产生的下沉个数
+    # 反转前 k+1 个元素，后面保持顺序
+    front = list(range(k + 1, 0, -1))  # k+1 到 1 的降序序列
+    back = list(range(k + 2, n + 1))   # k+2 到 n 的升序序列
+    res = front + back
+    print(*res)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        int k = m; // 需要产生的下沉个数
+        
+        // 使用 StringBuilder 拼接输出
+        StringBuilder sb = new StringBuilder();
+        
+        // 反转前 k+1 个元素：k+1, k, ..., 1
+        for (int i = k + 1; i >= 1; i--) {
+            sb.append(i).append(' ');
+        }
+        // 后续部分：k+2, k+3, ..., n
+        for (int i = k + 2; i <= n; i++) {
+            sb.append(i).append(' ');
+        }
+        
+        // 去除末尾多余空格并输出
+        System.out.println(sb.toString().trim());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    int k = m; // 需要产生的下沉个数
+    
+    vector<int> ans;
+    // 反转前 k+1 个元素：k+1, k, ..., 1
+    for (int i = k + 1; i >= 1; --i) {
+        ans.push_back(i);
+    }
+    // 后续部分：k+2, k+3, ..., n
+    for (int i = k + 2; i <= n; ++i) {
+        ans.push_back(i);
+    }
+    
+    // 输出结果
+    for (size_t i = 0; i < ans.size(); ++i) {
+        if (i > 0) cout << ' ';
+        cout << ans[i];
+    }
+    cout << endl;
+    
+    return 0;
+}
+```

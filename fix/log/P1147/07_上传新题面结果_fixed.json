@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1147",
+  "title": "第1题-岩石与水域",
+  "docId": 156,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "DFS"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

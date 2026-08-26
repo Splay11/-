@@ -1,0 +1,183 @@
+## 解题思路
+
+1. **问题转化**：  
+   给定 $n$ 个模块和 $n$ 条单向链路，每一条链路 $(u_i, v_i)$ 都有翻转代价 $c_i$。已知这些链路无向连接后恰好构成一个环，且每个模块度数为 $2$。目标是通过翻转若干条链路，使最终的有向图成为一个**强连通的单向环**，即所有边方向一致（要么全部顺时针，要么全部逆时针）。
+
+2. **建模**：  
+   对于每一条原始链路 $(u_i, v_i, c_i)$，在无向环中有两种可能的遍历方向：
+   - 若最终环的方向与该链路的方向相同，则无需翻转，代价为 $0$；
+   - 若方向相反，则需要翻转该链路，代价为 $c_i$。
+   
+   因此，可以构建一个无向图（或双向有向图）：
+   - 添加边 $u_i \to v_i$，权值为 $0$（原方向，无需翻转）；
+   - 添加边 $v_i \to u_i$，权值为 $c_i$（翻转方向，代价为 $c_i$）。
+
+3. **遍历计算**：  
+   最终环有且仅有两种可能的方向。我们可以任选一个起点（例如 $0$ 号模块），从它的两条邻接边出发分别沿环走一圈，累加所经过边的权值，得到的两个总代价分别对应两种环方向所需的翻转总代价。  
+   由于起始点的两条邻接边恰好分别属于两种方向，分别进行一次遍历即可覆盖全部情况，取最小值作为答案。
+
+4. **遍历实现**：  
+   使用 depth-first search（DFS）或栈模拟，从起点 $0$ 的某条邻接边开始，记录走过的节点，直到再次回到起点 $0$。沿途累加边权，该累加值即为当前方向下的总代价。  
+   注意：当 $n = 2$ 时，两条边互为反向，环只有一种有效方向（两条边原本方向即构成环），但题目保证 $n \ge 2$，此时对两种出发方向的遍历均等价，最小值为 $0$（无需翻转）。可以直接处理。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$。  
+  每个模块和链路仅被访问常数次。遍历两次，每次遍历访问 $n$ 条边，总复杂度为 $O(2n) = O(n)$。
+
+- **空间复杂度**：$O(n)$。  
+  邻接表存储每条原始链路对应的两条有向边，共 $2n$ 条边，空间 $O(n)$。栈或递归深度最多 $n$，也属于 $O(n)$ 级别。
+
+## 代码实现
+
+### Python
+
+```python
+# 读取输入
+n = int(input())
+
+# 邻接表，每个元素为 (相邻模块, 边权)
+edges = [[] for _ in range(n)]
+
+for _ in range(n):
+    u, v, c = map(int, input().split())
+    u -= 1
+    v -= 1
+    # 原方向：u -> v，代价 0
+    edges[u].append((v, 0))
+    # 反向：v -> u，代价 c
+    edges[v].append((u, c))
+
+# 如果只有两个模块，已经成环，无需翻转
+if n == 2:
+    print(0)
+    exit()
+
+
+def calc(edge_index):
+    """从 0 号模块的第 edge_index 条邻边出发，走一圈回到 0 的总代价"""
+    # 起始边权值
+    total = edges[0][edge_index][1]
+    # 模拟栈：前一个节点，当前节点
+    prev, cur = 0, edges[0][edge_index][0]
+    while cur != 0:
+        for nxt, w in edges[cur]:
+            if nxt == prev:
+                continue
+            total += w
+            prev, cur = cur, nxt
+            break
+    return total
+
+
+# 从 0 号点的两条邻接边分别尝试，取最小代价
+ans = min(calc(0), calc(1))
+print(ans)
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+
+        // 邻接表，存储 (相邻模块, 边权)
+        List<List<int[]>> edges = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) {
+            edges.add(new ArrayList<>());
+        }
+
+        for (int i = 0; i < n; i++) {
+            int u = sc.nextInt() - 1;
+            int v = sc.nextInt() - 1;
+            int c = sc.nextInt();
+            // 原方向边权为 0，反向边权为 c
+            edges.get(u).add(new int[]{v, 0});
+            edges.get(v).add(new int[]{u, c});
+        }
+
+        if (n == 2) {
+            System.out.println(0);
+            return;
+        }
+
+        // 计算从 0 号点第 edgeIdx 条邻边出发走一圈的总代价
+        int ans = Math.min(calc(edges, 0), calc(edges, 1));
+        System.out.println(ans);
+    }
+
+    private static int calc(List<List<int[]>> edges, int edgeIdx) {
+        int total = edges.get(0).get(edgeIdx)[1]; // 起始边权
+        int prev = 0;
+        int cur = edges.get(0).get(edgeIdx)[0];
+        while (cur != 0) {
+            for (int[] nxt : edges.get(cur)) {
+                if (nxt[0] == prev) continue;
+                total += nxt[1];
+                prev = cur;
+                cur = nxt[0];
+                break;
+            }
+        }
+        return total;
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 计算从 0 号点第 edgeIndex 条邻边出发走一圈的总代价
+int calc(const vector<vector<pair<int, int>>>& edges, int edgeIndex) {
+    int total = edges[0][edgeIndex].second; // 起始边权
+    int prev = 0;
+    int cur = edges[0][edgeIndex].first;
+    while (cur != 0) {
+        for (auto& nxt : edges[cur]) {
+            if (nxt.first == prev) continue;
+            total += nxt.second;
+            prev = cur;
+            cur = nxt.first;
+            break;
+        }
+    }
+    return total;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+
+    // 邻接表，存储 (相邻模块, 边权)
+    vector<vector<pair<int, int>>> edges(n);
+    for (int i = 0; i < n; ++i) {
+        int u, v, c;
+        cin >> u >> v >> c;
+        --u; --v;
+        // 原方向边权 0，反向边权 c
+        edges[u].emplace_back(v, 0);
+        edges[v].emplace_back(u, c);
+    }
+
+    if (n == 2) {
+        cout << 0 << '\n';
+        return 0;
+    }
+
+    int ans = min(calc(edges, 0), calc(edges, 1));
+    cout << ans << '\n';
+
+    return 0;
+}
+```

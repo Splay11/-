@@ -1,0 +1,177 @@
+### 思路
+
+* **统计**：计数 $\text{cntA}, \text{cntL}, \text{cntI}$。
+* **指针循环**：维护指针 $p \in \{0,1,2\}$ 对应 $[A, L, I]$。
+* **构造**：当 $\text{total} = \text{cntA} + \text{cntL} + \text{cntI} > 0$ 时循环：
+
+  * 从 $p$ 开始尝试至多 $3$ 次，找到第一个计数 $> 0$ 的字符，输出并将其计数减 $1$，并将 $p$ 更新为该字符之后的位置。
+* **判空**：若结果长度为 $0$，输出 $-1$。
+* 复杂度：时间 $O(m)$，空间 $O(1)$，其中 $m$ 为单个字符串长度。
+
+---
+
+## C++ 
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+string transformALI(const string& s) {
+    // 只统计 A、L、I 的数量，其他字符忽略
+    int cnt[3] = {0, 0, 0}; // 0->A, 1->L, 2->I
+    for (char c : s) {
+        if (c == 'A') cnt[0]++;
+        else if (c == 'L') cnt[1]++;
+        else if (c == 'I') cnt[2]++;
+    }
+
+    // 构造答案
+    string ans;
+    int p = 0; // 当前起始指针，0:A,1:L,2:I
+    int total = cnt[0] + cnt[1] + cnt[2];
+    while (total > 0) {
+        bool placed = false;
+        for (int k = 0; k < 3; ++k) {
+            int idx = (p + k) % 3;
+            if (cnt[idx] > 0) {
+                ans.push_back(idx == 0 ? 'A' : (idx == 1 ? 'L' : 'I'));
+                cnt[idx]--;
+                total--;
+                p = (idx + 1) % 3; // 下次从下一个字符开始
+                placed = true;
+                break;
+            }
+        }
+        if (!placed) break; // 理论上不会发生，因为 total > 0
+    }
+
+    if (ans.empty()) return "-1";
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    if (!(cin >> n)) return 0;
+    string s;
+    string dummy;
+    getline(cin, dummy); // 吃掉行尾
+
+    for (int i = 0; i < n; ++i) {
+        getline(cin, s);
+        cout << transformALI(s) << "\n";
+    }
+    return 0;
+}
+```
+
+## Python 
+
+```python
+import sys
+
+def transform_ali(s: str) -> str:
+    # 只统计 A、L、I 数量
+    cnt = [0, 0, 0]  # 0->A, 1->L, 2->I
+    for ch in s:
+        if ch == 'A':
+            cnt[0] += 1
+        elif ch == 'L':
+            cnt[1] += 1
+        elif ch == 'I':
+            cnt[2] += 1
+
+    res = []
+    p = 0  # 当前起始指针
+    total = sum(cnt)
+    while total > 0:
+        placed = False
+        for k in range(3):
+            idx = (p + k) % 3
+            if cnt[idx] > 0:
+                res.append('A' if idx == 0 else ('L' if idx == 1 else 'I'))
+                cnt[idx] -= 1
+                total -= 1
+                p = (idx + 1) % 3
+                placed = True
+                break
+        if not placed:
+            break
+
+    return "".join(res) if res else "-1"
+
+def main():
+    data = sys.stdin.read().splitlines()
+    if not data:
+        return
+    n = int(data[0].strip())
+    out = []
+    line_idx = 1
+    for _ in range(n):
+        s = data[line_idx] if line_idx < len(data) else ""
+        line_idx += 1
+        out.append(transform_ali(s))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+## Java 
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static String transformALI(String s) {
+        // 只统计 A、L、I 数量
+        int[] cnt = new int[3]; // 0->A,1->L,2->I
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == 'A') cnt[0]++;
+            else if (c == 'L') cnt[1]++;
+            else if (c == 'I') cnt[2]++;
+        }
+
+        StringBuilder ans = new StringBuilder();
+        int p = 0; // 当前起始指针
+        int total = cnt[0] + cnt[1] + cnt[2];
+        while (total > 0) {
+            boolean placed = false;
+            for (int k = 0; k < 3; k++) {
+                int idx = (p + k) % 3;
+                if (cnt[idx] > 0) {
+                    ans.append(idx == 0 ? 'A' : (idx == 1 ? 'L' : 'I'));
+                    cnt[idx]--;
+                    total--;
+                    p = (idx + 1) % 3;
+                    placed = true;
+                    break;
+                }
+            }
+            if (!placed) break;
+        }
+
+        return ans.length() == 0 ? "-1" : ans.toString();
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String t = br.readLine();
+        if (t == null || t.isEmpty()) return;
+        int n = Integer.parseInt(t.trim());
+
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            String s = br.readLine();
+            if (s == null) s = "";
+            out.append(transformALI(s));
+            if (i + 1 < n) out.append('\n');
+        }
+        System.out.print(out.toString());
+    }
+}
+```

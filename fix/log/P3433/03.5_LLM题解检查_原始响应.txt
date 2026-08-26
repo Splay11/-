@@ -1,0 +1,118 @@
+## 解题思路
+
+1. **理解问题**：给定一个 $n \times n$ 的方阵 `height_matrix`，以及块尺寸参数 $w$ 和 $h$（来自 `block_dim`），需要将方阵划分为互不重叠的 $w \times h$ 矩形块，并取每个块内的最大高度值，按块的行列顺序组织成一个新的矩阵。
+2. **确定输出尺寸**：由于 $w$ 和 $h$ 均可整除 $n$，输出矩阵的行数 $R = n / h$，列数 $C = n / w$。
+3. **分块求最值**：
+   - 外层循环遍历输出矩阵的行索引 $i$（$0$ 到 $R-1$）和列索引 $j$（$0$ 到 $C-1$）。
+   - 当前块在原方阵中的起始位置为 $(i \times h,\ j \times w)$。
+   - 内层双重循环遍历该 $h \times w$ 窗口内的所有元素，记录最大值。
+   - 将最大值填入输出矩阵的第 $i$ 行第 $j$ 列。
+4. **返回结果**：最终返回构造好的最大值矩阵。
+
+## 复杂度分析
+
+- **时间复杂度**：输出矩阵共有 $\frac{n}{h} \times \frac{n}{w}$ 个块，每个块需要遍历 $w \times h$ 个元素求最值。整体遍历的元素总数恰好为 $n^2$，因此时间复杂度为 $O(n^2)$。
+- **空间复杂度**：除输入外，需要额外存储大小为 $\frac{n}{h} \times \frac{n}{w}$ 的输出矩阵，空间复杂度为 $O\!\left(\frac{n^2}{wh}\right)$。
+
+## 代码实现
+
+### Python
+
+```python
+from typing import List
+
+class Solution:
+    def maxPooling(self, height_matrix: List[List[int]], block_dim: List[int]) -> List[List[int]]:
+        n = len(height_matrix)
+        w, h = block_dim
+        out_h = n // h
+        out_w = n // w
+
+        result = [[0] * out_w for _ in range(out_h)]
+
+        for i in range(out_h):
+            for j in range(out_w):
+                start_i = i * h
+                start_j = j * w
+                max_val = height_matrix[start_i][start_j]
+                # 遍历当前 h * w 窗口
+                for di in range(h):
+                    for dj in range(w):
+                        val = height_matrix[start_i + di][start_j + dj]
+                        if val > max_val:
+                            max_val = val
+                result[i][j] = max_val
+
+        return result
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Solution {
+    public int[][] maxPooling(int[][] heightMatrix, int[] blockDim) {
+        int n = heightMatrix.length;
+        int w = blockDim[0], h = blockDim[1];
+        int outH = n / h;
+        int outW = n / w;
+
+        int[][] result = new int[outH][outW];
+
+        for (int i = 0; i < outH; i++) {
+            for (int j = 0; j < outW; j++) {
+                int startI = i * h;
+                int startJ = j * w;
+                int maxVal = heightMatrix[startI][startJ];
+                for (int di = 0; di < h; di++) {
+                    for (int dj = 0; dj < w; dj++) {
+                        int val = heightMatrix[startI + di][startJ + dj];
+                        if (val > maxVal) {
+                            maxVal = val;
+                        }
+                    }
+                }
+                result[i][j] = maxVal;
+            }
+        }
+        return result;
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> maxPooling(vector<vector<int>>& heightMatrix, vector<int>& blockDim) {
+        int n = heightMatrix.size();
+        int w = blockDim[0], h = blockDim[1];
+        int outH = n / h, outW = n / w;
+
+        vector<vector<int>> result(outH, vector<int>(outW));
+
+        for (int i = 0; i < outH; ++i) {
+            for (int j = 0; j < outW; ++j) {
+                int startI = i * h;
+                int startJ = j * w;
+                int maxVal = heightMatrix[startI][startJ];
+                // 遍历当前窗口
+                for (int di = 0; di < h; ++di) {
+                    for (int dj = 0; dj < w; ++dj) {
+                        maxVal = max(maxVal, heightMatrix[startI + di][startJ + dj]);
+                    }
+                }
+                result[i][j] = maxVal;
+            }
+        }
+        return result;
+    }
+};
+```

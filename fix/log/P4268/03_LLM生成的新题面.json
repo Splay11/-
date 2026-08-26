@@ -1,0 +1,6 @@
+{
+  "title": "同商下标的公约压缩",
+  "content": "对数组可反复选不同下标 $i,j$ 满足 $\\lfloor n/i\\rfloor=\\lfloor n/j\\rfloor$，将 $a_i,a_j$ 同时改为 $\\gcd(a_i,a_j)$。求操作后（可不操作）元素和的最小值。\n\n$1 \\le T \\le 10^4$，$1 \\le n \\le 2\\times 10^5$，$1 \\le a_i \\le 10^9$，所有 $n$ 之和不超过 $2\\times 10^5$。",
+  "input_description": "第一行 $T$。每组一行 $n$，一行 $n$ 个整数 $a_i$。",
+  "output_description": "每组一行一个整数，表示最小元素和。"
+}

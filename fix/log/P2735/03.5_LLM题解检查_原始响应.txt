@@ -1,0 +1,289 @@
+## 解题思路
+
+本题要求计算在一棵树的所有连通块（课题组）中，奇数研究价值的实验室个数之和。树由 $n$ 个节点和 $n-1$ 条边构成，每个节点有一个正整数权值 $b_i$。一个连通块可以包含任意一个连通子图。
+
+我们可以将问题转化为树形动态规划：对于每个节点 $u$，统计以 $u$ 为“最高点”（即连通块中深度最小的节点，且必须包含 $u$）的所有连通块的奇数节点总数，最后把所有节点的贡献累加即可得到答案。
+
+### 1. 状态定义
+
+对于任意节点 $u$，定义：
+
+- $C[u]$：在以 $u$ 为根的子树中，**必须包含节点 $u$** 的连通块的个数（即这些连通块均由 $u$ 和它的一些子孙构成）。
+- $D[u]$：在以 $u$ 为根的子树中，**必须包含节点 $u$** 的连通块里，奇数研究价值的实验室个数之和。
+
+这样定义后，所有可能的连通块都会在其“最浅节点”处被恰好统计一次。
+
+### 2. 状态转移
+
+设 $u$ 的子节点集合为 $children$，对每个子节点 $v$，已经递归求出 $C[v]$ 和 $D[v]$。子树的连通块可以和 $u$ 组合，也可以不选某个子树的任何节点。
+
+- $C[u]$ 的计算：对于每个子节点 $v$，以 $v$ 为根且必含 $v$ 的连通块有 $C[v]$ 个，此外还有“不选 $v$ 的任何节点”这一种方案，即共有 $(C[v]+1)$ 种选择。因为各子树相互独立，所以乘积即为方案数：
+  $$ C[u] = \prod_{v \in children(u)} (C[v] + 1) \pmod{MOD} $$
+  特别地，空选择（即只包含 $u$ 自己）也包含在这个乘积中。
+
+- $D[u]$ 的计算：需要累加两部分贡献：
+  1. 节点 $u$ 自身的贡献：如果 $b[u]$ 是奇数，贡献为 $1$，否则为 $0$。该贡献对所有以 $u$ 为根且必含 $u$ 的连通块都计数一次，因此总贡献为 $f(u) \times C[u]$，其中
+     $$ f(u) = \begin{cases} 1, & b[u] \text{ 为奇数} \\ 0, & \text{否则} \end{cases} $$
+  2. 子树的贡献：考虑子节点 $v$，其连通块中的奇数节点个数的总和为 $D[v]$。当 $v$ 所在子树参与组合时，其他子节点的选择方式仍然相互独立，共有 $\prod_{w \in children(u), w \neq v} (C[w]+1)$ 种组合。因此来自 $v$ 的贡献为 $D[v] \times \prod_{w \neq v} (C[w]+1)$。对所有子节点求和即可。
+
+  综合得到：
+  $$ D[u] = f(u) \cdot C[u] + \sum_{v \in children(u)} D[v] \cdot \prod_{\substack{w \in children(u)\\ w \neq v}} (C[w]+1) \pmod{MOD} $$
+
+  为了高效计算每个子节点对应的“缺一乘积”，我们使用前缀积和后缀积：
+  - 设子节点顺序为 $v_1, v_2, \dots, v_k$；
+  - 计算前缀积 $pre[i] = \prod_{j=1}^{i-1} (C[v_j]+1)$；
+  - 计算后缀积 $suf[i] = \prod_{j=i+1}^{k} (C[v_j]+1)$；
+  - 则对于子节点 $v_i$，其他子节点的乘积 $rest = pre[i] \times suf[i]$。
+
+### 3. 最终答案
+
+所有连通块（课题组）的奇数实验室数量总和为
+$$ \text{answer} = \sum_{u=1}^{n} D[u] \pmod{10^9+7} $$
+
+算法使用一次 DFS 即可完成全部计算。
+
+## 复杂度分析
+
+- 时间复杂度：DFS 遍历每个节点一次，每个节点的子节点处理需要 $O(k)$ 的时间（$k$ 为子节点个数），整棵树的总子节点数为 $n-1$，因此总体时间复杂度为 $O(n)$。
+- 空间复杂度：邻接表、数组 $C,D$、以及递归栈等均与节点数 $n$ 同阶，空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(200000)
+MOD = 10**9 + 7
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    n = int(next(it))
+    b = [0] * (n + 1)
+    for i in range(1, n + 1):
+        b[i] = int(next(it))
+    adj = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u = int(next(it))
+        v = int(next(it))
+        adj[u].append(v)
+        adj[v].append(u)
+
+    C = [0] * (n + 1)
+    D = [0] * (n + 1)
+
+    def dfs(u, parent):
+        children = []
+        for v in adj[u]:
+            if v != parent:
+                dfs(v, u)
+                children.append(v)
+        m = len(children)
+        # 计算 C[u] = ∏(C[v] + 1)
+        prod = 1
+        for v in children:
+            prod = (prod * (C[v] + 1)) % MOD
+        C[u] = prod
+
+        # 前缀积与后缀积
+        prefix = [1] * (m + 1)
+        suffix = [1] * (m + 1)
+        for i in range(m):
+            v = children[i]
+            prefix[i + 1] = (prefix[i] * (C[v] + 1)) % MOD
+        for i in range(m - 1, -1, -1):
+            v = children[i]
+            suffix[i] = (suffix[i + 1] * (C[v] + 1)) % MOD
+
+        # 自身贡献
+        f = 1 if (b[u] % 2 == 1) else 0
+        total = (f * prod) % MOD
+        # 各子树贡献
+        for i in range(m):
+            v = children[i]
+            rest = (prefix[i] * suffix[i + 1]) % MOD
+            total = (total + D[v] * rest) % MOD
+        D[u] = total
+
+    dfs(1, 0)
+    ans = sum(D[1:]) % MOD
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007;
+    static int n;
+    static int[] b;
+    static List<Integer>[] adj;
+    static long[] C, D;
+
+    public static void dfs(int u, int parent) {
+        List<Integer> children = new ArrayList<>();
+        for (int v : adj[u]) {
+            if (v == parent) continue;
+            dfs(v, u);
+            children.add(v);
+        }
+        int m = children.size();
+        long prod = 1;
+        // 计算 C[u] = ∏(C[v]+1)
+        for (int v : children) {
+            prod = (prod * (C[v] + 1)) % MOD;
+        }
+        C[u] = prod;
+
+        // 前缀积与后缀积
+        long[] prefix = new long[m + 1];
+        long[] suffix = new long[m + 1];
+        prefix[0] = 1;
+        for (int i = 0; i < m; i++) {
+            int v = children.get(i);
+            prefix[i + 1] = (prefix[i] * (C[v] + 1)) % MOD;
+        }
+        suffix[m] = 1;
+        for (int i = m - 1; i >= 0; i--) {
+            int v = children.get(i);
+            suffix[i] = (suffix[i + 1] * (C[v] + 1)) % MOD;
+        }
+
+        // 自身贡献
+        long f = (b[u] % 2 == 1) ? 1 : 0;
+        long total = (f * prod) % MOD;
+        // 子节点贡献
+        for (int i = 0; i < m; i++) {
+            int v = children.get(i);
+            long rest = (prefix[i] * suffix[i + 1]) % MOD;
+            total = (total + D[v] * rest) % MOD;
+        }
+        D[u] = total;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(br.readLine());
+        b = new int[n + 1];
+        C = new long[n + 1];
+        D = new long[n + 1];
+        String[] parts = br.readLine().split(" ");
+        for (int i = 1; i <= n; i++) {
+            b[i] = Integer.parseInt(parts[i - 1]);
+        }
+
+        adj = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            adj[i] = new ArrayList<>();
+        }
+        for (int i = 1; i < n; i++) {
+            String[] edge = br.readLine().split(" ");
+            int u = Integer.parseInt(edge[0]);
+            int v = Integer.parseInt(edge[1]);
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+
+        dfs(1, 0);
+
+        long ans = 0;
+        for (int i = 1; i <= n; i++) {
+            ans = (ans + D[i]) % MOD;
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const long long MOD = 1000000007;
+
+int n;
+vector<int> b;
+vector<vector<int>> adj;
+vector<long long> C, D;
+
+void dfs(int u, int parent) {
+    vector<int> children;
+    for (int v : adj[u]) {
+        if (v == parent) continue;
+        dfs(v, u);
+        children.push_back(v);
+    }
+    int m = children.size();
+    long long prod = 1;
+    // 计算 C[u] = ∏(C[v] + 1)
+    for (int v : children) {
+        prod = (prod * (C[v] + 1)) % MOD;
+    }
+    C[u] = prod;
+
+    // 前缀积与后缀积
+    vector<long long> prefix(m + 1, 1), suffix(m + 1, 1);
+    for (int i = 0; i < m; i++) {
+        int v = children[i];
+        prefix[i + 1] = (prefix[i] * (C[v] + 1)) % MOD;
+    }
+    for (int i = m - 1; i >= 0; i--) {
+        int v = children[i];
+        suffix[i] = (suffix[i + 1] * (C[v] + 1)) % MOD;
+    }
+
+    // 自身贡献
+    long long f = (b[u] % 2 == 1) ? 1 : 0;
+    long long total = (f * prod) % MOD;
+    // 子节点贡献
+    for (int i = 0; i < m; i++) {
+        int v = children[i];
+        long long rest = (prefix[i] * suffix[i + 1]) % MOD;
+        total = (total + D[v] * rest) % MOD;
+    }
+    D[u] = total;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    cin >> n;
+    b.resize(n + 1);
+    adj.resize(n + 1);
+    C.resize(n + 1, 0);
+    D.resize(n + 1, 0);
+    
+    for (int i = 1; i <= n; i++) {
+        cin >> b[i];
+    }
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    dfs(1, 0);
+    
+    long long ans = 0;
+    for (int i = 1; i <= n; i++) {
+        ans = (ans + D[i]) % MOD;
+    }
+    cout << ans << "\n";
+    
+    return 0;
+}
+```

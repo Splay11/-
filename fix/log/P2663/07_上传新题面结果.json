@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2663",
+  "title": "第1题-最大数位能量",
+  "docId": 2180,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "其他"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

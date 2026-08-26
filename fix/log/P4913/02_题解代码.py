@@ -1,0 +1,439 @@
+## 解题思路
+
+1. 由于可以任意重排，先将数组从小到大排序。一段只关心段内最小值、最大值和元素个数。
+2. 对于一个合法段，若它在排序后选择了若干不连续元素，那么从它的最小值开始取同样数量的连续元素，最大值不会变大，因此仍然合法。所以最优方案可以看作排序数组上的连续分段。
+3. 设 $dp_i$ 表示覆盖排序后前 $i$ 个数的最少段数。若最后一段覆盖 $[i,j]$，需要满足：
+   $$
+   j-i+1\le L,\quad a_j-a_i\le D+E\times(j-i)
+   $$
+4. 将第二个条件变形。令 $b_k=a_k-E\times k$，则 $[i,j]$ 合法等价于：
+   $$
+   b_i\ge b_j-D
+   $$
+   因此在计算 $dp_{j+1}$ 时，只需要在窗口 $[j-L+1,j]$ 内找所有满足 $b_i\ge b_j-D$ 的左端点，并取其中最小的 $dp_i$。
+5. $b_i$ 不一定单调，所以不能对右端或左端直接二分。对所有 $b_i$ 离散化，用滑动窗口维护当前可用左端点；每个离散值下用堆维护最小 $dp_i$，外层线段树维护后缀离散值区间的最小 $dp_i$。
+6. 对每个右端 $j$，加入左端 $j$，删除超过长度 $L$ 的左端，再在线段树上查询 $b_i\ge b_j-D$ 的最小 $dp_i$，即可得到 $dp_{j+1}$。
+
+## 复杂度分析
+
+- 排序和离散化复杂度为 $O(n\log n)$。
+- 每个下标加入、删除、查询各一次，线段树和堆的总复杂度为 $O(n\log n)$。
+- 单组测试时间复杂度为 $O(n\log n)$，空间复杂度为 $O(n)$。
+- 所有测试数据满足 $\sum n\le 2\times 10^5$，可以通过。
+
+## 代码实现
+
+### Python
+
+```python
+from bisect import bisect_left
+from heapq import heappop, heappush
+
+
+INF = 10**9
+
+
+def build_tree(count):
+    size = 1
+    while size < count:
+        size *= 2
+    tree = [INF] * (size * 2)
+    return tree, size
+
+
+def update(tree, size, index, value):
+    pos = size + index
+    tree[pos] = value
+    pos //= 2
+    while pos:
+        tree[pos] = min(tree[pos * 2], tree[pos * 2 + 1])
+        pos //= 2
+
+
+def range_min(tree, size, left, right):
+    if left > right:
+        return INF
+    left += size
+    right += size
+    answer = INF
+    while left <= right:
+        if left % 2 == 1:
+            answer = min(answer, tree[left])
+            left += 1
+        if right % 2 == 0:
+            answer = min(answer, tree[right])
+            right -= 1
+        left //= 2
+        right //= 2
+    return answer
+
+
+def refresh(bucket_id, add_heaps, remove_heaps, tree, size):
+    add_heap = add_heaps[bucket_id]
+    remove_heap = remove_heaps[bucket_id]
+    while add_heap and remove_heap and add_heap[0] == remove_heap[0]:
+        heappop(add_heap)
+        heappop(remove_heap)
+    value = add_heap[0][0] if add_heap else INF
+    update(tree, size, bucket_id, value)
+
+
+def min_bucket_count(numbers, d, e, limit_size):
+    numbers.sort()
+    n = len(numbers)
+    transformed = [numbers[i] - e * i for i in range(n)]
+    values = sorted(set(transformed))
+    value_id = {value: i for i, value in enumerate(values)}
+    tree, size = build_tree(len(values))
+    add_heaps = [[] for _ in values]
+    remove_heaps = [[] for _ in values]
+
+    dp = [INF] * (n + 1)
+    dp[0] = 0
+    for right in range(n):
+        # 将 right 作为新段左端加入窗口，值为 dp[right]
+        bucket_id = value_id[transformed[right]]
+        heappush(add_heaps[bucket_id], (dp[right], right))
+        refresh(bucket_id, add_heaps, remove_heaps, tree, size)
+
+        expired = right - limit_size
+        if expired >= 0:
+            bucket_id = value_id[transformed[expired]]
+            heappush(remove_heaps[bucket_id], (dp[expired], expired))
+            refresh(bucket_id, add_heaps, remove_heaps, tree, size)
+
+        threshold = transformed[right] - d
+        first = bisect_left(values, threshold)
+        dp[right + 1] = range_min(tree, size, first, len(values) - 1) + 1
+    return dp[n]
+
+
+def main():
+    t = int(input())
+    for _ in range(t):
+        n, d, e, limit_size = map(int, input().split())
+        numbers = list(map(int, input().split()))
+        print(min_bucket_count(numbers, d, e, limit_size))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
+public class Main {
+    static class FastScanner {
+        private final BufferedInputStream in = new BufferedInputStream(System.in);
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0;
+        private int len = 0;
+
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) {
+                    return -1;
+                }
+            }
+            return buffer[ptr++];
+        }
+
+        long nextLong() throws IOException {
+            int c;
+            do {
+                c = read();
+            } while (c <= ' ' && c != -1);
+            long sign = 1;
+            if (c == '-') {
+                sign = -1;
+                c = read();
+            }
+            long value = 0;
+            while (c > ' ') {
+                value = value * 10 + (c - '0');
+                c = read();
+            }
+            return value * sign;
+        }
+    }
+
+    static class SegmentTree {
+        private final int size;
+        private final int[] tree;
+        private final int inf;
+
+        SegmentTree(int count, int infValue) {
+            inf = infValue;
+            int s = 1;
+            while (s < count) {
+                s <<= 1;
+            }
+            size = s;
+            tree = new int[size * 2];
+            Arrays.fill(tree, inf);
+        }
+
+        void update(int index, int value) {
+            int pos = size + index;
+            tree[pos] = value;
+            pos >>= 1;
+            while (pos >= 1) {
+                tree[pos] = Math.min(tree[pos * 2], tree[pos * 2 + 1]);
+                if (pos == 1) {
+                    break;
+                }
+                pos >>= 1;
+            }
+        }
+
+        int rangeMin(int left, int right) {
+            if (left > right) {
+                return inf;
+            }
+            left += size;
+            right += size;
+            int answer = inf;
+            while (left <= right) {
+                if ((left & 1) == 1) {
+                    answer = Math.min(answer, tree[left++]);
+                }
+                if ((right & 1) == 0) {
+                    answer = Math.min(answer, tree[right--]);
+                }
+                left >>= 1;
+                right >>= 1;
+            }
+            return answer;
+        }
+    }
+
+    static int lowerBound(long[] values, long target) {
+        int left = 0;
+        int right = values.length;
+        while (left < right) {
+            int mid = (left + right) >>> 1;
+            if (values[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    }
+
+    static boolean sameTop(int[] a, int[] b) {
+        return a[0] == b[0] && a[1] == b[1];
+    }
+
+    static void refresh(int id, PriorityQueue<int[]>[] addHeaps, PriorityQueue<int[]>[] removeHeaps,
+                        SegmentTree seg, int inf) {
+        while (!addHeaps[id].isEmpty() && !removeHeaps[id].isEmpty()
+                && sameTop(addHeaps[id].peek(), removeHeaps[id].peek())) {
+            addHeaps[id].poll();
+            removeHeaps[id].poll();
+        }
+        int value = addHeaps[id].isEmpty() ? inf : addHeaps[id].peek()[0];
+        seg.update(id, value);
+    }
+
+    static int minBucketCount(long[] numbers, long d, long e, int limitSize) {
+        Arrays.sort(numbers);
+        int n = numbers.length;
+        long[] transformed = new long[n];
+        for (int i = 0; i < n; i++) {
+            transformed[i] = numbers[i] - e * (long) i;
+        }
+
+        long[] values = transformed.clone();
+        Arrays.sort(values);
+        int uniqueCount = 0;
+        for (long value : values) {
+            if (uniqueCount == 0 || values[uniqueCount - 1] != value) {
+                values[uniqueCount++] = value;
+            }
+        }
+        values = Arrays.copyOf(values, uniqueCount);
+
+        int inf = n + 5;
+        SegmentTree seg = new SegmentTree(values.length, inf);
+        Comparator<int[]> cmp = (x, y) -> x[0] != y[0] ? Integer.compare(x[0], y[0]) : Integer.compare(x[1], y[1]);
+        @SuppressWarnings("unchecked")
+        PriorityQueue<int[]>[] addHeaps = new PriorityQueue[values.length];
+        @SuppressWarnings("unchecked")
+        PriorityQueue<int[]>[] removeHeaps = new PriorityQueue[values.length];
+        for (int i = 0; i < values.length; i++) {
+            addHeaps[i] = new PriorityQueue<>(cmp);
+            removeHeaps[i] = new PriorityQueue<>(cmp);
+        }
+
+        int[] coord = new int[n];
+        int[] dp = new int[n + 1];
+        Arrays.fill(dp, inf);
+        dp[0] = 0;
+        for (int right = 0; right < n; right++) {
+            coord[right] = lowerBound(values, transformed[right]);
+            // 将 right 作为新段左端加入窗口，值为 dp[right]
+            addHeaps[coord[right]].offer(new int[]{dp[right], right});
+            refresh(coord[right], addHeaps, removeHeaps, seg, inf);
+
+            int expired = right - limitSize;
+            if (expired >= 0) {
+                removeHeaps[coord[expired]].offer(new int[]{dp[expired], expired});
+                refresh(coord[expired], addHeaps, removeHeaps, seg, inf);
+            }
+
+            long threshold = transformed[right] - d;
+            int first = lowerBound(values, threshold);
+            dp[right + 1] = seg.rangeMin(first, values.length - 1) + 1;
+        }
+        return dp[n];
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        StringBuilder out = new StringBuilder();
+        int t = (int) fs.nextLong();
+        for (int caseId = 0; caseId < t; caseId++) {
+            int n = (int) fs.nextLong();
+            long d = fs.nextLong();
+            long e = fs.nextLong();
+            int limitSize = (int) fs.nextLong();
+            long[] numbers = new long[n];
+            for (int i = 0; i < n; i++) {
+                numbers[i] = fs.nextLong();
+            }
+            out.append(minBucketCount(numbers, d, e, limitSize)).append('\n');
+        }
+        System.out.print(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+class SegmentTree {
+private:
+    int size;
+    vector<int> tree;
+    int inf;
+
+public:
+    SegmentTree(int count, int infValue) : inf(infValue) {
+        size = 1;
+        while (size < count) {
+            size <<= 1;
+        }
+        tree.assign(size * 2, inf);
+    }
+
+    void update(int index, int value) {
+        int pos = size + index;
+        tree[pos] = value;
+        for (pos >>= 1; pos >= 1; pos >>= 1) {
+            tree[pos] = min(tree[pos * 2], tree[pos * 2 + 1]);
+            if (pos == 1) {
+                break;
+            }
+        }
+    }
+
+    int rangeMin(int left, int right) const {
+        if (left > right) {
+            return inf;
+        }
+        left += size;
+        right += size;
+        int answer = inf;
+        while (left <= right) {
+            if (left & 1) {
+                answer = min(answer, tree[left++]);
+            }
+            if (!(right & 1)) {
+                answer = min(answer, tree[right--]);
+            }
+            left >>= 1;
+            right >>= 1;
+        }
+        return answer;
+    }
+};
+
+int minBucketCount(vector<long long> numbers, long long d, long long e, int limitSize) {
+    sort(numbers.begin(), numbers.end());
+    int n = (int)numbers.size();
+
+    vector<long long> transformed(n);
+    for (int i = 0; i < n; i++) {
+        transformed[i] = numbers[i] - e * 1LL * i;
+    }
+
+    vector<long long> values = transformed;
+    sort(values.begin(), values.end());
+    values.erase(unique(values.begin(), values.end()), values.end());
+
+    const int INF = n + 5;
+    SegmentTree seg((int)values.size(), INF);
+    vector<multiset<int>> buckets(values.size());
+    vector<int> coord(n);
+    vector<int> dp(n + 1, INF);
+    dp[0] = 0;
+
+    auto refresh = [&](int id) {
+        int value = buckets[id].empty() ? INF : *buckets[id].begin();
+        seg.update(id, value);
+    };
+
+    for (int right = 0; right < n; right++) {
+        coord[right] = (int)(lower_bound(values.begin(), values.end(), transformed[right]) - values.begin());
+        // 将 right 作为新段左端加入窗口，值为 dp[right]
+        buckets[coord[right]].insert(dp[right]);
+        refresh(coord[right]);
+
+        int expired = right - limitSize;
+        if (expired >= 0) {
+            auto it = buckets[coord[expired]].find(dp[expired]);
+            if (it != buckets[coord[expired]].end()) {
+                buckets[coord[expired]].erase(it);
+            }
+            refresh(coord[expired]);
+        }
+
+        long long threshold = transformed[right] - d;
+        int first = (int)(lower_bound(values.begin(), values.end(), threshold) - values.begin());
+        dp[right + 1] = seg.rangeMin(first, (int)values.size() - 1) + 1;
+    }
+    return dp[n];
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+    while (t--) {
+        int n, limitSize;
+        long long d, e;
+        cin >> n >> d >> e >> limitSize;
+        vector<long long> numbers(n);
+        for (int i = 0; i < n; i++) {
+            cin >> numbers[i];
+        }
+        cout << minBucketCount(numbers, d, e, limitSize) << '\n';
+    }
+    return 0;
+}
+```

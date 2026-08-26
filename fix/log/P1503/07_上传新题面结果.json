@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1503",
+  "title": "第3题-单向环重构",
+  "docId": 527,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

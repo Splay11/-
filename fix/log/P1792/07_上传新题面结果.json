@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1792",
+  "title": "第3题-掩码并集",
+  "docId": 892,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "饿了么"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

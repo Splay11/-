@@ -1,0 +1,11 @@
+{
+  "pid": "P1754",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 16:28:35",
+  "end_time": "2026-08-19 16:28:39",
+  "new_title": "第3题-异常源布局",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

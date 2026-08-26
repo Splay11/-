@@ -1,0 +1,202 @@
+## 解题思路
+
+这道题的核心在于分析消除过程的可选奖励集合变化规律，并利用贪心策略分别求最大和最小总奖励。
+
+1. **操作始终合法**
+   由于初始宝石序列中任意相邻两颗宝石类型都不相同，删除任意一对相邻宝石后，剩下的序列仍然满足相邻不同类型。因此每一步都可以任意选择当前存在的任意一对相邻宝石进行消除。
+
+2. **操作次数固定**
+   每次消除会移除两颗宝石，游戏进行到宝石数量 ≤ 1 时结束。因此无论采用何种消除顺序，总操作次数均为
+   \[
+   m = \left\lfloor \frac{n}{2} \right\rfloor .
+   \]
+
+3. **可选奖励的前缀性质**
+   奖励数组 b 固定不变，且与位置绑定。第 1 次操作时，当前序列有 n 颗宝石，可选相邻对为 (i, i+1)，对应的奖励为 b_i，其中 i=1,2,…,n-1。
+   消除一对后，序列长度变为 n-2，原先用于消除的位置及其后续位置前移。第 2 次操作时，当前序列有 n-2 颗宝石，相邻对奖励仍依次引用 b_1 到 b_{n-3}（因为 b 数组不会因为消除而改变，奖励永远与当前相对位置对应）。依此类推，第 k 次操作（1‑based）时，允许选择的奖励集合恰好是 b 的一个前缀：
+   \[
+   b_1,\; b_2,\; \dots,\; b_{n-2k+1} .
+   \]
+
+4. **贪心选择前缀极值**
+   因为当前可选奖励集合是上一次可选集合的前缀（每次前缀长度减少 2），所以当前能取到的最优值（最大或最小）一定是当前前缀中的最优值。如果当前不取这个最优值，后续前缀只会更短，再也无法获得该值。因此：
+   - 要最大化总奖励，每一步都应该选择当前前缀中的最大值；
+   - 要最小化总奖励，每一步都应该选择当前前缀中的最小值。
+
+5. **前缀极值与答案计算**
+   预处理前缀最大值 `preMax[i]` 和前缀最小值 `preMin[i]`，分别表示 `b[1..i]` 中的最大值和最小值。
+   总操作次数 m 已知，第 1 次到第 m 次操作对应的前缀右端点依次为：
+   \[
+   r_1 = n-1,\; r_2 = n-3,\; \dots,\; r_k = n-2k+1 \quad (r_k \ge 1).
+   \]
+   则总奖励的最大值为
+   \[
+   S_{\max} = \sum_{k=1}^{m} \text{preMax}[r_k],
+   \]
+   最小值为
+   \[
+   S_{\min} = \sum_{k=1}^{m} \text{preMin}[r_k].
+   \]
+
+## 复杂度分析
+
+- 时间复杂度：对每组数据，预处理前缀极值需要 O(n) 时间，求和只需 O(m) = O(n) 时间。总时间复杂度与所有数据的 n 之和成正比，即 O(∑n) ≤ 2×10^5，非常高效。
+- 空间复杂度：前缀极值数组需要 O(n) 额外空间，整体为 O(n)。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve_case(n, b):
+    # preMax[i] 和 preMin[i] 分别表示 b[1..i] 的最大值和最小值，i从1开始
+    preMax = [0] * (n + 1)
+    preMin = [0] * (n + 1)
+    cur_max = -10**19
+    cur_min = 10**19
+    # 遍历奖励数组 b[0..n-2]，对应原始位置的 b_1..b_{n-1}
+    for i in range(1, n):
+        val = b[i - 1]
+        if val > cur_max:
+            cur_max = val
+        if val < cur_min:
+            cur_min = val
+        preMax[i] = cur_max
+        preMin[i] = cur_min
+
+    max_sum = 0
+    min_sum = 0
+    # 步数：依次取前缀右端点 n-1, n-3, ..., 直到 ≥1
+    r = n - 1
+    while r >= 1:
+        max_sum += preMax[r]
+        min_sum += preMin[r]
+        r -= 2
+    return max_sum, min_sum
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    it = iter(data)
+    T = next(it)
+    out_lines = []
+    for _ in range(T):
+        n = next(it)
+        b = [next(it) for _ in range(n - 1)]
+        mx, mn = solve_case(n, b)
+        out_lines.append(f"{mx} {mn}")
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    // 计算一个用例的答案：返回 [maxSum, minSum]
+    static long[] solveCase(int n, int[] b) {
+        long[] preMax = new long[n];
+        long[] preMin = new long[n];
+        long curMax = Long.MIN_VALUE / 4;
+        long curMin = Long.MAX_VALUE / 4;
+        // 前缀极值，索引 i 表示前缀长度 i（即用到 b[0..i-1]）
+        for (int i = 1; i <= n - 1; i++) {
+            int val = b[i - 1];
+            if (val > curMax) curMax = val;
+            if (val < curMin) curMin = val;
+            preMax[i] = curMax;
+            preMin[i] = curMin;
+        }
+        long maxSum = 0, minSum = 0;
+        // 右端点依次为 n-1, n-3, ...
+        for (int r = n - 1; r >= 1; r -= 2) {
+            maxSum += preMax[r];
+            minSum += preMin[r];
+        }
+        return new long[]{maxSum, minSum};
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder out = new StringBuilder();
+        int T = Integer.parseInt(br.readLine().trim());
+        for (int tc = 0; tc < T; tc++) {
+            int n = Integer.parseInt(br.readLine().trim());
+            int need = n - 1;
+            int[] b = new int[need];
+            int idx = 0;
+            // 按空白分隔读取 n-1 个奖励值
+            while (idx < need) {
+                String line = br.readLine();
+                if (line == null || line.isEmpty()) continue;
+                String[] parts = line.trim().split("\\s+");
+                for (String s : parts) {
+                    if (s.isEmpty()) continue;
+                    b[idx++] = Integer.parseInt(s);
+                    if (idx == need) break;
+                }
+            }
+            long[] ans = solveCase(n, b);
+            out.append(ans[0]).append(' ').append(ans[1]).append('\n');
+        }
+        System.out.print(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// 计算一个用例的答案：返回 {maxSum, minSum}
+pair<long long, long long> solve_case(int n, const vector<int>& b) {
+    vector<long long> preMax(n, LLONG_MIN / 4);
+    vector<long long> preMin(n, LLONG_MAX / 4);
+
+    long long curMax = LLONG_MIN / 4;
+    long long curMin = LLONG_MAX / 4;
+    // 前缀极值，i 表示前缀长度（用到 b[0..i-1]）
+    for (int i = 1; i <= n - 1; ++i) {
+        int val = b[i - 1];
+        if (val > curMax) curMax = val;
+        if (val < curMin) curMin = val;
+        preMax[i] = curMax;
+        preMin[i] = curMin;
+    }
+
+    long long maxSum = 0, minSum = 0;
+    // 右端点 r 依次取 n-1, n-3, ...
+    for (int r = n - 1; r >= 1; r -= 2) {
+        maxSum += preMax[r];
+        minSum += preMin[r];
+    }
+    return {maxSum, minSum};
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    if (!(cin >> T)) return 0;
+    while (T--) {
+        int n;
+        cin >> n;
+        vector<int> b(n - 1);
+        for (int i = 0; i < n - 1; ++i) cin >> b[i];
+
+        auto ans = solve_case(n, b);
+        cout << ans.first << ' ' << ans.second << "\n";
+    }
+    return 0;
+}
+```

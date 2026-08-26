@@ -1,0 +1,466 @@
+## 题解
+
+### 题面描述
+给定包含 $N$ 篇文档的文本数据集，每篇文档由一个类别标签（取值为 `"positive"` 或 `"negative"`）和文本内容构成。要求使用 $Bag\text{-}of\text{-}Words$ 模型提取文本特征，利用卡方检验计算每个单词与类别标签之间的相关性。卡方统计量的计算公式为  
+$\chi^2 $= $\sum_{i=1}^{2}$ $\sum_{j=1}^{2}$ $\frac{(O_{ij}-E_{ij})^2}{E_{ij}}$ 
+其中 $O_{ij}$ 表示观察到的频数，$E_{ij}$ 表示在独立性假设下计算的期望频数，计算公式为  
+$$E_{ij} = \frac{(\text{行和})\times(\text{列和})}{N}.$$  
+
+具体步骤如下：
+1. 读取输入数据集，第一行是文档数 $N$，接下来的 $N$ 行每行格式为  
+   `<label>` **\t** `<text>`  
+   最后一行输入整数 $k$ 表示需要选择的特征个数。
+2. 对每篇文档使用 $Bag\text{-}of\text{-}Words$ 模型提取单词（注意区分大小写），统计每个单词在不同类别下出现的文档数（每篇文档中对某单词只计一次）。
+3. 对于每个单词，构造 $2 \times 2$ 的列联表：  
+   - $A$：正类中出现该单词的文档数  
+   - $B$：负类中出现该单词的文档数  
+   - $C$：正类中未出现该单词的文档数 = $n_{positive} - A$  
+   - $D$：负类中未出现该单词的文档数 = $n_{negative} - B$
+4. 计算每个单词的卡方统计量。例如，计算单元格 $(1,1)$ 的期望频数为  
+   $$E_{11} = \frac{(A+B) \times n_{positive}}{N}.$$  
+   对 $4$ 个单元格均计算 $\frac{(O_{ij}-E_{ij})^2}{E_{ij}}$ 后求和即为该单词的卡方值。
+5. 按照卡方统计量从大到小排序，若相同则按单词字典序升序。输出前 $k$ 个单词作为选定的特征。
+6. 特殊情况：若输入格式不正确（例如实际文档数与 $N$ 不符）则输出 `-1`。
+
+### 思路与代码分析
+- **数据读取与预处理**  
+  首先读取第一行的整数 $N$。检查后续行数是否满足 $N+1$ 行（$N$ 行数据 + 1 行 $k$ 值），否则直接输出 `-1`。  
+- **特征提取**  
+  对每个文档，根据制表符拆分出类别和文本，然后使用空格分割文本得到单词列表。对每个文档使用集合保证同一单词在文档中只统计一次。
+- **统计频数**  
+  分别统计正类和负类的文档数，并构造每个单词的频数统计，即 $A$ 和 $B$。
+- **卡方统计量计算**  
+  根据 $A$、$B$、$C = n_{positive}-A$、$D = n_{negative}-B$，以及总文档数 $N$ 计算期望值 $E_{ij}$，再累加得到卡方值。  
+- **排序与输出**  
+  将所有单词按照卡方值降序排序，若卡方值相同则按单词的字母序升序，最后输出前 $k$ 个特征。
+
+## c++
+```cpp
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+// 定义结构体保存单词及其卡方值
+struct Feature {
+    string word;
+    double chi;
+};
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int N;
+    if(!(cin >> N)){
+        cout << -1;
+        return 0;
+    }
+    cin.ignore(); // 忽略换行
+
+    vector<string> docs;
+    // 读取 N 行文档
+    for (int i = 0; i < N; i++){
+        string line;
+        if(!getline(cin, line)){
+            cout << -1;
+            return 0;
+        }
+        docs.push_back(line);
+    }
+    // 读取最后一行的 k 值
+    int k;
+    if(!(cin >> k)){
+        cout << -1;
+        return 0;
+    }
+    
+    int positiveCount = 0, negativeCount = 0;
+    // 保存每个单词在正负类文档中出现的次数
+    unordered_map<string, pair<int, int>> wordCount;
+
+    for(auto &line : docs){
+        string label, text;
+        size_t pos = line.find('\t');
+        if(pos != string::npos){
+            // 如果存在制表符，则按照制表符拆分
+            label = line.substr(0, pos);
+            text = line.substr(pos+1);
+        } else {
+            // 否则按空格拆分，第一个单词为标签，其余为文本
+            istringstream iss(line);
+            if(!(iss >> label)){
+                cout << -1;
+                return 0;
+            }
+            getline(iss, text);
+            // 去掉 text 开头的空格
+            if(!text.empty() && text[0]==' ') text.erase(0, 1);
+        }
+        
+        bool isPositive = false;
+        if(label == "positive"){
+            positiveCount++;
+            isPositive = true;
+        } else if(label == "negative"){
+            negativeCount++;
+        } else {
+            cout << -1;
+            return 0;
+        }
+        
+        // 使用 set 保证同一文档中每个单词只计一次
+        unordered_set<string> wordsInDoc;
+        istringstream iss(text);
+        string word;
+        while(iss >> word){
+            wordsInDoc.insert(word);
+        }
+        for(auto &w : wordsInDoc){
+            if(isPositive)
+                wordCount[w].first++;
+            else
+                wordCount[w].second++;
+        }
+    }
+    
+    int total = positiveCount + negativeCount;
+    vector<Feature> features;
+   
+    for(auto &p : wordCount){
+        string word = p.first;
+        int A = p.second.first;  // 正类中出现该单词
+        int B = p.second.second; // 负类中出现该单词
+        int C = positiveCount - A; // 正类中未出现该单词
+        int D = negativeCount - B; // 负类中未出现该单词
+        
+        double chi = 0.0;
+        int row1 = A + B; // 单词出现的总文档数
+        int row2 = C + D; // 单词未出现的文档数
+        int col1 = positiveCount;
+        int col2 = negativeCount;
+        
+        // 对4个单元格分别计算贡献，注意避免除以 0
+        if(row1 > 0 && col1 > 0) {
+            double E = double(row1) * col1 / total;
+            if(E > 0) chi += (A - E) * (A - E) / E;
+        }
+        if(row1 > 0 && col2 > 0) {
+            double E = double(row1) * col2 / total;
+            if(E > 0) chi += (B - E) * (B - E) / E;
+        }
+        if(row2 > 0 && col1 > 0) {
+            double E = double(row2) * col1 / total;
+            if(E > 0) chi += (C - E) * (C - E) / E;
+        }
+        if(row2 > 0 && col2 > 0) {
+            double E = double(row2) * col2 / total;
+            if(E > 0) chi += (D - E) * (D - E) / E;
+        }
+        
+        features.push_back({word, chi});
+    }
+    
+    // 按照卡方值从大到小排序，若相同则按字母序升序
+    sort(features.begin(), features.end(), [](const Feature &a, const Feature &b) {
+        if(fabs(a.chi - b.chi) > 1e-9)
+            return a.chi > b.chi;
+        return a.word < b.word;
+    });
+    
+    // 输出前k个特征
+    for (int i = 0; i < k && i < features.size(); i++){
+        cout << features[i].word << "\n";
+    }
+    
+    return 0;
+}
+
+```
+## python
+```python
+# -*- coding: utf-8 -*-
+import sys
+import math
+
+def main():
+    # 读取所有输入行
+    lines = sys.stdin.read().splitlines()
+    if not lines:
+        print(-1)
+        return
+
+    try:
+        # 第一行为文档数量N
+        N = int(lines[0])
+    except:
+        print(-1)
+        return
+
+    # 检查是否有足够的行：N行文档 + 1 行k
+    if len(lines) != N + 2:
+        print(-1)
+        return
+
+    positive_count = 0
+    negative_count = 0
+    word_count = {}  # 字典，键为单词，值为 [正类出现次数, 负类出现次数]
+
+    # 遍历每篇文档
+    for i in range(1, N+1):
+        line = lines[i]
+        # 如果存在制表符，则用制表符分割；否则按空格拆分，第一个单词为标签
+        if "\t" in line:
+            label, text = line.split("\t", 1)
+        else:
+            parts = line.split()
+            if len(parts) < 2:
+                print(-1)
+                return
+            label = parts[0]
+            text = " ".join(parts[1:])
+            
+        if label == "positive":
+            positive_count += 1
+            is_positive = True
+        elif label == "negative":
+            negative_count += 1
+            is_positive = False
+        else:
+            print(-1)
+            return
+        
+        # 用集合保证每篇文档中每个单词只计一次
+        words = set(text.split())
+        for word in words:
+            if word not in word_count:
+                word_count[word] = [0, 0]
+            if is_positive:
+                word_count[word][0] += 1
+            else:
+                word_count[word][1] += 1
+
+    total = positive_count + negative_count
+    features = []
+    # 计算每个单词的卡方值
+    for word, counts in word_count.items():
+        A = counts[0]  # 正类中出现该单词
+        B = counts[1]  # 负类中出现该单词
+        C = positive_count - A  # 正类中未出现该单词
+        D = negative_count - B  # 负类中未出现该单词
+
+        row1 = A + B  # 单词出现的总文档数
+        row2 = C + D  # 单词未出现的文档数
+        col1 = positive_count
+        col2 = negative_count
+        
+        chi = 0.0
+        # 计算每个单元格的期望频数E并累加贡献
+        if row1 > 0 and col1 > 0:
+            E = row1 * col1 / total
+            if E > 0:
+                chi += (A - E) ** 2 / E
+        if row1 > 0 and col2 > 0:
+            E = row1 * col2 / total
+            if E > 0:
+                chi += (B - E) ** 2 / E
+        if row2 > 0 and col1 > 0:
+            E = row2 * col1 / total
+            if E > 0:
+                chi += (C - E) ** 2 / E
+        if row2 > 0 and col2 > 0:
+            E = row2 * col2 / total
+            if E > 0:
+                chi += (D - E) ** 2 / E
+
+        features.append((word, chi))
+
+    # 按照卡方值从大到小排序，若卡方值相同则按字母序升序
+    features.sort(key=lambda x: (-x[1], x[0]))
+    
+    try:
+        k = int(lines[-1])
+    except:
+        print(-1)
+        return
+
+    # 输出前k个特征
+    for i in range(min(k, len(features))):
+        print(features[i][0])
+        
+if __name__ == "__main__":
+    main()
+
+```
+## java
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
+
+// 定义 Feature 类保存单词及其卡方值
+class Feature {
+    String word;
+    double chi;
+    Feature(String word, double chi) {
+        this.word = word;
+        this.chi = chi;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine();
+        if(line == null){
+            System.out.println(-1);
+            return;
+        }
+        int N;
+        try {
+            // 读取文档数量N
+            N = Integer.parseInt(line.trim());
+        } catch(Exception e) {
+            System.out.println(-1);
+            return;
+        }
+        
+        List<String> docs = new ArrayList<>();
+        // 读取N行文档
+        for(int i = 0; i < N; i++){
+            String docLine = br.readLine();
+            if(docLine == null){
+                System.out.println(-1);
+                return;
+            }
+            docs.add(docLine);
+        }
+        // 读取最后一行的k值
+        String kLine = br.readLine();
+        if(kLine == null){
+            System.out.println(-1);
+            return;
+        }
+        int k;
+        try {
+            k = Integer.parseInt(kLine.trim());
+        } catch(Exception e) {
+            System.out.println(-1);
+            return;
+        }
+        
+        int positiveCount = 0;
+        int negativeCount = 0;
+        // 使用 Map 保存每个单词在正负类中的出现次数，值为 int 数组：[正类出现次数, 负类出现次数]
+        Map<String, int[]> wordCount = new HashMap<>();
+        
+        for(String doc : docs){
+            String label, text;
+            // 如果包含制表符，则按制表符拆分；否则按空格拆分，第一个单词为标签，其余为文本
+            if(doc.contains("\t")){
+                String[] parts = doc.split("\t", 2);
+                if(parts.length < 2){
+                    System.out.println(-1);
+                    return;
+                }
+                label = parts[0];
+                text = parts[1];
+            } else {
+                String[] parts = doc.split(" ");
+                if(parts.length < 2){
+                    System.out.println(-1);
+                    return;
+                }
+                label = parts[0];
+                text = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
+            }
+            
+            boolean isPositive;
+            if(label.equals("positive")){
+                positiveCount++;
+                isPositive = true;
+            } else if(label.equals("negative")){
+                negativeCount++;
+                isPositive = false;
+            } else {
+                System.out.println(-1);
+                return;
+            }
+            
+            // 使用 Set 保证同一文档中每个单词只计一次
+            String[] words = text.split(" ");
+            Set<String> wordSet = new HashSet<>(Arrays.asList(words));
+            for(String word : wordSet){
+                int[] counts = wordCount.getOrDefault(word, new int[2]);
+                if(isPositive)
+                    counts[0]++;
+                else
+                    counts[1]++;
+                wordCount.put(word, counts);
+            }
+        }
+        
+        int total = positiveCount + negativeCount;
+        List<Feature> features = new ArrayList<>();
+        // 遍历每个单词计算卡方值
+        for(Map.Entry<String, int[]> entry : wordCount.entrySet()){
+            String word = entry.getKey();
+            int A = entry.getValue()[0]; // 正类中出现该单词
+            int B = entry.getValue()[1]; // 负类中出现该单词
+            int C = positiveCount - A;   // 正类中未出现该单词
+            int D = negativeCount - B;   // 负类中未出现该单词
+            
+            int row1 = A + B; // 单词出现的文档总数
+            int row2 = C + D; // 单词未出现的文档数
+            int col1 = positiveCount;
+            int col2 = negativeCount;
+            
+            double chi = 0.0;
+            // 对每个单元格计算期望频数E并累加贡献
+            if(row1 > 0 && col1 > 0){
+                double E = (double)row1 * col1 / total;
+                if(E > 0)
+                    chi += (A - E) * (A - E) / E;
+            }
+            if(row1 > 0 && col2 > 0){
+                double E = (double)row1 * col2 / total;
+                if(E > 0)
+                    chi += (B - E) * (B - E) / E;
+            }
+            if(row2 > 0 && col1 > 0){
+                double E = (double)row2 * col1 / total;
+                if(E > 0)
+                    chi += (C - E) * (C - E) / E;
+            }
+            if(row2 > 0 && col2 > 0){
+                double E = (double)row2 * col2 / total;
+                if(E > 0)
+                    chi += (D - E) * (D - E) / E;
+            }
+            
+            features.add(new Feature(word, chi));
+        }
+        
+        // 按照卡方值降序排序，若相同则按字母序升序
+        Collections.sort(features, new Comparator<Feature>(){
+            public int compare(Feature f1, Feature f2){
+                if(Math.abs(f1.chi - f2.chi) > 1e-9){
+                    return f1.chi > f2.chi ? -1 : 1;
+                }
+                return f1.word.compareTo(f2.word);
+            }
+        });
+        
+        // 输出前k个特征
+        for(int i = 0; i < k && i < features.size(); i++){
+            System.out.println(features.get(i).word);
+        }
+    }
+}
+
+```

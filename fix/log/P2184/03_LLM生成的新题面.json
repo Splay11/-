@@ -1,0 +1,6 @@
+{
+  "title": "四点乘积最大化",
+  "content": "四个正整数 $a,b,c,d$，至多 $k$ 次操作，每次把其中一个数加 $1$。求最终乘积最大值。\n\n$1 \\le T \\le 100$，$1 \\le a,b,c,d,k \\le 20$。",
+  "input_description": "第一行 $T$。接下来 $T$ 行每行五个整数 $a,b,c,d,k$。",
+  "output_description": "每组一行一个整数，表示最大乘积。"
+}

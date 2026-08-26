@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3748",
+  "title": "第3题-哨所跨度",
+  "docId": 3091,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "树形dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树",
+  "videosol": "",
+  "trial_videosol": ""
+}

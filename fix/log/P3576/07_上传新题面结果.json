@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3576",
+  "title": "第1题-货箱齐整",
+  "docId": 2919,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "取模运算"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

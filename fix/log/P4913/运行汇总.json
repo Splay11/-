@@ -1,0 +1,21 @@
+{
+  "pid": "P4913",
+  "mode": 0,
+  "force": true,
+  "start_time": "2026-08-10 13:39:52",
+  "end_time": "2026-08-10 13:43:18",
+  "new_title": "第4题-最少加工批次",
+  "steps": {
+    "step1_fetch_problem": true,
+    "step2_fetch_solution": true,
+    "step3_generate_statement": true,
+    "step35_check_solution": true,
+    "step35_modified": true,
+    "step4_generate_samples": true,
+    "step5_assemble": true,
+    "step6_upload_original_statement": true,
+    "step7_upload_new_problem": true,
+    "step8_upload_solution": true
+  },
+  "overall_success": true
+}

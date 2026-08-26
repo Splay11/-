@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2144",
+  "title": "第3题-航线瓶颈",
+  "docId": 1251,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "最短路算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

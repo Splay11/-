@@ -1,0 +1,166 @@
+## 解题思路
+
+我们需要构造一个严格递增的正整数序列 $a_1 < a_2 < \dots < a_n$，满足所有数的按位或（共鸣融合）结果恰好等于给定的目标值 $k$。  
+算法的核心思想是：利用 $k$ 的二进制表示中所有为 1 的位，枚举这些位的所有非空子集，每个子集对应的数值就是选中位的权重之和。这些数值具有以下性质：
+
+1. **个数**：设 $k$ 的二进制表示中共有 $x$ 个 1。这些位可以生成 $2^x - 1$ 个不同的正整数（对应非空子集）。
+2. **按位或**：这 $2^x - 1$ 个数的按位或正好等于 $k$，因为每一位为 1 的位至少在某一个子集中被选中。
+3. **单调性**：若将 $k$ 中为 1 的位按权重从小到大排列（即位置升序），并按照子集的二进制掩码从小到大的顺序生成数字，得到的序列是严格递增的，且最后一个数正好是 $k$（全部位都选中的子集）。
+
+因此，构造步骤如下：
+- 找出 $k$ 的二进制中所有为 1 的位的下标（第 $i$ 位对应权重 $2^i$），记这些下标为 $p_1 < p_2 < \dots < p_x$。
+- 如果 $n > 2^x - 1$，则不可能构造出合法序列，直接输出 `NO`。
+- 否则，从小到大枚举非空子集（掩码 $i$ 从 $1$ 到 $2^x-1$），对于每个掩码，计算其对应的魔力值：遍历 $j=0\sim x-1$，若掩码的第 $j$ 位为 $1$，则累加权重 $2^{p_j}$。每生成一个数就加入结果序列，直到得到 $n$ 个数为止。
+- 最后，将结果序列的最后一个元素强制设为 $k$（保证按位或结果恰好为 $k$，且不影响严格递增性，因为 $k$ 是可能生成的最大值）。此时前 $n-1$ 个数均小于 $k$，替换后仍满足单调递增。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n + \log k)$。  
+  我们需要扫描 $k$ 的二进制位（最多 $61$ 位）收集 $1$ 的位置，随后最多生成 $n$ 个数字，每个数字的生成需要遍历 $x$ 个位，但 $x \le 60$，且 $n \le 10^5$，实际循环总次数为 $O(n \cdot x)$，在数据范围内完全可行。  
+- 空间复杂度：$O(n)$。  
+  需要存储构造出的 $n$ 个魔力值。
+
+## 代码实现
+
+### Python
+
+```python
+def solve():
+    n, k = map(int, input().split())
+    # 收集 k 中为 1 的二进制位
+    pos_one = []
+    for i in range(61):
+        if k & (1 << i):
+            pos_one.append(i)
+    num_one = len(pos_one)
+    states = 1 << num_one   # 2^x，所有子集数量
+    res = []
+    # 枚举所有非空子集（掩码 i 从 1 开始）
+    for i in range(1, states):
+        now = 0
+        for j in range(num_one):
+            if i & (1 << j):
+                now += 1 << pos_one[j]
+        res.append(now)
+        if len(res) == n:
+            break
+    if len(res) < n:
+        print("NO")
+    else:
+        # 将最后一个数替换为 k，保证或和准确且不影响递增
+        res[-1] = k
+        print("YES")
+        print(*res)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        long k = sc.nextLong();
+
+        // 收集 k 的二进制中为 1 的位
+        List<Integer> posOne = new ArrayList<>();
+        for (int i = 0; i < 61; i++) {
+            if ((k & (1L << i)) != 0) {
+                posOne.add(i);
+            }
+        }
+
+        int numOne = posOne.size();
+        long states = 1L << numOne; // 2^x
+        List<Long> res = new ArrayList<>();
+
+        // 枚举所有非空子集，掩码从 1 开始
+        for (int i = 1; i < states; i++) {
+            long now = 0;
+            for (int j = 0; j < numOne; j++) {
+                if ((i & (1 << j)) != 0) {
+                    now += (1L << posOne.get(j));
+                }
+            }
+            res.add(now);
+            if (res.size() == n) {
+                break;
+            }
+        }
+
+        if (res.size() < n) {
+            System.out.println("NO");
+        } else {
+            // 将最后一个元素设为 k，确保或和正确且保持递增
+            res.set(res.size() - 1, k);
+            System.out.println("YES");
+            for (long val : res) {
+                System.out.print(val + " ");
+            }
+            System.out.println();
+        }
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    int n;
+    long long k;
+    cin >> n >> k;
+
+    vector<int> posOne;
+    for (int i = 0; i < 61; i++) {
+        if ((k & (1LL << i)) != 0) {
+            posOne.push_back(i);
+        }
+    }
+
+    int numOne = posOne.size();
+    long long states = 1LL << numOne; // 2^x
+    vector<long long> res;
+
+    // 枚举所有非空子集，掩码从 1 开始
+    for (int i = 1; i < states; i++) {
+        long long now = 0;
+        for (int j = 0; j < numOne; j++) {
+            if (i & (1 << j)) {
+                now += (1LL << posOne[j]);
+            }
+        }
+        res.push_back(now);
+        if ((int)res.size() == n) {
+            break;
+        }
+    }
+
+    if ((int)res.size() < n) {
+        cout << "NO" << endl;
+    } else {
+        // 最后一位设为 k，保证或和等于 k 并保持递增
+        res[n - 1] = k;
+        cout << "YES" << endl;
+        for (long long val : res) {
+            cout << val << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
+```

@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1024",
+  "title": "第2题-成对翻转",
+  "docId": 25,
+  "hidden": false,
+  "difficulty": 1,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

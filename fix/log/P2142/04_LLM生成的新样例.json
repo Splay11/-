@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1\nxyz",
+      "output": "XYz",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "2\nab\ncd",
+      "output": "AB\nCD",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "1\nhello",
+      "output": "HElLo",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

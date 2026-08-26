@@ -1,0 +1,156 @@
+## 解题思路
+
+本题要求模拟标记比对计分规则，对每个待检项分别判断并累加得分。
+
+- **规则回顾**：  
+  对于第 $i$ 项，已知实际标记 $s_i$ 和期望标记 $t_i$：  
+  1. 若 $s_i$ 与 $t_i$ 完全相同，得 $3$ 分。  
+  2. 若 $s_i$ 中的每个字母均在 $t_i$ 中出现过，且 $t_i$ 的长度严格大于 $s_i$，得 $1$ 分。  
+  3. 其余情况得 $0$ 分。
+
+- **核心算法**（参照原题解的判定逻辑）：  
+  因为字符串仅由 `W, X, Y, Z` 组成且长度不超过 $4$，可以用双重循环直接检查。  
+  对于每一项 $(s_i, t_i)$：
+  1. 用一个计数器 `cnt` 统计 $s_i$ 中有多少个字母出现在了 $t_i$ 中。  
+     对 $s_i$ 的每个字符，遍历 $t_i$ 检查是否存在；若存在则 `cnt` 加 $1$ 并跳出内层循环。  
+  2. 若 `cnt == len(s_i)`，说明 $s_i$ 的所有字母都在 $t_i$ 中出现过：  
+     - 如果 `len(t_i) > len(s_i)`，则符合“部分正确”条件，得 $1$ 分。  
+     - 否则（此时必有 `len(t_i) <= len(s_i)`，结合字母全覆盖可知只能是 `len(t_i) == len(s_i)` 且字母完全相同，即两字符串实际相同），得 $3$ 分。  
+  3. 若 `cnt < len(s_i)`，则存在字母未出现，得 $0$ 分。  
+
+  以上逻辑与题目描述完全吻合：当 $s_i = t_i$ 时 `cnt == len(s_i)` 且长度相等，进入 `else` 分支得到 $3$ 分；当字母全覆盖且 $t_i$ 更长时得 $1$ 分。
+
+- **步骤总结**：  
+  1. 读入项数 $n$，再读入 $n$ 个实际标记 $s_i$ 和 $n$ 个期望标记 $t_i$。  
+  2. 初始化 `total = 0`。  
+  3. 遍历每对 $(s_i, t_i)$，用上述双重循环统计字母覆盖情况并累加分数。  
+  4. 输出总分。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n \cdot L^2)$，其中 $L$ 是字符串长度（$L \le 4$）。对每一项，内层检查最多 $4 \times 4 = 16$ 次比较，因此总操作次数为 $O(16n)$，即 $O(n)$。  
+- **空间复杂度**：$O(n)$，用于存储两个字符串数组（也可以边读边处理，但为保持代码清晰，这里保留数组）。
+
+## 代码实现
+
+### Python
+
+```python
+n = int(input())
+s = input().split()   # 实际标记
+t = input().split()   # 期望标记
+
+score = 0
+for i in range(n):
+    # 统计 s[i] 中的字母在 t[i] 中出现的次数
+    cnt = 0
+    for ch in s[i]:
+        if ch in t[i]:   # 检查字符是否存在于期望标记中
+            cnt += 1
+    # 如果 s[i] 的所有字母都在 t[i] 中出现
+    if cnt == len(s[i]):
+        # 部分正确：期望标记长度严格大于实际标记
+        if len(t[i]) > len(s[i]):
+            score += 1
+        # 全对：长度相等且字母全覆盖，即完全相同
+        else:
+            score += 3
+    # 否则 0 分（不操作）
+
+print(score)
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        String[] s = new String[n];   // 实际标记
+        String[] t = new String[n];   // 期望标记
+
+        for (int i = 0; i < n; i++) {
+            s[i] = sc.next();
+        }
+        for (int i = 0; i < n; i++) {
+            t[i] = sc.next();
+        }
+
+        int total = 0;
+        for (int i = 0; i < n; i++) {
+            int cnt = 0;
+            // 遍历实际标记的每个字符
+            for (char ch : s[i].toCharArray()) {
+                // 检查是否在期望标记中出现
+                for (char ch2 : t[i].toCharArray()) {
+                    if (ch == ch2) {
+                        cnt++;
+                        break;
+                    }
+                }
+            }
+            // 如果所有字符都出现
+            if (cnt == s[i].length()) {
+                if (t[i].length() > s[i].length()) {
+                    total += 1;   // 部分正确
+                } else {
+                    total += 3;   // 全对（完全相同）
+                }
+            }
+        }
+        System.out.println(total);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    vector<string> s(n), t(n);
+    // 读取实际标记
+    for (int i = 0; i < n; ++i) {
+        cin >> s[i];
+    }
+    // 读取期望标记
+    for (int i = 0; i < n; ++i) {
+        cin >> t[i];
+    }
+
+    int total = 0;
+    for (int i = 0; i < n; ++i) {
+        int cnt = 0;
+        // 统计 s[i] 的字符在 t[i] 中出现的次数
+        for (char ch : s[i]) {
+            for (char ch2 : t[i]) {
+                if (ch == ch2) {
+                    ++cnt;
+                    break;
+                }
+            }
+        }
+        // 如果 s[i] 的所有字符都在 t[i] 中出现过
+        if (cnt == s[i].length()) {
+            if (t[i].length() > s[i].length()) {
+                total += 1;   // 部分正确
+            } else {
+                total += 3;   // 全对（完全相同）
+            }
+        }
+        // 否则 0 分，什么也不加
+    }
+    cout << total << endl;
+    return 0;
+}
+```

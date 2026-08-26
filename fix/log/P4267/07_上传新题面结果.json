@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4267",
+  "title": "第1题-拆分到心动阈值",
+  "docId": 3345,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "搜索",
+    "枚举"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3745",
+  "title": "第3题-四基元之合",
+  "docId": 3088,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数论",
+    "质数判定"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "构造",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "2\nbb",
+      "output": "ac",
+      "explanation": "对位置 $1$ 与 $2$ 操作一次：$b$ 前移为 $a$，另一个 $b$ 后移为 $c$，得到 $ac$。这是字典序最小结果。"
+    },
+    {
+      "input": "3\naaa",
+      "output": "aaa",
+      "explanation": "所有字符都是 $a$，不存在满足 $s[i] \\neq \\texttt{a}$ 的位置，无法操作，输出原串。"
+    },
+    {
+      "input": "1\nz",
+      "output": "z",
+      "explanation": "长度为 $1$，找不到两个不同位置，无法操作，输出原串 $z$。"
+    },
+    {
+      "input": "3\nzab",
+      "output": "abz",
+      "explanation": "左指针处理 $z$，右指针处理 $b$：先把右侧抬到 $z$、左侧降为 $y$，再继续与中间的 $a$ 配对，最终把最左侧降到 $a$，得到 $abz$。"
+    }
+  ]
+}

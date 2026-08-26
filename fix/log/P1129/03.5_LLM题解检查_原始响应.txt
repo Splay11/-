@@ -1,0 +1,103 @@
+## 解题思路
+
+本题要求利用数值积分判断概率密度函数 $p(x)=\frac{\sin(\sqrt{x})}{5.68}$ 在给定区间 $[a,b]$ 上的积分是否大于 $0.5$。由于没有闭式解，采用矩形法进行近似计算，具体步骤如下：
+
+1. **确定参数**：读入整数 $a,b$，满足 $1 \le a < b \le 10$。
+2. **划分区间**：将 $[a,b]$ 均匀分为 $500$ 个小区间，步长 $\Delta x = \frac{b-a}{500}$。
+3. **矩形近似**：使用左端点法，第 $i$ 个小矩形的左端点坐标为 $x_i = a + i \cdot \Delta x$（$i=0,1,\dots,499$），对应矩形面积为 $\frac{\sin(\sqrt{x_i})}{5.68} \cdot \Delta x$。
+4. **累加求和**：近似概率 $P \approx \sum_{i=0}^{499} \frac{\sin(\sqrt{x_i})}{5.68} \Delta x$。
+5. **阈值判定**：若计算出的近似概率严格大于 $0.5$，输出 `1`，否则输出 `0`。
+6. **多组处理**：依次处理输入的 $T$ 组测试数据。
+
+## 复杂度分析
+
+- 时间复杂度：对于每组数据，需要执行 $500$ 次循环，每次循环进行常数次数学运算，因此单组时间复杂度为 $O(500)$，总时间复杂度为 $O(T)$，其中 $T$ 为测试数据组数。
+- 空间复杂度：仅使用了少量变量存储中间结果，没有使用与输入规模相关的额外存储空间，因此空间复杂度为 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import math
+
+def solve() -> None:
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    t = int(next(it))
+    out_lines = []
+    for _ in range(t):
+        a = int(next(it))
+        b = int(next(it))
+        delta = (b - a) / 500.0
+        prob = 0.0
+        # x_i = a + i * delta, i = 0..499
+        for i in range(500):
+            x = a + i * delta
+            prob += math.sin(math.sqrt(x)) / 5.68 * delta
+        out_lines.append('1' if prob > 0.5 else '0')
+    sys.stdout.write('\n'.join(out_lines))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            int a = sc.nextInt();
+            int b = sc.nextInt();
+            double delta = (b - a) / 500.0;
+            double sum = 0.0;
+            // x_i = a + i * delta, i = 0..499
+            for (int i = 0; i < 500; i++) {
+                double x = a + i * delta;
+                sum += Math.sin(Math.sqrt(x)) / 5.68 * delta;
+            }
+            sb.append(sum > 0.5 ? "1" : "0").append("\n");
+        }
+        System.out.print(sb);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int T;
+    cin >> T;
+    while (T--) {
+        int a, b;
+        cin >> a >> b;
+        double delta = (b - a) / 500.0;
+        double prob = 0.0;
+        // x_i = a + i * delta, i = 0..499
+        for (int i = 0; i < 500; ++i) {
+            double x = a + i * delta;
+            prob += sin(sqrt(x)) / 5.68 * delta;
+        }
+        cout << (prob > 0.5 ? 1 : 0) << '\n';
+    }
+    return 0;
+}
+```

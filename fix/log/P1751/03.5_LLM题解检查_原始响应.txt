@@ -1,0 +1,181 @@
+## 解题思路
+
+本题要求最小的连续修改长度 $k$，使得在不超过 $m$ 次操作的限制下，能将初始序列全部变为 `R`。每次操作可将从某个位置开始的连续 $k$ 个字符全部改为 `R`，且所有操作使用的 $k$ 必须相同。
+
+我们可以采用**二分答案**的方法进行求解：
+
+1. 若初始序列中已经没有 `W`，则不需要任何操作，直接输出 `0`。
+2. 否则，令二分下界 $l = 1$，上界 $r = n$，在区间 $[l, r]$ 内二分寻找最小的可行 $k$。
+3. 对于二分中值 $mid$，设计 `check(mid)` 函数判断该 $k$ 值能否在 $m$ 次操作内完成目标：
+   - 预处理一个 `nextW` 数组，`nextW[i]` 表示从位置 $i$ 开始（包括 $i$）向后的第一个 `W` 的下标；若 $i$ 之后没有 `W`，则记为 $n$。该数组可从后向前一次遍历得到。
+   - 从第一个 `W` 的位置（即 `nextW[0]`）开始模拟：每次操作必然从某一个 `W` 的位置开始，覆盖连续 $mid$ 个字符。因此下一次操作应从当前位置 $p$ 之后 $mid$ 位置开始的第一个 `W` 处进行，即下一个起点为 `nextW[p + mid]`（若 $p+mid \ge n$ 则已经覆盖到末尾，操作完成）。
+   - 统计整个过程需要的操作次数 $c$，若 $c \le m$ 则说明 $mid$ 可行，否则不可行。
+4. 根据 `check(mid)` 的结果缩小二分区间，最终 $l$ 即为答案。
+
+这种模拟方式保证了每次操作都至少覆盖一个尚未变成 `R` 的 `W`，且跳跃过程尽可能覆盖更多区域，所需操作次数最少。
+
+## 复杂度分析
+
+- **时间复杂度**：二分需要 $O(\log n)$ 轮，每轮 `check` 函数中通过 `nextW` 数组跳跃，最多需要 $\lceil n / k \rceil \le n$ 步，因此总时间复杂度为 $O(n \log n)$。
+- **空间复杂度**：需要额外数组 `nextW` 记录每个位置的下一个 `W` 位置，空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+n, m = map(int, input().split())
+s = input().strip()
+
+# 如果初始序列全是 'R'，直接输出 0
+if 'W' not in s:
+    print(0)
+    exit(0)
+
+# 预处理 nextW 数组：nextW[i] 表示从 i 开始（含 i）第一个 'W' 的下标，若无则为 n
+nextW = [n] * n
+for i in range(n - 1, -1, -1):
+    if s[i] == 'W':
+        nextW[i] = i
+    elif i + 1 < n:
+        nextW[i] = nextW[i + 1]
+
+def check(mid):
+    p = nextW[0]          # 第一个需要修改的 'W' 位置
+    cnt = 0
+    while p < n:
+        cnt += 1
+        if p + mid < n:
+            p = nextW[p + mid]  # 跳过已覆盖的区间，找下一个 'W'
+        else:
+            p = n               # 已经覆盖到末尾
+    return cnt <= m
+
+l, r = 1, n
+while l < r:
+    mid = (l + r) // 2
+    if check(mid):
+        r = mid
+    else:
+        l = mid + 1
+
+print(l)
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        String s = sc.next();
+
+        // 如果初始序列全是 'R'，直接输出 0
+        if (!s.contains("W")) {
+            System.out.println(0);
+            return;
+        }
+
+        // 预处理 nextW 数组
+        int[] nextW = new int[n];
+        nextW[n - 1] = (s.charAt(n - 1) == 'W') ? n - 1 : n;
+        for (int i = n - 2; i >= 0; i--) {
+            if (s.charAt(i) == 'W') {
+                nextW[i] = i;
+            } else {
+                nextW[i] = nextW[i + 1];
+            }
+        }
+
+        int l = 1, r = n;
+        while (l < r) {
+            int mid = (l + r) / 2;
+            if (check(mid, n, m, nextW)) {
+                r = mid;
+            } else {
+                l = mid + 1;
+            }
+        }
+        System.out.println(l);
+    }
+
+    private static boolean check(int k, int n, int m, int[] nextW) {
+        int p = nextW[0];
+        int cnt = 0;
+        while (p < n) {
+            cnt++;
+            if (p + k < n) {
+                p = nextW[p + k];
+            } else {
+                p = n;
+            }
+        }
+        return cnt <= m;
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+bool check(int k, int n, int m, const vector<int>& nextW) {
+    int p = nextW[0];
+    int cnt = 0;
+    while (p < n) {
+        cnt++;
+        if (p + k < n) {
+            p = nextW[p + k];
+        } else {
+            p = n;
+        }
+    }
+    return cnt <= m;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    string s;
+    cin >> n >> m >> s;
+
+    // 如果初始序列全是 'R'，直接输出 0
+    if (s.find('W') == string::npos) {
+        cout << 0 << "\n";
+        return 0;
+    }
+
+    // 预处理 nextW 数组
+    vector<int> nextW(n, n);
+    for (int i = n - 1; i >= 0; --i) {
+        if (s[i] == 'W') {
+            nextW[i] = i;
+        } else if (i + 1 < n) {
+            nextW[i] = nextW[i + 1];
+        }
+    }
+
+    int l = 1, r = n;
+    while (l < r) {
+        int mid = (l + r) / 2;
+        if (check(mid, n, m, nextW)) {
+            r = mid;
+        } else {
+            l = mid + 1;
+        }
+    }
+    cout << l << "\n";
+
+    return 0;
+}
+```

@@ -1,0 +1,19 @@
+{
+  "message": "problem update success",
+  "pid": "P3617",
+  "title": "第3题-最小化冠幅",
+  "docId": 2960,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "动态规划",
+    "树形DP",
+    "其他",
+    "二分查找",
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

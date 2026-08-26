@@ -1,0 +1,60 @@
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#pragma GCC target("avx,avx2,fma")
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define out(x) cout << #x << '=' << x << endl
+#define out2(x, y) cout << #x << '=' << x << ',' << #y << '=' << y << endl 
+#define no cout << "No" << endl; return
+#define yes cout << "Yes" << endl; return
+#define outvec(a) for (auto &v : a) { cout << v << ' '; } cout << endl
+#define lowbit(x) (x & -x)
+#define gcd __gcd 
+#define inf 0x3f3f3f3f3f3f3f3fLL
+#define infi 0x3f3f3f3f
+
+using ll = long long;
+using pii = pair<int, int>;
+
+void solve() {
+    string n;
+    cin >> n;
+    int sum = 0;
+    vector<array<int, 15>> pre(n.size() + 1);
+    for (int i = 0; i < (int) n.size(); i++) {
+        pre[i + 1][sum % 15]++;
+        sum = (sum * 10 + n[i] - '0') % 15;
+        for (int j = 0; j < 15; j++) {
+            pre[i + 1][j] += pre[i][j];
+        }
+        //outvec(pre[i + 1]);
+    }
+    ll ans = pre[n.size()][0] - 1;
+    sum = 0;
+    int f = 1;
+    for (int i = n.size() - 1; i > 0; i--) {
+        sum = (sum + (n[i] - '0') * f) % 15;
+        f = (f * 10) % 15;
+        for (int j = 0; j < 15; j++) {
+            if (((j * f) % 15 + sum) % 15 == 0) {
+                ans += pre[i][j];
+                //if (pre[i][j]) out2(i,j );
+            }
+        }
+    }
+    cout << ans << endl;
+}
+
+int main(void) {
+    ios::sync_with_stdio(false);
+    cin.tie(0); cout.tie(0);
+    int t = 1;
+	//cin >> t;
+    
+    while (t--) {
+    	solve();
+	}
+}

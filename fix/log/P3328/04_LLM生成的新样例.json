@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "alpha\nbridge",
+      "output": "alphadge\nbri",
+      "explanation": "$s=\\texttt{alpha}$，$t=\\texttt{bridge}$ 长度为 `6`。后半段为 $\\texttt{dge}$，前半段为 $\\texttt{bri}$。\n接驳后第一条为 $\\texttt{alphadge}$，第二行输出 $\\texttt{bri}$。"
+    },
+    {
+      "input": "A\nxy",
+      "output": "Ay\nx",
+      "explanation": "$s$ 只有一个字符，$t$ 长度为 `2`。后半为 $\\texttt{y}$，前半为 $\\texttt{x}$，输出 $\\texttt{Ay}$ 与 $\\texttt{x}$。"
+    }
+  ]
+}

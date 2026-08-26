@@ -1,0 +1,199 @@
+## 解题思路
+
+把问题看成：求$n$的所有**有序因子分解**数量，且分解中的每一项都 **不是完全平方数**。
+
+设$dp[x]$表示把$x$分成若干份后，满足条件的方案数。
+
+对于任意一个合法方案，第一份可以取某个因子$d$，要求：
+
+* $d \mid x$
+* $d$不是完全平方数
+
+那么后面的部分就是把$\dfrac{x}{d}$继续合法拆分，因此有转移：
+
+$$
+dp[x] = \sum_{d \mid x,\ d\text{不是完全平方数}} dp\left(\frac{x}{d}\right)
+$$
+
+边界为：
+
+$$
+dp[1]=1
+$$
+
+表示当前面已经恰好乘完时，算作一种合法拼接方式。
+
+### 如何高效实现
+
+如果直接对每个$x$枚举因子，也能做，但这里可以用更简洁的“刷表”方式：
+
+* 先预处理出$1\sim n$中哪些数是完全平方数
+* 枚举当前已经算出的状态$dp[i]$
+* 再枚举一个非平方数$j$
+* 把$dp[i]$转移到$dp[i\times j]$
+
+即：
+
+$$
+dp[i\times j] += dp[i]
+$$
+
+其中$j$必须满足：
+
+* $j$不是完全平方数
+* $i\times j \le n$
+
+这样枚举时，$j\ge 2$，所以总是从小状态转移到大状态，不会出错。
+
+这里本质上用到的是：
+
+* 动态规划
+* 枚举倍数 / 类似筛法的遍历方式
+
+## 复杂度分析
+
+预处理完全平方数的复杂度为：
+
+$$
+O(\sqrt{n})
+$$
+
+动态规划部分，枚举所有非平方数$j$对其倍数进行转移，复杂度约为：
+
+$$
+O\left(\sum_{j=2}^{n}\frac{n}{j}\right)=O(n\log n)
+$$
+
+总时间复杂度：
+
+$$
+O(n\log n)
+$$
+
+空间复杂度：
+
+$$
+O(n)
+$$
+
+对于$n \le 2\times 10^5$完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+# 计算方案数
+def solve(n):
+    # 标记完全平方数
+    is_square = [False] * (n + 1)
+    i = 1
+    while i * i <= n:
+        is_square[i * i] = True
+        i += 1
+
+    # dp[x] 表示乘积为 x 的合法有序分配方案数
+    dp = [0] * (n + 1)
+    dp[1] = 1  # 边界：已经恰好分完，算一种方案
+
+    # 从小到大刷表
+    for i in range(1, n + 1):
+        if dp[i] == 0:
+            continue
+        # 枚举下一份的大小 j，要求 j 不是完全平方数
+        for j in range(2, n // i + 1):
+            if not is_square[j]:
+                dp[i * j] += dp[i]
+
+    return dp[n]
+
+
+if __name__ == "__main__":
+    n = int(input().strip())
+    print(solve(n))
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 计算方案数
+    public static long solve(int n) {
+        // 标记完全平方数
+        boolean[] isSquare = new boolean[n + 1];
+        for (int i = 1; i * i <= n; i++) {
+            isSquare[i * i] = true;
+        }
+
+        // dp[x] 表示乘积为 x 的合法有序分配方案数
+        long[] dp = new long[n + 1];
+        dp[1] = 1; // 边界
+
+        // 从小到大刷表
+        for (int i = 1; i <= n; i++) {
+            if (dp[i] == 0) {
+                continue;
+            }
+            // 枚举下一份大小 j，j 不是完全平方数
+            for (int j = 2; j <= n / i; j++) {
+                if (!isSquare[j]) {
+                    dp[i * j] += dp[i];
+                }
+            }
+        }
+
+        return dp[n];
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        System.out.println(solve(n));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 计算方案数
+long long solve(int n) {
+    // 标记完全平方数
+    vector<bool> isSquare(n + 1, false);
+    for (int i = 1; i * i <= n; i++) {
+        isSquare[i * i] = true;
+    }
+
+    // dp[x] 表示乘积为 x 的合法有序分配方案数
+    vector<long long> dp(n + 1, 0);
+    dp[1] = 1; // 边界
+
+    // 从小到大刷表
+    for (int i = 1; i <= n; i++) {
+        if (dp[i] == 0) continue;
+
+        // 枚举下一份大小 j，j 不是完全平方数
+        for (int j = 2; j <= n / i; j++) {
+            if (!isSquare[j]) {
+                dp[i * j] += dp[i];
+            }
+        }
+    }
+
+    return dp[n];
+}
+
+int main() {
+    int n;
+    cin >> n;
+    cout << solve(n) << '\n';
+    return 0;
+}
+```

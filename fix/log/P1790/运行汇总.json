@@ -1,0 +1,11 @@
+{
+  "pid": "P1790",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 16:28:34",
+  "end_time": "2026-08-19 16:28:35",
+  "new_title": "第1题-一次加倍求平衡",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

@@ -1,0 +1,221 @@
+## 解题思路
+
+本题要求计算字符串所有非空子列（子序列）的镜像化代价之和。  
+将一个子列变为镜像串（回文串）的最小修改次数，等于子列中位置对称但字符不同的字符对数量。
+
+考虑原字符串中任意两个不同字符的位置 `i` 和 `j`（`i < j` 且 `s[i] ≠ s[j]`），它们在某些子列中可能成为一对对称位置，并对总代价产生贡献。只需统计所有这样的 `(i, j)` 对答案的贡献即可。
+
+对于固定的一对 `(i, j)`，要让它们恰好成为某个子列中的对称位置，需要满足：
+
+1. `i` 和 `j` 两个字符都被选入子列；
+2. 在 `i` 左侧和 `j` 右侧选出的字符数目必须相等（这样它们才能两两对称）；
+3. `i` 和 `j` 之间的字符可以任意选取。
+
+设：
+- `i` 左侧有 `A = i` 个字符；
+- `j` 右侧有 `C = n - 1 - j` 个字符（`n` 为字符串长度）；
+- `i` 与 `j` 之间有 `B = j - i - 1` 个字符。
+
+对于条件 2，左侧选 `k` 个、右侧选 `k` 个的方案数为组合数 `C(A, k) * C(C, k)`。  
+当 `k` 从 `0` 取到 `min(A, C)` 时，总方案数为 `∑ C(A, k) C(C, k) = C(A + C, A)`（范德蒙德卷积恒等式）。  
+条件 3 的方案数为 `2^B`。  
+因此，当 `s[i] ≠ s[j]` 时，这对位置对总代价的贡献为：
+
+```
+组合数 C(A + C, A) × 2^B
+```
+
+将所有满足 `i < j` 且 `s[i] ≠ s[j]` 的贡献累加，并对 `10^9+7` 取模，即得所有非空子列的镜像化代价之和。  
+注意：空子列不存在任何对称位置，其代价为 0，不会影响最终结果。
+
+## 复杂度分析
+
+- 预处理阶乘、阶乘逆元以及 `2` 的幂次：用时 `O(n)`。
+- 双层循环枚举所有 `i < j`：`O(n^2)`。
+- 总时间复杂度：`O(n^2)`，对于 `n ≤ 200` 完全可行。
+- 空间复杂度：`O(n)`，用于存储阶乘、逆元和 `2` 的幂表。
+
+## 代码实现
+
+### Python
+
+```python
+def solve():
+    MOD = 10**9 + 7
+    s = input().strip()
+    n = len(s)
+
+    # 预处理阶乘和逆阶乘
+    fac = [1] * (n + 1)
+    ifac = [1] * (n + 1)
+    for i in range(1, n + 1):
+        fac[i] = fac[i - 1] * i % MOD
+
+    # 快速幂求逆元
+    def modpow(a, e):
+        r = 1
+        while e:
+            if e & 1:
+                r = r * a % MOD
+            a = a * a % MOD
+            e >>= 1
+        return r
+
+    ifac[n] = modpow(fac[n], MOD - 2)
+    for i in range(n, 0, -1):
+        ifac[i - 1] = ifac[i] * i % MOD
+
+    # 预处理 2^k
+    pow2 = [1] * (n + 1)
+    for i in range(1, n + 1):
+        pow2[i] = pow2[i - 1] * 2 % MOD
+
+    # 组合数
+    def comb(x, y):
+        if y < 0 or y > x:
+            return 0
+        return fac[x] * ifac[y] % MOD * ifac[x - y] % MOD
+
+    ans = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            if s[i] != s[j]:
+                A = i                # i 左侧的字符数
+                C = n - 1 - j        # j 右侧的字符数
+                B = j - i - 1        # i 与 j 之间的字符数
+                ans = (ans + comb(A + C, A) * pow2[B]) % MOD
+
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    static final int MOD = 1_000_000_007;
+
+    static long modPow(long a, long e) {
+        long r = 1;
+        while (e > 0) {
+            if ((e & 1) == 1) {
+                r = r * a % MOD;
+            }
+            a = a * a % MOD;
+            e >>= 1;
+        }
+        return r;
+    }
+
+    static long comb(long[] fac, long[] ifac, int x, int y) {
+        if (y < 0 || y > x) return 0;
+        return fac[x] * ifac[y] % MOD * ifac[x - y] % MOD;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String s = sc.next();
+        int n = s.length();
+
+        // 预处理阶乘和逆阶乘
+        long[] fac = new long[n + 1];
+        long[] ifac = new long[n + 1];
+        fac[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            fac[i] = fac[i - 1] * i % MOD;
+        }
+        ifac[n] = modPow(fac[n], MOD - 2);
+        for (int i = n; i >= 1; i--) {
+            ifac[i - 1] = ifac[i] * i % MOD;
+        }
+
+        // 预处理 2^k
+        long[] pow2 = new long[n + 1];
+        pow2[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            pow2[i] = pow2[i - 1] * 2 % MOD;
+        }
+
+        long ans = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (s.charAt(i) != s.charAt(j)) {
+                    int A = i;                 // i 左侧的字符数
+                    int C = n - 1 - j;         // j 右侧的字符数
+                    int B = j - i - 1;         // i 与 j 之间的字符数
+                    ans = (ans + comb(fac, ifac, A + C, A) * pow2[B]) % MOD;
+                }
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+const int MOD = 1e9 + 7;
+
+long modpow(long a, long e) {
+    long r = 1;
+    while (e) {
+        if (e & 1) r = r * a % MOD;
+        a = a * a % MOD;
+        e >>= 1;
+    }
+    return r;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    cin >> s;
+    int n = s.size();
+
+    // 预处理阶乘和逆阶乘
+    vector<long> fac(n + 1, 1), ifac(n + 1, 1);
+    for (int i = 1; i <= n; i++) {
+        fac[i] = fac[i - 1] * i % MOD;
+    }
+    ifac[n] = modpow(fac[n], MOD - 2);
+    for (int i = n; i >= 1; i--) {
+        ifac[i - 1] = ifac[i] * i % MOD;
+    }
+
+    // 预处理 2^k
+    vector<long> pow2(n + 1, 1);
+    for (int i = 1; i <= n; i++) {
+        pow2[i] = pow2[i - 1] * 2 % MOD;
+    }
+
+    auto comb = [&](int x, int y) -> long {
+        if (y < 0 || y > x) return 0;
+        return fac[x] * ifac[y] % MOD * ifac[x - y] % MOD;
+    };
+
+    long ans = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (s[i] != s[j]) {
+                int A = i;                // i 左侧的字符数
+                int C = n - 1 - j;        // j 右侧的字符数
+                int B = j - i - 1;        // i 与 j 之间的字符数
+                ans = (ans + comb(A + C, A) * pow2[B]) % MOD;
+            }
+        }
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
+```

@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1\n1\nR",
+      "output": "R",
+      "explanation": "序列长度为 `1`，仅包含一个 `'R'`。统计 `L` 的数量 $cnt=0$，因此从唯一的起点 `1` 出发，弹珠最终从右侧离开，输出一个 `'R'`。"
+    },
+    {
+      "input": "2\n4\nRLLR\n5\nRRRRL",
+      "output": "LLRR\nLRRRR",
+      "explanation": "第一组长度为 `4`，字符串 `\"RLLR\"` 中 `L` 的数量 $cnt=2$，前 $cnt$ 个位置输出 `'L'`，后 $L-cnt$ 个位置输出 `'R'`，得到 `\"LLRR\"`。\n第二组长度为 `5`，字符串 `\"RRRRL\"` 中 `L` 的数量 $cnt=1$，因此答案为 `\"LRRRR\"`。"
+    },
+    {
+      "input": "3\n3\nLLL\n3\nRRR\n6\nLRLRLR",
+      "output": "LLL\nRRR\nLLLRRR",
+      "explanation": "第一组全为 `'L'`，$cnt=3$，输出 `\"LLL\"`，即所有起点均从左侧离开。\n第二组全为 `'R'`，$cnt=0$，输出 `\"RRR\"`，即所有起点均从右侧离开。\n第三组 `\"LRLRLR\"` 中 `'L'` 与 `'R'` 交替出现，$cnt=3$，输出前 `3` 个位置为 `'L'`、后 `3` 个位置为 `'R'` 的字符串 `\"LLLRRR\"`。"
+    }
+  ]
+}

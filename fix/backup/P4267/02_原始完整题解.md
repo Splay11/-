@@ -1,0 +1,126 @@
+## 解题思路
+
+* **核心目标**：通过若干次“把某个数 `ai` 拆成两个正整数相加”的操作，使数组满足
+  `max(a) ≤ 2 × min(a)`。
+* **关键观察**：
+
+  * 拆分会让元素变小，但**不能让当前最小值变小**，否则条件更难满足。因此最优策略是不拆分最小值，并在拆分其他元素时尽量让拆出的每一段都 **≥ 最小值 `m`**。
+  * 若数组最小值为 `m`，只要把每个元素 `ai` 拆成若干段，使每段都 **≤ 2m** 且 **≥ m**，就能保证最终整体满足条件，同时不降低 `m`。
+* **化为计数问题**：
+
+  * 要把 `ai` 切成 `p` 段，使每段的最大值 `ceil(ai / p) ≤ 2m`，则最小可行段数为
+    `p_min = max(1, ceil(ai / (2m)))`。
+  * 需要的操作次数是把一个数分成 `p` 段需 `p-1` 次，因此对该 `ai` 的最少操作是
+    `max(0, ceil(ai / (2m)) - 1)`。
+* **算法**：
+
+  1. 扫一遍求最小值 `m`。
+  2. 对每个 `ai` 累加 `max(0, ceil(ai / (2m)) - 1)`。
+  3. 总和即答案。
+* **实现要点**：
+
+  * 使用整除上取整：`ceil(x / y) = (x + y - 1) // y`。
+  * 全程用 64 位整型避免溢出（Java `long`、C++ `long long`）。
+
+## 复杂度分析
+
+* 时间复杂度：`O(n)`，一次扫描求最小值，再一次扫描累加。
+* 空间复杂度：`O(1)`（不计输入存储）。
+
+## 代码实现
+
+### Python
+
+```python
+# 题面功能在外部函数里，主函数只做输入输出
+import sys
+
+def min_operations_to_pleasant(arr):
+    # 计算使数组满足 max <= 2*min 的最少拆分次数
+    m = min(arr)
+    twice = 2 * m
+    ans = 0
+    for a in arr:
+        # 对每个元素累加 max(0, ceil(a/(2m)) - 1)
+        need = (a + twice - 1) // twice  # ceil(a / (2m))
+        if need > 1:
+            ans += need - 1
+    return ans
+
+def main():
+    data = sys.stdin.read().strip().split()
+    n = int(data[0])
+    arr = list(map(int, data[1:1+n]))
+    print(min_operations_to_pleasant(arr))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+// ACM 风格，类名统一为 Main
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 外部函数：计算最少拆分次数
+    public static long minOperationsToPleasant(long[] arr) {
+        long m = Long.MAX_VALUE;
+        for (long v : arr) m = Math.min(m, v);  // 最小值
+        long twice = 2L * m;
+        long ans = 0;
+        for (long a : arr) {
+            // 需要的段数 need = ceil(a / (2m))
+            long need = (a + twice - 1) / twice;
+            if (need > 1) ans += need - 1;     // 累加操作次数
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        // 数据范围较大但行数少，默认输入方式即可
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String s1 = br.readLine();
+        while (s1 != null && s1.trim().isEmpty()) s1 = br.readLine();
+        int n = Integer.parseInt(s1.trim());
+        String[] parts = br.readLine().trim().split("\\s+"); // 用空白分割
+        long[] arr = new long[n];
+        for (int i = 0; i < n; i++) arr[i] = Long.parseLong(parts[i]);
+        System.out.println(minOperationsToPleasant(arr));
+    }
+}
+```
+
+### C++
+
+```cpp
+// ACM 风格：主函数读写，功能写在外部函数
+#include <bits/stdc++.h>
+using namespace std;
+
+// 计算最少拆分次数
+long long minOperationsToPleasant(const vector<long long>& a) {
+    long long m = *min_element(a.begin(), a.end()); // 最小值
+    long long twice = 2LL * m;
+    long long ans = 0;
+    for (long long x : a) {
+        // need = ceil(x / (2m)) = (x + 2m - 1) // (2m)
+        long long need = (x + twice - 1) / twice;
+        if (need > 1) ans += need - 1; // 每个元素增加的操作次数
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    if (!(cin >> n)) return 0;
+    vector<long long> a(n);
+    for (int i = 0; i < n; ++i) cin >> a[i];
+    cout << minOperationsToPleasant(a) << "\n";
+    return 0;
+}
+```

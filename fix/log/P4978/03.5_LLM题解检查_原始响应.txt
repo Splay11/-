@@ -1,0 +1,98 @@
+## 解题思路
+
+失败会消耗体力且没有任何收益，因此最优策略不会去挑战必定失败的关卡。问题转化为：在体力限制下，选出尽可能多的关卡并安排挑战顺序，使得每次挑战时体力不低于该关卡难度。
+
+设已成功挑战 $cnt$ 关，则下一次挑战时的体力为 $s - cnt$（因为每次成功消耗 $1$ 点体力）。优先挑战难度较大的关卡能让后续的体力保持相对较高，更容易满足难度要求。具体步骤：
+
+1. 将所有关卡按难度值从大到小排序。
+2. 依次检查每个关卡 $a_i$：
+   - 若 $s - cnt \ge a_i$，则挑战成功，$cnt$ 加 $1$；
+   - 否则该关卡无法成功（因为即使现在体力不够，后面体力只会更少，更不可能成功），直接跳过。
+3. 最终 $cnt$ 即为最多成功挑战的关卡数。
+
+贪心正确性：优先处理难度大的关卡，若其挑战成功，不会劣于先做更简单的；若无法成功，之后体力更少，该关卡也永远无法成功，可安全跳过。
+
+## 复杂度分析
+
+设单组测试数据中关卡数量为 $n$。排序耗时 $O(n \log n)$，后续线性扫描 $O(n)$，单组时间复杂度 $O(n \log n)$。所有测试用例的关卡总数之和不超过 $2 \times 10^5$，因此总时间复杂度为 $O(\sum n \log n)$。空间复杂度为 $O(n)$，主要用于存储难度数组。
+
+## 代码实现
+
+### Python
+
+```python
+q = int(input())
+for _ in range(q):
+    n, s = map(int, input().split())
+    a = list(map(int, input().split()))
+    # 难度从大到小排序：优先挑战难度更大的关卡
+    a.sort(reverse=True)
+    cnt = 0
+    for x in a:
+        # 已成功 cnt 次，当前体力为 s - cnt
+        if s - cnt >= x:
+            cnt += 1
+    print(cnt)
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int q = Integer.parseInt(br.readLine().trim());
+        StringBuilder out = new StringBuilder();
+        while (q-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            long s = Long.parseLong(st.nextToken());
+            Integer[] a = new Integer[n];
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < n; i++) a[i] = Integer.parseInt(st.nextToken());
+            // 难度从大到小：优先挑战难度更大的关卡
+            Arrays.sort(a, Collections.reverseOrder());
+            int cnt = 0;
+            for (int x : a) {
+                // 已成功 cnt 次，当前体力为 s - cnt
+                if (s - cnt >= x) cnt++;
+            }
+            out.append(cnt).append('\n');
+        }
+        System.out.print(out);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int q;
+    cin >> q;
+    while (q--) {
+        int n;
+        long long s;
+        cin >> n >> s;
+        vector<long long> a(n);
+        for (int i = 0; i < n; ++i) cin >> a[i];
+        // 难度从大到小排序：优先挑战难度更大的关卡
+        sort(a.begin(), a.end(), greater<long long>());
+        int cnt = 0;
+        for (long long x : a) {
+            // 已成功 cnt 次，当前体力为 s - cnt
+            if (s - cnt >= x) ++cnt;
+        }
+        cout << cnt << '\n';
+    }
+    return 0;
+}
+```

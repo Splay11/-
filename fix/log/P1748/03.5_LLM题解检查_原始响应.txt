@@ -1,0 +1,126 @@
+## 解题思路
+
+本题要求从第 $1$ 个能源站出发，依次经过所有 $n$ 个站到达终点，需要行驶 $n-1$ 次，每次消耗 $1$ 单位能量。  
+可以在任意站购买能量，但若能量不是在购买后立即使用，则每多携带一站就需要支付维护费用。  
+具体来说，若在第 $j$ 个站购买了用于第 $i-1$ 到第 $i$ 站的行驶的能量（$i > j$），该单位能量的总花费为 $p_j + (i - j)$，其中 $p_j$ 是购买价格，$i-j$ 是沿途的维护费用。
+
+为了方便处理，我们将站点按 $0$ 到 $n-1$ 下标编号（分别对应题面中的第 $1$ 到第 $n$ 站），价格数组记为 $p[0 \ldots n-1]$。
+
+- **第一次行驶**：从第 $1$ 站到第 $2$ 站（下标 $0 \to 1$），此时只能从第 $1$ 站购买，花费即为 $p[0]$。  
+- **后续行驶**：对于从第 $i+1$ 站到第 $i+2$ 站（$i$ 从 $1$ 到 $n-2$），我们可以选择从之前任意第 $j+1$ 站（$0 \le j \le i$）购买能量，花费为 $p[j] + (i - j)$。  
+
+我们的目标是为每一段行驶选择一个最优的购买站，使总花费最小。
+
+观察到花费可以写成 $p[j] - j + i$。对于固定的 $i$，前面部分 $p[j] - j$ 越小越好。因此我们只需动态维护一个“候选”购买站下标队列，保证队首是当前 $i$ 下 $p[j] - j$ 最小的合法下标。
+
+具体步骤：
+
+1. 初始化总花费 $s = p[0]$，维护一个队列 $q$，将下标 $0$ 入队。
+2. 从 $i = 1$ 到 $n-2$ 循环：
+   - 若队列非空，且从队首 $j$ 购买的花费 $p[j] + (i - j) \ge p[i]$（即从当前站 $i$ 直接购买更优），说明队首站点对后续所有段都不再具有优势，将其弹出。重复此过程。
+   - 将当前站下标 $i$ 入队。
+   - 取队首下标 $j$，累加花费 $p[j] + (i - j)$ 到 $s$ 中。
+3. 循环结束后，$s$ 即为最小总花费。
+
+上述做法的正确性来源于：如果某一站 $j$ 对当前 $i$ 已经劣于新站 $i$，那么对于未来更大的 $i'$，$p[j] + (i' - j)$ 只会更加劣于 $p[i] + (i' - i)$，因为它多了一个更大的 $i'-j$，因此 $j$ 可以安全丢弃。
+
+## 复杂度分析
+
+- **时间复杂度**：每个下标最多入队一次、出队一次，循环共执行 $O(n)$ 次，总时间复杂度为 $O(n)$。  
+- **空间复杂度**：需要存储价格数组与队列，额外空间为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+from collections import deque
+
+n = int(input())
+p = list(map(int, input().split()))
+
+q = deque([0])
+s = p[0]  # 第一段行驶：从第1站到第2站
+
+for i in range(1, n - 1):
+    # 如果从队首购买的能量花费大于等于从当前站购买，则弹出队首
+    while q and p[q[0]] + i - q[0] >= p[i]:
+        q.popleft()
+    q.append(i)
+    # 选择当前最优的购买站，计算该段花费并累加
+    s += p[q[0]] + i - q[0]
+
+print(s)
+```
+
+### Java
+
+```java
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] p = new int[n];
+        for (int i = 0; i < n; i++) {
+            p[i] = sc.nextInt();
+        }
+
+        Queue<Integer> q = new ArrayDeque<>();
+        q.offer(0);
+        long s = p[0]; // 第一段行驶
+
+        for (int i = 1; i < n - 1; i++) {
+            // 弹出不优的队首
+            while (!q.isEmpty() && p[q.peek()] + i - q.peek() >= p[i]) {
+                q.poll();
+            }
+            q.offer(i);
+            s += p[q.peek()] + i - q.peek();
+        }
+
+        System.out.println(s);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n;
+    cin >> n;
+    vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        cin >> p[i];
+    }
+
+    queue<int> q;
+    q.push(0);
+    long long s = p[0]; // 第一段从第1站到第2站
+
+    for (int i = 1; i < n - 1; i++) {
+        // 如果队首购买点不再最优
+        while (!q.empty() && p[q.front()] + i - q.front() >= p[i]) {
+            q.pop();
+        }
+        q.push(i);
+        s += p[q.front()] + i - q.front();
+    }
+
+    cout << s << "\n";
+    return 0;
+}
+```

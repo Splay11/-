@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2664",
+  "title": "第2题-相互参见的页码",
+  "docId": 2181,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "数据结构",
+    "Hashing"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3550",
+  "title": "第2题-能量柱轮替",
+  "docId": 2893,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数据结构",
+    "链表"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

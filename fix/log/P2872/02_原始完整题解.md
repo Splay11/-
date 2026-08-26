@@ -1,0 +1,140 @@
+# 题解
+
+## 题面描述  
+给定一个长度为 $n$ 的字符串 $s$，仅由大小写英文字母构成。可以任意次执行如下操作：  
+- 选择两个不同的位置 $i$ 和 $j$，要求按 ASCII 码，$|s_i - s_j|$ 为偶数；  
+- 交换 $s_i$ 与 $s_j$。  
+问：经过任意次操作后，能得到的字典序最小的字符串是什么？
+
+---
+
+## 思路
+1. 注意到 ASCII 码的偶数/奇数性恰好将所有字母分为两类：  
+   - ASCII 码为偶数的一类，  
+   - ASCII 码为奇数的一类。  
+2. 只有同一类（奇偶性相同）的字符之间才能任意交换，因此这两类字符各自内部可以随意重排。  
+3. 为了使整体字典序最小，我们可以：  
+   - 将原字符串中所有 ASCII 码为偶数的字符摘出，排序得到列表 `evenChars`；  
+   - 将所有 ASCII 码为奇数的字符摘出，排序得到列表 `oddChars`；  
+   - 再按原字符串的遍历顺序，对于每个位置 $i$：  
+     - 若原字符 $s_i$ 的 ASCII 为偶数，则从 `evenChars` 中取最小的一个放入当前位置；  
+     - 否则从 `oddChars` 中取最小的一个放入当前位置。  
+这样保证在每个位置都放入当前可选字符中最小的一个，从而得到全局字典序最小的结果。
+
+## C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    string s;
+    cin >> n;
+    cin >> s;
+
+    // 分离偶数和奇数字符
+    vector<char> evenChars, oddChars;
+    for (char c : s) {
+        if ((c % 2) == 0) {
+            evenChars.push_back(c);
+        } else {
+            oddChars.push_back(c);
+        }
+    }
+    // 对各自字符组排序
+    sort(evenChars.begin(), evenChars.end());
+    sort(oddChars.begin(), oddChars.end());
+
+    // 双指针分别指向各组当前最小字符
+    int pEven = 0, pOdd = 0;
+    string result;
+    result.reserve(n);
+
+    // 按原字符串位置填充最小可选字符
+    for (char c : s) {
+        if ((c % 2) == 0) {
+            result.push_back(evenChars[pEven++]);
+        } else {
+            result.push_back(oddChars[pOdd++]);
+        }
+    }
+
+    cout << result << "\n";
+    return 0;
+}
+```
+## Python
+
+```python
+# -*- coding: utf-8 -*-
+def min_lex_string(s: str) -> str:
+    # 分离 ASCII 偶数和奇数字符
+    even_chars = [c for c in s if ord(c) % 2 == 0]
+    odd_chars = [c for c in s if ord(c) % 2 == 1]
+    # 排序
+    even_chars.sort()
+    odd_chars.sort()
+    # 双指针合并
+    pe = po = 0
+    res = []
+    for c in s:
+        if ord(c) % 2 == 0:
+            res.append(even_chars[pe])
+            pe += 1
+        else:
+            res.append(odd_chars[po])
+            po += 1
+    return ''.join(res)
+
+if __name__ == "__main__":
+    n = int(input().strip())
+    s = input().strip()
+    print(min_lex_string(s))
+```
+## Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        // 读取输入长度 n
+        int n = Integer.parseInt(br.readLine());
+        String s = br.readLine();
+
+        // 存放偶数字符和奇数字符的列表
+        List<Character> evenChars = new ArrayList<>();
+        List<Character> oddChars = new ArrayList<>();
+        for (char c : s.toCharArray()) {
+            if (c % 2 == 0) {
+                evenChars.add(c);
+            } else {
+                oddChars.add(c);
+            }
+        }
+        // 各自排序
+        Collections.sort(evenChars);
+        Collections.sort(oddChars);
+
+        // 双指针分别从最小元素开始取
+        int pe = 0, po = 0;
+        StringBuilder sb = new StringBuilder(n);
+        for (char c : s.toCharArray()) {
+            if (c % 2 == 0) {
+                sb.append(evenChars.get(pe++));
+            } else {
+                sb.append(oddChars.get(po++));
+            }
+        }
+
+        // 输出结果
+        System.out.println(sb.toString());
+    }
+}
+```

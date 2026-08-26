@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2968",
+  "title": "第3题-符文序列的总效能",
+  "docId": 2603,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "组合数学",
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

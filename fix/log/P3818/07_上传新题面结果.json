@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P3818",
+  "title": "第1题-无整除关系的两组分配",
+  "docId": 3174,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "数论",
+    "其他",
+    "构造"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "构造",
+  "videosol": "",
+  "trial_videosol": ""
+}

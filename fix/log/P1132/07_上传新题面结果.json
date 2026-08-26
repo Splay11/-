@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1132",
+  "title": "斜线裁切",
+  "docId": 136,
+  "hidden": false,
+  "difficulty": 0,
+  "tag": [
+    "腾讯"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "计算几何",
+  "trial_videosol": ""
+}

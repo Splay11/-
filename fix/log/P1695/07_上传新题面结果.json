@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1695",
+  "title": "游程邻段合并",
+  "docId": 795,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "trial_videosol": ""
+}

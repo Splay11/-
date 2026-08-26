@@ -1,0 +1,176 @@
+## 解题思路
+
+1. **问题转换**  
+   设切割点为 $p$ 和 $q$（$1\le p<q\le n-1$），三段能量总和分别为  
+   $$S_1 = \sum_{i=1}^{p} w_i,\quad S_2 = \sum_{i=p+1}^{q} w_i,\quad S_3 = \sum_{i=q+1}^{n} w_i.$$  
+   目标是最大化 $S_1 \times S_2 \times S_3$，最后输出它对 $998244353$ 取模的结果。
+
+2. **前缀和预处理**  
+   定义前缀和数组 $s$，其中 $s[0]=0$，$s[i]=\sum_{k=1}^{i} w_k$（$1\le i\le n$）。  
+   则三段和可表示为：  
+   $$S_1 = s[p],\quad S_2 = s[q]-s[p],\quad S_3 = s[n]-s[q].$$
+
+3. **枚举第二个切割点 $q$，二分查找最优 $p$**  
+   - 固定 $q$（$2\le q\le n-1$），令 $T = s[q]$，则前两段和为 $T$，第三段为 $s[n]-T$。  
+   - 此时需要最大化 $(s[p]) \cdot (T-s[p])$，其中 $1\le p\le q-1$。  
+   - 函数 $f(u)=u\,(T-u)$ 关于 $u$ 是以 $T/2$ 为对称轴的向下开口的二次函数，在 $u$ 最接近 $T/2$ 时取得最大值。  
+   - 因此在前缀和数组 $s[1\dots q-1]$ 上二分查找第一个不小于 $T/2$ 的位置，记为 $pos$。  
+   - 检查 $pos$ 和 $pos-1$ 这两个位置，计算对应的三段乘积并更新全局最大值。
+
+4. **大整数处理与取模**  
+   由于 $w_i$ 最大为 $2\times 10^5$，$n$ 最大为 $2\times 10^5$，三段乘积可能接近 $(4\times 10^{10})^3 \approx 6.4\times 10^{31}$，超出 64 位整数范围。  
+   - C++ 使用 `__int128` 存储中间乘积。  
+   - Python 整数自动支持任意精度。  
+   - Java 使用 `BigInteger` 进行精确比较和存储。  
+   最终将最大值对 $998244353$ 取模输出。
+
+## 复杂度分析
+
+- **时间复杂度**：枚举第二个切割点 $q$ 需要 $O(n)$ 次循环，每次循环内二分查找前缀和数组需要 $O(\log n)$，因此总时间复杂度为 $O(n\log n)$。  
+- **空间复杂度**：前缀和数组需要 $O(n)$ 空间，其余变量均为常数级别，因此空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import bisect
+
+def main():
+    data = sys.stdin.read().split()
+    if not data:
+        return
+    n = int(data[0])
+    w = list(map(int, data[1:1+n]))
+    
+    # 前缀和 s[0]=0, s[i]=sum_{k=1}^{i} w_k
+    s = [0] * (n + 1)
+    for i in range(1, n + 1):
+        s[i] = s[i-1] + w[i-1]
+    
+    total = s[n]
+    MOD = 998244353
+    max_prod = 0  # Python 自动支持大整数
+    
+    # 枚举第二个切割点 q (对应前两段的右端点)
+    for q in range(2, n):
+        T = s[q]  # 前两段总和
+        # 在 s[1..q-1] 中二分查找第一个 >= T/2 的位置
+        pos = bisect.bisect_left(s, T / 2, 1, q)
+        # 检查 pos 和 pos-1
+        for p in (pos, pos - 1):
+            if 1 <= p < q:
+                S1 = s[p]
+                S2 = T - S1
+                S3 = total - T
+                prod = S1 * S2 * S3
+                if prod > max_prod:
+                    max_prod = prod
+                    
+    print(max_prod % MOD)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+import java.math.BigInteger;
+
+public class Main {
+    static final BigInteger MOD = BigInteger.valueOf(998244353);
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        long[] w = new long[n];
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < n; i++) {
+            w[i] = Long.parseLong(st.nextToken());
+        }
+        
+        // 前缀和 s[0]=0, s[i]=sum_{k=1}^{i} w_k
+        long[] s = new long[n + 1];
+        for (int i = 1; i <= n; i++) {
+            s[i] = s[i-1] + w[i-1];
+        }
+        
+        long total = s[n];
+        BigInteger maxProd = BigInteger.ZERO;
+        
+        // 枚举第二个切割点 q （2 <= q <= n-1)
+        for (int q = 2; q < n; q++) {
+            long T = s[q];  // 前两段总和
+            // 二分查找在 s[1..q-1] 中第一个 >= T/2 的位置
+            int lo = 1, hi = q;
+            while (lo < hi) {
+                int mid = (lo + hi) >>> 1;
+                if (s[mid] * 2 < T) {   // 使用 *2 避免浮点误差
+                    lo = mid + 1;
+                } else {
+                    hi = mid;
+                }
+            }
+            // 检查 lo 和 lo-1
+            for (int p = lo; p >= lo - 1 && p >= 1; p--) {
+                if (p < q) {
+                    BigInteger S1 = BigInteger.valueOf(s[p]);
+                    BigInteger S2 = BigInteger.valueOf(T - s[p]);
+                    BigInteger S3 = BigInteger.valueOf(total - T);
+                    BigInteger prod = S1.multiply(S2).multiply(S3);
+                    if (prod.compareTo(maxProd) > 0) {
+                        maxProd = prod;
+                    }
+                }
+            }
+        }
+        
+        System.out.println(maxProd.mod(MOD));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll MOD = 998244353;
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<ll> w(n+1), s(n+1);
+    for(int i = 1; i <= n; i++){
+        cin >> w[i];
+        s[i] = s[i-1] + w[i];
+    }
+
+    __int128 max_prod = 0;
+    // 枚举第二个切割点 q (2 <= q <= n-1)
+    for(int q = 2; q < n; q++){
+        ll T = s[q];                     // 前两段总和
+        // 在 s[1..q-1] 中二分查找第一个 >= T/2 的位置
+        int pos = lower_bound(s.begin()+1, s.begin()+q, T/2.0) - s.begin();
+        // 检查 pos 和 pos-1
+        for(int p = pos; p >= pos-1 && p >= 1; p--){
+            if(p < q){
+                __int128 prod = (__int128)s[p] * (T - s[p]) * (s[n] - T);
+                if(prod > max_prod) max_prod = prod;
+            }
+        }
+    }
+
+    ll ans = (ll)(max_prod % MOD);
+    cout << ans << "\n";
+    return 0;
+}
+```

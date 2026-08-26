@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1079",
+  "title": "第1题-口令重排",
+  "docId": 80,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "排序算法",
+  "trial_videosol": ""
+}

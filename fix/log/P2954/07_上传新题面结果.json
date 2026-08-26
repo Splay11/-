@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2954",
+  "title": "环形序列的交错和最大值",
+  "docId": 2589,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "递推"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

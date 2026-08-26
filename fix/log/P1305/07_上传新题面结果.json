@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1305",
+  "title": "双工位排期",
+  "docId": 317,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

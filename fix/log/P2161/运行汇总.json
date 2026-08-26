@@ -1,0 +1,11 @@
+{
+  "pid": "P2161",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:42:29",
+  "end_time": "2026-08-19 19:42:30",
+  "new_title": "测点通道改名",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

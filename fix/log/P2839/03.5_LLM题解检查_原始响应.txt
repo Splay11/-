@@ -1,0 +1,184 @@
+## 解题思路
+
+本题要求判断初始序列能否通过若干次操作变为镜像序列（即回文序列），若能则输出总操作次数最小的方案。每次操作可以选择相邻的两个元素同时加 $1$。
+
+**核心观察**：为了得到镜像序列，必须让对称位置的元素相同。由于操作同时影响两个相邻元素，采用双指针从两端向中间贪心调整是合理的。
+
+**算法步骤**（设序列下标从 $0$ 开始，输出下标转换为从 $1$ 开始）：
+
+1. 初始化左指针 $l = 0$，右指针 $r = n-1$，用一个哈希表（或字典）`ops` 记录在每个位置 $i$ 执行操作的累计次数。
+2. 当 $l < r$ 时，比较 $a_l$ 与 $a_r$：
+   - 若 $a_l < a_r$，需将左边较小的元素增大。执行 $\mathit{diff} = a_r - a_l$ 次操作，位置选择 $l$（$0$ 索引），使 $a_l$ 和 $a_{l+1}$ 同时增加 $\mathit{diff}$。在 `ops` 中累加键为 $l$ 的操作次数 $\mathit{diff}$。
+   - 若 $a_l > a_r$，需将右边较小的元素增大。执行 $\mathit{diff} = a_l - a_r$ 次操作，位置选择 $r-1$（$0$ 索引），使 $a_{r-1}$ 和 $a_r$ 同时增加 $\mathit{diff}$。在 `ops` 中累加键为 $r-1$ 的操作次数 $\mathit{diff}$。
+   - 如果已经相等，不做操作。
+   - 然后执行 $l \leftarrow l+1$，$r \leftarrow r-1$。
+3. 遍历结束后，检查数组是否已经成为镜像序列（即对所有 $0 \le i < n/2$ 有 $a_i = a_{n-1-i}$）。若失败则输出 $-1$。
+4. 若成功，输出操作总条数 $m = \text{len}(ops)$（因为相同起始位置的操作已合并），接着按 $i$ 升序输出每行：起点位置 $i_{\text{1-indexed}} = i_{0\text{-indexed}} + 1$ 和对应的累计操作次数 $x$。
+
+该贪心策略每一轮直接补齐较小侧，保证总操作次数最小。
+
+## 复杂度分析
+
+- 时间复杂度：双指针遍历序列一次，每次操作 $O(1)$，最后检查回文也是 $O(n)$。因此总时间复杂度为 $O(n)$。
+- 空间复杂度：需要额外存储操作哈希表，最坏情况下有 $O(n)$ 条合并后的操作记录，故空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from collections import defaultdict
+
+def main():
+    input = sys.stdin.readline
+    n = int(input())
+    a = list(map(int, input().split()))
+    ops = defaultdict(int)
+    l, r = 0, n - 1
+
+    while l < r:
+        if a[l] < a[r]:
+            diff = a[r] - a[l]
+            a[l] += diff
+            a[l + 1] += diff
+            ops[l] += diff
+        elif a[l] > a[r]:
+            diff = a[l] - a[r]
+            a[r] += diff
+            a[r - 1] += diff
+            ops[r - 1] += diff
+        l += 1
+        r -= 1
+
+    # 检查是否为镜像序列
+    ok = True
+    for i in range(n // 2):
+        if a[i] != a[n - 1 - i]:
+            ok = False
+            break
+
+    if not ok:
+        print(-1)
+        return
+
+    # 输出操作方案（合并后）
+    print(len(ops))
+    for i in sorted(ops.keys()):
+        print(i + 1, ops[i])
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        long[] a = new long[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = sc.nextLong();
+        }
+
+        Map<Integer, Long> ops = new HashMap<>();
+        int l = 0, r = n - 1;
+
+        while (l < r) {
+            if (a[l] < a[r]) {
+                long diff = a[r] - a[l];
+                a[l] += diff;
+                a[l + 1] += diff;
+                ops.put(l, ops.getOrDefault(l, 0L) + diff);
+            } else if (a[l] > a[r]) {
+                long diff = a[l] - a[r];
+                a[r] += diff;
+                a[r - 1] += diff;
+                ops.put(r - 1, ops.getOrDefault(r - 1, 0L) + diff);
+            }
+            l++;
+            r--;
+        }
+
+        boolean ok = true;
+        for (int i = 0; i < n / 2; i++) {
+            if (a[i] != a[n - 1 - i]) {
+                ok = false;
+                break;
+            }
+        }
+
+        if (!ok) {
+            System.out.println(-1);
+            return;
+        }
+
+        System.out.println(ops.size());
+        List<Integer> keys = new ArrayList<>(ops.keySet());
+        Collections.sort(keys);
+        for (int i : keys) {
+            System.out.println((i + 1) + " " + ops.get(i));
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<long long> a(n);
+    for (int i = 0; i < n; ++i) cin >> a[i];
+
+    map<int, long long> ops;
+    int l = 0, r = n - 1;
+
+    while (l < r) {
+        if (a[l] < a[r]) {
+            long long diff = a[r] - a[l];
+            a[l] += diff;
+            a[l + 1] += diff;
+            ops[l] += diff;
+        } else if (a[l] > a[r]) {
+            long long diff = a[l] - a[r];
+            a[r] += diff;
+            a[r - 1] += diff;
+            ops[r - 1] += diff;
+        }
+        ++l;
+        --r;
+    }
+
+    bool ok = true;
+    for (int i = 0; i < n / 2; ++i) {
+        if (a[i] != a[n - 1 - i]) {
+            ok = false;
+            break;
+        }
+    }
+
+    if (!ok) {
+        cout << -1 << '\n';
+        return 0;
+    }
+
+    cout << ops.size() << '\n';
+    for (auto &p : ops) {
+        cout << p.first + 1 << ' ' << p.second << '\n';
+    }
+
+    return 0;
+}
+```

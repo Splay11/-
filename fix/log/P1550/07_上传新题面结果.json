@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1550",
+  "title": "闸机进站占优",
+  "docId": 574,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "栈",
+  "trial_videosol": ""
+}

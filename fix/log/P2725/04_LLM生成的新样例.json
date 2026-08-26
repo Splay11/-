@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "5\naA1!b\nbB2?c",
+      "output": "bB2_c",
+      "explanation": "位置 $1$：`a` 和 `b` 均为 $\\alpha$ 类，均非 $\\omega$ 且类别相同，中位码值 $\\lceil (97+98)/2 \\rceil = 98$，对应 ASCII 字符 `b`。\n位置 $2$：`A` 和 `B` 均为 $\\beta$ 类，$\\lceil (65+66)/2 \\rceil = 66$，对应 `B`。\n位置 $3$：`1` 和 `2` 均为 $\\gamma$ 类，$\\lceil (49+50)/2 \\rceil = 50$，对应 `2`。\n位置 $4$：`!` 和 `?` 均为 $\\omega$ 类，输出 `_`。\n位置 $5$：`b` 和 `c` 均为 $\\alpha$ 类，$\\lceil (98+99)/2 \\rceil = 99$，对应 `c`。\n按位置拼接后得到 `bB2_c`。"
+    },
+    {
+      "input": "4\na1B!\nA2c?",
+      "output": "81283_",
+      "explanation": "位置 $1$：`a`($\\alpha$) 与 `A`($\\beta$) 类别不同且均非 $\\omega$，中位码值 $\\lceil (97+65)/2 \\rceil = 81$，输出其十进制表示为 `81`。\n位置 $2$：`1`($\\gamma$) 与 `2`($\\gamma$) 类别相同，$\\lceil (49+50)/2 \\rceil = 50$，对应字符 `2`。\n位置 $3$：`B`($\\beta$) 与 `c`($\\alpha$) 类别不同，$\\lceil (66+99)/2 \\rceil = 83$，输出 `83`。\n位置 $4$：`!` 和 `?` 均为 $\\omega$ 类，输出 `_`。\n最终结果为 `81283_`。"
+    },
+    {
+      "input": "1\na\nB",
+      "output": "82",
+      "explanation": "长度 $n=1$。`a` 为 $\\alpha$ 类，`B` 为 $\\beta$ 类，均非 $\\omega$ 但类别不同。中位码值 $\\lceil (97+66)/2 \\rceil = \\lceil 81.5 \\rceil = 82$，输出字符串 `82`。"
+    }
+  ]
+}

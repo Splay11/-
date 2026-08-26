@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4590",
+  "title": "最少幂步移动",
+  "docId": 3828,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "其他",
+    "位运算"
+  ],
+  "alg_tag": "位运算",
+  "ai_alg_tags": "位运算",
+  "videosol": "",
+  "trial_videosol": ""
+}

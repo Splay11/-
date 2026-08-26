@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "edcba",
+      "output": "5",
+      "explanation": "字符串为 `edcba`，字符 `a` 在第 `5` 个位置。"
+    },
+    {
+      "input": "baedc",
+      "output": "2",
+      "explanation": "从左到右扫描，`a` 出现在第 `2` 位。"
+    },
+    {
+      "input": "cdeab",
+      "output": "4",
+      "explanation": "`a` 位于第 `4` 个位置。"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "pid": "P2838",
+  "mode": 0,
+  "force": true,
+  "start_time": "2026-08-10 13:11:58",
+  "end_time": "2026-08-10 13:14:03",
+  "new_title": "第1题-区间波动和",
+  "steps": {
+    "step1_fetch_problem": true,
+    "step2_fetch_solution": true,
+    "step3_generate_statement": true,
+    "step35_check_solution": true,
+    "step35_modified": true,
+    "step4_generate_samples": true,
+    "step5_assemble": true,
+    "step6_upload_original_statement": true,
+    "step7_upload_new_problem": true,
+    "step8_upload_solution": true
+  },
+  "overall_success": true
+}

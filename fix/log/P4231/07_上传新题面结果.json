@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4231",
+  "title": "第1题-最优因数分解",
+  "docId": 3306,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "动态规划",
+    "数论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

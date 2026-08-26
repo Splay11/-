@@ -1,0 +1,227 @@
+## 解题思路
+
+* 本题属于图论中的**拓扑排序**问题，可使用 **Kahn 算法（BFS）** 解决。  
+  核心思想是“贪心”：每次优先选择当前**入度为 0** 的工序（即没有未完成的前置工序），将其加入执行顺序。
+* **建图方式**  
+  依赖关系 `[a, b]` 表示完成工序 `a` 之前必须先完成工序 `b`。  
+  我们将该关系建模为一条从 `b` 指向 `a` 的有向边 **b → a**，并统计每个工序的入度。
+* **算法步骤（Kahn）**
+  1. 初始化邻接表和入度数组，将所有入度为 0 的工序加入优先队列（小根堆）。  
+  2. 循环从队中取出工序，加入答案序列；遍历其指向的后继工序，将其入度减 1，若减至 0 则入队。  
+  3. 当队列为空时，若答案序列长度等于工序总数 `n`，则该序列为一个可行的工序完成顺序；否则说明依赖关系中存在环（冲突），返回空列表。
+
+> 使用小根堆是为了在多个入度为 0 的工序中优先选择编号较小的，使输出在多种可行解中保持稳定（题目不强制要求字典序）。
+
+## 复杂度分析
+
+* 设工序总数为 $n$，依赖关系总数为 $m$。
+* **时间复杂度**：$O(n + m)$（每个节点和每条边各被处理一次，优先队列操作带来额外 $O(\log n)$ 常数因子）。
+* **空间复杂度**：$O(n + m)$（邻接表与入度数组所需空间）。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import heapq
+from ast import literal_eval
+
+def find_order(n, pairs):
+    # 构建邻接表与入度数组
+    g = [[] for _ in range(n)]
+    indeg = [0] * n
+    for a, b in pairs:          # 依赖关系：完成 a 前必须先完成 b -> 边 b -> a
+        if 0 <= a < n and 0 <= b < n:
+            g[b].append(a)
+            indeg[a] += 1
+
+    # 小根堆，优先处理编号较小的工序
+    pq = [i for i in range(n) if indeg[i] == 0]
+    heapq.heapify(pq)
+
+    order = []
+    while pq:
+        u = heapq.heappop(pq)
+        order.append(u)
+        for v in g[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0:
+                heapq.heappush(pq, v)
+
+    return order if len(order) == n else []
+
+if __name__ == "__main__":
+    # 读取整行输入，格式: [[...], [...], ...], n
+    s = sys.stdin.read().strip()
+    # 通过转换为元组一次性解析二维列表和整数 n
+    pairs, n = literal_eval("(" + "".join(s.split()) + ")")
+    ans = find_order(n, pairs)
+    print("[" + ",".join(map(str, ans)) + "]")
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static int[] findOrder(int n, List<int[]> pairs) {
+        List<List<Integer>> g = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            g.add(new ArrayList<>());
+        }
+        int[] indeg = new int[n];
+
+        // 依赖关系 [a, b] 表示 b -> a
+        for (int[] e : pairs) {
+            int a = e[0], b = e[1];
+            if (0 <= a && a < n && 0 <= b && b < n) {
+                g.get(b).add(a);
+                indeg[a]++;
+            }
+        }
+
+        // 小根堆，保证输出顺序稳定
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+        for (int i = 0; i < n; i++) {
+            if (indeg[i] == 0) pq.offer(i);
+        }
+
+        int[] order = new int[n];
+        int idx = 0;
+        while (!pq.isEmpty()) {
+            int u = pq.poll();
+            order[idx++] = u;
+            for (int v : g.get(u)) {
+                if (--indeg[v] == 0) {
+                    pq.offer(v);
+                }
+            }
+        }
+
+        // 若长度不足 n，说明存在环，返回空数组
+        if (idx < n) return new int[0];
+        return order;
+    }
+
+    public static void main(String[] args) throws Exception {
+        // 读取全部输入
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line).append('\n');
+        }
+        String s = sb.toString();
+        // 将 '[' , ']' , ',' 替换为空格，便于提取所有整数
+        s = s.replace('[', ' ').replace(']', ' ').replace(',', ' ').trim();
+
+        List<Integer> nums = new ArrayList<>();
+        try (Scanner sc = new Scanner(s)) {
+            while (sc.hasNextInt()) {
+                nums.add(sc.nextInt());
+            }
+        }
+
+        int n = 0;
+        List<int[]> pairs = new ArrayList<>();
+        if (!nums.isEmpty()) {
+            n = nums.get(nums.size() - 1);                // 最后一个整数为 n
+            // 前面成对的整数即是依赖关系
+            for (int i = 0; i + 2 <= nums.size() - 1; i += 2) {
+                pairs.add(new int[]{nums.get(i), nums.get(i + 1)});
+            }
+        }
+
+        int[] ans = findOrder(n, pairs);
+        StringBuilder out = new StringBuilder();
+        out.append("[");
+        for (int i = 0; i < ans.length; i++) {
+            if (i > 0) out.append(",");
+            out.append(ans[i]);
+        }
+        out.append("]");
+        System.out.println(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<int> findOrder(int n, const vector<pair<int,int>>& pairs) {
+    vector<vector<int>> g(n);
+    vector<int> indeg(n, 0);
+    for (auto &e : pairs) {
+        int a = e.first, b = e.second;   // 依赖关系：[a, b] 表示 b -> a
+        if (0 <= a && a < n && 0 <= b && b < n) {
+            g[b].push_back(a);
+            indeg[a]++;
+        }
+    }
+
+    // 小根堆
+    priority_queue<int, vector<int>, greater<int>> pq;
+    for (int i = 0; i < n; ++i) {
+        if (indeg[i] == 0) pq.push(i);
+    }
+
+    vector<int> order;
+    order.reserve(n);
+    while (!pq.empty()) {
+        int u = pq.top(); pq.pop();
+        order.push_back(u);
+        for (int v : g[u]) {
+            if (--indeg[v] == 0) {
+                pq.push(v);
+            }
+        }
+    }
+
+    if ((int)order.size() < n) return {};   // 存在环，无解
+    return order;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // 读取全部输入
+    string all, line;
+    while (getline(cin, line)) {
+        all += line + '\n';
+    }
+
+    // 将 '[' , ']' , ',' 替换为空格，便于提取整数
+    for (char &c : all) {
+        if (c == '[' || c == ']' || c == ',') c = ' ';
+    }
+    stringstream ss(all);
+    vector<int> nums;
+    int x;
+    while (ss >> x) nums.push_back(x);
+
+    int n = 0;
+    vector<pair<int,int>> pairs;
+    if (!nums.empty()) {
+        n = nums.back();                         // 最后一个整数为 n
+        for (size_t i = 0; i + 2 <= nums.size() - 1; i += 2) {
+            pairs.push_back({nums[i], nums[i + 1]});
+        }
+    }
+
+    vector<int> ans = findOrder(n, pairs);
+    cout << "[";
+    for (size_t i = 0; i < ans.size(); ++i) {
+        if (i) cout << ",";
+        cout << ans[i];
+    }
+    cout << "]";
+    return 0;
+}
+```

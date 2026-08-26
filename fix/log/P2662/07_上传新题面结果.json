@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P2662",
+  "title": "第3题-库存异或查询",
+  "docId": 2179,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "字符串",
+    "Trie树",
+    "数据结构"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "字典树",
+  "videosol": "",
+  "trial_videosol": ""
+}

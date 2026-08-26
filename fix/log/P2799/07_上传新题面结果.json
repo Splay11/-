@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2799",
+  "title": "第3题-探针覆盖",
+  "docId": 2431,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "搜索",
+    "枚举"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

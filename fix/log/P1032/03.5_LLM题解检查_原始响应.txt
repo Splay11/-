@@ -1,0 +1,106 @@
+## 解题思路
+
+设 X 套餐每份 $b$ GB，单价 $a$ 元；Y 套餐每份 $d$ GB，单价 $c$ 元。  
+对于任意需求 $k$，全部从 X 购买的花费为 $a \times \lceil k/b \rceil$，从 Y 购买的花费为 $c \times \lceil k/d \rceil$。  
+我们尝试令 $k = b$，此时 X 刚好购买一份，花费 $a$ 元；Y 需要 $\lceil b/d \rceil$ 份，花费 $c \times \lceil b/d \rceil$ 元。只需判断 $a < c \times \lceil b/d \rceil$ 是否成立。
+
+分三种情况讨论：
+
+- **当 $a < c$ 时**：  
+  由于 $\lceil b/d \rceil \ge 1$，则 $c \times \lceil b/d \rceil \ge c > a$，因此 $k = b$ 一定满足条件。
+
+- **当 $a = c$ 时**：  
+  - 若 $b > d$，则 $\lceil b/d \rceil \ge 2$，Y 花费至少 $2c = 2a > a$，$k = b$ 可行。  
+  - 若 $b \le d$，则 $\lceil b/d \rceil = 1$，Y 花费 $c = a$，不满足“严格小于”，无解，输出 $-1$。
+
+- **当 $a > c$ 时**：  
+  - 若 $b \le d$，则 $\lceil b/d \rceil = 1$，Y 花费 $c < a$，不满足条件，无解，输出 $-1$。  
+  - 若 $b > d$，Y 花费 $c \times \lceil b/d \rceil$。如果 $c \times \lceil b/d \rceil > a$，则 $k = b$ 可行；否则无解，输出 $-1$。
+
+对于每个询问，按上述逻辑输出 $b$ 或 $-1$ 即可。由于 $b$ 在输入范围内且 $b < 2^{31}$，满足题目要求。
+
+## 复杂度分析
+
+每次询问仅进行常数次比较和四则运算，故时间复杂度 $O(t)$，空间复杂度 $O(1)$（不计算输入存储）。
+
+## 代码实现
+
+### Python
+
+```python
+t = int(input())
+for _ in range(t):
+    a, b, c, d = map(int, input().split())
+    if a < c:
+        print(b)
+    elif a == c:
+        print(b if b > d else -1)
+    else:
+        if b <= d:
+            print(-1)
+        else:
+            # 计算 ceil(b / d) * c 并与 a 比较
+            print(b if (b + d - 1) // d * c > a else -1)
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int t = scanner.nextInt();
+        while (t-- > 0) {
+            long a = scanner.nextLong();
+            long b = scanner.nextLong();
+            long c = scanner.nextLong();
+            long d = scanner.nextLong();
+            if (a < c) {
+                System.out.println(b);
+            } else if (a == c) {
+                System.out.println(b > d ? b : -1);
+            } else {
+                if (b <= d) {
+                    System.out.println(-1);
+                } else {
+                    // 计算 ceil(b / d) * c 并与 a 比较
+                    long yCost = (b + d - 1) / d * c;
+                    System.out.println(yCost > a ? b : -1);
+                }
+            }
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int t;
+    cin >> t;
+    while (t--) {
+        long long a, b, c, d;
+        cin >> a >> b >> c >> d;
+        if (a < c) {
+            cout << b << endl;
+        } else if (a == c) {
+            cout << (b > d ? b : -1) << endl;
+        } else {
+            if (b <= d) {
+                cout << -1 << endl;
+            } else {
+                // 计算 ceil(b / d) * c 并与 a 比较
+                long long yCost = (b + d - 1) / d * c;
+                cout << (yCost > a ? b : -1) << endl;
+            }
+        }
+    }
+    return 0;
+}
+```

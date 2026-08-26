@@ -1,0 +1,139 @@
+## 解题思路
+
+求离当前坐标 $s$ 最近、且不在任何禁入区间并集内的整数工位。
+
+将所有 $[L_i,R_i]$ 按左端点排序后合并（相交或相邻的区间一并合并）。分两种情况：
+
+1. $s$ 不在任何合并区间内：答案为 $0$。
+2. $s$ 落在合并区间 $[L,R]$ 内：最近可用工位为 $L-1$ 或 $R+1$，答案为 $\min(s-L+1,\,R-s+1)$。
+
+## 复杂度分析
+
+- 时间：排序 $O(k \log k)$，合并扫描 $O(k)$。
+- 空间：$O(k)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+def solve_case(k, s, zones):
+    zones.sort()
+    cur_l, cur_r = zones[0]
+    for i in range(1, k):
+        L, R = zones[i]
+        if L <= cur_r + 1:
+            cur_r = max(cur_r, R)
+        else:
+            if cur_l <= s <= cur_r:
+                return min(s - cur_l + 1, cur_r - s + 1)
+            cur_l, cur_r = L, R
+    if cur_l <= s <= cur_r:
+        return min(s - cur_l + 1, cur_r - s + 1)
+    return 0
+
+
+def main():
+    input = sys.stdin.readline
+    t = int(input().strip())
+    ans = []
+    for _ in range(t):
+        k, s = map(int, input().split())
+        zones = [tuple(map(int, input().split())) for _ in range(k)]
+        ans.append(str(solve_case(k, s, zones)))
+    print("\n".join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int solveCase(int k, int s, int[][] zones) {
+        Arrays.sort(zones, (a, b) -> a[0] != b[0] ? a[0] - b[0] : a[1] - b[1]);
+        int curL = zones[0][0], curR = zones[0][1];
+        for (int i = 1; i < k; i++) {
+            int L = zones[i][0], R = zones[i][1];
+            if (L <= curR + 1) curR = Math.max(curR, R);
+            else {
+                if (curL <= s && s <= curR)
+                    return Math.min(s - curL + 1, curR - s + 1);
+                curL = L;
+                curR = R;
+            }
+        }
+        if (curL <= s && s <= curR)
+            return Math.min(s - curL + 1, curR - s + 1);
+        return 0;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            String[] first = br.readLine().split(" ");
+            int k = Integer.parseInt(first[0]), s = Integer.parseInt(first[1]);
+            int[][] zones = new int[k][2];
+            for (int i = 0; i < k; i++) {
+                String[] parts = br.readLine().split(" ");
+                zones[i][0] = Integer.parseInt(parts[0]);
+                zones[i][1] = Integer.parseInt(parts[1]);
+            }
+            sb.append(solveCase(k, s, zones)).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int solve_case(int k, int s, vector<pair<int,int>>& zones) {
+    sort(zones.begin(), zones.end());
+    int curL = zones[0].first, curR = zones[0].second;
+    for (int i = 1; i < k; i++) {
+        int L = zones[i].first, R = zones[i].second;
+        if (L <= curR + 1) curR = max(curR, R);
+        else {
+            if (curL <= s && s <= curR)
+                return min(s - curL + 1, curR - s + 1);
+            curL = L;
+            curR = R;
+        }
+    }
+    if (curL <= s && s <= curR)
+        return min(s - curL + 1, curR - s + 1);
+    return 0;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while (T--) {
+        int k, s;
+        cin >> k >> s;
+        vector<pair<int,int>> zones(k);
+        for (int i = 0; i < k; i++) cin >> zones[i].first >> zones[i].second;
+        cout << solve_case(k, s, zones) << '\n';
+    }
+    return 0;
+}
+```

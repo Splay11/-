@@ -1,0 +1,164 @@
+## 解题思路
+
+题目要求计算 $n \times n$ 矩阵 $G$（其中 $G[i][j] = P_i \oplus Q_j$）的所有连续子矩阵的元素和，并对 $10^9+7$ 取模。
+
+### 关键推导
+
+1. **统计单个元素的贡献次数**  
+   对于矩阵中位于第 $i$ 行、第 $j$ 列的元素 $G[i][j]$（下标从 $1$ 开始），它被包含在多少个连续子矩阵中？  
+   选择子矩阵的起始行和结束行时，行范围必须包含第 $i$ 行，共有 $i \times (n - i + 1)$ 种选择；同理，列范围有 $j \times (n - j + 1)$ 种选择。  
+   因此元素 $G[i][j]$ 在全部子矩阵中的总出现次数为：
+   $$ w_i \times w_j $$
+   其中 $w_i = i \times (n - i + 1)$，$w_j = j \times (n - j + 1)$。
+
+2. **总和的表达式**  
+   所有子矩阵的元素总和可写为：
+   $$ \text{ans} = \sum_{i=1}^n \sum_{j=1}^n G[i][j] \cdot w_i \cdot w_j $$
+
+3. **利用异或的性质展开**  
+   由于 $P_i, Q_j \in \{0, 1\}$，异或运算满足：
+   $$ P_i \oplus Q_j = P_i + Q_j - 2 \cdot P_i \cdot Q_j $$
+   代入总和公式：
+   $$ \text{ans} = \sum_{i=1}^n \sum_{j=1}^n (P_i + Q_j - 2P_iQ_j) \cdot w_i \cdot w_j $$
+
+4. **分离求和并记中间量**  
+   定义：
+   - $S = \sum_{i=1}^n w_i = \sum_{i=1}^n i \cdot (n - i + 1)$
+   - $S_P = \sum_{i=1}^n P_i \cdot w_i$
+   - $S_Q = \sum_{j=1}^n Q_j \cdot w_j$
+   
+   则总和可化简为：
+   $$ \text{ans} = S \cdot S_P + S \cdot S_Q - 2 \cdot S_P \cdot S_Q = S \cdot (S_P + S_Q) - 2 \cdot S_P \cdot S_Q $$
+   所有运算均在模 $10^9+7$ 下进行。
+
+5. **算法流程**  
+   - 读入 $n$ 以及序列 $P$ 和 $Q$；
+   - 遍历 $i$ 从 $0$ 到 $n-1$（对应题目中的第 $i+1$ 行/列），计算权值 $w = (i+1) \times (n-i)$ 并取模；
+   - 累加 $S$ 以及根据 $P_i,Q_j$ 的值累加 $S_P, S_Q$；
+   - 根据公式计算最终答案，注意处理负数取模。
+
+## 复杂度分析
+
+- **时间复杂度**：只需对序列 $P$ 和 $Q$ 各遍历一次，计算权值与累加，总复杂度为 $O(n)$。
+- **空间复杂度**：除了存储输入的两个序列外，仅使用了常数个变量，空间复杂度为 $O(n)$（或 $O(1)$ 额外空间）。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 1000000007
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    n = int(data[0])
+    P = list(map(int, data[1:1+n]))
+    Q = list(map(int, data[1+n:1+2*n]))
+    
+    S = 0
+    SP = 0
+    SQ = 0
+    
+    for i in range(n):
+        # 下标从0开始，对应原题中的 i+1，权值为 (i+1)*(n-i)
+        weight = (i + 1) * (n - i) % MOD
+        S = (S + weight) % MOD
+        if P[i] == 1:
+            SP = (SP + weight) % MOD
+        if Q[i] == 1:
+            SQ = (SQ + weight) % MOD
+    
+    ans = (S * ((SP + SQ) % MOD) % MOD - 2 * SP % MOD * SQ % MOD) % MOD
+    if ans < 0:
+        ans += MOD
+        
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    static final long MOD = 1000000007;
+    
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] P = new int[n];
+        int[] Q = new int[n];
+        
+        for (int i = 0; i < n; i++) {
+            P[i] = sc.nextInt();
+        }
+        for (int i = 0; i < n; i++) {
+            Q[i] = sc.nextInt();
+        }
+        
+        long S = 0, SP = 0, SQ = 0;
+        // 下标从0开始，权值为 (i+1)*(n-i)
+        for (int i = 0; i < n; i++) {
+            long weight = (long)(i + 1) * (n - i) % MOD;
+            S = (S + weight) % MOD;
+            if (P[i] == 1)
+                SP = (SP + weight) % MOD;
+            if (Q[i] == 1)
+                SQ = (SQ + weight) % MOD;
+        }
+        
+        long ans = (S * ((SP + SQ) % MOD) % MOD - 2L * SP % MOD * SQ % MOD) % MOD;
+        if (ans < 0) ans += MOD;
+        
+        System.out.println(ans);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const long long MOD = 1000000007;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n;
+    cin >> n;
+    vector<int> P(n), Q(n);
+    for (int i = 0; i < n; ++i) {
+        cin >> P[i];
+    }
+    for (int i = 0; i < n; ++i) {
+        cin >> Q[i];
+    }
+    
+    long long S = 0, SP = 0, SQ = 0;
+    // 下标从0开始，权值为 (i+1)*(n-i)
+    for (int i = 0; i < n; ++i) {
+        long long weight = (long long)(i + 1) * (n - i) % MOD;
+        S = (S + weight) % MOD;
+        if (P[i] == 1) SP = (SP + weight) % MOD;
+        if (Q[i] == 1) SQ = (SQ + weight) % MOD;
+    }
+    
+    long long ans = (S * ((SP + SQ) % MOD) % MOD - 2LL * SP % MOD * SQ % MOD) % MOD;
+    if (ans < 0) ans += MOD;
+    
+    cout << ans << "\n";
+    return 0;
+}
+```

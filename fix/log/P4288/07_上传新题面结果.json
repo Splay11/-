@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4288",
+  "title": "第1题-倍数查询",
+  "docId": 3385,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数论筛法"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

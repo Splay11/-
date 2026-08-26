@@ -1,0 +1,119 @@
+## 解题思路
+
+将正向插入的构建过程反过来考虑：从最终生成的目标序列 $S$ 开始，每一步从当前序列中删除一个字符，直到序列变为空串。对于长度为 $N$ 的目标序列：
+
+- 第一次删除时，序列中有 $N$ 个字符，从 $N$ 个位置中任选一个删除；
+- 第二次删除时，序列剩余 $N-1$ 个字符，有 $N-1$ 种删除位置；
+- 以此类推，直到最后一次删除时只有一个字符，只有 $1$ 种选择。
+
+因此，所有可能的删除顺序共有 $N \times (N-1) \times \cdots \times 1 = N!$ 种。由于每次正向插入的位置和字母选择与反向删除的过程一一对应，不同的正向操作序列数就等于反向删除的顺序数，即为 $N!$。目标序列中的字母内容不影响计数。
+
+综上所述，对于每组数据，答案即为 $N! \bmod (10^9+7)$。由于所有测试用例的 $N$ 之和不超过 $2 \times 10^6$，可以预处理出所有可能需要的阶乘值，每组询问 $O(1)$ 回答。
+
+## 复杂度分析
+
+- 时间复杂度：$O(\max N)$，其中 $\max N$ 为所有测试数据中 $N$ 的最大值。预处理阶乘需要 $O(\max N)$ 时间，每组数据回答 $O(1)$。
+- 空间复杂度：$O(\max N)$，用于存储预计算的阶乘数组。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10**9 + 7
+
+def main():
+    data = sys.stdin.read().split()
+    t = int(data[0])
+    idx = 1
+    ns = []
+    max_n = 0
+    for _ in range(t):
+        n = int(data[idx]); idx += 1
+        s = data[idx]; idx += 1  # 读入字符串 S，虽然用不到但需要消耗输入
+        ns.append(n)
+        if n > max_n:
+            max_n = n
+
+    # 预处理阶乘
+    fact = [1] * (max_n + 1)
+    for i in range(1, max_n + 1):
+        fact[i] = fact[i - 1] * i % MOD
+
+    out = '\n'.join(str(fact[n]) for n in ns)
+    sys.stdout.write(out)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007L;
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine());
+        int[] nArr = new int[T];
+        int maxN = 0;
+        for (int i = 0; i < T; i++) {
+            nArr[i] = Integer.parseInt(br.readLine());
+            br.readLine(); // 读入字符串 S，内容与答案无关，仅消耗输入
+            maxN = Math.max(maxN, nArr[i]);
+        }
+
+        long[] fact = new long[maxN + 1];
+        fact[0] = 1;
+        for (int i = 1; i <= maxN; i++) {
+            fact[i] = fact[i - 1] * i % MOD;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int n : nArr) {
+            sb.append(fact[n]).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    vector<int> nArr(T);
+    int maxN = 0;
+    for (int i = 0; i < T; i++) {
+        cin >> nArr[i];
+        string s;
+        cin >> s; // 读入字符串 S，内容与答案无关
+        maxN = max(maxN, nArr[i]);
+    }
+
+    vector<long long> fact(maxN + 1, 1);
+    for (int i = 1; i <= maxN; i++) {
+        fact[i] = fact[i - 1] * i % MOD;
+    }
+
+    for (int n : nArr) {
+        cout << fact[n] << '\n';
+    }
+    return 0;
+}
+```

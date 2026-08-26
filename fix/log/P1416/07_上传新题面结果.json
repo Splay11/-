@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1416",
+  "title": "第2题-向上取整表达式",
+  "docId": 432,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "栈",
+  "trial_videosol": ""
+}

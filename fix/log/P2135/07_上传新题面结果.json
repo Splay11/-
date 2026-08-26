@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2135",
+  "title": "第3题-激活同质边",
+  "docId": 1242,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树形dp",
+  "videosol": "",
+  "trial_videosol": ""
+}

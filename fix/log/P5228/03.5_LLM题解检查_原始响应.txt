@@ -1,0 +1,185 @@
+## 解题思路
+
+阈值 $X$ 只需考虑所有设备的特征值 $h_i$ 带来的状态变化。
+
+1. 当阈值 $X$ 足够小时，所有设备都满足 $h_i \ge X$，因此所有设备都取高输出值 $H_i$。
+2. 先计算初始输出总和：
+   $$V=\sum_{i=1}^{n} H_i$$
+   并用 $|V-S|$ 更新答案。
+3. 随着阈值 $X$ 增大，当 $X$ 超过某个设备的特征值 $h_i$ 时，该设备会从高输出值 $H_i$ 切换为低输出值 $L_i$，总和变化量为：
+   $$L_i-H_i$$
+4. 将所有设备按照 $h_i$ 从小到大排序，然后依次处理。
+5. 特别注意的是：如果有多个设备的 $h_i$ 相同，那么阈值不可能只越过其中一部分设备，因此相同 $h_i$ 的设备必须同时切换。
+6. 每处理完一组相同特征值的设备，就重新计算一次 $|V-S|$，并更新答案。
+
+这样即可枚举所有本质不同的阈值状态，得到最小差值。
+
+## 复杂度分析
+
+- 时间复杂度：排序需要 $O(n \log n)$，排序后只需遍历一次所有设备，总时间复杂度为 $O(n \log n)$。
+- 空间复杂度：存储所有设备信息需要 $O(n)$ 空间，因此空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve(n, S, items):
+    # 按特征值从小到大排序
+    items.sort(key=lambda x: x[0])
+
+    # 初始时所有设备都取高输出值
+    total = sum(H for _, _, H in items)
+    ans = abs(total - S)
+
+    i = 0
+    while i < n:
+        h = items[i][0]
+
+        # 相同特征值的设备必须一起切换
+        while i < n and items[i][0] == h:
+            _, L, H = items[i]
+            total += L - H
+            i += 1
+
+        ans = min(ans, abs(total - S))
+
+    return ans
+
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    if not data:
+        return
+
+    it = iter(data)
+    n = int(next(it))
+    S = int(next(it))
+
+    items = []
+    for _ in range(n):
+        h = int(next(it))
+        L = int(next(it))
+        H = int(next(it))
+        items.append((h, L, H))
+
+    print(solve(n, S, items))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        int n = Integer.parseInt(br.readLine().trim());
+        long S = Long.parseLong(br.readLine().trim());
+
+        long[][] items = new long[n][3];
+
+        for (int i = 0; i < n; i++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            items[i][0] = Long.parseLong(st.nextToken()); // h_i
+            items[i][1] = Long.parseLong(st.nextToken()); // L_i
+            items[i][2] = Long.parseLong(st.nextToken()); // H_i
+        }
+
+        // 按特征值从小到大排序
+        Arrays.sort(items, new Comparator<long[]>() {
+            public int compare(long[] a, long[] b) {
+                return Long.compare(a[0], b[0]);
+            }
+        });
+
+        // 初始时所有设备都取高输出值
+        long total = 0;
+        for (long[] item : items) {
+            total += item[2];
+        }
+
+        long ans = Math.abs(total - S);
+
+        int i = 0;
+        while (i < n) {
+            long h = items[i][0];
+
+            // 相同特征值的设备必须一起切换
+            while (i < n && items[i][0] == h) {
+                total += items[i][1] - items[i][2];
+                i++;
+            }
+
+            ans = Math.min(ans, Math.abs(total - S));
+        }
+
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Device {
+    long long h;
+    long long L;
+    long long H;
+};
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    long long S;
+    cin >> n >> S;
+
+    vector<Device> devices(n);
+
+    for (int i = 0; i < n; i++) {
+        cin >> devices[i].h >> devices[i].L >> devices[i].H;
+    }
+
+    // 按特征值从小到大排序
+    sort(devices.begin(), devices.end(), [](const Device& a, const Device& b) {
+        return a.h < b.h;
+    });
+
+    // 初始时所有设备都取高输出值
+    long long total = 0;
+    for (const auto& device : devices) {
+        total += device.H;
+    }
+
+    long long ans = llabs(total - S);
+
+    int i = 0;
+    while (i < n) {
+        long long h = devices[i].h;
+
+        // 相同特征值的设备必须一起切换
+        while (i < n && devices[i].h == h) {
+            total += devices[i].L - devices[i].H;
+            i++;
+        }
+
+        ans = min(ans, llabs(total - S));
+    }
+
+    cout << ans << '\n';
+    return 0;
+}
+```

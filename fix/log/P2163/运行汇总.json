@@ -1,0 +1,11 @@
+{
+  "pid": "P2163",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:42:32",
+  "end_time": "2026-08-19 19:42:33",
+  "new_title": "岩芯分段公约",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

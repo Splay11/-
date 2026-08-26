@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2960",
+  "title": "第1题-彩珠排布",
+  "docId": 2595,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "数论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

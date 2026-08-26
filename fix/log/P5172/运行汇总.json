@@ -1,0 +1,11 @@
+{
+  "pid": "P5172",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 15:34:55",
+  "end_time": "2026-08-19 15:34:55",
+  "new_title": "交替步长最大和",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1753",
+  "title": "第2题-额度发放顺序",
+  "docId": 853,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "饿了么"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,184 @@
+## 解题思路
+
+在圆环上 $n$ 个位置，每个位置有一个整数。选择两个不同的位置作为分割点，沿这两个点切开会将圆环分成两个连续的弧段，要求两个弧段各自至少包含一个位置，且两段上所有整数的和相等。
+
+记整个圆环上所有整数之和为 $S$。若两段的和相等，则每段的和必然都是 $\frac{S}{2}$。
+
+1. **环形转线性处理**  
+   将圆环从某个位置“断开”，顺时针展开为一个长度为 $n$ 的线性序列。选择两个不同分割点 $i$ 和 $j$（不妨设沿顺时针方向 $i$ 在 $j$ 之前），它们将线性序列切割出一段区间 $[i, j-1]$（即从位置 $i$ 到 $j-1$ 的所有整数）。这一段区间的和就是其中一段弧的和，而另一段弧的和为 $S$ 减去这段和。因此问题转化为：在线性序列中统计有多少个区间 $[i, j-1]$ 满足 $0 \le i < j < n$，且区间和恰好为 $\frac{S}{2}$。
+
+2. **前缀和与哈希表**  
+   设 $pre[k]$ 表示从开头到位置 $k$ 之前所有整数的前缀和（通常 $pre[0]=0$）。区间 $[i, j-1]$ 的和为 $pre[j] - pre[i]$。条件变为：
+   $$pre[j] - pre[i] = \frac{S}{2}$$
+   即
+   $$pre[i] = pre[j] - \frac{S}{2}$$
+   因此，我们可以从左到右枚举 $j$（对应前缀和的结束位置），同时维护一个哈希表记录前面出现过的所有前缀和数值及其出现次数。对于当前的 $pre[j]$，查询哈希表中键为 $pre[j] - \frac{S}{2}$ 的出现次数，将其累加到答案中。
+
+3. **避免非法情况**  
+   - 若 $S$ 为奇数，则 $\frac{S}{2}$ 不是整数，显然无解，直接输出 $0$。  
+   - 为保证两个弧段都至少包含一个位置，区间不能为空，因此我们最多只能枚举到 $j \le n-1$（即不包含最后一个位置作为区间的起点），从而避免选取整个环作为一段的情况。同时 $i < j$ 由枚举顺序自然保证。  
+   - 初始时哈希表记录 $pre[0]=0$ 出现一次，表示空前缀。
+
+4. **详细步骤**  
+   - 读入 $n$ 和 $n$ 个整数。
+   - 计算总和 $S$，若 $S$ 是奇数则输出 $0$。
+   - 设目标值 `target = S / 2`。
+   - 初始化哈希表 `cnt`，`cnt[0] = 1`。
+   - 当前前缀和 `pre = 0`，答案 `ans = 0`。
+   - 遍历 $i = 0$ 到 $n-2$（即从前 $n-1$ 个位置，保证另一段非空）：
+     - `pre += nums[i]`（计算前缀和至位置 $i$ 之后）。
+     - `ans += cnt.get(pre - target, 0)`。
+     - `cnt[pre] = cnt.get(pre, 0) + 1`。
+   - 最后输出 `ans`。
+
+## 复杂度分析
+
+- 时间复杂度：只需一次遍历即可完成统计，总计算次数与 $n$ 成正比，因此时间复杂度为 $O(n)$。
+- 空间复杂度：需要哈希表记录前缀和的出现次数，最坏情况下哈希表存储 $n$ 个不同的前缀和，空间复杂度为 $O(n)$。
+
+对于 $n \le 10^5$ 的数据范围，该复杂度完全可行，能够在规定时间内得出结果。
+
+## 代码实现
+
+### Python
+
+```python
+def solve(nums):
+    total = sum(nums)
+
+    # 总和为奇数时无法平分
+    if total % 2 != 0:
+        return 0
+
+    target = total // 2
+    cnt = {0: 1}          # 记录前缀和出现次数，初始前缀和为0
+    pre = 0
+    ans = 0
+    n = len(nums)
+
+    # 只遍历前 n-1 个位置，保证两段都非空
+    for i in range(n - 1):
+        pre += nums[i]
+        # 查询满足 pre[i] = current_pre - target 的个数
+        ans += cnt.get(pre - target, 0)
+        # 记录当前前缀和
+        cnt[pre] = cnt.get(pre, 0) + 1
+
+    return ans
+
+
+if __name__ == "__main__":
+    n = int(input())
+    nums = list(map(int, input().split()))
+    print(solve(nums))
+```
+
+### Java
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Main {
+    public static long solve(long[] nums) {
+        int n = nums.length;
+        long total = 0;
+
+        // 计算数组总和
+        for (long x : nums) {
+            total += x;
+        }
+
+        // 总和为奇数时不可能平分
+        if (total % 2 != 0) {
+            return 0;
+        }
+
+        long target = total / 2;
+        long pre = 0;
+        long ans = 0;
+
+        // 哈希表记录前缀和出现次数
+        Map<Long, Long> cnt = new HashMap<>();
+        cnt.put(0L, 1L); // 初始前缀和0出现一次
+
+        // 只遍历前 n-1 个位置，保证两段都非空
+        for (int i = 0; i < n - 1; i++) {
+            pre += nums[i];
+            // 查询满足条件的之前位置个数
+            ans += cnt.getOrDefault(pre - target, 0L);
+            // 记录当前前缀和
+            cnt.put(pre, cnt.getOrDefault(pre, 0L) + 1);
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        long[] nums = new long[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = sc.nextLong();
+        }
+        System.out.println(solve(nums));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+long long solve(const vector<long long>& nums) {
+    int n = nums.size();
+    long long total = 0;
+
+    // 计算总和
+    for (long long x : nums) {
+        total += x;
+    }
+
+    // 总和为奇数时无解
+    if (total % 2 != 0) {
+        return 0;
+    }
+
+    long long target = total / 2;
+    long long pre = 0;
+    long long ans = 0;
+
+    // 哈希表记录前缀和出现次数
+    unordered_map<long long, long long> cnt;
+    cnt[0] = 1; // 初始前缀和0
+
+    // 只遍历前 n-1 个位置，保证两段都非空
+    for (int i = 0; i < n - 1; i++) {
+        pre += nums[i];
+        // 查询满足 pre[i] = pre - target 的出现次数
+        if (cnt.count(pre - target)) {
+            ans += cnt[pre - target];
+        }
+        // 更新当前前缀和计数
+        cnt[pre]++;
+    }
+
+    return ans;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    vector<long long> nums(n);
+    for (int i = 0; i < n; i++) {
+        cin >> nums[i];
+    }
+    cout << solve(nums) << endl;
+    return 0;
+}
+```

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4850",
+  "title": "序列消除的最优插入",
+  "docId": 4137,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "马拉车算法"
+  ],
+  "alg_tag": "马拉车算法",
+  "ai_alg_tags": "马拉车算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

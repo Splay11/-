@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2842",
+  "title": "第2题-机房巡检派工",
+  "docId": 2475,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "二分"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

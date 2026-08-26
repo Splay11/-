@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3329",
+  "title": "第2题-密码碎片",
+  "docId": 2669,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "dfs",
+    "全排列"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

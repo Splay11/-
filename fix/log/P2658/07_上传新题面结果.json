@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2658",
+  "title": "第2题-三连音节",
+  "docId": 2175,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "搜索",
+    "搜索与剪枝"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

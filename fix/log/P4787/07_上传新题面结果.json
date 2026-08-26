@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4787",
+  "title": "第1题-魔法合成挑战",
+  "docId": 4053,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "暴力枚举"
+  ],
+  "alg_tag": "暴力枚举",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

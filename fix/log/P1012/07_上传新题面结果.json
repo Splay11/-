@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1012",
+  "title": "纪念券凑额",
+  "docId": 13,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "数学",
+  "trial_videosol": ""
+}

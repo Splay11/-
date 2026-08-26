@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4455",
+  "title": "第4题-专线连通片",
+  "docId": 3587,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "树",
+    "BFS"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树",
+  "videosol": "",
+  "trial_videosol": ""
+}

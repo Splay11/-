@@ -1,0 +1,11 @@
+{
+  "pid": "P5182",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 15:34:50",
+  "end_time": "2026-08-19 15:34:52",
+  "new_title": "第3题-工位相位巡检",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

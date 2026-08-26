@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4735",
+  "title": "第2题-环形赛道补给挑战",
+  "docId": 3991,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "双指针"
+  ],
+  "alg_tag": "双指针",
+  "ai_alg_tags": "双指针",
+  "videosol": "",
+  "trial_videosol": ""
+}

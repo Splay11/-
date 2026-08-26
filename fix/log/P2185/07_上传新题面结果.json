@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P2185",
+  "title": "第2题-间隔子段最大和",
+  "docId": 1292,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

@@ -1,0 +1,258 @@
+## 解题思路
+
+我们需要计算使安全强度 $V = x \oplus a \oplus b$ 取得最大值的有序数对 $(a, b)$ 的个数，其中 $a \in [A, B]$，$b \in [C, D]$，所有整数 $< 2^{31}$。
+
+因为异或运算按位独立，且高位权重大于低位，我们可以采用**从高位到低位的贪心策略**：
+1. 从最高可参与位（第 $30$ 位）开始，逐位决定当前位是否能取 $1$。
+2. 若在当前位，存在某种合法的 $a$ 和 $b$ 的取值，使得 $x_i \oplus a_i \oplus b_i = 1$，则为了最大化最终结果，**必须让这一位为 $1$**，即只保留使当前位异或结果为 $1$ 的转移。
+3. 若所有合法取值都只能使当前位异或结果为 $0$，则退而求其次，保留结果为 $0$ 的转移。
+
+为了判断哪些 $a, b$ 的取值是合法的，我们需要使用**数位 DP** 的思想，维护当前位之前的前缀是否仍然“贴紧”区间的上下界。具体来说，用四个布尔标记表示：
+- $tight_{aL}$：$a$ 的前缀是否已严格等于 $A$ 的下界前缀？如果是，后续位不能小于 $A$ 对应位。
+- $tight_{aR}$：$a$ 的前缀是否已严格等于 $B$ 的上界前缀？如果是，后续位不能大于 $B$ 对应位。
+- $tight_{bL}$、$tight_{bR}$ 对 $b$ 与 $[C, D]$ 的关系同理。
+
+这四个标记构成 $2^4 = 16$ 种状态。我们定义 $dp[st]$ 为处理完一些高位后，处于状态 $st$ 且异或前缀已达到当前最优的方案数。
+
+算法步骤：
+- 初始化 $dp[15]$（即所有标记为真的状态）为 $1$，表示还未处理任何位时，$a,b$ 均贴紧上下界。
+- 对于 $pos$ 从 $30$ 降到 $0$：
+  - 取出当前位 $x$ 的二进制 $x_i$，$A$ 的下界位 $A_i$、$B$ 的上界位 $B_i$、$C$ 的下界位 $C_i$、$D$ 的上界位 $D_i$。
+  - 枚举当前位 $a_i, b_i \in \{0,1\}$，根据当前状态 $st$ 的标记检查是否合法（例如，若 $tight_{aL}=1$ 且 $a_i < A_i$，则不能选，因为会让 $a$ 小于下界；类似的，若 $tight_{aR}=1$ 且 $a_i > B_i$，则不能选）。
+  - 对于合法的组合，计算新的状态 $ns$（更新标记），并计算当前位的异或值 $cur = x_i \oplus a_i \oplus b_i$。
+  - 记录两种情况：$cur = 1$ 时加入 $no[ns]$，$cur = 0$ 时加入 $nz[ns]$。
+  - 如果存在任何 $cur = 1$ 的合法转移，则本位的 $dp$ 变为 $no$；否则变为 $nz$。
+- 最终 $dp$ 中所有状态的方案数之和即为答案。
+
+## 复杂度分析
+
+- 时间复杂度：每组测试用例处理 $31$ 个二进制位，每位需要遍历 $16$ 种状态，每种状态枚举至多 $4$ 种 $(a_i, b_i)$ 组合，操作次数为常数。共 $T$ 组，总时间复杂度 $O(T)$。
+- 空间复杂度：DP 状态只需两个长度为 $16$ 的数组，额外空间 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def count_best(x, A, B, C, D):
+    # dp[st] 表示状态为 st 的方案数
+    # st 的二进制：bit0: tight_aL, bit1: tight_aR, bit2: tight_bL, bit3: tight_bR
+    dp = [0] * 16
+    dp[15] = 1  # 所有标记初始均为真
+    for pos in range(30, -1, -1):
+        xb = (x >> pos) & 1
+        aLb = (A >> pos) & 1
+        aRb = (B >> pos) & 1
+        bLb = (C >> pos) & 1
+        bRb = (D >> pos) & 1
+        
+        nz = [0] * 16  # 当前位结果为0的状态累积
+        no = [0] * 16  # 当前位结果为1的状态累积
+        has_one = False
+        
+        for st in range(16):
+            cnt = dp[st]
+            if not cnt:
+                continue
+            tight_aL = st & 1
+            tight_aR = (st >> 1) & 1
+            tight_bL = (st >> 2) & 1
+            tight_bR = (st >> 3) & 1
+            
+            for ab in (0, 1):  # a 的当前位
+                if tight_aL and ab < aLb:  # 若紧贴下界但选的位小于下界位，非法
+                    continue
+                if tight_aR and ab > aRb:  # 若紧贴上界但选的位大于上界位，非法
+                    continue
+                n_tight_aL = 1 if (tight_aL and ab == aLb) else 0
+                n_tight_aR = 1 if (tight_aR and ab == aRb) else 0
+                
+                for bb in (0, 1):  # b 的当前位
+                    if tight_bL and bb < bLb:
+                        continue
+                    if tight_bR and bb > bRb:
+                        continue
+                    n_tight_bL = 1 if (tight_bL and bb == bLb) else 0
+                    n_tight_bR = 1 if (tight_bR and bb == bRb) else 0
+                    
+                    ns = n_tight_aL | (n_tight_aR << 1) | (n_tight_bL << 2) | (n_tight_bR << 3)
+                    cur = xb ^ ab ^ bb
+                    if cur == 1:
+                        no[ns] += cnt
+                        has_one = True
+                    else:
+                        nz[ns] += cnt
+        
+        dp = no if has_one else nz
+    
+    return sum(dp)
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    if not data:
+        return
+    T = data[0]
+    idx = 1
+    out_lines = []
+    for _ in range(T):
+        x = data[idx]
+        A = data[idx + 1]
+        B = data[idx + 2]
+        C = data[idx + 3]
+        D = data[idx + 4]
+        idx += 5
+        out_lines.append(str(count_best(x, A, B, C, D)))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 计算最优方案数
+    static long countBest(int x, int A, int B, int C, int D) {
+        long[] dp = new long[16];
+        dp[15] = 1; // 初始所有tight为真
+        for (int pos = 30; pos >= 0; pos--) {
+            int xb = (x >> pos) & 1;
+            int aLb = (A >> pos) & 1, aRb = (B >> pos) & 1;
+            int bLb = (C >> pos) & 1, bRb = (D >> pos) & 1;
+            
+            long[] nz = new long[16];
+            long[] no = new long[16];
+            boolean hasOne = false;
+            
+            for (int st = 0; st < 16; st++) {
+                long cnt = dp[st];
+                if (cnt == 0) continue;
+                int tight_aL = st & 1;
+                int tight_aR = (st >> 1) & 1;
+                int tight_bL = (st >> 2) & 1;
+                int tight_bR = (st >> 3) & 1;
+                
+                for (int ab = 0; ab <= 1; ab++) {
+                    if (tight_aL == 1 && ab < aLb) continue;
+                    if (tight_aR == 1 && ab > aRb) continue;
+                    int n_tight_aL = (tight_aL == 1 && ab == aLb) ? 1 : 0;
+                    int n_tight_aR = (tight_aR == 1 && ab == aRb) ? 1 : 0;
+                    
+                    for (int bb = 0; bb <= 1; bb++) {
+                        if (tight_bL == 1 && bb < bLb) continue;
+                        if (tight_bR == 1 && bb > bRb) continue;
+                        int n_tight_bL = (tight_bL == 1 && bb == bLb) ? 1 : 0;
+                        int n_tight_bR = (tight_bR == 1 && bb == bRb) ? 1 : 0;
+                        
+                        int ns = n_tight_aL | (n_tight_aR << 1) | (n_tight_bL << 2) | (n_tight_bR << 3);
+                        int cur = xb ^ ab ^ bb;
+                        if (cur == 1) {
+                            no[ns] += cnt;
+                            hasOne = true;
+                        } else {
+                            nz[ns] += cnt;
+                        }
+                    }
+                }
+            }
+            dp = hasOne ? no : nz;
+        }
+        long ans = 0;
+        for (long v : dp) ans += v;
+        return ans;
+    }
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            int x = Integer.parseInt(br.readLine().trim());
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int A = Integer.parseInt(st.nextToken());
+            int B = Integer.parseInt(st.nextToken());
+            st = new StringTokenizer(br.readLine());
+            int C = Integer.parseInt(st.nextToken());
+            int D = Integer.parseInt(st.nextToken());
+            sb.append(countBest(x, A, B, C, D)).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// 计算最优方案数
+long long countBest(int x, int A, int B, int C, int D) {
+    vector<long long> dp(16, 0);
+    dp[15] = 1;  // 初始所有tight为真
+    for (int pos = 30; pos >= 0; --pos) {
+        int xb = (x >> pos) & 1;
+        int aLb = (A >> pos) & 1, aRb = (B >> pos) & 1;
+        int bLb = (C >> pos) & 1, bRb = (D >> pos) & 1;
+        
+        vector<long long> nz(16, 0), no(16, 0);
+        bool hasOne = false;
+        
+        for (int st = 0; st < 16; ++st) {
+            long long cnt = dp[st];
+            if (!cnt) continue;
+            int tight_aL = st & 1;
+            int tight_aR = (st >> 1) & 1;
+            int tight_bL = (st >> 2) & 1;
+            int tight_bR = (st >> 3) & 1;
+            
+            for (int ab = 0; ab <= 1; ++ab) {
+                if (tight_aL && ab < aLb) continue;
+                if (tight_aR && ab > aRb) continue;
+                int n_tight_aL = (tight_aL && ab == aLb) ? 1 : 0;
+                int n_tight_aR = (tight_aR && ab == aRb) ? 1 : 0;
+                
+                for (int bb = 0; bb <= 1; ++bb) {
+                    if (tight_bL && bb < bLb) continue;
+                    if (tight_bR && bb > bRb) continue;
+                    int n_tight_bL = (tight_bL && bb == bLb) ? 1 : 0;
+                    int n_tight_bR = (tight_bR && bb == bRb) ? 1 : 0;
+                    
+                    int ns = n_tight_aL | (n_tight_aR << 1) | (n_tight_bL << 2) | (n_tight_bR << 3);
+                    int cur = xb ^ ab ^ bb;
+                    if (cur == 1) {
+                        no[ns] += cnt;
+                        hasOne = true;
+                    } else {
+                        nz[ns] += cnt;
+                    }
+                }
+            }
+        }
+        dp = hasOne ? no : nz;
+    }
+    long long ans = 0;
+    for (long long v : dp) ans += v;
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while (T--) {
+        int x, A, B, C, D;
+        cin >> x >> A >> B >> C >> D;
+        cout << countBest(x, A, B, C, D) << '\n';
+    }
+    return 0;
+}
+```

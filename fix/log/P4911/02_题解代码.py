@@ -1,0 +1,196 @@
+## 解题思路
+
+本题要求仅使用基础的数值计算工具实现完整的二分类训练流程，模型为线性映射后接双弯曲函数。
+
+首先，使用训练集特征按列计算均值 $\mu$ 和标准差 $\sigma$，标准差使用 $ddof=0$。若某一列的 $\sigma=0$，则将其改为 $1$，避免除零。然后使用训练集得到的 $\mu$ 和 $\sigma$ 对 $train$、$val$、$test$ 做相同标准化。
+
+模型使用线性映射后接双弯曲函数：
+
+$$
+\hat y=\sigma(w^Tx+b)
+$$
+
+损失函数为二分类交叉熵加 $L2$ 正则：
+
+$$
+\mathcal{L}=BCE+\frac{\lambda}{2}\lVert w\rVert_2^2
+$$
+
+训练时使用自适应动量优化方法，参数 $w$ 和 $b$ 初始化为 $0$。每个周期使用 `np.random.permutation` 打乱训练集，并按批大小 $16$ 进行小批量训练。
+
+前 $5$ 个周期使用线性预热，学习率从 $0$ 增加到 $0.01$，第 $6$ 个周期起固定为 $0.01$。
+
+每轮训练后计算验证集损失，若连续 $10$ 个周期没有达到有效改进，则提前停止，并恢复验证集损失最优时的参数。最后对测试集计算概率，使用阈值 $0.5$ 得到预测标签。
+
+## 复杂度分析
+
+设训练集样本数为 $N$，验证集样本数为 $M$，测试集样本数为 $T$，特征维度为 $d$，最大训练轮数为 $E=100$。
+
+时间复杂度为：
+
+$$
+O(E \cdot N \cdot d + E \cdot M \cdot d + T \cdot d)
+$$
+
+空间复杂度为：
+
+$$
+O(N \cdot d + M \cdot d + T \cdot d)
+$$
+
+主要空间用于存储数据矩阵、标准化后的特征以及模型参数，复杂度满足要求。
+
+## 代码实现
+
+### Python3
+
+```python
+import sys
+import json
+import numpy as np
+
+
+LAMBDA = 1e-4
+LR_INIT = 0.01
+BETA1 = 0.9
+BETA2 = 0.999
+EPS = 1e-8
+BATCH_SIZE = 16
+MAX_EPOCHS = 100
+PATIENCE = 10
+
+
+def sigmoid(z):
+    # 稳定计算 sigmoid，防止 exp 溢出
+    res = np.empty_like(z, dtype=float)
+    pos = z >= 0
+    res[pos] = 1.0 / (1.0 + np.exp(-z[pos]))
+    ez = np.exp(z[~pos])
+    res[~pos] = ez / (1.0 + ez)
+    return res
+
+
+def calc_loss(x, y, w, b):
+    # 计算二分类交叉熵损失加 L2 正则
+    p = sigmoid(x.dot(w) + b)
+    p = np.clip(p, 1e-15, 1.0 - 1e-15)
+    ce = -np.mean(y * np.log(p) + (1.0 - y) * np.log(1.0 - p))
+    reg = LAMBDA * 0.5 * np.sum(w * w)
+    return ce + reg
+
+
+def train_and_predict(data):
+    # 读取训练集、验证集和测试集
+    train = np.array(data["train"], dtype=float)
+    val = np.array(data["val"], dtype=float)
+    test = np.array(data["test"], dtype=float)
+
+    x_train = train[:, :-1]
+    y_train = train[:, -1]
+    x_val = val[:, :-1]
+    y_val = val[:, -1]
+
+    # 使用训练集均值和标准差做标准化
+    mu = np.mean(x_train, axis=0)
+    sigma = np.std(x_train, axis=0, ddof=0)
+    sigma[sigma == 0] = 1.0
+
+    x_train = (x_train - mu) / sigma
+    x_val = (x_val - mu) / sigma
+    x_test = (test - mu) / sigma
+
+    n, d = x_train.shape
+
+    # 初始化参数 w 和 b
+    w = np.zeros(d)
+    b = 0.0
+
+    # 初始化自适应动量优化器的一阶矩和二阶矩
+    mw = np.zeros(d)
+    vw = np.zeros(d)
+    mb = 0.0
+    vb = 0.0
+    step = 0
+
+    best_loss = float("inf")
+    best_w = w.copy()
+    best_b = b
+    bad_epochs = 0
+
+    # 固定随机种子，保证打乱顺序一致
+    np.random.seed(42)
+
+    for epoch in range(1, MAX_EPOCHS + 1):
+        # 前 5 个周期使用预热策略
+        if epoch <= 5:
+            lr = LR_INIT * epoch / 5.0
+        else:
+            lr = LR_INIT
+
+        # 每轮训练前打乱样本
+        order = np.random.permutation(n)
+
+        for start in range(0, n, BATCH_SIZE):
+            idx = order[start:start + BATCH_SIZE]
+            xb = x_train[idx]
+            yb = y_train[idx]
+            bs = len(idx)
+
+            # 前向计算
+            p = sigmoid(xb.dot(w) + b)
+            diff = p - yb
+
+            # 计算梯度，w 加 L2 正则，b 不加正则
+            gw = xb.T.dot(diff) / bs + LAMBDA * w
+            gb = np.sum(diff) / bs
+
+            # 自适应动量更新
+            step += 1
+
+            mw = BETA1 * mw + (1.0 - BETA1) * gw
+            vw = BETA2 * vw + (1.0 - BETA2) * (gw * gw)
+            mb = BETA1 * mb + (1.0 - BETA1) * gb
+            vb = BETA2 * vb + (1.0 - BETA2) * (gb * gb)
+
+            mw_hat = mw / (1.0 - BETA1 ** step)
+            vw_hat = vw / (1.0 - BETA2 ** step)
+            mb_hat = mb / (1.0 - BETA1 ** step)
+            vb_hat = vb / (1.0 - BETA2 ** step)
+
+            w -= lr * mw_hat / (np.sqrt(vw_hat) + EPS)
+            b -= lr * mb_hat / (np.sqrt(vb_hat) + EPS)
+
+        # 计算验证集损失并进行早停
+        val_loss = calc_loss(x_val, y_val, w, b)
+
+        if val_loss < best_loss - 1e-6:
+            best_loss = val_loss
+            best_w = w.copy()
+            best_b = b
+            bad_epochs = 0
+        else:
+            bad_epochs += 1
+            if bad_epochs >= PATIENCE:
+                break
+
+    # 恢复验证集上最优参数
+    w = best_w
+    b = best_b
+
+    # 测试集预测
+    prob = sigmoid(x_test.dot(w) + b)
+    ans = (prob >= 0.5).astype(int).tolist()
+    return ans
+
+
+def main():
+    data = json.loads(sys.stdin.readline())
+    ans = train_and_predict(data)
+
+    # 使用默认 json.dumps，逗号后会带空格，输出格式如 [0, 1, 0]
+    print(json.dumps(ans))
+
+
+if __name__ == "__main__":
+    main()
+```

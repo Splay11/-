@@ -1,0 +1,206 @@
+## 解题思路
+
+1. **等价条件转化**  
+   一种涂色方案被称为“有效的”，当且仅当存在一条从 $(0,0)$ 到 $(n,n)$ 的单调路径（每次向右或向下），使得路径左下方区域不含金色，右上方区域不含银色。  
+   可以证明，该条件等价于：**不存在金色单元格 $A$ 和银色单元格 $B$，使得 $A$ 在 $B$ 的“左下方”**（即若 $A$ 坐标为 $(i_a,j_a)$，$B$ 为 $(i_b,j_b)$，则 $i_a \le i_b$ 且 $j_a \le j_b$）。  
+   若存在这样的对，任何单调路径均无法同时满足“金不在左下”与“银不在右上”；反之，可利用银色单元格的下闭包构造一条优美路径。
+
+2. **理想与路径的对应**  
+   定义银色单元格集合的向下闭包（在坐标偏序下）为一个理想 $I$。根据上述等价条件，所有金色单元格均不在 $I$ 内。此时，$I$ 的极大元必须为银色，而 $I$ 内部的其余单元格可以涂银或铜；$I$ 外部的单元格可以涂金或铜。  
+   理想 $I$ 与从 $(0,0)$ 到 $(n,n)$ 的单调路径一一对应：路径左下方的格子恰为 $I$。路径中“由向右转为向下”的拐角数 $k$ 等于 $I$ 的极大元个数 $m(I)$。
+
+3. **方案计数**  
+   对于固定的 $I$（或固定路径），极大元有 $k$ 个，则内部非极大元的格子与外部所有格子的颜色均可自由选择（银/铜 或 金/铜），但极大元必须为银。因此该理想对应的有效涂色方案数为 $2^{n^2 - k}$。  
+   包含 $k$ 个“右转下”拐角的单调路径数量为 $\binom{n}{k}^2$（分别在行列方向上选择 $k$ 个转折位置）。
+
+4. **最终公式**  
+   总有效方案数为  
+
+   \[
+   \sum_{k=0}^{n} \binom{n}{k}^2 \cdot 2^{n^2 - k}
+   = 2^{n^2} \sum_{k=0}^{n} \binom{n}{k}^2 \left(\frac{1}{2}\right)^k .
+   \]
+
+   其中 $\frac{1}{2}$ 在模 $998244353$ 下的逆元为 $499122177$。
+
+5. **计算过程**  
+   - 预处理阶乘与阶乘的逆元，以便 $O(1)$ 计算组合数。  
+   - 使用递推计算 $(\frac{1}{2})^k$，累加求和得到 $S = \sum_{k=0}^{n} \binom{n}{k}^2 \left(\frac{1}{2}\right)^k$。  
+   - 使用快速幂计算 $2^{n^2}$，答案即为 $2^{n^2} \cdot S \bmod 998244353$。
+
+## 复杂度分析
+
+- **时间复杂度**：预处理阶乘与逆元需要 $O(n)$，求和步骤需要 $O(n)$，快速幂计算 $2^{n^2}$ 需要 $O(\log n)$，总时间复杂度为 $O(n)$。  
+- **空间复杂度**：存储阶乘和逆元数组需要 $O(n)$ 空间。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 998244353
+
+def modpow(a, e, mod=MOD):
+    """快速幂取模"""
+    r = 1
+    a %= mod
+    while e > 0:
+        if e & 1:
+            r = (r * a) % mod
+        a = (a * a) % mod
+        e >>= 1
+    return r
+
+def main():
+    data = sys.stdin.read().strip().split()
+    n = int(data[0])
+
+    # 预处理阶乘和阶乘的逆元
+    fact = [1] * (n + 1)
+    for i in range(1, n + 1):
+        fact[i] = fact[i - 1] * i % MOD
+
+    inv_fact = [1] * (n + 1)
+    inv_fact[n] = modpow(fact[n], MOD - 2)
+    for i in range(n, 0, -1):
+        inv_fact[i - 1] = inv_fact[i] * i % MOD
+
+    def C(N, K):
+        """组合数 C(N, K) % MOD"""
+        if K < 0 or K > N:
+            return 0
+        return fact[N] * inv_fact[K] % MOD * inv_fact[N - K] % MOD
+
+    inv2 = (MOD + 1) // 2          # 2 在模 MOD 下的逆元，即 499122177
+    S = 0
+    cur = 1                        # cur = (1/2)^k，初始为 (1/2)^0 = 1
+    for k in range(n + 1):
+        comb = C(n, k)
+        term = comb * comb % MOD * cur % MOD
+        S = (S + term) % MOD
+        cur = cur * inv2 % MOD
+
+    pow2 = modpow(2, n * n)       # 2^{n^2}
+    ans = pow2 * S % MOD
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 998244353L;
+
+    static long modpow(long a, long e) {
+        long r = 1 % MOD;
+        a %= MOD;
+        while (e > 0) {
+            if ((e & 1) == 1) r = (r * a) % MOD;
+            a = (a * a) % MOD;
+            e >>= 1;
+        }
+        return r;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+
+        // 预处理阶乘和逆元
+        long[] fact = new long[n + 1];
+        long[] invFact = new long[n + 1];
+        fact[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            fact[i] = fact[i - 1] * i % MOD;
+        }
+        invFact[n] = modpow(fact[n], MOD - 2);
+        for (int i = n; i >= 1; i--) {
+            invFact[i - 1] = invFact[i] * i % MOD;
+        }
+
+        // 组合数函数
+        java.util.function.BiFunction<Integer, Integer, Long> C = (N, K) -> {
+            if (K < 0 || K > N) return 0L;
+            return fact[N] * invFact[K] % MOD * invFact[N - K] % MOD;
+        };
+
+        long inv2 = (MOD + 1) / 2;     // 499122177
+        long S = 0;
+        long cur = 1;                  // (1/2)^0
+        for (int k = 0; k <= n; k++) {
+            long comb = C.apply(n, k);
+            long term = comb * comb % MOD * cur % MOD;
+            S = (S + term) % MOD;
+            cur = cur * inv2 % MOD;
+        }
+
+        long pow2 = modpow(2, 1L * n * n);
+        long ans = pow2 * S % MOD;
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long MOD = 998244353;
+
+// 快速幂
+long long modpow(long long a, long long e) {
+    long long r = 1 % MOD;
+    a %= MOD;
+    while (e > 0) {
+        if (e & 1) r = (r * a) % MOD;
+        a = (a * a) % MOD;
+        e >>= 1;
+    }
+    return r;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    cin >> n;
+
+    // 预处理阶乘与阶乘的逆元
+    vector<long long> fact(n + 1), invFact(n + 1);
+    fact[0] = 1;
+    for (int i = 1; i <= n; ++i) fact[i] = fact[i - 1] * i % MOD;
+    invFact[n] = modpow(fact[n], MOD - 2);
+    for (int i = n; i >= 1; --i) invFact[i - 1] = invFact[i] * i % MOD;
+
+    auto C = [&](int N, int K) -> long long {
+        if (K < 0 || K > N) return 0;
+        return fact[N] * invFact[K] % MOD * invFact[N - K] % MOD;
+    };
+
+    long long inv2 = (MOD + 1) / 2;   // 499122177
+    long long S = 0;
+    long long cur = 1;                // (1/2)^0
+    for (int k = 0; k <= n; ++k) {
+        long long comb = C(n, k);
+        long long term = comb * comb % MOD * cur % MOD;
+        S = (S + term) % MOD;
+        cur = cur * inv2 % MOD;
+    }
+
+    long long pow2 = modpow(2, 1LL * n * n);
+    long long ans = pow2 * S % MOD;
+    cout << ans << "\n";
+
+    return 0;
+}
+```

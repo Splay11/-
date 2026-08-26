@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3452",
+  "title": "第2题-卡片错位",
+  "docId": 2794,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

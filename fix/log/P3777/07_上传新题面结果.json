@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3777",
+  "title": "第1题-货区尾段品类",
+  "docId": 3121,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "哈希表"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "哈希表",
+  "videosol": "",
+  "trial_videosol": ""
+}

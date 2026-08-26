@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5203",
+  "title": "第3题-产能最大化",
+  "docId": 4515,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

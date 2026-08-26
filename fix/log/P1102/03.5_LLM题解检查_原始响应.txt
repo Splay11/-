@@ -1,0 +1,221 @@
+## 解题思路
+
+本题要求对于每个给定的 \(k\)，找到最小的页码 \(n\)，使得从第 \(1\) 页到第 \(n\) 页所有页码的十进制表示中，数字 `0` 出现的总次数 \(f(n) \ge k\)。数据组数 \(t \le 1000\)，\(k \le 10^{13}\)。
+
+首先注意到 \(f(n)\) 是一个单调不减函数：页码越多，数字 `0` 出现的次数不会变少。因此我们可以采用**二分答案**的方法：确定一个足够大的上界 \(R\)，在 \([1, R]\) 范围内二分查找第一个使 \(f(n) \ge k\) 的位置。由于 \(k \le 10^{13}\)，而数字 `0` 的出现频率大约为十分之一，满足条件的 \(n\) 不会超过 \(10^{14}\) 量级，实际可将上界设为 \(10^{15}\) 或更大以保证安全。
+
+二分过程中需要快速计算 \(f(n)\)，即 \(1\) 到 \(n\) 之间所有整数包含的数字 `0` 的总个数（不含前导零）。这个问题可以使用**数位动态规划（数位 DP）** 高效求解，复杂度与 \(n\) 的十进制位数相关，约为 \(O(\log_{10} n)\)。
+
+具体计算 \(f(n)\) 的方法如下：
+1. 预处理数组 \(dp[i]\) 和 \(mid[i]\)（\(i\) 从 \(0\) 开始），其中：
+   - \(mid[i] = 10^i\)，表示 \(i\) 位数的全排列数量；
+   - \(dp[i]\) 表示所有 \(i\) 位十进制数（允许前导零）中数字 `0` 出现的总次数。  
+   递推公式：\(dp[0] = 0,\; mid[0] = 1\)；  
+   \(dp[i] = dp[i-1] \times 10 + mid[i-1]\quad (i \ge 1)\)。  
+   这可以理解为：\(i\) 位数由最高位和低 \(i-1\) 位组成，低 \(i-1\) 位贡献 \(dp[i-1]\) 且最高位有 \(10\) 种选择，因此先有 \(dp[i-1] \times 10\)；当最高位固定为 `0` 时，低 \(i-1\) 位的每一个组合都会产生一个前导零，后续处理中会减去这部分影响，这里先累加 \(mid[i-1]\)。
+2. 将 \(n\) 按十进制拆分为各位数字，从高位向低位处理。维护剩余部分 \(tt\) 和答案 \(ans\)。对每一位数字 \(d\)（所在位权为 \(10^i\)）：
+   - 累加 \(dp[i] \times d\)：表示当前位取 \(0 \dots d-1\) 时，低位完整的 \(dp[i]\) 贡献。
+   - 若 \(d > 0\)，累加 \(mid[i]\)：表示当前位取 \(0\) 且后面低位任取时增加的 `0` 的次数。
+   - 更新 \(tt\)（减去当前位权乘 \(d\)）。
+   - 若 \(d == 0\)，则累加 \(tt + 1\)：表示当前位为 \(0\) 时，后面的数字（比 \(n\) 小的后缀）中，这一位上的 `0` 会出现的次数（包括后缀从 \(0\) 开始的情况）。
+   - 最后减去 \(mid[i]\)：用于消除前导零带来的重复计数。
+3. 处理完所有位后得到的 \(ans\) 即为 \(f(n)\)。
+
+二分查找时，对当前 \(mid\) 计算 \(f(mid)\)，若 \(f(mid) \ge k\) 则收缩右边界，否则收缩左边界；最终左边界 \(l\) 即为最小满足条件的页码。
+
+## 复杂度分析
+
+- 时间复杂度：预处理 \(dp\) 数组仅需常数时间。对于每组询问，二分查找需要 \(O(\log R)\) 次迭代，其中 \(R\) 为二分上界，取 \(10^{15}\) 时 \(\log_2 R \approx 50\)。每次 \(f(n)\) 计算与 \(n\) 的十进制位数成正比，位数不超过 \(15\)。因此单次询问时间 \(O(\log R \cdot \log_{10} n)\)。总时间复杂度 \(O(t \log R \log_{10} n)\)，在本题数据范围内完全可行。
+- 空间复杂度：仅使用常数大小的数组存储 \(dp\) 和 \(mid\)，空间复杂度 \(O(1)\)。
+
+## 代码实现
+
+### Python
+
+```python
+def count_zero(n: int) -> int:
+    """计算1到n所有页码中数字0出现的总次数"""
+    if n <= 0:
+        return 0
+    # 拆分数位
+    digits = []
+    temp = n
+    while temp:
+        digits.append(temp % 10)
+        temp //= 10
+    length = len(digits)
+
+    # 预处理 dp 与 mid
+    MAXL = 20
+    dp = [0] * MAXL
+    mid = [0] * MAXL
+    mid[0] = 1
+    for i in range(1, MAXL):
+        dp[i] = dp[i - 1] * 10 + mid[i - 1]
+        mid[i] = mid[i - 1] * 10
+
+    ans = 0
+    tt = n
+    # 从高位向低位处理，第 i 位对应权值 10^i
+    for i in range(length - 1, -1, -1):
+        d = digits[i]
+        ans += dp[i] * d
+        if d > 0:
+            ans += mid[i]
+        tt -= mid[i] * d
+        if d == 0:
+            ans += tt + 1
+        ans -= mid[i]
+    return ans
+
+
+if __name__ == "__main__":
+    import sys
+    input = sys.stdin.readline
+    t = int(input())
+    for _ in range(t):
+        k = int(input())
+        l, r = 1, 10 ** 15  # 上界足够大
+        while l <= r:
+            mid = (l + r) // 2
+            if count_zero(mid) >= k:
+                r = mid - 1
+            else:
+                l = mid + 1
+        print(l)
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static long[] dp = new long[20];
+    static long[] mid = new long[20];
+
+    static {
+        mid[0] = 1;
+        for (int i = 1; i < 20; i++) {
+            dp[i] = dp[i - 1] * 10 + mid[i - 1];
+            mid[i] = mid[i - 1] * 10;
+        }
+    }
+
+    // 计算 1 到 n 中数字 0 出现的总次数
+    static long countZero(long n) {
+        if (n <= 0) return 0;
+        // 拆分数位
+        int[] digits = new int[20];
+        int len = 0;
+        long temp = n;
+        while (temp > 0) {
+            digits[len++] = (int)(temp % 10);
+            temp /= 10;
+        }
+
+        long ans = 0;
+        long tt = n;
+        // 从高位向低位
+        for (int i = len - 1; i >= 0; i--) {
+            int d = digits[i];
+            ans += dp[i] * d;
+            if (d > 0) {
+                ans += mid[i];
+            }
+            tt -= mid[i] * d;
+            if (d == 0) {
+                ans += tt + 1;
+            }
+            ans -= mid[i];
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int t = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        while (t-- > 0) {
+            long k = Long.parseLong(br.readLine());
+            long l = 1, r = (long) 1e15;  // 上界足够大
+            while (l <= r) {
+                long mid = (l + r) >>> 1;
+                if (countZero(mid) >= k) {
+                    r = mid - 1;
+                } else {
+                    l = mid + 1;
+                }
+            }
+            sb.append(l).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <cstring>
+using namespace std;
+
+typedef long long ll;
+
+ll dp[20], mid[20];
+
+void init() {
+    mid[0] = 1;
+    for (int i = 1; i < 20; ++i) {
+        dp[i] = dp[i - 1] * 10 + mid[i - 1];
+        mid[i] = mid[i - 1] * 10;
+    }
+}
+
+// 计算 1 到 n 中数字 0 出现的总次数
+ll countZero(ll n) {
+    if (n <= 0) return 0;
+    int digits[20], len = 0;
+    ll temp = n;
+    while (temp) {
+        digits[len++] = temp % 10;
+        temp /= 10;
+    }
+    ll ans = 0;
+    ll tt = n;
+    for (int i = len - 1; i >= 0; --i) {
+        int d = digits[i];
+        ans += dp[i] * d;
+        if (d > 0) ans += mid[i];
+        tt -= mid[i] * d;
+        if (d == 0) ans += tt + 1;
+        ans -= mid[i];
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    init();
+    int t;
+    cin >> t;
+    while (t--) {
+        ll k;
+        cin >> k;
+        ll l = 1, r = 1e15;  // 上界足够大
+        while (l <= r) {
+            ll mid = (l + r) >> 1;
+            if (countZero(mid) >= k)
+                r = mid - 1;
+            else
+                l = mid + 1;
+        }
+        cout << l << '\n';
+    }
+    return 0;
+}
+```

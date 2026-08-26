@@ -1,0 +1,496 @@
+## 解题思路
+
+先把题意做一个等价转化。
+
+设原数组为 $a_1,a_2,\dots,a_n$，一个子数组合法，当且仅当这个子数组中任意相邻元素的差的绝对值都不超过 $k$。
+
+对于相邻的两个位置 $i,i+1$，定义一条“边权”：
+
+$$
+d_i = |a_i-a_{i+1}| \quad (1\le i\le n-1)
+$$
+
+那么一个子数组 $[l,r]$ 合法，等价于：
+
+$$
+\max(d_l,d_{l+1},\dots,d_{r-1}) \le k
+$$
+
+也就是说，子数组内部所有相邻位置之间的边权都必须不超过 $k$。
+
+于是问题转化为：
+
+* 数组的每个位置看成一个点；
+* 相邻位置之间有一条边，第 $i$ 条边连接点 $i$ 和点 $i+1$，边权为 $d_i$；
+* 对于每个 $k$，只保留边权 $\le k$ 的边；
+* 问此时这张链式图中，最大的连通块大小是多少。
+
+因为链上的一个连通块，恰好对应原数组中的一个连续子数组，所以：
+
+* 最大连通块大小
+* 就是合法子数组的最大长度。
+
+### 相关算法
+
+这里使用：
+
+1. 离线排序
+2. 并查集（Disjoint Set Union, DSU）
+
+### 核心思路
+
+对于每个 $k$ 都重新扫描一遍数组会很慢。
+
+注意到当 $k$ 从小到大增加时，满足条件的边只会越来越多，不会减少。因此可以按 $k$ 从小到大处理，同时把边按边权从小到大排序。
+
+具体做法：
+
+1. 先计算所有相邻差值 $d_i=|a_i-a_{i+1}|$；
+2. 把每条边记录为 $(d_i,i)$，表示连接位置 $i$ 和 $i+1$；
+3. 按照边权从小到大排序；
+4. 枚举 $k=1$ 到 $n$：
+
+   * 把所有边权 $\le k$ 的边依次加入；
+   * 每加入一条边，就用并查集合并两个端点所在集合；
+   * 并维护当前最大的集合大小；
+   * 这个最大集合大小就是当前 $k$ 的答案。
+
+### 实现方法
+
+并查集中维护：
+
+* `parent[x]`：节点 $x$ 的父节点
+* `size[x]`：以某个根节点为代表的连通块大小
+
+合并两个集合时：
+
+* 先找到各自根节点；
+* 若不同，则合并；
+* 更新新的集合大小；
+* 同时更新当前全局最大连通块大小。
+
+由于图本身是一条链，所以边只会连接相邻两个点，但用并查集处理最清晰，也便于严格维护“随着阈值增大逐步连边”的过程。
+
+
+
+## 复杂度分析
+
+设每组数据长度为 $n$。
+
+### 时间复杂度
+
+1. 计算相邻差值：$O(n)$
+2. 对 $n-1$ 条边排序：$O(n\log n)$
+3. 并查集合并总共最多 $n-1$ 次：$O(n\alpha(n))$
+
+因此总时间复杂度为：
+
+$$
+O(n\log n)
+$$
+
+其中 $\alpha(n)$ 为并查集的反阿克曼函数，可以看作很小的常数。
+
+题目保证所有测试数据中 $n$ 的总和不超过 $2\times 10^5$，这个复杂度完全可行。
+
+### 空间复杂度
+
+需要存储：
+
+* 原数组
+* 边数组
+* 并查集的父节点和集合大小
+
+总空间复杂度为：
+
+$$
+O(n)
+$$
+
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 并查集，维护连通块大小
+class DSU:
+    def __init__(self, n):
+        # parent[i] 表示节点 i 的父节点
+        self.parent = list(range(n + 1))
+        # size[i] 表示以 i 为根的集合大小
+        self.size = [1] * (n + 1)
+        # 当前最大的连通块大小，初始每个点单独成块，大小为 1
+        self.max_size = 1
+
+    # 查找根节点，带路径压缩
+    def find(self, x):
+        while self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
+
+    # 合并两个集合，并更新最大连通块大小
+    def union(self, x, y):
+        rx = self.find(x)
+        ry = self.find(y)
+
+        if rx == ry:
+            return
+
+        # 按集合大小合并，小集合挂到大集合上
+        if self.size[rx] < self.size[ry]:
+            rx, ry = ry, rx
+
+        self.parent[ry] = rx
+        self.size[rx] += self.size[ry]
+
+        if self.size[rx] > self.max_size:
+            self.max_size = self.size[rx]
+
+
+# 计算每个 k 对应的答案
+def solve_one_case(n, arr):
+    # edges 中保存 (边权, 左端点位置)
+    # 表示位置 i 和 i+1 之间有一条边，边权为 abs(arr[i]-arr[i+1])
+    edges = []
+    for i in range(n - 1):
+        diff = abs(arr[i] - arr[i + 1])
+        edges.append((diff, i + 1))  # 使用 1-based 下标，连接 i+1 和 i+2
+
+    # 按边权从小到大排序，方便随着 k 增加逐步加边
+    edges.sort()
+
+    dsu = DSU(n)
+    ans = [1] * (n + 1)
+
+    idx = 0
+    m = len(edges)
+
+    # 枚举 k=1..n
+    for k in range(1, n + 1):
+        # 将所有边权 <= k 的边加入图中
+        while idx < m and edges[idx][0] <= k:
+            pos = edges[idx][1]
+            dsu.union(pos, pos + 1)
+            idx += 1
+
+        # 当前最大连通块大小就是答案
+        ans[k] = dsu.max_size
+
+    return ans[1:]
+
+
+def main():
+    input = sys.stdin.readline
+    t = int(input().strip())
+    out = []
+
+    for _ in range(t):
+        n = int(input().strip())
+        arr = list(map(int, input().split()))
+        res = solve_one_case(n, arr)
+        out.append(" ".join(map(str, res)))
+
+    sys.stdout.write("\n".join(out))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    // 边，保存边权和左端点位置
+    static class Edge implements Comparable<Edge> {
+        int diff;
+        int pos;
+
+        Edge(int diff, int pos) {
+            this.diff = diff;
+            this.pos = pos;
+        }
+
+        @Override
+        public int compareTo(Edge other) {
+            return this.diff - other.diff;
+        }
+    }
+
+    // 并查集，维护连通块大小
+    static class DSU {
+        int[] parent;
+        int[] size;
+        int maxSize;
+
+        DSU(int n) {
+            parent = new int[n + 1];
+            size = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                parent[i] = i;
+                size[i] = 1;
+            }
+            // 初始每个点单独成块，最大大小为 1
+            maxSize = 1;
+        }
+
+        // 查找根节点，带路径压缩
+        int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+
+        // 合并两个集合，并更新最大连通块大小
+        void union(int x, int y) {
+            int rx = find(x);
+            int ry = find(y);
+
+            if (rx == ry) {
+                return;
+            }
+
+            // 按集合大小合并，小集合挂到大集合上
+            if (size[rx] < size[ry]) {
+                int temp = rx;
+                rx = ry;
+                ry = temp;
+            }
+
+            parent[ry] = rx;
+            size[rx] += size[ry];
+
+            if (size[rx] > maxSize) {
+                maxSize = size[rx];
+            }
+        }
+    }
+
+    // 计算每个 k 对应的答案
+    static int[] solveOneCase(int n, int[] arr) {
+        Edge[] edges = new Edge[n - 1];
+
+        // 构造相邻位置之间的边
+        for (int i = 0; i < n - 1; i++) {
+            int diff = Math.abs(arr[i] - arr[i + 1]);
+            edges[i] = new Edge(diff, i + 1); // 连接位置 i+1 和 i+2
+        }
+
+        // 按边权从小到大排序
+        Arrays.sort(edges);
+
+        DSU dsu = new DSU(n);
+        int[] ans = new int[n + 1];
+        int idx = 0;
+
+        // 枚举 k=1..n
+        for (int k = 1; k <= n; k++) {
+            // 将所有边权 <= k 的边加入图中
+            while (idx < edges.length && edges[idx].diff <= k) {
+                int pos = edges[idx].pos;
+                dsu.union(pos, pos + 1);
+                idx++;
+            }
+
+            // 当前最大连通块大小就是答案
+            ans[k] = dsu.maxSize;
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastReader fr = new FastReader();
+        StringBuilder sb = new StringBuilder();
+
+        int t = fr.nextInt();
+
+        while (t-- > 0) {
+            int n = fr.nextInt();
+            int[] arr = new int[n];
+
+            for (int i = 0; i < n; i++) {
+                arr[i] = fr.nextInt();
+            }
+
+            int[] ans = solveOneCase(n, arr);
+
+            for (int k = 1; k <= n; k++) {
+                if (k > 1) {
+                    sb.append(' ');
+                }
+                sb.append(ans[k]);
+            }
+            sb.append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+
+    // 使用 BufferedReader + StringTokenizer 进行输入
+    static class FastReader {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreElements()) {
+                st = new StringTokenizer(br.readLine());
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+
+using namespace std;
+
+// 边，保存边权和左端点位置
+struct Edge {
+    int diff;
+    int pos;
+
+    bool operator<(const Edge& other) const {
+        return diff < other.diff;
+    }
+};
+
+// 并查集，维护连通块大小
+class DSU {
+public:
+    vector<int> parent;
+    vector<int> sz;
+    int maxSize;
+
+    DSU(int n) {
+        parent.resize(n + 1);
+        sz.assign(n + 1, 1);
+
+        for (int i = 1; i <= n; i++) {
+            parent[i] = i;
+        }
+
+        // 初始每个点单独成块，最大大小为 1
+        maxSize = 1;
+    }
+
+    // 查找根节点，带路径压缩
+    int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+
+    // 合并两个集合，并更新最大连通块大小
+    void unite(int x, int y) {
+        int rx = find(x);
+        int ry = find(y);
+
+        if (rx == ry) {
+            return;
+        }
+
+        // 按集合大小合并，小集合挂到大集合上
+        if (sz[rx] < sz[ry]) {
+            swap(rx, ry);
+        }
+
+        parent[ry] = rx;
+        sz[rx] += sz[ry];
+
+        if (sz[rx] > maxSize) {
+            maxSize = sz[rx];
+        }
+    }
+};
+
+// 计算每个 k 对应的答案
+vector<int> solveOneCase(int n, const vector<int>& arr) {
+    vector<Edge> edges;
+
+    // 构造相邻位置之间的边
+    for (int i = 0; i < n - 1; i++) {
+        int diff = abs(arr[i] - arr[i + 1]);
+        edges.push_back({diff, i + 1});  // 连接位置 i+1 和 i+2
+    }
+
+    // 按边权从小到大排序
+    sort(edges.begin(), edges.end());
+
+    DSU dsu(n);
+    vector<int> ans(n + 1, 1);
+    int idx = 0;
+    int m = (int)edges.size();
+
+    // 枚举 k=1..n
+    for (int k = 1; k <= n; k++) {
+        // 将所有边权 <= k 的边加入图中
+        while (idx < m && edges[idx].diff <= k) {
+            int pos = edges[idx].pos;
+            dsu.unite(pos, pos + 1);
+            idx++;
+        }
+
+        // 当前最大连通块大小就是答案
+        ans[k] = dsu.maxSize;
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+
+    while (t--) {
+        int n;
+        cin >> n;
+
+        vector<int> arr(n);
+        for (int i = 0; i < n; i++) {
+            cin >> arr[i];
+        }
+
+        vector<int> ans = solveOneCase(n, arr);
+
+        for (int k = 1; k <= n; k++) {
+            if (k > 1) {
+                cout << ' ';
+            }
+            cout << ans[k];
+        }
+        cout << '\n';
+    }
+
+    return 0;
+}
+```

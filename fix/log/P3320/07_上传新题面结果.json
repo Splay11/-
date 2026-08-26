@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3320",
+  "title": "第1题-异态计数",
+  "docId": 2660,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "3 3\nppp\nppo\nppp",
+      "output": "1",
+      "explanation": "位置 $(2,3)$ 为 `o`，与它中心对称的 $(2,1)$ 为 `p`，需要把该 `o` 改成 `p`，最少 `1` 次。"
+    },
+    {
+      "input": "1 4\npppo",
+      "output": "1",
+      "explanation": "一行四列时，第 `1` 格与第 `4` 格互为中心对称：`p` 与 `o` 不同，把 `o` 改成 `p` 即可，答案为 `1`。"
+    },
+    {
+      "input": "2 3\nppo\nppp",
+      "output": "1",
+      "explanation": "左上 `p` 与右下 `p` 相同；右上 `o` 与左下 `p` 不同，改 `1` 次。"
+    },
+    {
+      "input": "4 1\np\no\np\np",
+      "output": "1",
+      "explanation": "一列四行中，第 `2` 格 `o` 与第 `3` 格 `p` 不对称，改 `1` 次。"
+    }
+  ]
+}

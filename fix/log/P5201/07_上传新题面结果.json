@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5201",
+  "title": "第1题-逐层消散的嵌套编码",
+  "docId": 4513,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "模拟",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

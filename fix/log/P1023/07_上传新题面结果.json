@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1023",
+  "title": "第1题-隔值收取",
+  "docId": 24,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

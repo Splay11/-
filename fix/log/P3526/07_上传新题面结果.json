@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3526",
+  "title": "第3题-智能分拣指令",
+  "docId": 2869,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "栈",
+  "videosol": "",
+  "trial_videosol": ""
+}

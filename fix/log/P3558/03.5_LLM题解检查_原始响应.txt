@@ -1,0 +1,221 @@
+## 解题思路
+
+本题描述了一场积分赛中**领先者次数**的统计问题。$n$ 名选手初始积分为 $0$，依次发生 $m$ 次得分事件，每次事件后积分最高的所有选手都算作一次“领先”。暴力模拟总复杂度为 $O(n\times m)$，无法通过 $n,m \le 2\times 10^5$ 的数据。我们采用**相位（phase）**的概念进行优化。
+
+**核心思想：**
+
+1. **定义相位**  
+   设当前最高积分值为 $C$，从 $C$ 开始保持不变，直到某次事件将最高积分提升为 $C+1$ 为止的连续时间段称为一个**相位**。在同一相位内，最高积分不变，但领先者集合只会**增加**（每当有选手追平当前最高分时加入），而不会减少；当相位结束时，该相位的领先者集合清空，新的相位开始。
+
+2. **记录加入事件**  
+   对于每个相位 $p$，我们记录其结束时刻 $T_p$。  
+   当一名选手在时刻 $t$ 追平当前最高分（即 $t$ 时刻其积分等于当时最高分）时，意味着从 $t$ 到该相位结束 $T_p$ 这段时间，该选手都是领先者。  
+   因此，我们为该选手记录一个“加入事件”$(p, t)$，代表他在相位 $p$ 中的领先起始时刻为 $t$。
+
+3. **扫描过程**  
+   - 维护当前每位选手的积分 `score[i]`，当前最高积分 `maxScore`，当前相位编号 `phaseId`，已处理事件数（时刻）`time`。
+   - 遍历所有得分事件，每次选手 $x$ 积分增加 $1$：
+     * 若 `score[x]` 等于 `maxScore + 1`，说明最高分被刷新，旧相位结束（记录其结束时刻为 `time`），新相位开始（`phaseId + 1`），并更新 `maxScore`。此时选手 $x$ 在新相位的时刻 `time` 加入领先集合，记录事件 `(phaseId, time)`。
+     * 若 `score[x]` 等于 `maxScore`，说明该选手在当前相位追平最高分，记录加入事件 `(phaseId, time)`。
+     * 每次事件后 `time` 自增。
+   - 处理完所有事件后，若还有未结束的相位，将其结束时刻设为 `time`。
+
+4. **计算答案**  
+   对于每位选手，他的领先次数 = 所有他加入的相位中，$(T_{phase} - joinTime)$ 的总和。  
+   这是因为在一个相位内，从加入开始直到相位结束，每次事件后他都是领先者（因为集合只增不减，且每次事件后都要计一次领先）。因此直接累加时间差即可。
+
+该方法避免了在每个时刻对所有领先者进行统计，而是利用相位的单调性批量处理，总复杂度与相位数和事件数线性相关。
+
+## 复杂度分析
+
+- **时间复杂度**：扫描 $m$ 次得分事件，每次至多产生一次“加入事件”，因此总事件数 $O(m)$；最终累加每位选手的加入事件贡献，也是 $O(m)$。总体时间复杂度为 $O(n+m)$。
+- **空间复杂度**：需要存储每位选手的积分、答案、加入事件列表，以及相位结束时间数组。加入事件总数 $O(m)$，相位数量 $O(m)$，因此空间复杂度为 $O(n+m)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    n = int(data[0])
+    m = int(data[1])
+    events = list(map(int, data[2:2+m]))
+    
+    score = [0] * (n + 1)          # 每位选手当前积分
+    ans = [0] * (n + 1)           # 每位选手领先次数
+    joins = [[] for _ in range(n + 1)]  # 每位选手的加入事件：(phase_id, join_time)
+    
+    max_score = 0   # 当前最高积分
+    phase_id = 0    # 当前相位编号，从1开始
+    time = 0        # 已处理的得分事件数
+    phase_end = [0] # 每个相位的结束时刻，索引0占位
+    
+    for x in events:
+        score[x] += 1
+        if score[x] == max_score + 1:
+            # 最高分提升，旧相位结束，新相位开始
+            if phase_id > 0:
+                phase_end[phase_id] = time
+            phase_id += 1
+            if len(phase_end) <= phase_id:
+                phase_end.append(0)
+            max_score += 1
+            joins[x].append((phase_id, time))  # 新相位首个领先者
+        elif score[x] == max_score:
+            # 追平当前最高分，加入领先集合
+            joins[x].append((phase_id, time))
+        time += 1
+    
+    if phase_id > 0:
+        phase_end[phase_id] = time
+    
+    for i in range(1, n + 1):
+        total = 0
+        for pid, jt in joins[i]:
+            total += phase_end[pid] - jt
+        ans[i] = total
+    
+    print(' '.join(str(ans[i]) for i in range(1, n + 1)))
+
+if __name__ == '__main__':
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] firstLine = br.readLine().split(" ");
+        int n = Integer.parseInt(firstLine[0]);
+        int m = Integer.parseInt(firstLine[1]);
+        
+        int[] events = new int[m];
+        String[] secondLine = br.readLine().split(" ");
+        for (int i = 0; i < m; i++) {
+            events[i] = Integer.parseInt(secondLine[i]);
+        }
+        
+        int[] score = new int[n + 1];             // 每位选手当前积分
+        long[] ans = new long[n + 1];             // 每位选手领先次数
+        ArrayList<int[]>[] joins = new ArrayList[n + 1]; // 加入事件：(phase_id, join_time)
+        for (int i = 1; i <= n; i++) {
+            joins[i] = new ArrayList<>();
+        }
+        
+        int maxScore = 0;    // 当前最高积分
+        int phaseId = 0;     // 当前相位编号，从1开始
+        int time = 0;        // 已处理的得分事件数
+        int[] phaseEnd = new int[m + 2]; // 相位结束时刻，最多m个相位
+        
+        for (int x : events) {
+            score[x]++;
+            if (score[x] == maxScore + 1) {
+                // 最高分提升，旧相位结束，新相位开始
+                if (phaseId > 0) {
+                    phaseEnd[phaseId] = time;
+                }
+                phaseId++;
+                maxScore++;
+                joins[x].add(new int[]{phaseId, time}); // 新相位首个领先者
+            } else if (score[x] == maxScore) {
+                // 追平当前最高分，加入领先集合
+                joins[x].add(new int[]{phaseId, time});
+            }
+            time++;
+        }
+        if (phaseId > 0) {
+            phaseEnd[phaseId] = time;
+        }
+        
+        for (int i = 1; i <= n; i++) {
+            long total = 0;
+            for (int[] event : joins[i]) {
+                int pid = event[0];
+                int joinTime = event[1];
+                total += phaseEnd[pid] - joinTime;
+            }
+            ans[i] = total;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= n; i++) {
+            if (i > 1) sb.append(' ');
+            sb.append(ans[i]);
+        }
+        System.out.println(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n, m;
+    cin >> n >> m;
+    
+    vector<int> score(n + 1, 0);               // 每位选手当前积分
+    vector<long long> ans(n + 1, 0);           // 每位选手领先次数
+    vector<vector<pair<int,int>>> joins(n + 1); // 加入事件：(phase_id, join_time)
+    
+    int maxScore = 0;      // 当前最高积分
+    int phaseId = 0;       // 当前相位编号，从1开始
+    int time = 0;          // 已处理的得分事件数
+    vector<int> phaseEnd(1, 0); // 相位结束时刻，索引0占位
+    
+    for (int i = 0; i < m; i++) {
+        int x;
+        cin >> x;
+        score[x]++;
+        if (score[x] == maxScore + 1) {
+            // 最高分提升，旧相位结束，新相位开始
+            if (phaseId > 0) {
+                phaseEnd[phaseId] = time;
+            }
+            phaseId++;
+            if ((int)phaseEnd.size() <= phaseId) {
+                phaseEnd.push_back(0);
+            }
+            maxScore++;
+            joins[x].push_back({phaseId, time}); // 新相位首个领先者
+        } else if (score[x] == maxScore) {
+            // 追平当前最高分，加入领先集合
+            joins[x].push_back({phaseId, time});
+        }
+        time++;
+    }
+    if (phaseId > 0) {
+        phaseEnd[phaseId] = time;
+    }
+    
+    for (int i = 1; i <= n; i++) {
+        for (auto &event : joins[i]) {
+            int pid = event.first;
+            int joinTime = event.second;
+            ans[i] += (long long)(phaseEnd[pid] - joinTime);
+        }
+    }
+    
+    for (int i = 1; i <= n; i++) {
+        cout << ans[i] << (i == n ? '\n' : ' ');
+    }
+    
+    return 0;
+}
+```

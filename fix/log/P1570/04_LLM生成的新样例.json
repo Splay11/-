@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "8\n1\nvoid emit(int id)\n1\nint emit(String msg,int level)\n2\nemit(int)\n2\nemit(double)\n1\ndouble mix(double x,int y)\n2\nmix(double,int)\n2\nhalt(int)\n1\nString emit(int value)",
+      "output": "Yes.\nYes.\nYes.\nemit was not declared in this scope.\nYes.\nYes.\nThere is no function halt.\nredefinition of emit.",
+      "explanation": "第一次登记参数类型为 `int` 的 `emit`，成功。\n第二次登记参数类型为 `String,int` 的另一个 `emit`，类型列表不同，属于合法重载。\n第三次调用 `emit(int)`，存在完全匹配，输出 `Yes.`。\n第四次调用 `emit(double)`：名字 `emit` 已存在，但没有 `double` 重载，输出 `emit was not declared in this scope.`。\n第五次登记 `mix(double,int)` 成功，第六次调用匹配成功。\n第七次调用 `halt(int)`，该名字从未登记，输出 `There is no function halt.`。\n最后一次登记 `emit(int)`：返回类型与参数名不同，但名字和参数类型列表与第一次相同，输出 `redefinition of emit.`。"
+    },
+    {
+      "input": "3\n1\nint ping()\n2\nping()\n2\nping(int)",
+      "output": "Yes.\nYes.\nping was not declared in this scope.",
+      "explanation": "登记无参接口 `ping` 成功。\n调用 `ping()` 与空参数列表匹配，输出 `Yes.`。\n调用 `ping(int)` 时名字存在但类型列表不匹配，输出 `ping was not declared in this scope.`。"
+    },
+    {
+      "input": "2\n2\nopen(int)\n1\nvoid open(int fd)",
+      "output": "There is no function open.\nYes.",
+      "explanation": "尚未登记任何接口就调用 `open`，输出 `There is no function open.`。\n随后登记 `open(int)` 成功，输出 `Yes.`。"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+## 解题思路
+
+题目要求选择分割位置 $k$（$1 \le k < n$），将序列 $p_1,\dots,p_n$ 分为前段与后段，最大化两段元素两两乘积之和：
+$$
+V = \sum_{i=1}^{k} \sum_{j=k+1}^{n} p_i \cdot p_j
+$$
+该表达式可以改写为前段和与后段和的乘积。令 $S = \sum_{i=1}^{n} p_i$ 为序列总和，分割点为 $k$ 时的前段和为 $\text{pre} = \sum_{i=1}^{k} p_i$，后段和为 $S - \text{pre}$。于是：
+$$
+V = \text{pre} \times (S - \text{pre})
+$$
+由于所有 $p_i > 0$，上述表达式是关于 $\text{pre}$ 的开口向下的二次函数，在 $\text{pre}$ 接近 $S/2$ 时取得最大值。
+
+我们可以枚举所有可能的分割位置 $k = 1, 2, \dots, n-1$，维护前缀和并计算当前的价值，记录其中的最大值。因为 $n \le 2 \times 10^5$，一次遍历即可完成。
+
+注意最终答案需要对 $998244353$ 取模，并且中间计算的乘积可能较大（最大约为 $(S/2)^2$），需使用 64 位整数类型（如 `long long`）存储。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$，只需预先计算总和并进行一次线性扫描。
+- 空间复杂度：$O(n)$，主要用于存储原始序列 $p$；若采用在线计算，可以将空间优化至 $O(1)$，但通常为清晰起见保留数组。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 998244353
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    n = int(data[0])
+    p = list(map(int, data[1:1+n]))
+    
+    S = sum(p)
+    prefix = 0
+    ans = 0
+    # 枚举分割位置 k，对应索引从 0 到 n-2
+    for i in range(n - 1):
+        prefix += p[i]
+        suffix = S - prefix
+        product = prefix * suffix
+        if product > ans:
+            ans = product
+    
+    print(ans % MOD)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 998244353;
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        int[] p = new int[n];
+        String[] tokens = br.readLine().trim().split("\\s+");
+        for (int i = 0; i < n; i++) {
+            p[i] = Integer.parseInt(tokens[i]);
+        }
+
+        long S = 0;
+        for (int val : p) {
+            S += val;
+        }
+
+        long prefix = 0;
+        long ans = 0;
+        // 枚举分割位置 k，1 <= k < n，在数组中分割点 i = k-1
+        for (int i = 0; i < n - 1; i++) {
+            prefix += p[i];
+            long suffix = S - prefix;
+            long product = prefix * suffix;
+            if (product > ans) {
+                ans = product;
+            }
+        }
+
+        System.out.println(ans % MOD);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+typedef long long ll;
+
+const ll MOD = 998244353;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int> p(n);
+    for (int i = 0; i < n; ++i) {
+        cin >> p[i];
+    }
+
+    ll S = 0;
+    for (int val : p) {
+        S += val;
+    }
+
+    ll prefix = 0;
+    ll ans = 0;
+    // 枚举分割位置 k，对应下标 0 到 n-2
+    for (int i = 0; i < n - 1; ++i) {
+        prefix += p[i];
+        ll suffix = S - prefix;
+        ll product = prefix * suffix;
+        if (product > ans) {
+            ans = product;
+        }
+    }
+
+    cout << ans % MOD << "\n";
+    return 0;
+}
+```

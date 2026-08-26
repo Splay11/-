@@ -1,0 +1,221 @@
+## 解题思路
+
+对于每组测试数据，设矩阵的行数为 $r$，列数为 $c$。
+首先预处理出每一行的总和 $rowSum[i]$ 以及每一列的总和 $colSum[j]$。
+
+两次采集按顺序进行，所有可能的情况可以分为以下三类：
+
+1. **两次都选择行**  
+   - 若两次选择同一行，第一次获得该行总和，第二次该行全部为 $0$，获得 $0$，总收益等于该行总和。  
+   - 若两次选择两个不同的行，总收益为这两行各自的总和之和。  
+   - 因此，这种情况的候选最大值为：所有行和的最大值，以及（若 $r \ge 2$）最大的两个行和之和。
+
+2. **两次都选择列**  
+   与行的情况完全对称。候选最大值为：所有列和的最大值，以及（若 $c \ge 2$）最大的两个列和之和。
+
+3. **一次选择行、一次选择列**  
+   假设先选择第 $i$ 行，再选择第 $j$ 列（顺序不影响最终结果，因为交叉点只计一次）。  
+   - 第一次选择第 $i$ 行，获得 $rowSum[i]$，将该行所有元素置为 $0$。  
+   - 第二次选择第 $j$ 列时，交叉点 $(i, j)$ 已变为 $0$，因此实际获得 $colSum[j] - matrix[i][j]$。  
+   - 总收益为 $rowSum[i] + colSum[j] - matrix[i][j]$。  
+   枚举所有 $i, j$ 计算出这种情况的最大收益即可。
+
+最终答案即为上述三类情况中所有收益的最大值。
+
+## 复杂度分析
+
+- **时间复杂度**：对于每组测试数据，计算行和与列和需要 $O(r \times c)$，枚举一行一列的组合也需要 $O(r \times c)$。题目保证所有测试用例的矩阵元素总数不超过 $5 \times 10^5$，因此总时间复杂度为 $O(\text{总元素数})$，可以在规定时间内通过。  
+- **空间复杂度**：需要存储矩阵以及行和、列和，每组数据的空间复杂度为 $O(r \times c)$，在最坏情况下仍满足内存限制。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve():
+    data = sys.stdin.read().split()
+    it = iter(data)
+    q = int(next(it))
+    out = []
+    for _ in range(q):
+        r = int(next(it))
+        c = int(next(it))
+        matrix = []
+        row_sum = [0] * r
+        col_sum = [0] * c
+        for i in range(r):
+            row = []
+            for j in range(c):
+                val = int(next(it))
+                row.append(val)
+                row_sum[i] += val
+                col_sum[j] += val
+            matrix.append(row)
+        # 同一行/列采集两次等价于只采一次
+        ans = max(row_sum + col_sum)
+        # 两次采集不同的行
+        if r >= 2:
+            a = b = -10**18
+            for v in row_sum:
+                if v >= a:
+                    b = a
+                    a = v
+                elif v > b:
+                    b = v
+            ans = max(ans, a + b)
+        # 两次采集不同的列
+        if c >= 2:
+            a = b = -10**18
+            for v in col_sum:
+                if v >= a:
+                    b = a
+                    a = v
+                elif v > b:
+                    b = v
+            ans = max(ans, a + b)
+        # 一次行一次列
+        for i in range(r):
+            for j in range(c):
+                ans = max(ans, row_sum[i] + col_sum[j] - matrix[i][j])
+        out.append(str(ans))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int q = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        while (q-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int r = Integer.parseInt(st.nextToken());
+            int c = Integer.parseInt(st.nextToken());
+            long[][] mat = new long[r][c];
+            long[] rowSum = new long[r];
+            long[] colSum = new long[c];
+            for (int i = 0; i < r; i++) {
+                st = new StringTokenizer(br.readLine());
+                for (int j = 0; j < c; j++) {
+                    mat[i][j] = Long.parseLong(st.nextToken());
+                    rowSum[i] += mat[i][j];
+                    colSum[j] += mat[i][j];
+                }
+            }
+            long ans = Long.MIN_VALUE;
+            // 同一行/列两次
+            for (long v : rowSum) ans = Math.max(ans, v);
+            for (long v : colSum) ans = Math.max(ans, v);
+            // 两个不同的行
+            if (r >= 2) {
+                long a = Long.MIN_VALUE, b = Long.MIN_VALUE;
+                for (long v : rowSum) {
+                    if (v >= a) {
+                        b = a;
+                        a = v;
+                    } else if (v > b) {
+                        b = v;
+                    }
+                }
+                ans = Math.max(ans, a + b);
+            }
+            // 两个不同的列
+            if (c >= 2) {
+                long a = Long.MIN_VALUE, b = Long.MIN_VALUE;
+                for (long v : colSum) {
+                    if (v >= a) {
+                        b = a;
+                        a = v;
+                    } else if (v > b) {
+                        b = v;
+                    }
+                }
+                ans = Math.max(ans, a + b);
+            }
+            // 一行一列
+            for (int i = 0; i < r; i++) {
+                for (int j = 0; j < c; j++) {
+                    ans = Math.max(ans, rowSum[i] + colSum[j] - mat[i][j]);
+                }
+            }
+            sb.append(ans).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int q;
+    cin >> q;
+    while (q--) {
+        int r, c;
+        cin >> r >> c;
+        vector<vector<long long>> mat(r, vector<long long>(c));
+        vector<long long> rowSum(r, 0), colSum(c, 0);
+        for (int i = 0; i < r; ++i) {
+            for (int j = 0; j < c; ++j) {
+                cin >> mat[i][j];
+                rowSum[i] += mat[i][j];
+                colSum[j] += mat[i][j];
+            }
+        }
+        long long ans = LLONG_MIN;
+        // 同一行/列两次
+        for (long long v : rowSum) ans = max(ans, v);
+        for (long long v : colSum) ans = max(ans, v);
+        // 两个不同的行
+        if (r >= 2) {
+            long long a = LLONG_MIN, b = LLONG_MIN;
+            for (long long v : rowSum) {
+                if (v >= a) {
+                    b = a;
+                    a = v;
+                } else if (v > b) {
+                    b = v;
+                }
+            }
+            ans = max(ans, a + b);
+        }
+        // 两个不同的列
+        if (c >= 2) {
+            long long a = LLONG_MIN, b = LLONG_MIN;
+            for (long long v : colSum) {
+                if (v >= a) {
+                    b = a;
+                    a = v;
+                } else if (v > b) {
+                    b = v;
+                }
+            }
+            ans = max(ans, a + b);
+        }
+        // 一行一列
+        for (int i = 0; i < r; ++i) {
+            for (int j = 0; j < c; ++j) {
+                ans = max(ans, rowSum[i] + colSum[j] - mat[i][j]);
+            }
+        }
+        cout << ans << '\n';
+    }
+    return 0;
+}
+```

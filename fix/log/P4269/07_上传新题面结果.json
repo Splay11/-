@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4269",
+  "title": "第3题-均载货窗",
+  "docId": 3347,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

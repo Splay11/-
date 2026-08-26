@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P3502",
+  "title": "第3题-导电连通片的期望",
+  "docId": 2845,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "概率论",
+    "dfs",
+    "bfs"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "并查集",
+  "videosol": "",
+  "trial_videosol": ""
+}

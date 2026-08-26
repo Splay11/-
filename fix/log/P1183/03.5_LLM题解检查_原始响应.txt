@@ -1,0 +1,221 @@
+## 解题思路
+
+1. **问题转化**  
+   公司员工构成一棵 $n$ 个节点的树，每个节点有一个类别：`R`（研究员）或 `B`（工程师）。  
+   整棵树满足研究员人数严格多于工程师人数。  
+   切断恰好一条边，将树分为两个连通块，要求两个连通块各自的研究员人数都严格多于工程师人数。求可行的切边方案数。
+
+2. **预处理子树信息**  
+   - 任选一个节点（例如 $1$ 号员工）作为根，将树转为有根树。  
+   - 第一次深度优先搜索（DFS）自底向上统计每个节点的子树信息：  
+     - `sz[u]`：以 $u$ 为根的子树中的员工总数。  
+     - `r[u]`：以 $u$ 为根的子树中研究员的个数。  
+   - 对叶子节点，初始化 `sz[u] = 1`，`r[u] = (s[u] == 'R')`（假设 $s$ 为输入的类别字符串，使用 $1$‑based 下标）。
+
+3. **枚举切边并判断**  
+   - 第二次 DFS，遍历树中的每一条父‑子边 $(u, v)$（其中 $v$ 是 $u$ 的子节点）。  
+   - 删除边 $(u, v)$ 后，树被分成两部分：  
+     - 子树 $v$：  
+       研究员数 $= r[v]$，工程师数 $= sz[v] - r[v]$。  
+       需满足 $r[v] > sz[v] - r[v]$。  
+     - 剩余部分（原树去掉子树 $v$）：  
+       研究员数 $= r[1] - r[v]$，工程师数 $= (n - sz[v]) - (r[1] - r[v])$。  
+       需满足 $r[1] - r[v] > (n - sz[v]) - (r[1] - r[v])$。  
+   - 若上述两个条件同时成立，则该边是一种合法的切断方案，答案加 $1$。
+
+4. **边界与细节**  
+   - 由于已知整棵树本身是一个明星团队，初始条件 $r[1] > n - r[1]$ 成立，确保剩余部分判定的分母等不会出现负值。  
+   - 无向树中每条边在 DFS 时恰好以父‑子关系被访问一次，不会重复计算。  
+   - 输入字符串下标从 $1$ 开始可通过前置占位符（如 `'#'` 或 `' '`）实现，便于和树节点编号对齐。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$  
+  两次 DFS 遍历所有节点和边，每条边被访问常数次，每次操作 $O(1)$。
+- **空间复杂度**：$O(n)$  
+  存储邻接表需要 $O(n)$ 的空间，数组 `sz` 和 `r` 各占用 $O(n)$，递归栈深度在最坏情况下为 $O(n)$。整体为线性空间。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(2000000)
+
+def solve():
+    input_data = sys.stdin.read().split()
+    it = iter(input_data)
+    n = int(next(it))
+    # 类别字符串，从下标1开始存储
+    s = ' ' + next(it)
+    # 邻接表
+    g = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u = int(next(it))
+        v = int(next(it))
+        g[u].append(v)
+        g[v].append(u)
+    
+    sz = [0] * (n + 1)
+    r = [0] * (n + 1)
+    
+    # 第一次DFS：计算子树大小和研究员数
+    def dfs1(u, p):
+        sz[u] = 1
+        r[u] = 1 if s[u] == 'R' else 0
+        for v in g[u]:
+            if v == p:
+                continue
+            dfs1(v, u)
+            sz[u] += sz[v]
+            r[u] += r[v]
+    
+    dfs1(1, 0)
+    
+    ans = 0
+    # 第二次DFS：枚举每条边
+    def dfs2(u, p):
+        nonlocal ans
+        for v in g[u]:
+            if v == p:
+                continue
+            # 检查子树v
+            if r[v] > sz[v] - r[v]:
+                rest_r = r[1] - r[v]
+                rest_sz = n - sz[v]
+                if rest_r > rest_sz - rest_r:
+                    ans += 1
+            dfs2(v, u)
+    
+    dfs2(1, 0)
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int n;
+    static String s;
+    static List<Integer>[] g;
+    static int[] sz, r;
+    static int ans = 0;
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(br.readLine().trim());
+        s = " " + br.readLine().trim();  // 1-based
+        g = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            g[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < n - 1; i++) {
+            String[] edge = br.readLine().split(" ");
+            int u = Integer.parseInt(edge[0]);
+            int v = Integer.parseInt(edge[1]);
+            g[u].add(v);
+            g[v].add(u);
+        }
+        sz = new int[n + 1];
+        r = new int[n + 1];
+
+        dfs1(1, 0);
+        ans = 0;
+        dfs2(1, 0);
+        System.out.println(ans);
+    }
+
+    static void dfs1(int u, int p) {
+        sz[u] = 1;
+        r[u] = s.charAt(u) == 'R' ? 1 : 0;
+        for (int v : g[u]) {
+            if (v == p) continue;
+            dfs1(v, u);
+            sz[u] += sz[v];
+            r[u] += r[v];
+        }
+    }
+
+    static void dfs2(int u, int p) {
+        for (int v : g[u]) {
+            if (v == p) continue;
+            // 检查边 (u, v)
+            if (r[v] > sz[v] - r[v]) {
+                int restR = r[1] - r[v];
+                int restSz = n - sz[v];
+                if (restR > restSz - restR) {
+                    ans++;
+                }
+            }
+            dfs2(v, u);
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    string s;
+    cin >> s;
+    s = ' ' + s;  // 1‑based
+
+    vector<vector<int>> g(n + 1);
+    for (int i = 1; i < n; ++i) {
+        int u, v;
+        cin >> u >> v;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+
+    vector<int> sz(n + 1), r(n + 1);
+
+    function<void(int, int)> dfs1 = [&](int u, int p) {
+        sz[u] = 1;
+        r[u] = (s[u] == 'R');
+        for (int v : g[u]) {
+            if (v == p) continue;
+            dfs1(v, u);
+            sz[u] += sz[v];
+            r[u] += r[v];
+        }
+    };
+    dfs1(1, 0);
+
+    int ans = 0;
+    function<void(int, int)> dfs2 = [&](int u, int p) {
+        for (int v : g[u]) {
+            if (v == p) continue;
+            // 检查边 (u, v)
+            if (r[v] > sz[v] - r[v]) {
+                int rest_r = r[1] - r[v];
+                int rest_sz = n - sz[v];
+                if (rest_r > rest_sz - rest_r) {
+                    ++ans;
+                }
+            }
+            dfs2(v, u);
+        }
+    };
+    dfs2(1, 0);
+
+    cout << ans << '\n';
+    return 0;
+}
+```

@@ -1,0 +1,234 @@
+## 解题思路
+
+1. 将重排表 $a$ 看成一个置换：位置 $i$ 在操作后用到的是原串位置 $a_i$。为了方便，可以把所有下标转成从 $0$ 开始，即令 $p_i=a_i-1$，此时置换关系为 $i \to p_i$。
+
+2. 一个置换可以分解成若干个互不相交的循环。对于每个循环，从某个位置出发，依次按 $x \to a_x$ 的方向访问，直到回到起点，就能得到该循环上的一个长度为 $L$ 的圆形字符串。
+
+3. 一次重排操作等价于让每个循环上的圆形字符串旋转一格。因此，一个循环恢复原状的最少正整数步数，就是这个圆形字符串的最小正周期。
+
+4. 设某个循环长度为 $L$，其圆形字符串为 $c$。枚举 $L$ 的所有约数 $d$，检查是否对所有位置满足 $c_j = c_{j \bmod d}$。最小的满足条件的 $d$ 就是该循环的周期。若循环中字符全部相同，则 $d=1$。
+
+5. 整串恢复原状当且仅当所有循环都恢复原状，所以总答案是所有循环周期的最小公倍数。
+
+6. 答案本身可能非常大，因此不能只使用普通 $64$ 位整数。Python 和 Java 可以使用高精度整数求最小公倍数；C++ 代码使用质因数分解，记录每个质因子的最大指数，最后用快速幂累乘并取模 $10^9+7$。
+
+## 复杂度分析
+
+- 时间复杂度：$O\left(\sum_i L_i \cdot \tau(L_i) + n\right)$，其中 $L_i$ 是第 $i$ 个循环的长度，$\tau(L_i)$ 是 $L_i$ 的约数个数。在 $n \le 2 \times 10^5$ 范围内约数个数很少，实际运行效率足够。
+- 空间复杂度：$O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import math
+
+MOD = 10**9 + 7
+
+
+def cycle_period(chars):
+    """返回环形字符串 chars 的最小正周期"""
+    m = len(chars)
+    for d in range(1, m + 1):
+        if m % d != 0:
+            continue
+        if all(chars[i] == chars[i % d] for i in range(m)):
+            return d
+    return m
+
+
+def solve():
+    data = sys.stdin.read().split()
+    if not data:
+        return
+
+    n = int(data[0])
+    s = data[1]
+    # 将重排表转为 0-based 的置换
+    a = [int(x) - 1 for x in data[2:2 + n]]
+
+    visited = [False] * n
+    ans = 1  # 最小正整数答案
+
+    for i in range(n):
+        if visited[i]:
+            continue
+
+        cycle = []
+        x = i
+        while not visited[x]:
+            visited[x] = True
+            cycle.append(s[x])
+            x = a[x]
+
+        period = cycle_period(cycle)
+        # 使用高精度整数计算最小公倍数
+        ans = ans // math.gcd(ans, period) * period
+
+    print(ans % MOD)
+
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.*;
+
+public class Main {
+    static final int MOD = 1_000_000_007;
+
+    static int cyclePeriod(String s) {
+        int m = s.length();
+        for (int d = 1; d <= m; d++) {
+            if (m % d != 0) continue;
+            boolean ok = true;
+            for (int i = 0; i < m; i++) {
+                if (s.charAt(i) != s.charAt(i % d)) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) return d;
+        }
+        return m;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        int n = Integer.parseInt(br.readLine().trim());
+        String s = br.readLine().trim();
+
+        int[] a = new int[n];
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < n; i++) {
+            a[i] = Integer.parseInt(st.nextToken()) - 1; // 转为 0-based
+        }
+
+        boolean[] visited = new boolean[n];
+        BigInteger ans = BigInteger.ONE;
+        BigInteger mod = BigInteger.valueOf(MOD);
+
+        for (int i = 0; i < n; i++) {
+            if (visited[i]) continue;
+
+            StringBuilder cycle = new StringBuilder();
+            int x = i;
+            while (!visited[x]) {
+                visited[x] = true;
+                cycle.append(s.charAt(x));
+                x = a[x];
+            }
+
+            BigInteger period = BigInteger.valueOf(cyclePeriod(cycle.toString()));
+            // 高精度最小公倍数
+            ans = ans.divide(ans.gcd(period)).multiply(period);
+        }
+
+        System.out.println(ans.mod(mod));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long MOD = 1e9 + 7;
+
+int cycle_period(const string& s) {
+    int m = (int)s.size();
+    for (int d = 1; d <= m; ++d) {
+        if (m % d != 0) continue;
+        bool ok = true;
+        for (int i = 0; i < m; ++i) {
+            if (s[i] != s[i % d]) {
+                ok = false;
+                break;
+            }
+        }
+        if (ok) return d;
+    }
+    return m;
+}
+
+// 质因数分解 x，并更新每个质因子的最大指数
+void add_factors(int x, vector<int>& max_exp) {
+    for (int p = 2; 1LL * p * p <= x; ++p) {
+        if (x % p == 0) {
+            int e = 0;
+            while (x % p == 0) {
+                x /= p;
+                ++e;
+            }
+            max_exp[p] = max(max_exp[p], e);
+        }
+    }
+    if (x > 1) {
+        max_exp[x] = max(max_exp[x], 1);
+    }
+}
+
+long long mod_pow(long long base, int exp) {
+    long long res = 1;
+    while (exp > 0) {
+        if (exp & 1) res = res * base % MOD;
+        base = base * base % MOD;
+        exp >>= 1;
+    }
+    return res;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    string s;
+    cin >> s;
+
+    vector<int> a(n);
+    for (int i = 0; i < n; ++i) {
+        cin >> a[i];
+        --a[i]; // 转为 0-based
+    }
+
+    vector<char> visited(n, false);
+    vector<int> max_exp(n + 1, 0);
+
+    for (int i = 0; i < n; ++i) {
+        if (visited[i]) continue;
+
+        string cycle;
+        int x = i;
+        while (!visited[x]) {
+            visited[x] = true;
+            cycle.push_back(s[x]);
+            x = a[x];
+        }
+
+        int period = cycle_period(cycle);
+        add_factors(period, max_exp);
+    }
+
+    long long ans = 1;
+    for (int p = 2; p <= n; ++p) {
+        if (max_exp[p] > 0) {
+            ans = ans * mod_pow(p, max_exp[p]) % MOD;
+        }
+    }
+
+    cout << ans << '\n';
+    return 0;
+}
+```

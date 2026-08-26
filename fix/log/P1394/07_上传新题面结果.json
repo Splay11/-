@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1394",
+  "title": "第3题-同首尾切片",
+  "docId": 409,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

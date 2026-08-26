@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1082",
+  "title": "饱和谱系计数",
+  "docId": 84,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

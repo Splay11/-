@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4785",
+  "title": "零的稀疏约束",
+  "docId": 4051,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

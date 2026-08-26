@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2757",
+  "title": "第3题-质数灯组",
+  "docId": 2389,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "搜索"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

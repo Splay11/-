@@ -1,0 +1,225 @@
+## 解题思路
+
+给定一行共 n 人，每人有能力值 a\[i]。对所有连续长度为 x 的小组，**该组能力值定义为组内最小值**；题目要求对所有 1≤x≤n，输出“长度为 x 的所有小组能力值中的最大值”。
+
+核心做法是用 **单调栈** 预处理每个元素作为“组内最小值”时所能覆盖的最大窗口长度：
+
+1. 对每个位置 i，找到
+
+   * `pre[i]`：i 左侧 **第一个严格更小** 的位置（值 `< a[i]`），不存在记为 -1；
+   * `nxt[i]`：i 右侧 **第一个小于等于** 的位置（值 `<= a[i]`），不存在记为 n。
+2. 则以 a\[i] 为最小值能覆盖的最大窗口长度为
+   `len = nxt[i] - pre[i] - 1`。
+   于是我们可以让 `ans[len] = max(ans[len], a[i])`。
+3. 由于某个长度的最佳最小值也适用于更小的长度（缩短窗口不变劣），从大到小做一次 **后缀最大**：
+   `for x=n-1..1: ans[x] = max(ans[x], ans[x+1])`。
+4. 输出 `ans[1..n]`。
+
+上述两次栈扫描均为 O(n)。
+
+## 复杂度分析
+
+* 时间复杂度：O(n)，每个元素至多入栈出栈一次，最后线性扫两遍。
+* 空间复杂度：O(n)，存储前后更小位置与答案数组。
+
+## 代码实现
+
+### Python
+
+```python
+# -*- coding: utf-8 -*-
+import sys
+
+def max_of_min_for_all_windows(a):
+    n = len(a)
+    pre = [-1] * n  # 左侧第一个严格更小的位置
+    nxt = [n] * n   # 右侧第一个小于等于的位置
+
+    # 计算 pre：维护单调递增栈，保证栈顶元素 < 当前值
+    st = []
+    for i in range(n):
+        # 弹出 >= a[i]，以确保得到严格更小
+        while st and a[st[-1]] >= a[i]:
+            st.pop()
+        pre[i] = st[-1] if st else -1
+        st.append(i)
+
+    # 计算 nxt：从右往左，维护单调递增栈，得到 <= a[i]
+    st.clear()
+    for i in range(n - 1, -1, -1):
+        # 弹出 > a[i]，使得栈顶 <= a[i]
+        while st and a[st[-1]] > a[i]:
+            st.pop()
+        nxt[i] = st[-1] if st else n
+        st.append(i)
+
+    ans = [0] * (n + 1)  # ans[len] 表示长度为 len 的答案
+    for i in range(n):
+        length = nxt[i] - pre[i] - 1
+        if a[i] > ans[length]:
+            ans[length] = a[i]
+
+    # 后缀最大，填补尚未被直接更新的位置
+    for x in range(n - 1, 0, -1):
+        if ans[x + 1] > ans[x]:
+            ans[x] = ans[x + 1]
+
+    return ans[1:]  # 去掉 0 位置
+
+def main():
+    data = list(map(int, sys.stdin.read().strip().split()))
+    if not data:
+        return
+    n = data[0]
+    a = data[1:1 + n]
+    res = max_of_min_for_all_windows(a)
+    print(" ".join(map(str, res)))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+// 注意：ACM 风格，主类名为 Main
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 计算所有窗口长度的“最大最小值”
+    static int[] maxOfMinForAllWindows(int[] a) {
+        int n = a.length;
+        int[] pre = new int[n];
+        int[] nxt = new int[n];
+        Arrays.fill(pre, -1);
+        Arrays.fill(nxt, n);
+
+        // pre：左侧第一个严格更小的位置
+        Deque<Integer> st = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            while (!st.isEmpty() && a[st.peek()] >= a[i]) st.pop();
+            pre[i] = st.isEmpty() ? -1 : st.peek();
+            st.push(i);
+        }
+
+        // nxt：右侧第一个小于等于的位置
+        st.clear();
+        for (int i = n - 1; i >= 0; i--) {
+            while (!st.isEmpty() && a[st.peek()] > a[i]) st.pop();
+            nxt[i] = st.isEmpty() ? n : st.peek();
+            st.push(i);
+        }
+
+        int[] ans = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            int len = nxt[i] - pre[i] - 1;
+            if (a[i] > ans[len]) ans[len] = a[i];
+        }
+        // 后缀最大
+        for (int x = n - 1; x >= 1; x--) {
+            if (ans[x + 1] > ans[x]) ans[x] = ans[x + 1];
+        }
+        return Arrays.copyOfRange(ans, 1, n + 1);
+    }
+
+    // 适配数据规模的简易快读
+    static class FastScanner {
+        private final InputStream in;
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+        FastScanner(InputStream is) { in = is; }
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) return -1;
+            }
+            return buffer[ptr++];
+        }
+        int nextInt() throws IOException {
+            int c, sgn = 1, x = 0;
+            do { c = read(); } while (c <= ' ');
+            if (c == '-') { sgn = -1; c = read(); }
+            while (c > ' ') { x = x * 10 + (c - '0'); c = read(); }
+            return x * sgn;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner(System.in);
+        int n = fs.nextInt();
+        int[] a = new int[n];
+        for (int i = 0; i < n; i++) a[i] = fs.nextInt();
+
+        int[] res = maxOfMinForAllWindows(a);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < res.length; i++) {
+            if (i > 0) sb.append(' ');
+            sb.append(res[i]);
+        }
+        System.out.println(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+// ACM 风格，主函数中读写，核心逻辑写在外部函数
+#include <bits/stdc++.h>
+using namespace std;
+
+// 计算所有窗口长度的“最大最小值”
+vector<long long> maxOfMinForAllWindows(const vector<long long>& a) {
+    int n = (int)a.size();
+    vector<int> pre(n, -1), nxt(n, n);
+    vector<int> st;
+
+    // pre：左侧第一个严格更小的位置
+    st.clear();
+    for (int i = 0; i < n; ++i) {
+        while (!st.empty() && a[st.back()] >= a[i]) st.pop_back();
+        pre[i] = st.empty() ? -1 : st.back();
+        st.push_back(i);
+    }
+
+    // nxt：右侧第一个小于等于的位置
+    st.clear();
+    for (int i = n - 1; i >= 0; --i) {
+        while (!st.empty() && a[st.back()] > a[i]) st.pop_back();
+        nxt[i] = st.empty() ? n : st.back();
+        st.push_back(i);
+    }
+
+    vector<long long> ans(n + 1, 0);
+    for (int i = 0; i < n; ++i) {
+        int len = nxt[i] - pre[i] - 1;
+        ans[len] = max(ans[len], a[i]);
+    }
+    // 后缀最大
+    for (int x = n - 1; x >= 1; --x) {
+        ans[x] = max(ans[x], ans[x + 1]);
+    }
+    ans.erase(ans.begin()); // 去掉 0 位置
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    if (!(cin >> n)) return 0;
+    vector<long long> a(n);
+    for (int i = 0; i < n; ++i) cin >> a[i];
+
+    vector<long long> res = maxOfMinForAllWindows(a);
+    for (int i = 0; i < (int)res.size(); ++i) {
+        if (i) cout << ' ';
+        cout << res[i];
+    }
+    cout << "\n";
+    return 0;
+}
+```

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2838",
+  "title": "第1题-区间波动和",
+  "docId": 2471,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

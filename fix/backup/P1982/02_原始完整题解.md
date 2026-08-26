@@ -1,0 +1,55 @@
+## 思路：模拟
+
+对障碍物按时间进行排序。模拟到每一个障碍物的时候宝可梦和机器人的位置，如果机器人位置 >= 宝可梦位置，则失败。
+
+## 代码
+
+### python
+```python
+def main():
+    import sys
+    
+    input = sys.stdin.readline  # 使用 readline 逐行读取输入
+    q = int(input())
+    
+    for _ in range(q):
+        n, m, a = map(int, input().split())
+        time = 1
+        events = []
+        
+        # 读取障碍物位置
+        positions = list(map(int, input().split()))
+        for x in positions:
+            events.append([x, 0])
+        
+        # 读取摧毁时间
+        destroy_times = list(map(int, input().split()))
+        for i in range(m):
+            events[i][1] = destroy_times[i]
+        
+        # 按照障碍物位置排序
+        events.sort(key=lambda x: x[0])
+        
+        ans = "YES"
+        # 遍历障碍物
+        for position, destroy_time in events:
+            # 如果当前位置大于等于 a，那么需要移动到当前位置
+            if position >= a:
+                # 移动时间 = 当前位置 - 上一个位置 + 摧毁时间
+                time += position - a + destroy_time
+                # 如果移动时间大于等于摧毁时间，那么无法到达
+                if time >= position:
+                    ans = "NO"
+                    break
+                # 更新当前位置
+                a = position
+        
+        print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+
+
+OJ会员可以通过点击题目上方《已通过》查看其他通过代码来学习。

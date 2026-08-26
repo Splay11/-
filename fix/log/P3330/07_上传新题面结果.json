@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3330",
+  "title": "第3题-轴上覆盖",
+  "docId": 2670,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "二分",
+    "扫描线"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

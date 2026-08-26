@@ -1,0 +1,21 @@
+{
+  "pid": "P1970",
+  "mode": 0,
+  "force": false,
+  "start_time": "2026-08-10 11:33:17",
+  "end_time": "2026-08-10 11:35:43",
+  "new_title": "倍环挪移",
+  "steps": {
+    "step1_fetch_problem": true,
+    "step2_fetch_solution": true,
+    "step3_generate_statement": true,
+    "step35_check_solution": true,
+    "step35_modified": true,
+    "step4_generate_samples": true,
+    "step5_assemble": true,
+    "step6_upload_original_statement": true,
+    "step7_upload_new_problem": true,
+    "step8_upload_solution": true
+  },
+  "overall_success": true
+}

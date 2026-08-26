@@ -1,0 +1,173 @@
+## 解题思路
+
+本题要求将 $N$ 个关卡恰好划分为 $K$ 个非空连续阶段，每个阶段的得分为该阶段内所有关卡得分之和。总得分为：第 $1,3,5,\dots$（奇数编号）阶段的得分按原值累加，第 $2,4,6,\dots$（偶数编号）阶段的得分按两倍累加。求最大可能的总得分。
+
+- 定义 **前缀和** $prefix[i] = \sum_{t=1}^{i} a_t$，用于快速计算任意区间的得分和。
+- 设计 **动态规划**：
+  - 令 $dp[i][j]$ 表示将前 $i$ 个关卡划分成 $j$ 个阶段时，能够获得的最大总得分。
+  - 边界条件：$dp[0][0] = 0$，其余状态初始化为负无穷。
+  - 第 $j$ 个阶段的权值 $w_j$ 为：若 $j$ 为奇数，$w_j = 1$；若 $j$ 为偶数，$w_j = 2$。
+  - 转移时枚举最后一个阶段的起点：假设最后一段的区间为 $[l+1, i]$，其区间和为 $prefix[i] - prefix[l]$，则有转移：
+    $$dp[i][j] = \max_{l=j-1}^{i-1} \{ dp[l][j-1] + w_j \times (prefix[i] - prefix[l]) \}$$
+  - 为了加速转移，将上式变形为：
+    $$dp[i][j] = w_j \times prefix[i] + \max_{l=j-1}^{i-1} \{ dp[l][j-1] - w_j \times prefix[l] \}$$
+  - 在固定 $j$ 后，顺序扫描 $i$ 时，用一个变量 $max\_val$ 维护当前已遍历的 $l$ 中 $dp[l][j-1] - w_j \times prefix[l]$ 的最大值。每次更新 $max\_val$ 后直接计算 $dp[i][j]$，即可将单次转移复杂度降为 $O(1)$。
+- 最终答案即为 $dp[N][K]$。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(N \times K)$。每组数据需要两层循环，外层循环 $K$ 次，内层循环最多 $N$ 次，所有测试数据的 $N$ 总和不超过 $3000$，因此总时间完全可行。
+- **空间复杂度**：$O(N \times K)$。需要使用二维 $dp$ 数组存储中间状态，每组数据最大占用 $3000 \times 3000$ 的 `long long` 数组，满足题目限制。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    input = sys.stdin.readline
+    T = int(input())
+    for _ in range(T):
+        # 读取 N, K
+        N, K = map(int, input().split())
+        # 关卡得分，1-index
+        a = [0] + list(map(int, input().split()))
+        # 前缀和
+        prefix = [0] * (N + 1)
+        for i in range(1, N + 1):
+            prefix[i] = prefix[i - 1] + a[i]
+
+        NEG_INF = -10**18
+        # dp[i][j] 表示前 i 个关卡划分为 j 个阶段的最大总得分
+        dp = [[NEG_INF] * (K + 1) for _ in range(N + 1)]
+        dp[0][0] = 0
+
+        # 枚举阶段编号 j
+        for j in range(1, K + 1):
+            # 该阶段的权值：奇数阶段为 1，偶数阶段为 2
+            w = 1 if j % 2 == 1 else 2
+            max_val = NEG_INF
+            # i 至少为 j，保证每个阶段至少有一个关卡
+            for i in range(j, N + 1):
+                # 候选分界点 l = i - 1（前 j-1 个阶段覆盖前 i-1 个关卡）
+                if i - 1 >= j - 1:
+                    cand = dp[i - 1][j - 1] - w * prefix[i - 1]
+                    if cand > max_val:
+                        max_val = cand
+                # 完成转移
+                dp[i][j] = w * prefix[i] + max_val
+
+        print(dp[N][K])
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+
+        while (T-- > 0) {
+            String[] firstLine = br.readLine().trim().split(" ");
+            int N = Integer.parseInt(firstLine[0]);
+            int K = Integer.parseInt(firstLine[1]);
+
+            long[] a = new long[N + 1];
+            long[] prefix = new long[N + 1];
+            String[] scores = br.readLine().trim().split(" ");
+            for (int i = 1; i <= N; i++) {
+                a[i] = Long.parseLong(scores[i - 1]);
+                prefix[i] = prefix[i - 1] + a[i];
+            }
+
+            long NEG_INF = Long.MIN_VALUE / 2;
+            long[][] dp = new long[N + 1][K + 1];
+            for (int i = 0; i <= N; i++) {
+                Arrays.fill(dp[i], NEG_INF);
+            }
+            dp[0][0] = 0;
+
+            // 枚举阶段编号 j
+            for (int j = 1; j <= K; j++) {
+                // 奇数阶段权值为 1，偶数阶段为 2
+                long w = (j % 2 == 1) ? 1 : 2;
+                long maxVal = NEG_INF;
+                // i 至少为 j
+                for (int i = j; i <= N; i++) {
+                    // 用 l = i - 1 更新最大值
+                    if (i - 1 >= j - 1) {
+                        long cand = dp[i - 1][j - 1] - w * prefix[i - 1];
+                        if (cand > maxVal) {
+                            maxVal = cand;
+                        }
+                    }
+                    dp[i][j] = w * prefix[i] + maxVal;
+                }
+            }
+
+            System.out.println(dp[N][K]);
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+using ll = long long;
+const ll NEG_INF = -0x3f3f3f3f3f3f3f3fLL;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int N, K;
+        cin >> N >> K;
+        vector<ll> a(N + 1), prefix(N + 1, 0);
+        for (int i = 1; i <= N; i++) {
+            cin >> a[i];
+            prefix[i] = prefix[i - 1] + a[i];
+        }
+
+        // dp[i][j] 表示前 i 个关卡划分为 j 个阶段的最大总得分
+        vector<vector<ll>> dp(N + 1, vector<ll>(K + 1, NEG_INF));
+        dp[0][0] = 0;
+
+        // 枚举阶段编号 j
+        for (int j = 1; j <= K; j++) {
+            // 奇数阶段权值为 1，偶数阶段为 2
+            ll w = (j % 2 == 1) ? 1 : 2;
+            ll max_val = NEG_INF;
+            // i 至少为 j
+            for (int i = j; i <= N; i++) {
+                // 候选分界点 l = i - 1
+                if (i - 1 >= j - 1) {
+                    max_val = max(max_val, dp[i - 1][j - 1] - w * prefix[i - 1]);
+                }
+                dp[i][j] = w * prefix[i] + max_val;
+            }
+        }
+
+        cout << dp[N][K] << "\n";
+    }
+    return 0;
+}
+```

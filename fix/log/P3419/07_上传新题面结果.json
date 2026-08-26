@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3419",
+  "title": "第2题-工位偏差窗口",
+  "docId": 2761,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

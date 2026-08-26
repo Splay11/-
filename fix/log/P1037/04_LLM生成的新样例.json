@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "abc123\nxyz",
+      "output": "0",
+      "explanation": "第一条含字母与数字，第二条为 `xyz`，没有公共连续片段，最长长度为 `0`，得分 `0`。"
+    },
+    {
+      "input": "ab12c\nab12c",
+      "output": "10",
+      "explanation": "两条标记完全相同，最长公共连续片段长度为 `5`，得分为 `10`。"
+    },
+    {
+      "input": "1323467\n1378695",
+      "output": "4",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

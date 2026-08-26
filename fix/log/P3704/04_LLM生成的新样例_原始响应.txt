@@ -1,0 +1,21 @@
+```json
+{
+  "samples": [
+    {
+      "input": "\"programming\",\"programmer\"",
+      "output": "\"programm\"",
+      "explanation": "$S$ 为 `\"programming\"`，$T$ 为 `\"programmer\"`。两串的最长公共前缀为 `\"programm\"`，长度为 `8`，且该片段在各自序列中唯一最长的连续公共部分，因此输出 `\"programm\"`。"
+    },
+    {
+      "input": "\"x\",\"x\"",
+      "output": "\"x\"",
+      "explanation": "两个文本序列长度均为 `1` 且内容相同，因此最长公共连续片段即为该字符本身 `\"x\"`。"
+    },
+    {
+      "input": "\"OpenAI\",\"OpenAI\"",
+      "output": "\"OpenAI\"",
+      "explanation": "两个文本序列完全一致，因此最长公共连续片段就是整个字符串 `\"OpenAI\"`，长度为 `6`。"
+    }
+  ]
+}
+```

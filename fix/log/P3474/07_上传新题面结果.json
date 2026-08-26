@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3474",
+  "title": "第2题-传感器信号分布复杂度",
+  "docId": 2816,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "信息熵"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

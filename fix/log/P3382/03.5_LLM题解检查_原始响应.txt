@@ -1,0 +1,158 @@
+## 解题思路
+
+1. **操作的本质**  
+   每次操作选择两个不同位置 $i$ 和 $j$，令 $e_i = e_i + e_j$，并将 $e_j$ 置为 $0$。  
+   通过该操作，我们可以将任意位置的能量转移到另一个位置，并让原来的位置归零。正数可以被集中到同一个位置，负数则可以被搬运到序列末尾，从而不影响前面的前缀最大值。
+
+2. **前缀最大值的最大化目标**  
+   我们希望最大化  
+   \[
+   S = \sum_{i=1}^n \max(e_1, e_2, \dots, e_i)
+   \]  
+   显然，如果能让前面所有前缀的最大值都相等且尽可能大，总和就能达到最大。  
+   通过操作将所有**正数**集中到最靠前的一个位置（例如 $e_1$），其余位置清零，那么从第 $1$ 项起的所有前缀最大值都等于所有正数的和 $P$，此时 $S = P \times n$。  
+   如果序列中没有正数，最优策略可以将负数全部移至末尾，使前缀最大值全部为 $0$，总和为 $0$。
+
+3. **分类讨论**  
+   - **$n = 1$**：无法操作，答案为 $e_1$ 本身。  
+   - **$n \ge 3$**：由于长度足够，我们总能将所有正数集中到首位，所有负数或零甩到后面，因此答案直接为 $P \times n$（$P$ 为所有正数之和）。  
+   - **$n = 2$**：需要细致讨论：  
+     * 若 $e_1 < 0$：可以将两个数合并，若合并后的值 $e_1+e_2 > 0$，则能得到 $2(e_1+e_2)$；否则最优为 $0$。  
+     * 若 $e_1 \ge 0$ 且 $e_2 \ge 0$：合并后得到 $2(e_1+e_2)$。  
+     * 若 $e_1 \ge 0$ 且 $e_2 < 0$：保留 $e_1$，将 $e_2$ 清零（不加到 $e_1$ 上），答案为 $2e_1$。  
+
+   上述逻辑可整合为：$n=2$ 时先判断 $e_1$ 的正负，再根据 $e_2$ 的情况给出答案，保证结果最大。
+
+## 复杂度分析
+
+- **时间复杂度**：每组数据只需遍历一遍序列，复杂度 $O(n)$。所有测试数据的 $n$ 总和不超过 $2\times 10^5$，总时间复杂度 $O(\sum n)$。  
+- **空间复杂度**：存储长度为 $n$ 的能量序列，空间复杂度 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    data = sys.stdin.read().split()
+    it = iter(data)
+    t = int(next(it))
+    out_lines = []
+    for _ in range(t):
+        n = int(next(it))
+        e = [int(next(it)) for _ in range(n)]
+        if n == 1:
+            out_lines.append(str(e[0]))
+            continue
+        if n >= 3:
+            pos_sum = sum(x for x in e if x > 0)
+            out_lines.append(str(pos_sum * n))
+            continue
+        # n == 2
+        if e[0] < 0:
+            temp = max(0, e[0] + e[1])
+            out_lines.append(str(temp * 2))
+        else:
+            if e[1] >= 0:
+                out_lines.append(str((e[0] + e[1]) * 2))
+            else:
+                out_lines.append(str(e[0] * 2))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            int n = Integer.parseInt(br.readLine());
+            int[] e = new int[n];
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < n; i++) {
+                e[i] = Integer.parseInt(st.nextToken());
+            }
+            if (n == 1) {
+                sb.append(e[0]).append("\n");
+                continue;
+            }
+            if (n >= 3) {
+                long posSum = 0;
+                for (int x : e) {
+                    if (x > 0) posSum += x;
+                }
+                sb.append(posSum * n).append("\n");
+                continue;
+            }
+            // n == 2
+            if (e[0] < 0) {
+                long temp = Math.max(0, e[0] + e[1]);
+                sb.append(temp * 2).append("\n");
+            } else {
+                if (e[1] >= 0) {
+                    sb.append((e[0] + e[1]) * 2L).append("\n");
+                } else {
+                    sb.append(e[0] * 2L).append("\n");
+                }
+            }
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using i64 = long long;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        cin >> n;
+        vector<int> e(n);
+        for (int i = 0; i < n; ++i) cin >> e[i];
+        if (n == 1) {
+            cout << e[0] << '\n';
+            continue;
+        }
+        if (n >= 3) {
+            i64 pos_sum = 0;
+            for (int x : e) {
+                if (x > 0) pos_sum += x;
+            }
+            cout << pos_sum * n << '\n';
+            continue;
+        }
+        // n == 2
+        if (e[0] < 0) {
+            i64 temp = max(0, e[0] + e[1]);
+            cout << temp * 2 << '\n';
+        } else {
+            if (e[1] >= 0) {
+                cout << (i64)(e[0] + e[1]) * 2 << '\n';
+            } else {
+                cout << (i64)e[0] * 2 << '\n';
+            }
+        }
+    }
+    return 0;
+}
+```

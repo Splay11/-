@@ -1,0 +1,220 @@
+## 解题思路
+
+1. **解析表达式**  
+   给定的石刻算式 `expr` 仅由小写字母和数字字符 `1`、`2`、`3`、`4` 组成，且恰好包含一个运算符。  
+   遍历字符串，找到第一个满足 `c ∈ {'1','2','3','4'}` 的字符，记其下标为 `opPos`。  
+   则左侧字母序列为 `L = expr[0:opPos]`，右侧字母序列为 `R = expr[opPos+1:]`，运算符 `op = expr[opPos]`。
+
+2. **字母序列转换为整数**  
+   对于一段字母序列（如 `L` 或 `R`），将其中的每一个字母 `ch` 替换为对应的数值：  
+   `v = ord(ch) - ord('a')`（即 `a→0, b→1, …, z→25`）。  
+   将转换后的数字按原顺序拼接成一个十进制字符串，再转换为整数。  
+   例如：字母串 `"kj"` → `10` 和 `9` → 字符串 `"109"` → 整数 `109`。  
+   经过这一步，得到左操作数 `left` 和右操作数 `right`。
+
+3. **执行运算**  
+   根据运算符 `op` 进行对应的整数运算：
+   - `'1'`：加法，`res = left + right`
+   - `'2'`：减法，`res = left - right`；若结果为负数，则取其绝对值
+   - `'3'`：乘法，`res = left * right`
+   - `'4'`：整除（向下取整），先检查除数是否为零。若 `right == 0`，返回 `-1` 表示无效算式；否则 `res = left // right`（C++/Java 中为 `left / right`，因为两者均为非负整数，自然向下取整）
+
+4. **返回结果**  
+   对于非除法运算，若 `res < 0` 则返回 `-res`，否则直接返回 `res`；除法已在内部处理了除零情况。
+
+## 复杂度分析
+
+- **时间复杂度**：输入的字符串长度 `n ≤ 9`，转换字母序列时需要遍历左右子串，查找运算符也只需一次遍历，整体操作均为线性时间复杂度 `O(n)`。
+- **空间复杂度**：转换过程中使用临时字符串存储数字拼接结果，所需额外空间为 `O(n)`。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def letters_to_num(s: str) -> int:
+    # 将字母序列按 a=0,b=1,...,z=25 转换为数字化拼接后的整数
+    # 例如 "kj" -> "109" -> 109
+    return int("".join(str(ord(c) - ord('a')) for c in s))
+
+def solve(expr: str) -> int:
+    # 去除可能的空白字符（题目保证无空白，此处仅做防御性处理）
+    expr = "".join(ch for ch in expr if not ch.isspace())
+    # 找到唯一的运算符位置
+    op_pos = next(i for i, ch in enumerate(expr) if ch in "1234")
+    L = expr[:op_pos]
+    R = expr[op_pos+1:]
+    op = expr[op_pos]
+
+    left = letters_to_num(L)
+    right = letters_to_num(R)
+
+    if op == '1':
+        res = left + right
+    elif op == '2':
+        res = left - right
+    elif op == '3':
+        res = left * right
+    else:  # op == '4'，整除
+        if right == 0:
+            return -1
+        res = left // right  # 向下取整（left, right 非负）
+    
+    return -res if res < 0 else res
+
+def main():
+    # 读取整个输入作为一个字符串，去除首尾空白
+    s = sys.stdin.read().strip()
+    if s:
+        print(solve(s))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class Main {
+    // 将字母序列转换为拼接后的整数
+    private static long lettersToNum(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            int v = s.charAt(i) - 'a';   // a->0, b->1, ..., z->25
+            sb.append(v);
+        }
+        // 字符串为空时不会发生，这里防御返回0
+        return Long.parseLong(sb.toString());
+    }
+
+    private static long solve(String expr) {
+        // 移除所有空白字符（防御性处理）
+        StringBuilder clean = new StringBuilder();
+        for (int i = 0; i < expr.length(); i++) {
+            if (!Character.isWhitespace(expr.charAt(i))) {
+                clean.append(expr.charAt(i));
+            }
+        }
+        expr = clean.toString();
+
+        // 找到运算符位置
+        int opPos = -1;
+        for (int i = 0; i < expr.length(); i++) {
+            char ch = expr.charAt(i);
+            if (ch >= '1' && ch <= '4') {
+                opPos = i;
+                break;
+            }
+        }
+
+        String L = expr.substring(0, opPos);
+        String R = expr.substring(opPos + 1);
+        char op = expr.charAt(opPos);
+
+        long left = lettersToNum(L);
+        long right = lettersToNum(R);
+
+        long res;
+        if (op == '1') {
+            res = left + right;
+        } else if (op == '2') {
+            res = left - right;
+        } else if (op == '3') {
+            res = left * right;
+        } else { // op == '4'，整除
+            if (right == 0) return -1;
+            res = left / right;  // left, right 非负，自然向下取整
+        }
+
+        return res < 0 ? -res : res;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine();
+        if (line != null) {
+            System.out.println(solve(line.trim()));
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <algorithm>
+
+using namespace std;
+
+// 将字母序列转换为拼接后的整数
+long long lettersToNum(const string &s) {
+    string num;
+    num.reserve(s.size() * 2);
+    for (char c : s) {
+        int v = c - 'a';             // a->0, b->1, ..., z->25
+        num += to_string(v);
+    }
+    return stoll(num);
+}
+
+long long solve(const string &s) {
+    // 移除所有空白字符（防御性处理）
+    string expr;
+    expr.reserve(s.size());
+    for (char ch : s) {
+        if (!isspace(ch)) {
+            expr.push_back(ch);
+        }
+    }
+
+    // 找到运算符位置
+    int opPos = -1;
+    for (int i = 0; i < (int)expr.size(); ++i) {
+        if (expr[i] >= '1' && expr[i] <= '4') {
+            opPos = i;
+            break;
+        }
+    }
+
+    string L = expr.substr(0, opPos);
+    string R = expr.substr(opPos + 1);
+    char op = expr[opPos];
+
+    long long left = lettersToNum(L);
+    long long right = lettersToNum(R);
+
+    long long res = 0;
+    if (op == '1') {
+        res = left + right;
+    } else if (op == '2') {
+        res = left - right;
+    } else if (op == '3') {
+        res = left * right;
+    } else { // op == '4'，整除
+        if (right == 0) return -1;
+        res = left / right;   // left, right 非负，自然向下取整
+    }
+
+    return res < 0 ? -res : res;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string line;
+    if (getline(cin, line)) {
+        cout << solve(line) << '\n';
+    }
+    return 0;
+}
+```

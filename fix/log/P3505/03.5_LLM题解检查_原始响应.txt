@@ -1,0 +1,190 @@
+## 解题思路
+
+题目要求统计整数区间 $[l, r]$ 内，满足 $a<b<c<d$ 且 $a,b,c,d \in [l,r]$，同时 $d$ 能被 $a, b, c$ 中的每一个整除的四元组个数。
+这类四元组被称为“完美四元组”。
+
+**关键转化**：若 $d$ 能被 $a, b, c$ 整除，则 $a, b, c$ 必然是 $d$ 的约数，并且必须小于 $d$。因此我们可以**枚举 $d$ 作为四元组中的最大值**，然后在 $d$ 的真约数（不含自身）中，只保留那些**位于 $[l, d)$** 的约数，设这样的约数有 $k$ 个。从这 $k$ 个约数中任选 $3$ 个，按升序作为 $a,b,c$，即可与 $d$ 构成一个完美四元组。方案数为组合数 $C(k, 3)$。
+
+于是答案为：
+$$
+\sum_{d=l}^{r} C(k_d, 3)
+$$
+其中 $k_d$ 表示 $d$ 在 $[l, d)$ 范围内的真约数个数。
+
+**算法步骤**：
+
+1. **预处理真约数列表**  
+   因为 $r \le 10^5$，使用类似埃氏筛的倍数法：  
+   遍历 $i = 1 \sim 10^5$，对于每个 $i$，将其作为约数加入到所有 $j$ 的列表中，其中 $j$ 是 $i$ 的倍数且 $j > i$（即 $j$ 从 $i+i$ 开始，步长为 $i$）。  
+   这样 `divs[j]` 中存储的所有元素都小于 $j$，且由于 $i$ 是递增加入的，列表自然有序。
+
+2. **处理每个查询**  
+   对于区间 $[l, r]$，遍历 $d = l \sim r$：
+   - 取出 `divs[d]`（已升序）。
+   - 用二分查找找到第一个 $\ge l$ 的位置 $pos$（例如 `lower_bound`）。
+   - 则位于 $[l, d)$ 的约数个数 $k = \text{len}(divs[d]) - pos$。
+   - 若 $k \ge 3$，累加 $C(k, 3) = \frac{k \cdot (k-1) \cdot (k-2)}{6}$ 到答案中。
+
+3. 输出每个测试用例的答案。
+
+## 复杂度分析
+
+- **时间复杂度**  
+  预处理真约数：对于每个 $i$，需要在其倍数上添加元素，遍历次数为 $\sum_{i=1}^{N} \frac{N}{i} \approx N \log N$，其中 $N = 10^5$，大约 $10^5 \times \ln(10^5)$ 级别，完全可以接受。  
+  每次查询：遍历 $d = l \sim r$，对于每个 $d$ 进行一次二分查找，二分复杂度为 $O(\log \tau(d))$（$\tau(d)$ 为 $d$ 的约数个数，平均很小）。总查询复杂度与区间长度成正比，乘以极小的对数因子。由于 $t \le 10$，总计算量远小于 $10^7$ 级别，可轻松通过。
+
+- **空间复杂度**  
+  所有真约数存储的总数约为 $N \log N$ 级别，最坏情况下约 $10^5 \times \log(10^5)$ 个整数，数组占用的空间在百万量级，可以接受。因此空间复杂度为 $O(N \log N)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from bisect import bisect_left
+
+def solve() -> None:
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    t = int(next(it))
+    
+    MAXN = 100000
+    # 预处理每个数的真约数（不含自身），升序
+    divs = [[] for _ in range(MAXN + 1)]
+    for i in range(1, MAXN + 1):
+        step = i
+        j = i + step
+        while j <= MAXN:
+            divs[j].append(i)
+            j += step
+    
+    def comb3(k: int) -> int:
+        # 组合数 C(k, 3)
+        return k * (k - 1) * (k - 2) // 6
+    
+    out_lines = []
+    for _ in range(t):
+        l = int(next(it))
+        r = int(next(it))
+        ans = 0
+        for d in range(l, r + 1):
+            arr = divs[d]
+            # 统计位于 [l, d) 的约数个数
+            p = bisect_left(arr, l)      # 第一个 >= l 的位置
+            k = len(arr) - p
+            if k >= 3:
+                ans += comb3(k)
+        out_lines.append(str(ans))
+    
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final int MAXN = 100000;
+    static ArrayList<Integer>[] divs = new ArrayList[MAXN + 1];
+
+    static long comb3(int k) {
+        // C(k, 3)
+        return 1L * k * (k - 1) * (k - 2) / 6;
+    }
+
+    // 二分查找第一个 >= key 的下标
+    static int lowerBound(ArrayList<Integer> a, int key) {
+        int l = 0, r = a.size();
+        while (l < r) {
+            int m = (l + r) >>> 1;
+            if (a.get(m) >= key) r = m;
+            else l = m + 1;
+        }
+        return l;
+    }
+
+    public static void main(String[] args) throws Exception {
+        // 预处理真约数
+        for (int i = 0; i <= MAXN; i++) divs[i] = new ArrayList<>();
+        for (int i = 1; i <= MAXN; i++) {
+            for (int j = i + i; j <= MAXN; j += i) {
+                divs[j].add(i);
+            }
+        }
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        for (int tc = 0; tc < T; tc++) {
+            String[] parts = br.readLine().trim().split("\\s+");
+            int l = Integer.parseInt(parts[0]);
+            int r = Integer.parseInt(parts[1]);
+            long ans = 0;
+            for (int d = l; d <= r; d++) {
+                ArrayList<Integer> arr = divs[d];
+                int pos = lowerBound(arr, l);
+                int k = arr.size() - pos;   // [l, d) 内的约数个数
+                if (k >= 3) {
+                    ans += comb3(k);
+                }
+            }
+            sb.append(ans).append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAXN = 100000;
+vector<int> divs[MAXN + 1];
+
+long long comb3(long long k) {
+    // C(k, 3)
+    return k * (k - 1) * (k - 2) / 6;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // 预处理每个数的真约数（不含自身）
+    for (int i = 1; i <= MAXN; ++i) {
+        for (int j = i + i; j <= MAXN; j += i) {
+            divs[j].push_back(i);
+        }
+    }
+
+    int T;
+    if (!(cin >> T)) return 0;
+    while (T--) {
+        int l, r;
+        cin >> l >> r;
+        long long ans = 0;
+        for (int d = l; d <= r; ++d) {
+            auto &arr = divs[d];
+            // 统计位于 [l, d) 的约数个数
+            int pos = lower_bound(arr.begin(), arr.end(), l) - arr.begin();
+            int k = (int)arr.size() - pos;
+            if (k >= 3) {
+                ans += comb3(k);
+            }
+        }
+        cout << ans << "\n";
+    }
+    return 0;
+}
+```

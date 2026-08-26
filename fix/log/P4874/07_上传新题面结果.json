@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4874",
+  "title": "第一个空闲秒",
+  "docId": 4172,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

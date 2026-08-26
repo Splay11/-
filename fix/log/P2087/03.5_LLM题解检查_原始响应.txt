@@ -1,0 +1,237 @@
+## 解题思路
+
+1. **问题转化**  
+   定义相邻信号塔 $i$ 和 $i+1$ 之间链路的品质因子为 $c_i = b_i + b_{i+1}$。  
+   选择若干条链路等价于在 $n-1$ 条链路中选出一个下标子集。条件可转化为：  
+   - 所有被选链路的品质因子相等；  
+   - 任意两条被选链路不能相邻（若选了 $i$，就不能选 $i-1$ 和 $i+1$），否则会共用信号塔，违反“每个塔号最多出现在一条被选链路中”；  
+   - 至少选择一条链路。
+
+2. **按品质因子分组**  
+   对于每一种品质因子值 $x$，收集所有满足 $c_i = x$ 的链路编号 $i$（$1 \le i \le n-1$，实现时常用 $0$ 基下标）。  
+   在同一个品质因子的编号列表中，问题变为：选出一个子集，子集中没有两个相邻的编号，求至少选一个的方案数。
+
+3. **分割连续段**  
+   将编号列表按连续性划分：当出现 $p_j = p_{j-1} + 1$ 时，它们属于同一个连续段；否则另起一段。  
+   每个连续段是一条链，其长度为该段包含的编号个数 $t$，表示有 $t$ 条首尾相连的链路。
+
+4. **连续段内的方案数**  
+   在一个长度为 $t$ 的连续段中，选择若干条互不相邻的链路的方案数（允许一条也不选）记为 $f_t$，且满足斐波那契递推式：  
+   $$
+   f_0 = 1,\quad f_1 = 2,\quad f_t = f_{t-1} + f_{t-2}\ (t \ge 2)
+   $$
+   解释：  
+   - $f_0 = 1$：空段只有一种方案（不选）。  
+   - $f_1 = 2$：只有一条链路，可选或不选。  
+   - $t \ge 2$ 时，考虑最后一条链路：若不选，则方案数为 $f_{t-1}$；若选，则前一条不能选，方案数为 $f_{t-2}$。
+
+5. **合并各段方案**  
+   不同连续段之间的选择互不影响，因此对于某个品质因子 $x$，总方案数（允许全不选）为各连续段长度的 $f$ 值之积：
+   $$
+   \prod f_{len_i}
+   $$
+   题目要求**至少选择一条链路**，因此需减去全不选的一种情况，该品质因子的有效方案数为：
+   $$
+   \left(\prod f_{len_i}\right) - 1
+   $$
+
+6. **汇总答案**  
+   对所有不同的品质因子值分别计算上述贡献，累加后对 $10^9+7$ 取模即为最终答案。
+
+---
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$。  
+  预处理斐波那契数组需要 $O(n)$，扫描所有 $n-1$ 条链路进行分组和分段，每个链路只被处理常数次，总复杂度为 $O(n)$。
+- **空间复杂度**：$O(n)$。  
+  哈希表存储分组信息占据 $O(n)$ 空间，斐波那契数组需要 $O(n)$ 空间。
+
+---
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10**9 + 7
+
+def solve(n, b):
+    # f[t] 表示长度为 t 的连续段中，选择若干条互不相邻链路的方案数（可一个不选）
+    f = [0] * n
+    f[0] = 1
+    if n > 1:
+        f[1] = 2
+    for i in range(2, n):
+        f[i] = (f[i - 1] + f[i - 2]) % MOD
+
+    # 按品质因子分组，键为品质因子值，值为链路下标列表
+    groups = {}
+    for i in range(n - 1):
+        c = b[i] + b[i + 1]
+        groups.setdefault(c, []).append(i)
+
+    ans = 0
+
+    # 逐组统计
+    for pos in groups.values():
+        ways = 1
+        cnt = 1  # 当前连续段长度
+
+        for i in range(1, len(pos)):
+            if pos[i] == pos[i - 1] + 1:
+                cnt += 1
+            else:
+                ways = ways * f[cnt] % MOD
+                cnt = 1
+
+        # 最后一组连续段
+        ways = ways * f[cnt] % MOD
+
+        # 减去全不选的一种情况
+        ans = (ans + ways - 1) % MOD
+
+    return ans
+
+
+def main():
+    input = sys.stdin.readline
+    n = int(input().strip())
+    b = list(map(int, input().split()))
+    print(solve(n, b))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007L;
+
+    public static long solve(int n, long[] b) {
+        // f[t] 表示长度为 t 的连续段中，选择若干条互不相邻链路的方案数（可一个不选）
+        long[] f = new long[n];
+        f[0] = 1;
+        if (n > 1) {
+            f[1] = 2;
+        }
+        for (int i = 2; i < n; i++) {
+            f[i] = (f[i - 1] + f[i - 2]) % MOD;
+        }
+
+        // 按品质因子分组
+        HashMap<Long, ArrayList<Integer>> groups = new HashMap<>();
+        for (int i = 0; i < n - 1; i++) {
+            long c = b[i] + b[i + 1];
+            groups.computeIfAbsent(c, k -> new ArrayList<>()).add(i);
+        }
+
+        long ans = 0;
+
+        for (ArrayList<Integer> pos : groups.values()) {
+            long ways = 1;
+            int cnt = 1; // 当前连续段长度
+
+            for (int i = 1; i < pos.size(); i++) {
+                if (pos.get(i) == pos.get(i - 1) + 1) {
+                    cnt++;
+                } else {
+                    ways = ways * f[cnt] % MOD;
+                    cnt = 1;
+                }
+            }
+            ways = ways * f[cnt] % MOD;
+
+            // 减去全不选的情况
+            ans = (ans + ways - 1 + MOD) % MOD;
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        String[] parts = br.readLine().trim().split(" ");
+        long[] b = new long[n];
+        for (int i = 0; i < n; i++) {
+            b[i] = Long.parseLong(parts[i]);
+        }
+        System.out.println(solve(n, b));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+
+long long solve(int n, const vector<long long>& b) {
+    // f[t] 表示长度为 t 的连续段中，选择若干条互不相邻链路的方案数（可一个不选）
+    vector<long long> f(n, 0);
+    f[0] = 1;
+    if (n > 1) {
+        f[1] = 2;
+    }
+    for (int i = 2; i < n; i++) {
+        f[i] = (f[i - 1] + f[i - 2]) % MOD;
+    }
+
+    // 按品质因子分组
+    unordered_map<long long, vector<int>> groups;
+    for (int i = 0; i < n - 1; i++) {
+        long long c = b[i] + b[i + 1];
+        groups[c].push_back(i);
+    }
+
+    long long ans = 0;
+
+    for (auto& entry : groups) {
+        vector<int>& pos = entry.second;
+        long long ways = 1;
+        int cnt = 1; // 当前连续段长度
+
+        for (int i = 1; i < (int)pos.size(); i++) {
+            if (pos[i] == pos[i - 1] + 1) {
+                cnt++;
+            } else {
+                ways = ways * f[cnt] % MOD;
+                cnt = 1;
+            }
+        }
+        ways = ways * f[cnt] % MOD;
+
+        // 减去全不选的情况，+MOD 避免负数
+        ans = (ans + ways - 1 + MOD) % MOD;
+    }
+
+    return ans;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    vector<long long> b(n);
+    for (int i = 0; i < n; i++) {
+        cin >> b[i];
+    }
+    cout << solve(n, b) << '\n';
+    return 0;
+}
+```

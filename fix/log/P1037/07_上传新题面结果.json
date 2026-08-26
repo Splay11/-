@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1037",
+  "title": "第1题-双轨对齐",
+  "docId": 38,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "字符串",
+  "trial_videosol": ""
+}

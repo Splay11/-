@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1\n7",
+      "output": "7 ",
+      "explanation": "只有一个位置，无法向两侧扩展，答案就是该位置本身的值 `7`。"
+    },
+    {
+      "input": "1\n8",
+      "output": "8 ",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "1\n9",
+      "output": "9 ",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

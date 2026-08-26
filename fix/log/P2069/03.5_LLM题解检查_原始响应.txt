@@ -1,0 +1,261 @@
+## 解题思路
+
+本题要求构造一个 $R$ 行 $C$ 列的正整数矩阵，使得每一行、每一列都构成等差数列，且所有元素之和恰好等于 $S$。若无解则输出 $-1$。
+
+观察可以发现一种非常简单的构造方法：**让每一行内部所有元素都相等**（即行内公差为 $0$），而**不同行之间对应的首项构成一个等差数列**。  
+设第 $1$ 行的所有元素均为 $a_1$（首项），行间公差为 $d$（$d \ge 0$，整数），那么第 $i$ 行（$1 \le i \le R$）的所有元素均为 $a_1 + (i-1) \cdot d$。
+
+此时：
+- 每一行（同一行内）元素全部相等，显然是公差为 $0$ 的等差数列。
+- 每一列（固定列号）的元素依次为 $a_1, a_1+d, a_1+2d, \ldots$，是公差为 $d$ 的等差数列。
+
+因此该构造完全满足题目要求。
+
+**总和分析**
+
+所有元素之和为  
+$$S = \sum_{i=1}^{R} \sum_{j=1}^{C} \bigl(a_1 + (i-1)d\bigr) = C \sum_{i=0}^{R-1} (a_1 + i d) = C \left(R a_1 + d \frac{R(R-1)}{2}\right).$$
+
+两边乘以 $2$ 并整理：
+$$\frac{2S}{R C} = 2a_1 + d(R-1).$$
+
+令 $X = \dfrac{2S}{R C}$，若 $2S$ 不能被 $R C$ 整除，则一定无解。  
+否则问题转化为：寻找**正整数** $a_1$ 和非负整数 $d$，使得 $2a_1 + d(R-1) = X$。
+
+**求解 $a_1$ 和 $d$**
+
+- 当 $R=1$ 时，$R-1=0$，方程变为 $2a_1 = X$，要求 $X$ 为偶数且 $X \ge 2$（保证 $a_1 \ge 1$）。
+- 当 $R>1$ 时，通过分析奇偶性可知，只需在 $d=0,1,2$ 中进行尝试即可覆盖所有可能解：
+  1. 若 $X$ 为偶数且 $X \ge 2$，可取 $d=0$，$a_1 = X/2$。
+  2. 若 $R-1$ 为奇数，$X$ 为奇数，且 $X - (R-1) \ge 2$ 且为偶数，可取 $d=1$，$a_1 = \frac{X - (R-1)}{2}$。
+  3. 若 $R-1$ 为偶数，$X$ 为偶数，且 $X - 2(R-1) \ge 2$ 且为偶数，可取 $d=2$，$a_1 = \frac{X - 2(R-1)}{2}$。
+  
+若以上均不满足，则无解。
+
+另外，当 $R \le 2$ 且 $C \le 2$ 且 $R \times C \le S$ 时，存在一种简单的直接构造方法：前 $R-1$ 行全部填 $1$，第 $R$ 行的前 $C-1$ 列填 $1$，最后一格填 $S - (R \times C - 1)$（保证为正整数）。此构造同样满足每行每列都是等差数列，直接输出即可。
+
+## 复杂度分析
+
+- 时间复杂度：$O(R C)$。需要输出整个矩阵，共 $R \times C$ 个元素。
+- 空间复杂度：$O(1)$。除输入和输出外，只使用了常数级别的额外空间。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    R, C, S = map(int, data)
+
+    # 小规模特殊构造
+    if R <= 2 and C <= 2 and R * C <= S:
+        out_lines = []
+        for i in range(1, R + 1):
+            if i < R:
+                out_lines.append(' '.join(['1'] * C))
+            else:
+                row = ['1'] * (C - 1) + [str(S - R * C + 1)]
+                out_lines.append(' '.join(row))
+        sys.stdout.write('\n'.join(out_lines))
+        return
+
+    # 一般情况：需要 2*S 能被 R*C 整除
+    if (2 * S) % (R * C) != 0:
+        print(-1)
+        return
+
+    X = (2 * S) // (R * C)
+
+    a1 = -1
+    d = -1
+
+    # 尝试 d=0,1,2
+    if X >= 2 and X % 2 == 0:
+        d = 0
+        a1 = X // 2
+    elif R > 1:
+        # 尝试 d=1
+        tmp = X - (R - 1)
+        if tmp >= 2 and tmp % 2 == 0:
+            d = 1
+            a1 = tmp // 2
+        # 尝试 d=2
+        if a1 == -1:
+            tmp = X - 2 * (R - 1)
+            if tmp >= 2 and tmp % 2 == 0:
+                d = 2
+                a1 = tmp // 2
+    else:
+        # R == 1 但 X 不是偶数或 X<2
+        pass
+
+    if a1 == -1:
+        print(-1)
+        return
+
+    # 输出矩阵
+    out = []
+    for i in range(R):
+        val = a1 + i * d
+        out.append(' '.join([str(val)] * C))
+    sys.stdout.write('\n'.join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] parts = br.readLine().split(" ");
+        long R = Long.parseLong(parts[0]);
+        long C = Long.parseLong(parts[1]);
+        long S = Long.parseLong(parts[2]);
+
+        // 小规模特殊构造
+        if (R <= 2 && C <= 2 && R * C <= S) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 1; i <= R; i++) {
+                if (i < R) {
+                    for (int j = 0; j < C; j++) {
+                        sb.append("1 ");
+                    }
+                } else {
+                    for (int j = 0; j < C - 1; j++) {
+                        sb.append("1 ");
+                    }
+                    sb.append(S - R * C + 1);
+                }
+                sb.append("\n");
+            }
+            System.out.print(sb);
+            return;
+        }
+
+        // 一般情况
+        if ((2 * S) % (R * C) != 0) {
+            System.out.println(-1);
+            return;
+        }
+
+        long X = (2 * S) / (R * C);
+        long a1 = -1;
+        long d = -1;
+
+        if (X >= 2 && X % 2 == 0) {
+            d = 0;
+            a1 = X / 2;
+        } else if (R > 1) {
+            long tmp = X - (R - 1);
+            if (tmp >= 2 && tmp % 2 == 0) {
+                d = 1;
+                a1 = tmp / 2;
+            } else {
+                tmp = X - 2 * (R - 1);
+                if (tmp >= 2 && tmp % 2 == 0) {
+                    d = 2;
+                    a1 = tmp / 2;
+                }
+            }
+        }
+
+        if (a1 == -1) {
+            System.out.println(-1);
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < R; i++) {
+            long val = a1 + i * d;
+            for (int j = 0; j < C; j++) {
+                sb.append(val);
+                if (j < C - 1) sb.append(' ');
+            }
+            sb.append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    long long R, C, S;
+    cin >> R >> C >> S;
+
+    // 小规模特殊构造
+    if (R <= 2 && C <= 2 && R * C <= S) {
+        for (int i = 1; i <= R; ++i) {
+            if (i < R) {
+                for (int j = 0; j < C; ++j)
+                    cout << 1 << ' ';
+            } else {
+                for (int j = 0; j < C - 1; ++j)
+                    cout << 1 << ' ';
+                cout << S - R * C + 1 << ' ';
+            }
+            cout << '\n';
+        }
+        return 0;
+    }
+
+    // 一般情况
+    if ((2 * S) % (R * C) != 0) {
+        cout << -1 << '\n';
+        return 0;
+    }
+
+    long long X = (2 * S) / (R * C);
+    long long a1 = -1, d = -1;
+
+    if (X >= 2 && X % 2 == 0) {
+        d = 0;
+        a1 = X / 2;
+    } else if (R > 1) {
+        long long tmp = X - (R - 1);
+        if (tmp >= 2 && tmp % 2 == 0) {
+            d = 1;
+            a1 = tmp / 2;
+        } else {
+            tmp = X - 2 * (R - 1);
+            if (tmp >= 2 && tmp % 2 == 0) {
+                d = 2;
+                a1 = tmp / 2;
+            }
+        }
+    }
+
+    if (a1 == -1) {
+        cout << -1 << '\n';
+        return 0;
+    }
+
+    for (int i = 0; i < R; ++i) {
+        long long val = a1 + i * d;
+        for (int j = 0; j < C; ++j) {
+            cout << val << (j < C - 1 ? ' ' : '\n');
+        }
+    }
+
+    return 0;
+}
+```

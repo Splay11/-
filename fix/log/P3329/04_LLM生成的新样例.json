@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "2\naa ab",
+      "output": "aaa",
+      "explanation": "两段 $\\texttt{aa}$ 与 $\\texttt{ab}$。拼接 $\\texttt{aaab}$ 无下降点，删除末尾得到 $\\texttt{aaa}$；拼接 $\\texttt{abaa}$ 在第二位下降，删掉 $\\texttt{b}$ 同样得到 $\\texttt{aaa}$。"
+    },
+    {
+      "input": "3\naa ab",
+      "output": "aaa",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "4\naa ab",
+      "output": "aaa",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

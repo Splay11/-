@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3360",
+  "title": "第3题-节拍最短窗",
+  "docId": 2702,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "动态规划",
+    "数论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "videosol": "",
+  "trial_videosol": ""
+}

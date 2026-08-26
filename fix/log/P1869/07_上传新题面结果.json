@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1869",
+  "title": "第3题-同向压差廊道",
+  "docId": 969,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

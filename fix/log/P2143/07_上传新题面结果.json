@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P2143",
+  "title": "第2题-双段加倍",
+  "docId": 1250,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "trial_videosol": ""
+}

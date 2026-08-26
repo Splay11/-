@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3579",
+  "title": "第1题-双通道字符对账",
+  "docId": 2922,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "哈希"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "https://www.bilibili.com/video/BV1HpaYzbEXM/",
+  "trial_videosol": ""
+}

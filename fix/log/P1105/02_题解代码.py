@@ -1,0 +1,64 @@
+import java.util.*;
+import java.text.*;
+import java.math.*;
+import java.util.function.*;
+
+public class Main {
+	public static void main(String[] args) {
+	
+		Scanner sc = new Scanner(System.in);
+		int n = sc.nextInt();
+		int q = sc.nextInt();
+		TreeMap<Long, long[]> odt = new TreeMap<>();
+		long ans = 0;
+		odt.put(0L, new long[]{1L << n, 0L});
+		for (int i = 1; i <= q; i++) {
+			long x = sc.nextLong();
+			long s = x;
+			while (x * 2 + 1 < (1L << n)) {
+				x = x * 2 + 1;
+			}
+			x = calDfn(n, x);
+			s = calDfn(n, s);
+			split(odt, s);
+			split(odt, x + 1);
+			for (Map.Entry<Long, long[]> entry : odt.subMap(s, x + 1).entrySet()) {
+				if (entry.getValue()[1] == 0) {
+					ans += entry.getValue()[0] - entry.getKey() + 1;
+				}
+			}
+			odt.subMap(s, x + 1).clear();
+			odt.put(s, new long[]{x, 1});
+			System.out.println(ans);
+		}
+	}
+	
+	private static void split(TreeMap<Long, long[]> odt, long x) {
+		Map.Entry<Long, long[]> entry = odt.floorEntry(x);
+		long val = entry.getValue()[1];
+		odt.put(entry.getKey(), new long[]{x - 1, val});
+		odt.put(x, new long[]{entry.getValue()[0], val});
+	}
+	
+	private static long calDfn(int n, long x) {
+		long ans = 0;
+		while (x > 1) {
+			ans++;
+			if (x % 2 == 1) {
+				ans += numChildren(n, x - 1);
+			}
+			x /= 2;
+		}
+		return ans;
+	}
+	
+	private static long numChildren(int n, long x){
+		int dep = 0;
+		while (x > 1) {
+			x /= 2;
+			dep++;
+		}
+		return (1L << (n - dep)) - 1;
+	}
+	
+}

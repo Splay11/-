@@ -1,0 +1,212 @@
+## 解题思路
+
+设小红在火箭发射后 $t$ 时刻的位置为：
+
+$$
+(x,y,z)=(x_0+v_x t,\ y_0+v_y t,\ z_0+v_z t)
+$$
+
+当小红穿越大气层时，他刚好到达球面上，因此满足：
+
+$$
+(x_0+v_x t)^2+(y_0+v_y t)^2+(z_0+v_z t)^2=R^2
+$$
+
+展开后可得到一个关于 $t$ 的一元二次方程：
+
+$$
+at^2+bt+c=0
+$$
+
+其中：
+
+$$
+a=v_x^2+v_y^2+v_z^2
+$$
+
+$$
+b=2(x_0v_x+y_0v_y+z_0v_z)
+$$
+
+$$
+c=x_0^2+y_0^2+z_0^2-R^2
+$$
+
+因为题目保证初始时刻小红在大气层内，即：
+
+$$
+x_0^2+y_0^2+z_0^2 \le R^2
+$$
+
+所以有 $c\le 0$。同时速度不为 $0$，因此 $a>0$。
+这说明方程一定存在一个非负实根，而这个非负实根就是小红第一次穿越大气层的时刻。
+
+根据求根公式：
+
+$$
+t=\frac{-b\pm\sqrt{b^2-4ac}}{2a}
+$$
+
+由于一个根为负，一个根为非负，所以答案直接取较大的那个根即可：
+
+$$
+ans=\frac{-b+\sqrt{b^2-4ac}}{2a}
+$$
+
+这里使用的算法就是 数学推导 + 一元二次方程求根。
+
+需要注意：题面输入描述里速度写成了 $(v_z,v_y,v_z)$，应理解为 $(v_x,v_y,v_z)$。
+
+## 复杂度分析
+
+对于每组数据，只需要进行常数次计算：
+
+* 时间复杂度：$O(1)$
+* 空间复杂度：$O(1)$
+
+总共 $t$ 组数据时：
+
+* 总时间复杂度：$O(t)$
+* 总空间复杂度：$O(1)$
+
+这样的复杂度对于 $1 \le t \le 1000$ 是完全合适的。
+
+## 代码实现
+
+### Python
+
+```python
+import math
+
+
+# 计算穿越大气层的时刻
+def solve_one(x0, y0, z0, vx, vy, vz, r):
+    # 二次项系数
+    a = vx * vx + vy * vy + vz * vz
+    # 一次项系数
+    b = 2.0 * (x0 * vx + y0 * vy + z0 * vz)
+    # 常数项
+    c = x0 * x0 + y0 * y0 + z0 * z0 - r * r
+
+    # 判别式
+    delta = b * b - 4.0 * a * c
+
+    # 取较大的根，即非负根
+    ans = (-b + math.sqrt(delta)) / (2.0 * a)
+    return ans
+
+
+def main():
+    t = int(input())
+    for _ in range(t):
+        # 读入一组数据
+        x0, y0, z0, vx, vy, vz, r = map(float, input().split())
+
+        # 计算答案
+        ans = solve_one(x0, y0, z0, vx, vy, vz, r)
+
+        # 按要求输出，精度足够即可
+        print(f"{ans:.10f}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 计算穿越大气层的时刻
+    public static double solveOne(double x0, double y0, double z0,
+                                  double vx, double vy, double vz, double r) {
+        // 二次项系数
+        double a = vx * vx + vy * vy + vz * vz;
+        // 一次项系数
+        double b = 2.0 * (x0 * vx + y0 * vy + z0 * vz);
+        // 常数项
+        double c = x0 * x0 + y0 * y0 + z0 * z0 - r * r;
+
+        // 判别式
+        double delta = b * b - 4.0 * a * c;
+
+        // 取较大的根，即非负根
+        return (-b + Math.sqrt(delta)) / (2.0 * a);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // 输入数据组数
+        int t = sc.nextInt();
+
+        while (t-- > 0) {
+            // 读入一组数据
+            double x0 = sc.nextDouble();
+            double y0 = sc.nextDouble();
+            double z0 = sc.nextDouble();
+            double vx = sc.nextDouble();
+            double vy = sc.nextDouble();
+            double vz = sc.nextDouble();
+            double r = sc.nextDouble();
+
+            // 计算答案
+            double ans = solveOne(x0, y0, z0, vx, vy, vz, r);
+
+            // 输出结果
+            System.out.printf("%.10f%n", ans);
+        }
+
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <cmath>
+#include <cstdio>
+using namespace std;
+
+// 计算穿越大气层的时刻
+double solve_one(double x0, double y0, double z0,
+                 double vx, double vy, double vz, double r) {
+    // 二次项系数
+    double a = vx * vx + vy * vy + vz * vz;
+    // 一次项系数
+    double b = 2.0 * (x0 * vx + y0 * vy + z0 * vz);
+    // 常数项
+    double c = x0 * x0 + y0 * y0 + z0 * z0 - r * r;
+
+    // 判别式
+    double delta = b * b - 4.0 * a * c;
+
+    // 取较大的根，即非负根
+    return (-b + sqrt(delta)) / (2.0 * a);
+}
+
+int main() {
+    int t;
+    cin >> t;
+
+    while (t--) {
+        double x0, y0, z0, vx, vy, vz, r;
+
+        // 读入一组数据
+        cin >> x0 >> y0 >> z0 >> vx >> vy >> vz >> r;
+
+        // 计算答案
+        double ans = solve_one(x0, y0, z0, vx, vy, vz, r);
+
+        // 输出结果
+        printf("%.10f\n", ans);
+    }
+
+    return 0;
+}
+```

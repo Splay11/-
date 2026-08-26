@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4585",
+  "title": "第3题-档案均分裁切",
+  "docId": 3823,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

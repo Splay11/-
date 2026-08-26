@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4717",
+  "title": "第3题-深空航路的共同枢纽",
+  "docId": 3966,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "树"
+  ],
+  "alg_tag": "树",
+  "ai_alg_tags": "树",
+  "videosol": "",
+  "trial_videosol": ""
+}

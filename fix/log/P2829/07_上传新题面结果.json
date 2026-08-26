@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P2829",
+  "title": "第1题-分频排序",
+  "docId": 2461,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "字符串",
+    "其他",
+    "排序"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "排序算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

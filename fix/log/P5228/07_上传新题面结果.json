@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P5228",
+  "title": "第1题-阈值调节的最小差值",
+  "docId": 4555,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "其他",
+    "排序"
+  ],
+  "alg_tag": "排序",
+  "ai_alg_tags": "",
+  "videosol": "",
+  "trial_videosol": ""
+}

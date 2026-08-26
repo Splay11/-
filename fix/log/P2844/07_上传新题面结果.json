@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2844",
+  "title": "第4题-双三角防尘罩",
+  "docId": 2477,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "计算几何"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

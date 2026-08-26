@@ -1,0 +1,110 @@
+## 解题思路
+
+1. 设当前总量为 $S$，任意合法拆分可以表示为两个整数 $x$ 和 $S-x$，其中 $0 \le x \le S$。目标是求：
+   $$\min_{0\le x\le S}\big(x \oplus (S-x)\big)$$
+
+2. 利用位运算恒等式：
+   $$a+b=(a\oplus b)+2(a\land b)$$
+   代入 $a=x$，$b=S-x$，得到：
+   $$S=x\oplus(S-x)+2\big(x\land(S-x)\big)$$
+   即：
+   $$x\oplus(S-x)=S-2\big(x\land(S-x)\big)$$
+
+3. 因此，最小化 $x\oplus(S-x)$ 等价于最大化 $x\land(S-x)$。
+
+4. 当 $x$ 尽量接近 $S/2$ 时，$x\land(S-x)$ 取得最大值。因此取：
+   $$x=\left\lfloor\frac{S}{2}\right\rfloor$$
+
+5. 此时第二部分为：
+   $$S-x=\left\lceil\frac{S}{2}\right\rceil=\left\lfloor\frac{S+1}{2}\right\rfloor$$
+   所以最小分裂差异值为：
+   $$\left\lfloor\frac{S}{2}\right\rfloor \oplus \left\lfloor\frac{S+1}{2}\right\rfloor$$
+
+6. 该公式对所有 $S\ge 1$ 成立。特别地，当 $S$ 为偶数时，两个部分相等，异或结果一定为 $0$。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$，每个询问只需 $O(1)$ 计算一次异或。
+- 空间复杂度：$O(1)$，仅使用常数个变量。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def min_split_diff(S: int) -> int:
+    # 均分后的两部分异或即为最小分裂差异值
+    return (S // 2) ^ ((S + 1) // 2)
+
+def main() -> None:
+    data = sys.stdin.buffer.read().split()
+    if not data:
+        return
+    n = int(data[0])
+    out = []
+    for i in range(1, n + 1):
+        S = int(data[i])
+        out.append(str(min_split_diff(S)))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+
+public class Main {
+    // 均分后的两部分异或即为最小分裂差异值
+    static long minSplitDiff(long S) {
+        return (S / 2) ^ ((S + 1) / 2); // 必须使用 64 位整数
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < n; i++) {
+            long S = Long.parseLong(br.readLine().trim());
+            sb.append(minSplitDiff(S)).append('\n');
+        }
+
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+using int64 = long long;
+
+// 均分后的两部分异或即为最小分裂差异值
+int64 min_split_diff(int64 S) {
+    return (S / 2) ^ ((S + 1) / 2); // 必须使用 64 位整数
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+
+    while (n--) {
+        int64 S;
+        cin >> S;
+        cout << min_split_diff(S) << '\n';
+    }
+
+    return 0;
+}
+```

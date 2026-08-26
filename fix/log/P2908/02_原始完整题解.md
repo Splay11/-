@@ -1,0 +1,211 @@
+# 题解
+
+## 题面描述  
+给定一个长度为 $n$ 的数组 $\{a_1,a_2,\dots,a_n\}$。可以进行若干次如下操作：  
+> - 任选一个区间 $[l,r]$，将子数组 $\{a_l,a_{l+1},\dots,a_r\}$ 的所有元素任意重排；  
+> - 本次操作代价为该区间元素之和：  
+> $$\sum_{i=l}^r a_i\,. $$  
+
+要求计算：  
+1. 将数组变为**升序**所需的最小总代价；  
+2. 将数组变为**降序**所需的最小总代价。  
+
+$n$ 的取值可达 $2\times10^5$，$a_i$ 可达 $10^9$，需要 $O(n\log n)$ 或更优方案。
+
+---
+
+## 思路  
+
+1. **全局思路**  
+   - 任何一次操作只能在某个**连续区间**内任意置换，区间外的元素位置保持不动；  
+   - 如果对多个不相交区间各做一次操作，且每个元素至多参与一次操作，则总代价等于这些区间内所有元素之和；  
+   - 因此，要最小化总代价，就应尽可能地**保留**一些“本来就在正确位置”的元素，不对它们所在的区间做操作。  
+
+2. **如何判断元素可“保留”**  
+   - 令 $b$ 为数组 $a$ 排序（升序或降序）后得到的目标数组；  
+   - 若在下标 $i$ 上有 $a_i=b_i$，且前缀 $a[1..i]$ 与 $b[1..i]$ 的**多重集合相同**，则可以将位置 $i$ 视为一个“分割点”，  
+     在该点可将操作区间切开，不必包含这个位置；  
+   - 记 $P[i]=\text{true}$ 当且仅当多重集合  
+     $$\{a_1,\dots,a_i\} = \{b_1,\dots,b_i\}\,. $$  
+   - 那么所有满足  
+     $$P[i]\quad\text{且}\quad a_i=b_i$$  
+     的位置都可以“保留”不动。  
+   - 总和 $S=\sum_{i=1}^n a_i$，保留元素之和记为  
+     $S_{\text{keep}}$=$sum_{i:\,P[i]\land a_i=b_i}a_i\,. $  
+   - 最小总代价即  
+     $S - S_{\text{keep}}\,. $  
+
+3. **复杂度**  
+   - 先拷贝一份数组并排序得到 $b$，$O(n\log n)$；  
+   - 一次扫描维护两个哈希表（或 `unordered_map`）：前缀中对每个值的出现次数差异，判断 $P[i]$，共 $O(n)$ 平均；  
+   - 总计 $O(n\log n)$。
+
+---
+## cpp
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+// 计算将 a 排成 b 需要的最小代价
+ll calc(const vector<ll>& a, vector<ll> b) {
+    int n = a.size();
+    // cnt[x] = 在 a 前缀中出现次数 - 在 b 前缀中出现次数
+    unordered_map<ll,int> cnt;
+    cnt.reserve(n*2);
+    ll diff = 0;   // 当前有多少个值的 cnt[x] != 0
+    ll keep = 0;   // 可保留元素的总和
+    
+    for (int i = 0; i < n; i++) {
+        // 插入 a[i]
+        {
+            ll x = a[i];
+            int before = cnt[x];
+            if (before != 0) diff--;     // 更新前差异计数
+            int after = before + 1;
+            cnt[x] = after;
+            if (after != 0) diff++;      // 更新后差异计数
+        }
+        // 删除 b[i]
+        {
+            ll x = b[i];
+            int before = cnt[x];
+            if (before != 0) diff--;
+            int after = before - 1;
+            cnt[x] = after;
+            if (after != 0) diff++;
+        }
+        // 若 diff == 0，说明前缀多重集合相同
+        if (diff == 0 && a[i] == b[i]) {
+            keep += a[i];
+        }
+    }
+    return keep;
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<ll> a(n);
+    ll sum = 0;
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+        sum += a[i];
+    }
+
+    // 升序
+    vector<ll> b = a;
+    sort(b.begin(), b.end());
+    ll keep_asc = calc(a, b);
+    // 降序
+    sort(b.begin(), b.end(), greater<ll>());
+    ll keep_desc = calc(a, b);
+
+    // 最小代价 = 总和 - 最大保留和
+    cout << (sum - keep_asc) << " " << (sum - keep_desc) << "\n";
+    return 0;
+}
+```
+## python
+```python
+# Python 实现
+# 时间复杂度 O(n log n)
+import sys
+from collections import defaultdict
+
+def calc(a, b):
+    cnt = defaultdict(int)
+    diff = 0
+    keep = 0
+    for x, y in zip(a, b):
+        # a 前缀插入 x
+        before = cnt[x]
+        if before != 0: diff -= 1
+        cnt[x] = before + 1
+        if cnt[x] != 0: diff += 1
+        # b 前缀移除 y
+        before = cnt[y]
+        if before != 0: diff -= 1
+        cnt[y] = before - 1
+        if cnt[y] != 0: diff += 1
+
+        if diff == 0 and x == y:
+            keep += x
+    return keep
+
+def main():
+    input = sys.stdin.readline
+    n = int(input())
+    a = list(map(int, input().split()))
+    total = sum(a)
+
+    b = sorted(a)
+    keep_asc = calc(a, b)
+    b.reverse()
+    keep_desc = calc(a, b)
+
+    print(total - keep_asc, total - keep_desc)
+
+if __name__ == "__main__":
+    main()
+```
+## java
+```java
+// Java 实现
+// 时间复杂度 O(n log n)
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 计算 a 排成 b 的最大保留和
+    static long calc(long[] a, long[] b) {
+        Map<Long, Integer> cnt = new HashMap<>();
+        long diff = 0, keep = 0;
+        for (int i = 0; i < a.length; i++) {
+            long x = a[i], y = b[i];
+            // a 前缀插入 x
+            int before = cnt.getOrDefault(x, 0);
+            if (before != 0) diff--;
+            int after = before + 1;
+            cnt.put(x, after);
+            if (after != 0) diff++;
+            // b 前缀移除 y
+            before = cnt.getOrDefault(y, 0);
+            if (before != 0) diff--;
+            after = before - 1;
+            cnt.put(y, after);
+            if (after != 0) diff++;
+            // 若前缀一致且 a[i]==b[i]，则可保留
+            if (diff == 0 && x == y) {
+                keep += x;
+            }
+        }
+        return keep;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(in.readLine());
+        long[] a = new long[n];
+        StringTokenizer st = new StringTokenizer(in.readLine());
+        long sum = 0;
+        for (int i = 0; i < n; i++) {
+            a[i] = Long.parseLong(st.nextToken());
+            sum += a[i];
+        }
+        long[] b = a.clone();
+        Arrays.sort(b);  // 升序
+        long keepAsc = calc(a, b);
+        // 降序
+        for (int i = 0; i < n/2; i++) {
+            long t = b[i]; b[i] = b[n-1-i]; b[n-1-i] = t;
+        }
+        long keepDesc = calc(a, b);
+
+        System.out.println((sum - keepAsc) + " " + (sum - keepDesc));
+    }
+}
+```

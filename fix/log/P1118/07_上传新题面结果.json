@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1118",
+  "title": "纯净数游戏",
+  "docId": 122,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

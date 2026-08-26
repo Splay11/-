@@ -1,0 +1,312 @@
+## 解题思路
+
+把已经能够两两匹配的括号先消掉，问题就会变得非常简单。
+
+设用栈扫描整个字符串 $s$：
+
+* 遇到 `'('`，下标入栈；
+* 遇到 `')'`：
+
+  * 如果栈顶有未匹配的 `'('`，就把这一对匹配掉；
+  * 否则这个 `')'` 只能暂时作为“未匹配的右括号”。
+
+扫描结束后：
+
+* 栈中剩下的全是未匹配的 `'('`；
+* 之前记录下来的全是未匹配的 `')'`。
+
+并且把所有可匹配部分删掉后，剩余结构一定形如：
+
+$$
+))))\cdots((((
+$$
+
+也就是前面若干个未匹配的 `')'`，后面若干个未匹配的 `'('`。
+
+设：
+
+* 未匹配的 `')'` 有 $a$ 个；
+* 未匹配的 `'('` 有 $b$ 个。
+
+那么最少操作次数就是：
+
+$$
+\left\lceil \frac{a}{2} \right\rceil + \left\lceil \frac{b}{2} \right\rceil
+$$
+
+原因是：
+
+* 左边这 $a$ 个未匹配右括号，至少要翻转其中 $\left\lceil \frac{a}{2} \right\rceil$ 个；
+* 右边这 $b$ 个未匹配左括号，至少要翻转其中 $\left\lceil \frac{b}{2} \right\rceil$ 个。
+
+这也是经典的“最少翻转括号使其平衡”算法。
+
+### 如何构造一组最优方案
+
+* 对未匹配的 `')'`，翻转最前面的 $\left\lceil \frac{a}{2} \right\rceil$ 个；
+* 对未匹配的 `'('`，翻转最后面的 $\left\lceil \frac{b}{2} \right\rceil$ 个。
+
+这样一定能得到一个平衡括号序列，并且操作次数最少。
+
+### 实现方法
+
+1. 用栈保存未匹配的 `'('` 的下标。
+2. 用数组保存未匹配的 `')'` 的下标。
+3. 扫描完成后：
+
+   * 栈中的下标就是未匹配 `'('`；
+   * 数组中的下标就是未匹配 `')'`。
+4. 按上面的构造方式输出需要翻转的位置即可。
+
+---
+
+## 复杂度分析
+
+对于每组数据，只需扫描一次字符串。
+
+* 时间复杂度：$O(n)$
+* 空间复杂度：$O(n)$
+
+并且所有测试的 $n$ 总和不超过 $2 \times 10^5$，完全满足要求。
+
+---
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 处理一组测试数据，返回最少操作次数和操作下标列表
+def solve_one(n, s):
+    stack = []          # 存未匹配的 '(' 的下标
+    bad_right = []      # 存未匹配的 ')' 的下标
+
+    for i, ch in enumerate(s, 1):  # 下标从 1 开始
+        if ch == '(':
+            stack.append(i)
+        else:
+            if stack:
+                stack.pop()        # 匹配掉一对括号
+            else:
+                bad_right.append(i)
+
+    bad_left = stack               # 剩下的全是未匹配的 '('
+
+    a = len(bad_right)
+    b = len(bad_left)
+
+    ans = []
+
+    # 翻转最前面的 ceil(a / 2) 个未匹配 ')'
+    need_right = (a + 1) // 2
+    for i in range(need_right):
+        ans.append(bad_right[i])
+
+    # 翻转最后面的 ceil(b / 2) 个未匹配 '('
+    need_left = (b + 1) // 2
+    for i in range(b - need_left, b):
+        ans.append(bad_left[i])
+
+    return len(ans), ans
+
+
+def main():
+    input = sys.stdin.readline
+    t = int(input().strip())
+    out = []
+
+    for _ in range(t):
+        n = int(input().strip())
+        s = input().strip()
+
+        k, ans = solve_one(n, s)
+        out.append(str(k))
+        if k == 0:
+            out.append("")
+        else:
+            out.append(" ".join(map(str, ans)))
+
+    sys.stdout.write("\n".join(out))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    // 返回一组测试的答案
+    static ArrayList<Integer> solveOne(int n, String s) {
+        ArrayList<Integer> stack = new ArrayList<>();      // 存未匹配的 '(' 下标
+        ArrayList<Integer> badRight = new ArrayList<>();   // 存未匹配的 ')' 下标
+
+        for (int i = 0; i < n; i++) {
+            char ch = s.charAt(i);
+            int idx = i + 1; // 题目要求下标从 1 开始
+
+            if (ch == '(') {
+                stack.add(idx);
+            } else {
+                if (!stack.isEmpty()) {
+                    // 匹配掉一对括号
+                    stack.remove(stack.size() - 1);
+                } else {
+                    badRight.add(idx);
+                }
+            }
+        }
+
+        ArrayList<Integer> ans = new ArrayList<>();
+
+        int a = badRight.size();
+        int b = stack.size();
+
+        // 翻转最前面的 ceil(a / 2) 个未匹配 ')'
+        int needRight = (a + 1) / 2;
+        for (int i = 0; i < needRight; i++) {
+            ans.add(badRight.get(i));
+        }
+
+        // 翻转最后面的 ceil(b / 2) 个未匹配 '('
+        int needLeft = (b + 1) / 2;
+        for (int i = b - needLeft; i < b; i++) {
+            ans.add(stack.get(i));
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastReader fr = new FastReader();
+        StringBuilder sb = new StringBuilder();
+
+        int T = fr.nextInt();
+        while (T-- > 0) {
+            int n = fr.nextInt();
+            String s = fr.next();
+
+            ArrayList<Integer> ans = solveOne(n, s);
+
+            sb.append(ans.size()).append('\n');
+            if (ans.size() == 0) {
+                sb.append('\n');
+            } else {
+                for (int i = 0; i < ans.size(); i++) {
+                    if (i > 0) sb.append(' ');
+                    sb.append(ans.get(i));
+                }
+                sb.append('\n');
+            }
+        }
+
+        System.out.print(sb.toString());
+    }
+
+    // 简单输入工具
+    static class FastReader {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreElements()) {
+                st = new StringTokenizer(br.readLine());
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+
+// 处理一组测试数据，返回需要翻转的下标
+vector<int> solveOne(int n, const string &s) {
+    vector<int> st;        // 存未匹配的 '(' 下标
+    vector<int> badRight;  // 存未匹配的 ')' 下标
+
+    for (int i = 0; i < n; i++) {
+        char ch = s[i];
+        int idx = i + 1;   // 题目下标从 1 开始
+
+        if (ch == '(') {
+            st.push_back(idx);
+        } else {
+            if (!st.empty()) {
+                st.pop_back(); // 匹配掉一对括号
+            } else {
+                badRight.push_back(idx);
+            }
+        }
+    }
+
+    vector<int> ans;
+    int a = (int)badRight.size();
+    int b = (int)st.size();
+
+    // 翻转最前面的 ceil(a / 2) 个未匹配 ')'
+    int needRight = (a + 1) / 2;
+    for (int i = 0; i < needRight; i++) {
+        ans.push_back(badRight[i]);
+    }
+
+    // 翻转最后面的 ceil(b / 2) 个未匹配 '('
+    int needLeft = (b + 1) / 2;
+    for (int i = b - needLeft; i < b; i++) {
+        ans.push_back(st[i]);
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n;
+        string s;
+        cin >> n >> s;
+
+        vector<int> ans = solveOne(n, s);
+
+        cout << ans.size() << '\n';
+        if (ans.empty()) {
+            cout << '\n';
+        } else {
+            for (int i = 0; i < (int)ans.size(); i++) {
+                if (i) cout << ' ';
+                cout << ans[i];
+            }
+            cout << '\n';
+        }
+    }
+
+    return 0;
+}
+```

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3575",
+  "title": "第3题-三色序列的跨度总和",
+  "docId": 2918,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

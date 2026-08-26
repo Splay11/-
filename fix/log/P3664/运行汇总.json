@@ -1,0 +1,11 @@
+{
+  "pid": "P3664",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 18:41:49",
+  "end_time": "2026-08-19 18:41:50",
+  "new_title": "第1题-阶乘零位",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

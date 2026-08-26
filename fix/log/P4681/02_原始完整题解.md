@@ -1,0 +1,357 @@
+## 解题思路
+
+设数组为 $a_1,a_2,\dots,a_n$，满足
+
+* $a_i \ge 0$
+* $\sum_{i=1}^n a_i=m$
+* 相邻不同的位置数不超过 $d$
+
+并定义
+
+$$
+F(a)=\sum_{i=1}^{n-1}|a_i-a_{i+1}|
+$$
+
+每次询问其实就是判断：在限制“相邻不同的边数不超过 $d$”下，是否存在某个数组使得 $F(a)\ge y$。
+
+问题核心就是求出在给定 $n,m,d$ 时，$F(a)$ 的最大值。
+
+### 相关算法
+
+本题使用的是 数学分析 + 分类讨论。
+
+### 核心结论
+
+先看 $F(a)$ 的最大能到多少。
+
+#### 1. 当 $d=0$
+
+此时整个数组必须相等，即
+
+$$
+a_1=a_2=\cdots=a_n
+$$
+
+所以只有当 $m$ 能被 $n$ 整除时，才存在这样的数组，此时
+
+$$
+F(a)=0
+$$
+
+因此：
+
+* 若 $m \bmod n \ne 0$，无解
+* 若 $m \bmod n = 0$，最大值为 $0$
+
+---
+
+#### 2. 当 $d\ge 1$
+
+只要 $n\ge 2$，总能构造出只有一条边不同的数组，例如
+
+$$
+[m,0,0,\dots,0]
+$$
+
+此时
+
+$$
+F(a)=m
+$$
+
+所以当 $d\ge 1$ 时，至少能做到 $F(a)=m$。
+
+---
+
+#### 3. 当 $d\ge 2$ 且 $n\ge 3$
+
+可以把所有的和都放在中间某一项，其余全为 $0$，例如
+
+$$
+[0,\dots,0,m,0,\dots,0]
+$$
+
+此时左右各产生一次变化，所以一共用了 $2$ 条不同边，并且
+
+$$
+F(a)=|0-m|+|m-0|=2m
+$$
+
+而 $F(a)$ 不可能超过 $2m$，因为总和只有 $m$，上下起伏的总幅度最多就是把这 $m$ “抬起来再放下去” 一次。
+
+所以此时最大值就是
+
+$$
+2m
+$$
+
+---
+
+### 最终分类
+
+#### 情况一：$n=1$
+
+没有相邻边，所以恒有
+
+$$
+F(a)=0
+$$
+
+因此只有当 $y=0$ 时答案为 YES。
+
+---
+
+#### 情况二：$d=0$
+
+只有当 $m \bmod n=0$ 时存在合法数组，而且这时
+
+$$
+F(a)=0
+$$
+
+所以只有当
+
+$$
+m \bmod n=0 \quad\text{且}\quad y=0
+$$
+
+答案才是 YES。
+
+---
+
+#### 情况三：$n\ge 2,d\ge 1$
+
+* 若 $n=2$，最多只有一条边，因此最大值为
+
+$$
+m
+$$
+
+* 若 $n\ge 3$：
+
+  * $d=1$ 时，最大值为
+
+$$
+m
+$$
+
+* $d\ge 2$ 时，最大值为
+
+$$
+2m
+$$
+
+所以每次询问只需要算出最大值，再判断
+
+$$
+\text{maxF}\ge y
+$$
+
+即可。
+
+## 复杂度分析
+
+每个询问都只需要 $O(1)$ 时间判断一次。
+
+设所有测试数据的询问总数为 $Q$，则总复杂度为：
+
+* 时间复杂度：$O(Q)$
+* 空间复杂度：$O(1)$
+
+这样的复杂度对题目数据范围完全足够。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 计算在当前 n, m, d 下，F(a) 的最大值
+# 若不存在合法数组，返回 -1
+def get_max_f(n, m, d):
+    # 只有一个数，没有相邻边
+    if n == 1:
+        return 0
+
+    # 不允许相邻不同，整个数组必须相等
+    if d == 0:
+        if m % n == 0:
+            return 0
+        return -1
+
+    # n == 2 时最多只有一条边
+    if n == 2:
+        return m
+
+    # n >= 3
+    if d == 1:
+        return m
+    else:
+        return 2 * m
+
+
+def main():
+    data = sys.stdin.read().split()
+    t = int(data[0])
+    idx = 1
+    ans = []
+
+    for _ in range(t):
+        n = int(data[idx])
+        m = int(data[idx + 1])
+        q = int(data[idx + 2])
+        idx += 3
+
+        for _ in range(q):
+            d = int(data[idx])
+            y = int(data[idx + 1])
+            idx += 2
+
+            max_f = get_max_f(n, m, d)
+
+            if max_f != -1 and max_f >= y:
+                ans.append("YES")
+            else:
+                ans.append("NO")
+
+    sys.stdout.write("\n".join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 计算在当前 n, m, d 下，F(a) 的最大值
+    // 若不存在合法数组，返回 -1
+    public static long getMaxF(long n, long m, long d) {
+        // 只有一个数，没有相邻边
+        if (n == 1) {
+            return 0;
+        }
+
+        // 不允许相邻不同，整个数组必须相等
+        if (d == 0) {
+            if (m % n == 0) {
+                return 0;
+            }
+            return -1;
+        }
+
+        // n == 2 时最多只有一条边
+        if (n == 2) {
+            return m;
+        }
+
+        // n >= 3
+        if (d == 1) {
+            return m;
+        } else {
+            return 2L * m;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        StringBuilder sb = new StringBuilder();
+
+        int t = sc.nextInt();
+
+        while (t-- > 0) {
+            long n = sc.nextLong();
+            long m = sc.nextLong();
+            int q = sc.nextInt();
+
+            while (q-- > 0) {
+                long d = sc.nextLong();
+                long y = sc.nextLong();
+
+                long maxF = getMaxF(n, m, d);
+
+                if (maxF != -1 && maxF >= y) {
+                    sb.append("YES\n");
+                } else {
+                    sb.append("NO\n");
+                }
+            }
+        }
+
+        sc.close();
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+// 计算在当前 n, m, d 下，F(a) 的最大值
+// 若不存在合法数组，返回 -1
+long long getMaxF(long long n, long long m, long long d) {
+    // 只有一个数，没有相邻边
+    if (n == 1) {
+        return 0;
+    }
+
+    // 不允许相邻不同，整个数组必须相等
+    if (d == 0) {
+        if (m % n == 0) {
+            return 0;
+        }
+        return -1;
+    }
+
+    // n == 2 时最多只有一条边
+    if (n == 2) {
+        return m;
+    }
+
+    // n >= 3
+    if (d == 1) {
+        return m;
+    } else {
+        return 2 * m;
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+
+    while (t--) {
+        long long n, m;
+        int q;
+        cin >> n >> m >> q;
+
+        while (q--) {
+            long long d, y;
+            cin >> d >> y;
+
+            long long maxF = getMaxF(n, m, d);
+
+            if (maxF != -1 && maxF >= y) {
+                cout << "YES\n";
+            } else {
+                cout << "NO\n";
+            }
+        }
+    }
+
+    return 0;
+}
+```

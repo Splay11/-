@@ -1,0 +1,208 @@
+## 解题思路
+
+1. **状态表示**  
+   由于装置数量 $n \le 7$，可以**状压 DP**：用一个 $n$ 位二进制数表示某一天激活的装置集合（第 $i$ 位为 $1$ 表示激活第 $i+1$ 个装置）。  
+   令 $dp[day][mask]$ 表示前 $day$ 天，且第 $day$ 天选择的激活集合为 $mask$ 时，能收集到的最大总数据量。
+
+2. **预处理**  
+   提前计算出每天每个状态对应的数据总量 $val[day][mask]$，即统计 $mask$ 中所有 $1$ 位对应的装置在当前天的数据量之和。
+
+3. **初始化**  
+   第 $0$ 天（第一天）不受前一天约束，可以直接选择任意激活集合：  
+   $$ dp[0][mask] = val[0][mask] $$
+
+4. **状态转移**  
+   对于第 $day$ 天（$day \ge 1$），枚举当天状态 $cur$ 和前一天状态 $prev$。  
+   题目要求：如果前一天激活了装置 $i$，则当天不能激活 $i-1,i,i+1$（若存在）。  
+   用位运算表达：令 $ban = prev \mid (prev \ll 1) \mid (prev \gg 1)$，则 $cur$ 不能与 $ban$ 有交集，即：
+   $$ \big(cur \;\&\; ban\big) = 0 $$
+   若合法，则转移：
+   $$ dp[day][cur] = \max\big(dp[day][cur],\ dp[day-1][prev] + val[day][cur]\big) $$
+
+5. **最终答案**  
+   所有 $m$ 天结束后，答案为 $\max\limits_{mask} dp[m-1][mask]$。
+
+## 复杂度分析
+
+- **时间复杂度**：$O\big(m \cdot 2^n \cdot 2^n\big) = O\big(m \cdot 4^n\big)$。  
+  其中 $n\le 7$，$m\le 100$，运算量在 $10^6$ 级别，完全可以接受。
+- **空间复杂度**：$O\big(m \cdot 2^n\big)$（若使用滚动数组可优化到 $O(2^n)$，但原版 $m$ 很小，直接开二维数组足够）。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().strip().split()
+    it = iter(data)
+    n = int(next(it))
+    m = int(next(it))
+    mm = 1 << n
+    # 读取每天每个装置的数据量
+    a = [[0] * n for _ in range(m)]
+    for day in range(m):
+        for i in range(n):
+            a[day][i] = int(next(it))
+    
+    # 预处理每天每种状态的数据和
+    val = [[0] * mm for _ in range(m)]
+    for day in range(m):
+        for mask in range(mm):
+            s = 0
+            for i in range(n):
+                if (mask >> i) & 1:
+                    s += a[day][i]
+            val[day][mask] = s
+    
+    # dp[day][mask]
+    dp = [[0] * mm for _ in range(m)]
+    # 第一天
+    for mask in range(mm):
+        dp[0][mask] = val[0][mask]
+    
+    # 后续天数
+    for day in range(1, m):
+        for cur in range(mm):
+            max_val = 0
+            for prev in range(mm):
+                # 前一天状态 prev，产生的影响范围
+                ban = prev | (prev << 1) | (prev >> 1)
+                ban &= (mm - 1)  # 只保留低 n 位，可省略
+                if (cur & ban) == 0:
+                    if dp[day - 1][prev] + val[day][cur] > max_val:
+                        max_val = dp[day - 1][prev] + val[day][cur]
+            dp[day][cur] = max_val
+    
+    ans = max(dp[m - 1])
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        int mm = 1 << n;
+        int[][] a = new int[m][n];
+        for (int day = 0; day < m; day++) {
+            for (int i = 0; i < n; i++) {
+                a[day][i] = sc.nextInt();
+            }
+        }
+        
+        // 预处理每天每种状态的数据和
+        int[][] val = new int[m][mm];
+        for (int day = 0; day < m; day++) {
+            for (int mask = 0; mask < mm; mask++) {
+                int sum = 0;
+                for (int i = 0; i < n; i++) {
+                    if ((mask >> i & 1) == 1) {
+                        sum += a[day][i];
+                    }
+                }
+                val[day][mask] = sum;
+            }
+        }
+        
+        int[][] dp = new int[m][mm];
+        // 第一天
+        for (int mask = 0; mask < mm; mask++) {
+            dp[0][mask] = val[0][mask];
+        }
+        
+        // 后续天数转移
+        for (int day = 1; day < m; day++) {
+            for (int cur = 0; cur < mm; cur++) {
+                int best = 0;
+                for (int prev = 0; prev < mm; prev++) {
+                    int ban = prev | (prev << 1) | (prev >> 1);
+                    if ((cur & ban) == 0) {
+                        best = Math.max(best, dp[day - 1][prev] + val[day][cur]);
+                    }
+                }
+                dp[day][cur] = best;
+            }
+        }
+        
+        int ans = 0;
+        for (int mask = 0; mask < mm; mask++) {
+            ans = Math.max(ans, dp[m - 1][mask]);
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n, m;
+    cin >> n >> m;
+    int mm = 1 << n;
+    vector<vector<int>> a(m, vector<int>(n));
+    for (int day = 0; day < m; ++day) {
+        for (int i = 0; i < n; ++i) {
+            cin >> a[day][i];
+        }
+    }
+    
+    // 预处理每天每种状态的数据和
+    vector<vector<int>> val(m, vector<int>(mm, 0));
+    for (int day = 0; day < m; ++day) {
+        for (int mask = 0; mask < mm; ++mask) {
+            int sum = 0;
+            for (int i = 0; i < n; ++i) {
+                if (mask >> i & 1) {
+                    sum += a[day][i];
+                }
+            }
+            val[day][mask] = sum;
+        }
+    }
+    
+    vector<vector<int>> dp(m, vector<int>(mm, 0));
+    // 第一天
+    for (int mask = 0; mask < mm; ++mask) {
+        dp[0][mask] = val[0][mask];
+    }
+    
+    // 后续天数转移
+    for (int day = 1; day < m; ++day) {
+        for (int cur = 0; cur < mm; ++cur) {
+            int best = 0;
+            for (int prev = 0; prev < mm; ++prev) {
+                int ban = prev | (prev << 1) | (prev >> 1);
+                if ((cur & ban) == 0) {
+                    best = max(best, dp[day - 1][prev] + val[day][cur]);
+                }
+            }
+            dp[day][cur] = best;
+        }
+    }
+    
+    int ans = *max_element(dp[m - 1].begin(), dp[m - 1].end());
+    cout << ans << endl;
+    
+    return 0;
+}
+```

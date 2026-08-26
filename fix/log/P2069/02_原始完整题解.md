@@ -1,0 +1,72 @@
+# 数论加分类讨论
+提供一种满足的构造方法，每一行每一列的公差$(d)$都是相等的$\\$
+第$i$行的和=$(i-1)*m*d+m*(2*a_1*(m-1)*d)/2\\$
+等式第二项是定值,第$i$行于第$i+1$行的差也是定值为$m*d$.得到$n*m*(2*a1+(m-1)*d)/2=x$,题目要求正整数得到一下两个性质$\\$
+$1.$  $x*2$是$n*m$的倍数 $\\$
+$2.$  $2*a1+(m-1)*d=(x*2/n/m)$可以解得$a1$和$d$是正整数$\\$
+最简单的方法也就是枚举$d=0,1,2.$ $2*a1$一定是偶数，所以$d=0,1,2$可以概括全部情况
+也可以直接$exgcd$求解一个二元一次方程
+$\\$整体复杂度$o(1)$$\\$
+## 代码如下
+### $cpp$
+```cpp
+#include <bits/stdc++.h>//分讨
+using namespace std;
+#define int long long
+signed main() {
+	ios::sync_with_stdio(0);
+	cin.tie(0);
+	int n, m, x1;
+	cin >> n >> m >> x1;
+	if((n<=2&&m<=2)&&n*m<=x1){
+		for(int i=1;i<=n;i++){
+			if(i<n)
+			for(int j=1;j<=m;j++){
+				cout<<1<<' ';
+			}
+			else{
+				for(int j=1;j<m;j++){
+					cout<<1<<' ';
+				}
+				cout<<x1-n*m+1<<' ';
+			}
+			cout<<'\n';
+		}
+		return 0;
+	}
+	if (x1 * 2 % (n * m) != 0) {
+		cout << -1 << '\n';
+		return 0;
+	}
+	x1 *= 2;
+	x1 /= n;
+	x1 /= m;
+	int a1, dd, boo = 0;
+	if (x1 - (n - 1) >= 2 && (x1 - (n - 1)) % 2 == 0) {
+		dd = 1;
+		a1 = (x1 - (n - 1)) / 2;
+		boo = 1;
+	} else if (x1 - 2 * (n - 1) >= 2 && (x1 - 2 * (n - 1)) % 2 == 0) {
+		dd = 2;
+		a1 = (x1 - 2 * (n - 1)) / 2;
+		boo = 1;
+	} else if (x1 >= 2 && (x1) % 2 == 0) {
+		dd = 0;
+		a1 = x1 / 2;
+		boo = 1;
+	}
+	if (boo == 1) {
+		for (int i = 1; i <= n; i++) {
+			for (int j = 1; j <= m; j++)
+				cout << a1 << ' ';
+			cout << '\n';
+			a1 += dd;
+		}
+	} else {
+		cout << "-1" << '\n';
+	}
+}
+
+
+
+```

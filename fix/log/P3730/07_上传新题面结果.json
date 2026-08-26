@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3730",
+  "title": "第1题-灯带等积切割",
+  "docId": 3073,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

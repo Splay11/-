@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3726",
+  "title": "第4题-货架倒序",
+  "docId": 3068,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "数据结构",
+    "树状数组"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树状数组",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4714",
+  "title": "第3题-最小融合代价",
+  "docId": 3962,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

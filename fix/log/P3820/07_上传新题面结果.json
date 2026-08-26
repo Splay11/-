@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P3820",
+  "title": "最小频道编号和",
+  "docId": 3176,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "动态规划",
+    "bfs",
+    "dfs"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "BFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

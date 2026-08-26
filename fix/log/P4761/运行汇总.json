@@ -1,0 +1,11 @@
+{
+  "pid": "P4761",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 18:41:45",
+  "end_time": "2026-08-19 18:41:46",
+  "new_title": "第1题-展牌校准",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

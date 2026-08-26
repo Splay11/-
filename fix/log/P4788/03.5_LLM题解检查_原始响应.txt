@@ -1,0 +1,188 @@
+## 解题思路
+
+在一个 $R$ 行 $C$ 列的矩形区域中，标记为 `#` 的格子称为阻塞格，其余格子称为可操作格。定义相邻格为上下左右相邻的两个可操作格，若相邻的两个可操作格标记不同（一个为 `0`，一个为 `1`），则产生一条异态边。整个区域的异态指标为异态边的总数对 $2$ 取模的结果（即异态边的奇偶性）。
+
+现在可以选择一个可操作格，将其标记取反。需要统计有多少个可操作格，在翻转后使得整个区域的异态指标保持不变。
+
+### 核心观察
+
+考虑翻转某个可操作格 $(i, j)$。只有与它相邻的边会受影响，其他所有相邻关系保持不变。
+
+设当前可操作格 $(i, j)$ 有 $d$ 个非阻塞格邻居（即上下左右四方向的相邻可操作格）。其对应的 $d$ 条边中，原本与邻居标记不同（异态边）的数量设为 $x$，则翻转该格后：
+
+- 原来标记不同的边变为相同，异态边减少 $x$；
+- 原来标记相同的边变为不同，异态边增加 $d - x$。
+
+翻转后该格相关的异态边总数变为 $(d - x)$，整个区域的异态指标的变化量为：
+
+$$
+(d - x) - x = d - 2x.
+$$
+
+对 $2$ 取模后，$-2x \equiv 0$，因此异态指标的奇偶性是否改变仅取决于 $d \bmod 2$。
+
+- 若 $d$ 是偶数，翻转后异态指标不变；
+- 若 $d$ 是奇数，翻转后异态指标改变。
+
+### 最终算法
+
+不需要统计原本的异态指标，也不需要关心每个格子是 `0` 还是 `1`。只需遍历每一个可操作格，计算其四方向上非阻塞格邻居个数 $d$：
+
+- 若 $d \bmod 2 = 0$，则翻转该格后异态指标不变，计入答案；
+- 否则不计入答案。
+
+阻塞格（`#`）本身不可操作，直接跳过。
+
+---
+
+## 复杂度分析
+
+设单组数据区域大小为 $R \times C$。每个格子最多被访问 $1$ 次，每次检查固定 $4$ 个邻居方向，因此时间复杂度为 $O(RC)$。
+
+需要存储整个 $R \times C$ 的字符矩阵，空间复杂度为 $O(RC)$。题目保证所有测试数据的 $R \times C$ 总和不超过 $2 \times 10^6$，该复杂度完全可行。
+
+---
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    data = sys.stdin.buffer.read().split()
+    t = int(data[0])
+    idx = 1
+    out = []
+    
+    for _ in range(t):
+        R = int(data[idx]); C = int(data[idx + 1])
+        idx += 2
+        grid = []
+        for _ in range(R):
+            grid.append(data[idx].decode())
+            idx += 1
+        
+        # 四个方向：上、下、左、右
+        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        ans = 0
+        
+        for i in range(R):
+            for j in range(C):
+                if grid[i][j] == '#':   # 阻塞格不可操作
+                    continue
+                deg = 0  # 非阻塞格邻居数量
+                for dx, dy in dirs:
+                    ni, nj = i + dx, j + dy
+                    if 0 <= ni < R and 0 <= nj < C and grid[ni][nj] != '#':
+                        deg += 1
+                if deg % 2 == 0:         # 邻居数为偶数，异态指标不变
+                    ans += 1
+        out.append(str(ans))
+    
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        int T = Integer.parseInt(br.readLine().trim());
+        
+        // 四个方向：上、下、左、右
+        int[] dx = {-1, 1, 0, 0};
+        int[] dy = {0, 0, -1, 1};
+        
+        while (T-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int R = Integer.parseInt(st.nextToken());
+            int C = Integer.parseInt(st.nextToken());
+            char[][] grid = new char[R][];
+            for (int i = 0; i < R; i++) {
+                grid[i] = br.readLine().toCharArray();
+            }
+            
+            int ans = 0;
+            for (int i = 0; i < R; i++) {
+                for (int j = 0; j < C; j++) {
+                    if (grid[i][j] == '#') {   // 阻塞格不可操作
+                        continue;
+                    }
+                    int deg = 0; // 非阻塞格邻居数量
+                    for (int k = 0; k < 4; k++) {
+                        int ni = i + dx[k];
+                        int nj = j + dy[k];
+                        if (ni >= 0 && ni < R && nj >= 0 && nj < C && grid[ni][nj] != '#') {
+                            deg++;
+                        }
+                    }
+                    if (deg % 2 == 0) {        // 邻居数为偶数，异态指标不变
+                        ans++;
+                    }
+                }
+            }
+            sb.append(ans).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int T;
+    cin >> T;
+    
+    // 四个方向：上、下、左、右
+    const int dx[4] = {-1, 1, 0, 0};
+    const int dy[4] = {0, 0, -1, 1};
+    
+    while (T--) {
+        int R, C;
+        cin >> R >> C;
+        vector<string> grid(R);
+        for (int i = 0; i < R; ++i) {
+            cin >> grid[i];
+        }
+        
+        int ans = 0;
+        for (int i = 0; i < R; ++i) {
+            for (int j = 0; j < C; ++j) {
+                if (grid[i][j] == '#')   // 阻塞格不可操作
+                    continue;
+                int deg = 0; // 非阻塞格邻居数量
+                for (int k = 0; k < 4; ++k) {
+                    int ni = i + dx[k];
+                    int nj = j + dy[k];
+                    if (ni >= 0 && ni < R && nj >= 0 && nj < C && grid[ni][nj] != '#')
+                        ++deg;
+                }
+                if (deg % 2 == 0)        // 邻居数为偶数，异态指标不变
+                    ++ans;
+            }
+        }
+        cout << ans << '\n';
+    }
+    return 0;
+}
+```

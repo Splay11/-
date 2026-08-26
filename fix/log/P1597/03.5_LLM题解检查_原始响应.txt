@@ -1,0 +1,132 @@
+## 解题思路
+
+1. **操作对总和的影响**  
+   - 普通调节：任选两个位置，一个加 $1$，一个减 $1$，整个调节器的参数总和不变。  
+   - 特殊调节：任选两个位置，一个加 $2$，一个减 $1$，整个调节器的参数总和增加 $1$。  
+
+2. **初始与最终状态的关系**  
+   - 所有调节器的初始参数完全相同，所以初始总和也完全相同。  
+   - 经过若干次操作后，普通调节器只使用了普通调节，因此它们的总和始终保持一致，等于初始总和。  
+   - 特殊调节器使用了 $k$ 次特殊调节（可能还混有普通调节），其总和比初始总和多 $k$，即比任何普通调节器的总和都大 $k$。  
+
+3. **解题方法**  
+   - 读入所有调节器的参数，计算每个调节器的元素总和，存入数组 `sums`。  
+   - 特殊调节器的总和一定与其他所有调节器的总和不同（且是唯一的最大值）。  
+   - 找到总和最大的调节器，记其编号为 $p$（从 $1$ 开始），最大总和为 $S_{\text{max}}$。取任意一个非最大总和 $S_{\text{other}}$，则特殊调节次数 $k = S_{\text{max}} - S_{\text{other}}$。  
+   - 若所有总和相等（$k = 0$），根据题意数据保证有唯一解，这种情况不会出现歧义，我们仍可输出任意编号与 $0$，但实际题目中特殊调节器会被唯一确定。  
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n \times m)$，需要遍历所有 $n \times m$ 个参数以计算每个调节器的总和，后续查找最大值只需 $O(n)$ 时间。  
+- **空间复杂度**：$O(n)$，存储每个调节器的总和；若在输入时直接比较并维护最大值和次大值，可优化至 $O(1)$，但 $n \times m \le 10^5$，$O(n)$ 空间完全可行。  
+
+## 代码实现
+
+### Python
+
+```python
+n, m = map(int, input().split())
+
+# 存储每个调节器的总和
+sums = []
+for _ in range(n):
+    total = sum(map(int, input().split()))
+    sums.append(total)
+
+# 寻找最大总和及其编号（1-based）
+max_val = max(sums)
+p = sums.index(max_val) + 1
+
+# 找到一个不是最大总和的值来计算差值
+other = next(val for val in sums if val != max_val)
+k = max_val - other
+
+print(p, k)
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+
+        // 存储每个调节器的总和
+        long[] sums = new long[n];
+        for (int i = 0; i < n; i++) {
+            long total = 0;
+            for (int j = 0; j < m; j++) {
+                total += sc.nextLong();
+            }
+            sums[i] = total;
+        }
+
+        // 寻找最大值及其索引
+        long maxSum = sums[0];
+        int maxIdx = 0;
+        for (int i = 1; i < n; i++) {
+            if (sums[i] > maxSum) {
+                maxSum = sums[i];
+                maxIdx = i;
+            }
+        }
+
+        // 找一个与最大值不同的普通总和
+        long otherSum = sums[0] == maxSum ? sums[1] : sums[0];
+        long k = maxSum - otherSum;
+
+        // 输出编号（1-based）和次数
+        System.out.println((maxIdx + 1) + " " + k);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+
+    vector<long long> sums(n);
+    for (int i = 0; i < n; ++i) {
+        long long total = 0;
+        for (int j = 0; j < m; ++j) {
+            long long x;
+            cin >> x;
+            total += x;
+        }
+        sums[i] = total;
+    }
+
+    // 找出最大总和及其位置
+    long long maxSum = sums[0];
+    int maxIdx = 0;
+    for (int i = 1; i < n; ++i) {
+        if (sums[i] > maxSum) {
+            maxSum = sums[i];
+            maxIdx = i;
+        }
+    }
+
+    // 取一个普通总和
+    long long otherSum = (maxIdx == 0) ? sums[1] : sums[0];
+    long long k = maxSum - otherSum;
+
+    cout << maxIdx + 1 << " " << k << endl;
+
+    return 0;
+}
+```

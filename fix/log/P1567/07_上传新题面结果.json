@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1567",
+  "title": "第2题-疲劳版本号",
+  "docId": 590,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

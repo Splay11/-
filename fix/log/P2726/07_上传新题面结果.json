@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2726",
+  "title": "第2题-编码序列的位运算求余",
+  "docId": 2355,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

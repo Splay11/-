@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4980",
+  "title": "第3题-瓶颈相容子序列",
+  "docId": 4323,
+  "hidden": false,
+  "difficulty": 9,
+  "tag": [
+    "二分算法"
+  ],
+  "alg_tag": "二分算法",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

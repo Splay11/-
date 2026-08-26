@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2840",
+  "title": "第3题-危险的炼制",
+  "docId": 2473,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "组合数学",
+    "概率论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

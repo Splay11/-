@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1009",
+  "title": "共振最大化",
+  "docId": 10,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "腾讯"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "trial_videosol": ""
+}

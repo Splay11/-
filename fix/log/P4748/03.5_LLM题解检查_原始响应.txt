@@ -1,0 +1,214 @@
+## 解题思路
+
+本题要求从能量值序列中选出一个**非空子列**（保持原有次序，但可以不连续），使得选中晶体的能量总和 $S$ 除以调制基数 $M$ 的余数 $S \bmod M$ 最大。
+
+由于求和只与选出的元素有关，与顺序无关，问题本质是：从能量值序列中选出非空子集，最大化元素和模 $M$ 的值。因此，本题等价于一个**模意义下的子集和可达性问题**。
+
+### 状态设计
+
+我们只关心在模 $M$ 意义下哪些余数能够被某个非空子集的和表示出来。设 $dp$ 为一个二进制状态，其第 $r$ 位（$0 \le r < M$）为 $1$ 表示已经可以构造出某个非空子集，使得其能量总和模 $M$ 等于 $r$。初始时没有任何数被选中，即所有状态均为 $0$（空集不计入可达状态）。
+
+### 转移方法
+
+依次考虑每个能量值 $a_i$，设 $x = a_i \bmod M$。
+
+如果当前已经可以凑出模值 $r$，那么再选取当前晶体后，新的模值变为 $(r + x) \bmod M$。这相当于将所有已存在的可达状态在模 $M$ 的圆环上“循环左移” $x$ 位。此外，单独选择当前晶体自身也能得到模值 $x$。
+
+因此，对于每个能量值，状态更新为：
+1. 保留原有状态；
+2. 将原有状态循环左移 $x$ 位后并入；
+3. 将模值 $x$ 单独加入。
+
+### 位运算优化
+
+由于 $M \le n \le 2 \times 10^4$，用普通布尔数组进行 DP 复杂度为 $O(nM)$，可能较慢。但状态可视为一个长度为 $M$ 的二进制串，因此可以使用**位集**（或大整数）来压缩状态。每次循环左移、按位或等操作只需 $O(M/w)$ 的机器字操作（$w$ 为机器字长，通常为 $64$），大幅降低常数。
+
+### 结果提取
+
+处理完所有能量值后，从 $M-1$ 向下枚举余数 $r$，第一个满足 $dp$ 中第 $r$ 位为 $1$ 的即为最大可能余数，直接输出即可。
+
+## 复杂度分析
+
+设单个测试数据中序列长度为 $n$，调制基数为 $M$。使用位集优化后，每次状态转移需要对 $M$ 位进行若干次移位和按位或运算，单次转移复杂度为 $O(M/w)$，其中 $w$ 为机器字长（通常可视为常数 $64$）。共处理 $n$ 个数，故单组时间复杂度为：  
+$O\left(n \times \dfrac{M}{w}\right)$。
+
+所有测试数据的 $n$ 总和不超过 $6 \times 10^4$，因此能够在时限内完成。
+
+空间复杂度主要消耗在存储位集状态上，为 $O(M/w)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+def rotate_left(dp, shift, M, mask):
+    """将长度为 M 位的二进制状态 dp 循环左移 shift 位"""
+    shift %= M
+    if shift == 0:
+        return dp
+    left = (dp << shift) & mask   # 左移溢出的高位被 mask 截断
+    right = dp >> (M - shift)     # 高位补到低位
+    return left | right
+
+
+def solve_case(n, M, arr):
+    mask = (1 << M) - 1
+    dp = 0          # 第 r 位为 1 表示模 r 可达
+
+    for num in arr:
+        x = num % M
+        shifted = rotate_left(dp, x, M, mask)
+        dp |= shifted           # 将当前数接在已有方案后面
+        dp |= (1 << x)          # 单独选择当前数
+        dp &= mask              # 仅保留低 M 位
+
+    # 从大到小寻找最大可行余数
+    for ans in range(M - 1, -1, -1):
+        if (dp >> ans) & 1:
+            return ans
+    return 0
+
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    T = data[0]
+    idx = 1
+    out = []
+
+    for _ in range(T):
+        n = data[idx]
+        M = data[idx + 1]
+        idx += 2
+        arr = data[idx:idx + n]
+        idx += n
+        out.append(str(solve_case(n, M, arr)))
+
+    sys.stdout.write("\n".join(out))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.math.BigInteger;
+import java.util.Scanner;
+
+public class Main {
+
+    // 将长度为 M 位的二进制状态 dp 循环左移 shift 位
+    static BigInteger rotateLeft(BigInteger dp, int shift, int M, BigInteger mask) {
+        shift %= M;
+        if (shift == 0) return dp;
+        BigInteger left = dp.shiftLeft(shift).and(mask);
+        BigInteger right = dp.shiftRight(M - shift);
+        return left.or(right);
+    }
+
+    static int solveCase(int n, int M, int[] arr) {
+        BigInteger mask = BigInteger.ONE.shiftLeft(M).subtract(BigInteger.ONE);
+        BigInteger dp = BigInteger.ZERO;
+
+        for (int num : arr) {
+            int x = num % M;
+            BigInteger shifted = rotateLeft(dp, x, M, mask);
+            dp = dp.or(shifted);               // 接在已有方案后
+            dp = dp.setBit(x);                 // 单独选取当前数
+            dp = dp.and(mask);                 // 保留低 M 位
+        }
+
+        for (int ans = M - 1; ans >= 0; ans--) {
+            if (dp.testBit(ans)) {
+                return ans;
+            }
+        }
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        while (T-- > 0) {
+            int n = sc.nextInt();
+            int M = sc.nextInt();
+            int[] arr = new int[n];
+            for (int i = 0; i < n; i++) {
+                arr[i] = sc.nextInt();
+            }
+            sb.append(solveCase(n, M, arr)).append('\n');
+        }
+
+        System.out.print(sb);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <bitset>
+using namespace std;
+
+const int MAXM = 20005;
+
+int solveCase(int n, int M, const vector<int>& arr) {
+    bitset<MAXM> dp;      // dp[r] = 1 表示余数 r 可达
+    bitset<MAXM> mask;    // 用于截断，仅保留低 M 位
+
+    for (int i = 0; i < M; ++i) {
+        mask.set(i);
+    }
+
+    for (int num : arr) {
+        int x = num % M;
+        bitset<MAXM> shifted;
+
+        if (x == 0) {
+            shifted = dp;
+        } else {
+            // 循环左移 x 位
+            shifted = ((dp << x) & mask) | (dp >> (M - x));
+        }
+
+        dp |= shifted;       // 接在已有方案后
+        dp.set(x);           // 单独选取当前数
+        dp &= mask;          // 仅保留低 M 位
+    }
+
+    for (int ans = M - 1; ans >= 0; --ans) {
+        if (dp.test(ans)) {
+            return ans;
+        }
+    }
+    return 0;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n, M;
+        cin >> n >> M;
+        vector<int> arr(n);
+        for (int i = 0; i < n; ++i) {
+            cin >> arr[i];
+        }
+        cout << solveCase(n, M, arr) << '\n';
+    }
+
+    return 0;
+}
+```

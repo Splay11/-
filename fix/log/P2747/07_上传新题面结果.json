@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2747",
+  "title": "第2题-邻条纠错",
+  "docId": 2378,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数据结构",
+    "栈"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "栈",
+  "videosol": "",
+  "trial_videosol": ""
+}

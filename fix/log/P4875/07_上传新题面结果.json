@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4875",
+  "title": "第2题-奇段符文的填充",
+  "docId": 4173,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

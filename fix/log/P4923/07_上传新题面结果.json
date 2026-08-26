@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4923",
+  "title": "第4题-编组冒泡过闸费",
+  "docId": 4237,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "数据结构",
+    "树状数组"
+  ],
+  "alg_tag": "树状数组",
+  "ai_alg_tags": "树状数组",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3629",
+  "title": "第2题-寻找最优分离特征",
+  "docId": 2972,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "决策树"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "决策树",
+  "videosol": "",
+  "trial_videosol": ""
+}

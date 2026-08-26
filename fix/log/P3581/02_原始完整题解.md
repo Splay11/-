@@ -1,0 +1,293 @@
+### 思路
+
+* 由于 $a_i < 2^{12}$，所有可能的异或值只有 $V = 2^{12} = 4096$ 种。
+* 设对于每个异或值 $x$，计算：
+
+  * $\text{min\_t}[x]$：达到异或值 $x$ 的最少选取件数；
+  * $\text{max\_t}[x]$：达到异或值 $x$ 的最多选取件数。
+* 用 0/1 背包风格的转移（每次只在异或维度上转移）：
+
+  * 对于一个值 $v$，更新：
+
+    * $\text{new\_min}[x]$ = $\min$($\text{old\_min}[x]$,$\text{old\_min}[x \oplus v] + 1$)
+    * $\text{new\_max}[x]$ = $\max$($\text{old\_max}[x]$,$\text{old\_max}[x \oplus v] + 1$)
+* 复杂度：每件装备对全部 $x$ 做常数时间转移，总体 $O(n \cdot 2^{12})$，空间 $O(2^{12})$。
+* 最终答案选择：
+
+  * 若 $b > 0$：对每个可达 $x$，候选值为 $x + b \times \text{max\_t}[x]$，并取最小的对应 $t=\text{max\_t}[x]$ 打破平局；
+  * 若 $b = 0$：最大化 $x$，并取最小的 $t=\text{min\_t}[x]$；
+  * 若 $b < 0$：对每个可达 $x$，候选值为 $x + b \times \text{min\_t}[x]$，并取最小的对应 $t=\text{min\_t}[x]$ 打破平局。
+* 空集 $x=0,t=0$ 始终可达，保证答案下界为 $0$。
+
+---
+
+## C++ 
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	int T;
+	if (!(cin >> T)) return 0;
+	const int V = 1 << 12;          // 异或值范围 0..4095
+	const int INF = 1e9;
+	const int NINF = -INF;
+
+	while (T--) {
+		int n, b;
+		cin >> n >> b;
+		vector<int> a(n);
+		for (int i = 0; i < n; ++i) cin >> a[i];
+
+		// min_sz[x]: 达到异或值 x 的最小选取件数
+		// max_sz[x]: 达到异或值 x 的最大选取件数
+		vector<int> min_sz(V, INF), max_sz(V, NINF);
+		min_sz[0] = 0;  // 不选任何物品达到异或 0
+		max_sz[0] = 0;
+
+		for (int v : a) {
+			vector<int> nmin = min_sz; // 先拷贝（对应“不选当前物品”）
+			vector<int> nmax = max_sz;
+			for (int x = 0; x < V; ++x) {
+				int y = x ^ v;
+				if (min_sz[y] != INF) {
+					nmin[x] = min(nmin[x], min_sz[y] + 1);
+				}
+				if (max_sz[y] != NINF) {
+					nmax[x] = max(nmax[x], max_sz[y] + 1);
+				}
+			}
+			min_sz.swap(nmin);
+			max_sz.swap(nmax);
+		}
+
+		long long best_val = 0; // 至少可取空集
+		int best_t = 0;
+
+		if (b > 0) {
+			for (int x = 0; x < V; ++x) if (max_sz[x] != NINF) {
+				int t = max_sz[x];
+				long long val = (long long)x + (long long)b * t;
+				if (val > best_val || (val == best_val && t < best_t)) {
+					best_val = val;
+					best_t = t;
+				}
+			}
+		} else if (b == 0) {
+			for (int x = 0; x < V; ++x) if (min_sz[x] != INF) {
+				int t = min_sz[x];
+				long long val = (long long)x;
+				if (val > best_val || (val == best_val && t < best_t)) {
+					best_val = val;
+					best_t = t;
+				}
+			}
+		} else { // b < 0
+			for (int x = 0; x < V; ++x) if (min_sz[x] != INF) {
+				int t = min_sz[x];
+				long long val = (long long)x + (long long)b * t;
+				if (val > best_val || (val == best_val && t < best_t)) {
+					best_val = val;
+					best_t = t;
+				}
+			}
+		}
+
+		cout << best_t << ' ' << best_val << '\n';
+	}
+	return 0;
+}
+```
+
+## Python 
+
+```python
+import sys
+
+def solve():
+	data = sys.stdin.read().strip().split()
+	it = iter(data)
+	T = int(next(it))
+	V = 1 << 12
+	INF = 10**9
+	NINF = -INF
+
+	out_lines = []
+	for _ in range(T):
+		n = int(next(it)); b = int(next(it))
+		a = [int(next(it)) for _ in range(n)]
+
+		# min_sz[x]: 达到异或值 x 的最小选取件数
+		# max_sz[x]: 达到异或值 x 的最大选取件数
+		min_sz = [INF] * V
+		max_sz = [NINF] * V
+		min_sz[0] = 0
+		max_sz[0] = 0
+
+		for v in a:
+			nmin = min_sz[:]  # 不选 v
+			nmax = max_sz[:]
+			for x in range(V):
+				y = x ^ v
+				if min_sz[y] != INF:
+					ny = min_sz[y] + 1
+					if ny < nmin[x]:
+						nmin[x] = ny
+				if max_sz[y] != NINF:
+					ny = max_sz[y] + 1
+					if ny > nmax[x]:
+						nmax[x] = ny
+			min_sz, nmin = nmin, None
+			max_sz, nmax = nmax, None
+
+		best_val = 0  # 空集
+		best_t = 0
+
+		if b > 0:
+			for x in range(V):
+				if max_sz[x] != NINF:
+					t = max_sz[x]
+					val = x + b * t
+					if val > best_val or (val == best_val and t < best_t):
+						best_val = val
+						best_t = t
+		elif b == 0:
+			for x in range(V):
+				if min_sz[x] != INF:
+					t = min_sz[x]
+					val = x
+					if val > best_val or (val == best_val and t < best_t):
+						best_val = val
+						best_t = t
+		else:  # b < 0
+			for x in range(V):
+				if min_sz[x] != INF:
+					t = min_sz[x]
+					val = x + b * t
+					if val > best_val or (val == best_val and t < best_t):
+						best_val = val
+						best_t = t
+
+		out_lines.append(f"{best_t} {best_val}")
+
+	print("\n".join(out_lines))
+
+if __name__ == "__main__":
+	run = solve()
+```
+
+## Java 
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+	static class FastScanner {
+		private final InputStream in;
+		private final byte[] buffer = new byte[1 << 16];
+		private int ptr = 0, len = 0;
+		FastScanner(InputStream is) { in = is; }
+		private int read() throws IOException {
+			if (ptr >= len) {
+				len = in.read(buffer);
+				ptr = 0;
+				if (len <= 0) return -1;
+			}
+			return buffer[ptr++];
+		}
+		int nextInt() throws IOException {
+			int c, sgn = 1, x = 0;
+			do { c = read(); } while (c <= ' ');
+			if (c == '-') { sgn = -1; c = read(); }
+			while (c > ' ') {
+				x = x * 10 + (c - '0');
+				c = read();
+			}
+			return x * sgn;
+		}
+	}
+	public static void main(String[] args) throws Exception {
+		FastScanner fs = new FastScanner(System.in);
+		StringBuilder out = new StringBuilder();
+		final int V = 1 << 12; // 4096
+		final int INF = 1_000_000_000;
+		final int NINF = -INF;
+
+		int T;
+		try { T = fs.nextInt(); } catch (Exception e) { return; }
+
+		while (T-- > 0) {
+			int n = fs.nextInt();
+			int b = fs.nextInt();
+			int[] a = new int[n];
+			for (int i = 0; i < n; ++i) a[i] = fs.nextInt();
+
+			// min_sz[x]: 达到异或值 x 的最小选取件数
+			// max_sz[x]: 达到异或值 x 的最大选取件数
+			int[] min_sz = new int[V];
+			int[] max_sz = new int[V];
+			Arrays.fill(min_sz, INF);
+			Arrays.fill(max_sz, NINF);
+			min_sz[0] = 0;
+			max_sz[0] = 0;
+
+			for (int v : a) {
+				int[] nmin = Arrays.copyOf(min_sz, V); // 不选 v
+				int[] nmax = Arrays.copyOf(max_sz, V);
+				for (int x = 0; x < V; ++x) {
+					int y = x ^ v;
+					if (min_sz[y] != INF) {
+						int ny = min_sz[y] + 1;
+						if (ny < nmin[x]) nmin[x] = ny;
+					}
+					if (max_sz[y] != NINF) {
+						int ny = max_sz[y] + 1;
+						if (ny > nmax[x]) nmax[x] = ny;
+					}
+				}
+				min_sz = nmin;
+				max_sz = nmax;
+			}
+
+			long bestVal = 0; // 空集
+			int bestT = 0;
+
+			if (b > 0) {
+				for (int x = 0; x < V; ++x) if (max_sz[x] != NINF) {
+					int t = max_sz[x];
+					long val = (long)x + (long)b * t;
+					if (val > bestVal || (val == bestVal && t < bestT)) {
+						bestVal = val;
+						bestT = t;
+					}
+				}
+			} else if (b == 0) {
+				for (int x = 0; x < V; ++x) if (min_sz[x] != INF) {
+					int t = min_sz[x];
+					long val = (long)x;
+					if (val > bestVal || (val == bestVal && t < bestT)) {
+						bestVal = val;
+						bestT = t;
+					}
+				}
+			} else { // b < 0
+				for (int x = 0; x < V; ++x) if (min_sz[x] != INF) {
+					int t = min_sz[x];
+					long val = (long)x + (long)b * t;
+					if (val > bestVal || (val == bestVal && t < bestT)) {
+						bestVal = val;
+						bestT = t;
+					}
+				}
+			}
+
+			out.append(bestT).append(' ').append(bestVal).append('\n');
+		}
+		System.out.print(out.toString());
+	}
+}
+```

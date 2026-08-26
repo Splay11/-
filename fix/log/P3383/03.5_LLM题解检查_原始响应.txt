@@ -1,0 +1,199 @@
+## 解题思路
+
+1. **问题转化**  
+   对于位于 $(x_j, y_j)$ 的幸存者，其与对角线上任意避难所 $(i,i)$ 的移动距离为 $|x_j-i|+|y_j-i|$。  
+   可证：当 $i$ 取区间 $[\,\min(x_j,y_j),\;\max(x_j,y_j)\,]$ 内的整数时，距离恒等于 $|x_j-y_j|$，且这是该幸存者能到达任何避难所的最短距离。  
+   因此，该幸存者可选择的所有“最近避难所”恰好就是下标落在该区间内的所有避难所。  
+   记 $L_j = \min(x_j,y_j)$，$R_j = \max(x_j,y_j)$，则将原问题转化为：  
+   给定 $m$ 个区间 $[L_j,R_j]$，以及 $n$ 个容量为 $1$ 的点 $1,2,\dots,n$，求最多能匹配多少个区间（即最多有多少幸存者可进入避难所）。
+
+2. **贪心策略**  
+   对于“每个点容量为 $1$ 的区间选点”问题，存在经典的贪心算法：  
+   - 将所有区间按左端点 $L$ 从小到大排序；  
+   - 从点 $i=1$ 到 $n$ 依次处理，维护一个小根堆，存放当前所有满足 $L\le i$ 的区间的右端点 $R$；  
+   - 对于当前点 $i$，先将所有未入堆且 $L\le i$ 的区间右端点入堆，再移除堆中右端点 $R < i$ 的过期区间；  
+   - 若堆非空，则弹出堆顶（即右端点最小的区间），视为该区间匹配点 $i$，答案加 $1$。  
+   该策略能保证全局最优，因为它总是优先满足即将失效（$R$ 最小）的区间，同时不浪费任何点位的容量。
+
+3. **算法步骤**  
+   1. 读入 $n,m$ 及所有幸存者坐标，对每个幸存者构造区间 $(L_j,R_j)=(\min(x_j,y_j),\max(x_j,y_j))$；  
+   2. 将所有区间按 $L$ 升序排序（若 $L$ 相同可任意）；  
+   3. 初始化小根堆，遍历 $i=1..n$：  
+      - 将排序后未处理且 $L\le i$ 的区间的 $R$ 放入堆中；  
+      - 弹出堆中所有 $R<i$ 的元素；  
+      - 若堆非空，弹出堆顶并累加答案；  
+   4. 输出答案。
+
+## 复杂度分析
+
+- **时间复杂度**：区间排序 $O(m\log m)$；每个区间至多入堆、出堆各一次，堆操作 $O(\log m)$，扫描 $n$ 个点在最坏情况下可能将所有区间入堆，总时间为 $O((n+m)\log m)$，满足 $n,m\le 10^6$ 的要求。  
+- **空间复杂度**：存储区间数组和优先队列所需空间均为 $O(m)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import heapq
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    if not data:
+        return
+    it = iter(data)
+    n = int(next(it))
+    m = int(next(it))
+    intervals = []
+    for _ in range(m):
+        x = int(next(it))
+        y = int(next(it))
+        L = x if x < y else y
+        R = x if x > y else y
+        intervals.append((L, R))
+    
+    # 按左端点升序排序
+    intervals.sort(key=lambda seg: seg[0])
+    
+    pq = []          # 小根堆，存放右端点
+    ans = 0
+    idx = 0
+    for i in range(1, n + 1):
+        # 将所有 L <= i 的区间入堆
+        while idx < m and intervals[idx][0] <= i:
+            heapq.heappush(pq, intervals[idx][1])
+            idx += 1
+        # 移除右端点小于 i 的过期区间
+        while pq and pq[0] < i:
+            heapq.heappop(pq)
+        # 匹配当前避难所
+        if pq:
+            heapq.heappop(pq)
+            ans += 1
+    
+    sys.stdout.write(str(ans))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static class FastScanner {
+        private final InputStream in;
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+        FastScanner(InputStream is) { in = is; }
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) return -1;
+            }
+            return buffer[ptr++];
+        }
+        int nextInt() throws IOException {
+            int c, sgn = 1, x = 0;
+            do { c = read(); } while (c <= 32);
+            if (c == '-') { sgn = -1; c = read(); }
+            while (c > 32) {
+                x = x * 10 + (c - '0');
+                c = read();
+            }
+            return x * sgn;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner(System.in);
+        int n = fs.nextInt();
+        int m = fs.nextInt();
+        int[][] segs = new int[m][2];
+        for (int i = 0; i < m; i++) {
+            int x = fs.nextInt();
+            int y = fs.nextInt();
+            segs[i][0] = Math.min(x, y);
+            segs[i][1] = Math.max(x, y);
+        }
+        // 按左端点排序
+        Arrays.sort(segs, (a, b) -> {
+            if (a[0] != b[0]) return Integer.compare(a[0], b[0]);
+            return Integer.compare(a[1], b[1]);
+        });
+
+        PriorityQueue<Integer> pq = new PriorityQueue<>(); // 小根堆存右端点
+        int ans = 0;
+        int idx = 0;
+        for (int i = 1; i <= n; i++) {
+            while (idx < m && segs[idx][0] <= i) {
+                pq.offer(segs[idx][1]);
+                idx++;
+            }
+            while (!pq.isEmpty() && pq.peek() < i) {
+                pq.poll();
+            }
+            if (!pq.isEmpty()) {
+                pq.poll();
+                ans++;
+            }
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    if (!(cin >> n >> m)) return 0;
+    vector<pair<int, int>> intervals;
+    intervals.reserve(m);
+    for (int i = 0; i < m; ++i) {
+        int x, y;
+        cin >> x >> y;
+        int L = min(x, y);
+        int R = max(x, y);
+        intervals.emplace_back(L, R);
+    }
+    // 按左端点排序
+    sort(intervals.begin(), intervals.end(),
+         [](const auto& a, const auto& b) {
+             if (a.first != b.first) return a.first < b.first;
+             return a.second < b.second;
+         });
+
+    priority_queue<int, vector<int>, greater<int>> pq; // 小根堆存右端点
+    int ans = 0, idx = 0;
+    for (int i = 1; i <= n; ++i) {
+        // 加入所有左端点 <= i 的区间
+        while (idx < m && intervals[idx].first <= i) {
+            pq.push(intervals[idx].second);
+            ++idx;
+        }
+        // 移除过期的区间
+        while (!pq.empty() && pq.top() < i) {
+            pq.pop();
+        }
+        // 用当前避难所匹配右端点最小的区间
+        if (!pq.empty()) {
+            pq.pop();
+            ++ans;
+        }
+    }
+    cout << ans << '\n';
+    return 0;
+}
+```

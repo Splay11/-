@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4702",
+  "title": "第1题-试剂位查找",
+  "docId": 3946,
+  "hidden": false,
+  "difficulty": 1,
+  "tag": [
+    "暴力枚举"
+  ],
+  "alg_tag": "暴力枚举",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

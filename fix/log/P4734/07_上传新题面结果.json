@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4734",
+  "title": "第1题-统一调整",
+  "docId": 3990,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "哈希表"
+  ],
+  "alg_tag": "哈希表",
+  "ai_alg_tags": "哈希表",
+  "videosol": "",
+  "trial_videosol": ""
+}

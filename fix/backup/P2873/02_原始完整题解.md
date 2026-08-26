@@ -1,0 +1,148 @@
+# 题解
+
+## 题面描述  
+给定一个长度为 $n$ 的整数数组 $a$，我们称一个长度为 $5$ 的数组是“顺子”，当且仅当将该数组排序后，每个元素都比前一个恰好大 $1$。  
+例如，$[4,6,3,2,5]$ 排序后为 $[2,3,4,5,6]$ ，满足条件；而 $[1,4,1,5,3]$ 排序后为 $[1,1,3,4,5]$ ，不满足条件。  
+现在要统计原数组中有多少个长度为 $5$ 的**子序列**（保持原序但可删去若干元素）是一个“顺子”，结果对 $10^{9}+7$ 取模。
+
+---
+
+## 思路
+
+1. **先统计频次**  
+   用哈希表（或 `unordered_map`）统计每个值 $v$ 在数组中出现的次数，记为 $\mathrm{cnt}[v]$。
+
+2. **枚举“顺子”起始值**  
+   若一个子序列要成为“顺子”，它的五个元素的值集合必须是  
+   $$\{\,v,\,v+1,\,v+2,\,v+3,\,v+4\}$$  
+   中各取一个。  
+   因此，对于每个可能的 $v$，只要 $\mathrm{cnt}[v],\ldots,\mathrm{cnt}[v+4]$ 都大于 $0$，那么取这五个值的办法数就是
+   $\mathrm{cnt}[v]$ $\times$ $\mathrm{cnt}[v+1]$ $\times$ $\mathrm{cnt}[v+2]$ $\times$ $\mathrm{cnt}[v+3]$ $\times$ $\mathrm{cnt}[v+4]$
+
+3. **求和取模**  
+   将上述乘积对所有 $v$ 累加，并对 $10^{9}+7$ 取模即可得到答案。
+
+整个过程只需要一次遍历统计频次，随后再遍历哈希表（或键的集合）做常数次查找和乘法，总时间复杂度为 $O(n)$。
+
+## C++
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+static const int MOD = 1e9 + 7;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;                                  // 读取长度 n
+    unordered_map<long long, long long> cnt;
+    cnt.reserve(n * 2);
+
+    // 统计每个值的出现次数
+    for (int i = 0; i < n; i++) {
+        long long x;
+        cin >> x;
+        cnt[x]++;
+    }
+
+    long long ans = 0;
+    // 枚举“顺子”起始值 v
+    for (auto &p : cnt) {
+        long long v = p.first;
+        // 检查 v, v+1, v+2, v+3, v+4 是否都存在
+        if (cnt.count(v + 1) && cnt.count(v + 2) &&
+            cnt.count(v + 3) && cnt.count(v + 4)) {
+            // 累加 cnt[v]*cnt[v+1]*...*cnt[v+4]
+            long long prod = p.second;
+            prod = (prod * cnt[v + 1]) % MOD;
+            prod = (prod * cnt[v + 2]) % MOD;
+            prod = (prod * cnt[v + 3]) % MOD;
+            prod = (prod * cnt[v + 4]) % MOD;
+            ans = (ans + prod) % MOD;
+        }
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
+```
+## Python
+```python
+import sys
+def main():
+    MOD = 10**9 + 7
+    data = sys.stdin.read().split()
+    n = int(data[0])
+    a = list(map(int, data[1:]))
+
+    # 统计每个值的出现次数
+    cnt = {}
+    for x in a:
+        cnt[x] = cnt.get(x, 0) + 1
+
+    ans = 0
+    # 枚举“顺子”起始值 v
+    for v, c0 in cnt.items():
+        c1 = cnt.get(v+1, 0)
+        c2 = cnt.get(v+2, 0)
+        c3 = cnt.get(v+3, 0)
+        c4 = cnt.get(v+4, 0)
+        # 只有当五个计数都大于 0 时才有贡献
+        if c1 and c2 and c3 and c4:
+            prod = c0 * c1 % MOD
+            prod = prod * c2 % MOD
+            prod = prod * c3 % MOD
+            prod = prod * c4 % MOD
+            ans = (ans + prod) % MOD
+
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+## Java
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.HashMap;
+
+public class Main {
+    static final int MOD = 1000000007;
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        String[] parts = br.readLine().split(" ");
+
+        // 统计每个值的出现次数
+        HashMap<Long, Long> cnt = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            long x = Long.parseLong(parts[i]);
+            cnt.put(x, cnt.getOrDefault(x, 0L) + 1);
+        }
+
+        long ans = 0;
+        // 枚举“顺子”起始值 v
+        for (long v : cnt.keySet()) {
+            long c0 = cnt.get(v);
+            Long c1 = cnt.get(v + 1);
+            Long c2 = cnt.get(v + 2);
+            Long c3 = cnt.get(v + 3);
+            Long c4 = cnt.get(v + 4);
+            // 只有当五个计数都不为 null 时才计算乘积
+            if (c1 != null && c2 != null && c3 != null && c4 != null) {
+                long prod = c0;
+                prod = (prod * c1) % MOD;
+                prod = (prod * c2) % MOD;
+                prod = (prod * c3) % MOD;
+                prod = (prod * c4) % MOD;
+                ans = (ans + prod) % MOD;
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+```

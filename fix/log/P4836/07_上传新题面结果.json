@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4836",
+  "title": "前后均衡的字母变换",
+  "docId": 4123,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "模拟",
+    "哈希表"
+  ],
+  "alg_tag": "哈希表",
+  "ai_alg_tags": "哈希表",
+  "videosol": "",
+  "trial_videosol": ""
+}

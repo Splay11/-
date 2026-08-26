@@ -1,0 +1,137 @@
+## 解题思路
+
+本题要求模拟 \(n\) 台开采机依次在 \(m\) 口能源井中采集晶体的过程。每口井的深度为 \(b_j\)，且晶体从地表向下均匀分布，初始时每口井的深度区间 \([1, b_j]\) 内每个单位深度都有 \(1\) 单位晶体。第 \(i\) 台开采机的作业深度为 \(a_i\)，它可以覆盖深度范围 \([1, a_i]\)，并将该范围内尚未被采集的晶体全部取走。由于井壁稳固，底层晶体被取走后上层晶体并不会坠落，因此每口井已采集的深度只需用一个变量维护即可。
+
+算法采用直接模拟：
+
+1. 使用一个数组 \(cur\) 记录每口井已经采集到的深度（初始均为 \(0\)）。对于第 \(i\) 台开采机，遍历每一口井 \(j\)。
+2. 若该井的剩余晶体深度大于 \(0\)（即 \(cur[j] < b_j\)），并且开采机的作业深度大于已采集的深度（即 \(a_i > cur[j]\)），则该开采机能在这口井中采集的晶体数量为：
+   \[
+   \text{min}(a_i,\ b_j) - cur[j]
+   \]
+   这是因为开采机只能采集深度不超过自己作业上限 \(a_i\) 且不大于该井总深 \(b_j\) 的部分，减去已经采集的高度 \(cur[j]\) 即为本次可采集的量。
+3. 将该量累加到当前开采机的总采集量中，同时更新该井的已采集深度 \(cur[j]\) 为 \(\text{min}(a_i, b_j)\)（即增加本次采集量）。
+4. 处理完所有 \(m\) 口井后，输出当前开采机的总采集量。所有开采机处理完毕后输出一行结果。
+
+由于 \(n, m \le 10^3\)，直接双层循环模拟即可满足时间限制。
+
+## 复杂度分析
+
+- 时间复杂度：\(O(n \times m)\)。需要对每台开采机遍历所有能源井，运算次数不超过 \(10^6\)，效率满足要求。
+- 空间复杂度：\(O(m)\)。仅需一个长度为 \(m\) 的数组记录每口井的已采集深度，以及输入数组存储 \(a\) 和 \(b\)。
+
+## 代码实现
+
+### Python
+
+```python
+# 读入开采机数量和井的数量
+n, m = map(int, input().split())
+# 读入每台开采机的作业深度
+a = list(map(int, input().split()))
+# 读入每口井的深度
+b = list(map(int, input().split()))
+
+# cur[j] 表示第 j 口井已被采集的深度
+cur = [0] * m
+
+# 依次模拟每台开采机的采集过程
+for i in range(n):
+    total = 0  # 当前开采机采集的晶体总量
+    for j in range(m):
+        # 若井中还有剩余晶体且开采机的作业深度大于已采深度
+        if cur[j] < b[j] and a[i] > cur[j]:
+            # 可采集的晶体数量 = min(作业深度, 井深) - 已采深度
+            remove = min(a[i], b[j]) - cur[j]
+            total += remove
+            cur[j] += remove  # 更新该井已采集深度
+    # 按格式输出，最后一项后换行
+    print(total, end=" " if i < n - 1 else "\n")
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        // 读入开采机数量 n 和井的数量 m
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        
+        // 存储开采机作业深度和井深
+        long[] a = new long[n];
+        long[] b = new long[m];
+        // cur 记录每口井已采集的深度
+        long[] cur = new long[m];
+        
+        for (int i = 0; i < n; i++) {
+            a[i] = sc.nextLong();
+        }
+        for (int j = 0; j < m; j++) {
+            b[j] = sc.nextLong();
+        }
+        
+        // 依次处理每台开采机
+        for (int i = 0; i < n; i++) {
+            long total = 0;  // 本机采集总量
+            for (int j = 0; j < m; j++) {
+                // 如果井里还有剩余晶体且当前开采机能采到更深的位置
+                if (cur[j] < b[j] && a[i] > cur[j]) {
+                    long remove = Math.min(a[i], b[j]) - cur[j];
+                    total += remove;
+                    cur[j] += remove; // 更新已采集深度
+                }
+            }
+            // 输出本机结果，空格分隔，最后换行
+            System.out.print(total + (i < n - 1 ? " " : "\n"));
+        }
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    // 读入开采机数量 n 和井的数量 m
+    int n, m;
+    cin >> n >> m;
+    
+    // 存储开采机作业深度和井深
+    vector<long long> a(n), b(m);
+    // cur 记录每口井已采集的深度，初始为 0
+    vector<long long> cur(m, 0);
+    
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+    for (int j = 0; j < m; j++) {
+        cin >> b[j];
+    }
+    
+    // 依次模拟每台开采机
+    for (int i = 0; i < n; i++) {
+        long long total = 0;  // 本台采集总量
+        for (int j = 0; j < m; j++) {
+            // 若井中还有剩余晶体且开采机能采到更深的位置
+            if (cur[j] < b[j] && a[i] > cur[j]) {
+                long long remove = min(a[i], b[j]) - cur[j];
+                total += remove;
+                cur[j] += remove;  // 更新已采集深度
+            }
+        }
+        // 输出结果，空格分隔，最后换行
+        cout << total << (i < n - 1 ? " " : "\n");
+    }
+    return 0;
+}
+```

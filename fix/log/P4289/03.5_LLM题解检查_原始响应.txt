@@ -1,0 +1,174 @@
+## 解题思路
+
+本题要求计算满足约束条件的步长序列数量。约束为：每一步可以是 1 米或 2 米，总距离恰好为 $k$ 米；必须保证第一步不是 1 米，除非整个序列只有一步（即 $k=1$，此时步长为 1 米是允许的）。
+
+1. **特判** $k=1$：只有一种方案 $[1]$，故答案为 $1$。
+
+2. 对于 $k\ge 2$，由于第一步不能是 $1$，第一步必须是 $2$ 米。第一步走完后，剩余距离为 $k-2$ 米。剩余部分可以任意使用 $1$ 米和 $2$ 米的步长，没有任何额外限制。
+
+3. 定义 $g(n)$ 为用 $1$ 米和 $2$ 米的步长走完 $n$ 米的总方案数（步长顺序不同视为不同方案）。显然有：
+   $$
+   g(0)=1,\quad g(1)=1,\quad g(n)=g(n-1)+g(n-2)\quad (n\ge 2)
+   $$
+   这正是偏移了一位的斐波那契数列：$g(n)=F_{n+1}$，其中 $F_0=0, F_1=1$。
+
+4. 因此，对于 $k\ge 2$，答案等于第一步走 $2$ 米后剩余部分任意走的方案数：
+   $$
+   \text{ans} = g(k-2) = F_{k-1}
+   $$
+
+5. 问题转化为计算单个斐波那契数 $F_{k-1}$ 对 $998244353$ 取模的结果。由于 $k\le 10^9$，必须采用时间复杂度为 $O(\log k)$ 的**快速倍增法（Fast Doubling）**。
+   - 该方法通过维护 $(F(m), F(m+1))$，按 $n$ 的二进制位从高到低倍增：
+     $$
+     F(2m) = F(m) \cdot (2F(m+1) - F(m)) \\
+     F(2m+1) = F(m)^2 + F(m+1)^2
+     $$
+   - 若当前位为 $1$，再从 $2m$ 推进到 $2m+1$。
+
+6. 多组测试数据下，对每个 $k$ 计算 $F_{k-1}$，输出答案即可。
+
+## 复杂度分析
+
+- 对于每组数据，使用快速倍增法计算斐波那契数，迭代次数为二进制位数，时间复杂度 $O(\log k)$。
+- 辅助变量仅需常数个，空间复杂度 $O(1)$。
+- 总数据组数 $T\le 10^4$，在极限数据下总运算量约为 $10^4 \times 30$ 次模运算，完全可以通过。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 998244353
+
+def calc_answer(k: int) -> int:
+    # k == 1 的特判
+    if k == 1:
+        return 1
+    # 需要计算 F_{k-1}
+    n = k - 1
+    # 快速倍增法，维护 (F(m), F(m+1))
+    a, b = 0, 1  # F(0), F(1)
+    # 从最高位向下扫描
+    for i in range(n.bit_length() - 1, -1, -1):
+        # 倍增步：m -> 2m
+        two_b = (b << 1) % MOD
+        term = (two_b - a) % MOD
+        c = (a * term) % MOD               # F(2m)
+        d = (a * a + b * b) % MOD          # F(2m+1)
+        a, b = c, d
+        # 如果该位为 1，再前进一步：2m -> 2m+1
+        if (n >> i) & 1:
+            a, b = d % MOD, (c + d) % MOD
+    return a % MOD
+
+def main():
+    data = list(map(int, sys.stdin.read().split()))
+    t = data[0]
+    out = []
+    idx = 1
+    for _ in range(t):
+        k = data[idx]
+        idx += 1
+        out.append(str(calc_answer(k)))
+    print('\n'.join(out))
+
+if __name__ == '__main__':
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class Main {
+    static final long MOD = 998244353L;
+
+    static long calcAnswer(long k) {
+        // k == 1 特判
+        if (k == 1) return 1L;
+        long n = k - 1;            // 需要计算的 F_{k-1}
+        long a = 0L, b = 1L;       // F(0), F(1)
+        // 获取 n 的二进制位数，从最高位向下扫描
+        for (int i = 63 - Long.numberOfLeadingZeros(n); i >= 0; i--) {
+            // 倍增：m -> 2m
+            long twoB = (2L * b) % MOD;
+            long term = (twoB - a) % MOD;
+            if (term < 0) term += MOD;
+            long c = (a * term) % MOD;                 // F(2m)
+            long d = ( (a * a) % MOD + (b * b) % MOD ) % MOD; // F(2m+1)
+            a = c;
+            b = d;
+            // 若当前位为 1，则从 2m 走到 2m+1
+            if ( ((n >> i) & 1L) == 1L ) {
+                long na = d % MOD;
+                long nb = (c + d) % MOD;
+                a = na;
+                b = nb;
+            }
+        }
+        return a % MOD;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < T; i++) {
+            long k = Long.parseLong(br.readLine().trim());
+            sb.append(calcAnswer(k)).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long MOD = 998244353LL;
+
+long long calc_answer(long long k) {
+    // k == 1 特判
+    if (k == 1) return 1;
+    long long n = k - 1;      // 需要 F_{k-1}
+    long long a = 0, b = 1;   // F(0), F(1)
+    // 从最高位向下迭代
+    for (int i = 63 - __builtin_clzll(n); i >= 0; --i) {
+        // 倍增：m -> 2m
+        long long twoB = (2 * b) % MOD;
+        long long term = (twoB - a) % MOD;
+        if (term < 0) term += MOD;
+        long long c = (a * term) % MOD;                 // F(2m)
+        long long d = ((a * a) % MOD + (b * b) % MOD) % MOD; // F(2m+1)
+        a = c; b = d;
+        // 若该位为 1，再前进一步
+        if ((n >> i) & 1LL) {
+            long long na = d % MOD;
+            long long nb = (c + d) % MOD;
+            a = na; b = nb;
+        }
+    }
+    return a % MOD;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while (T--) {
+        long long k;
+        cin >> k;
+        cout << calc_answer(k) << '\n';
+    }
+    return 0;
+}
+```

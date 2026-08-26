@@ -1,0 +1,282 @@
+## 解题思路
+
+设整个网格中，所有四联通相邻的非墙单元格对里，数值不同的对数为 $S$，那么题目定义的奇偶性就是：
+
+$$
+S \bmod 2
+$$
+
+现在考虑翻转某一个非墙单元格 $(i,j)$，也就是把 `'0'` 变成 `'1'`，或把 `'1'` 变成 `'0'`。
+
+### 核心思路
+
+一个单元格翻转后，只有和它相邻的边会受到影响，其他相邻单元格对的“是否不同”状态完全不变。
+
+假设当前单元格有 $d$ 个相邻的非墙单元格，那么它会对应 $d$ 条相邻边。
+
+对于其中任意一条边：
+
+* 如果原来这两个端点数值不同，那么翻转当前格后就变成相同；
+* 如果原来这两个端点数值相同，那么翻转当前格后就变成不同。
+
+也就是说，**与该点相连的每一条边，都会让“是否不同”这个状态翻转一次**。
+
+因此：
+
+* 原来不同的边数记为 $x$
+* 翻转后不同的边数就变成 $d-x$
+
+那么总奇偶性变化量为：
+
+$$
+(d-x)-x = d-2x
+$$
+
+对 $2$ 取模后，$-2x \equiv 0$，所以奇偶性是否改变只取决于：
+
+$$
+d \bmod 2
+$$
+
+于是得到结论：
+
+* 如果这个单元格相邻的非墙单元格数量 $d$ 是偶数，那么翻转后整个网格奇偶性不变；
+* 如果 $d$ 是奇数，那么翻转后整个网格奇偶性改变。
+
+### 实现方法
+
+所以这道题根本不需要真的计算整个网格当前的奇偶性，也不需要关心每个格子里是 `'0'` 还是 `'1'`。
+
+只需要遍历所有非墙单元格，统计它四个方向中有多少个邻居也是非墙：
+
+* 若邻居数为偶数，则答案加一；
+* 否则不计入答案。
+
+四个方向分别是上、下、左、右，判断时注意不要越界，并且 `'#'` 不是可选单元格。
+
+---
+
+## 复杂度分析
+
+设单组数据网格大小为 $n \times m$。
+
+* 每个单元格只会被遍历一次；
+* 每次只检查固定的 $4$ 个方向。
+
+因此时间复杂度为：
+
+$$
+O(nm)
+$$
+
+空间复杂度为：
+
+$$
+O(nm)
+$$
+
+其中空间主要用于存储输入网格。题目保证所有测试数据的 $n \times m$ 总和不超过 $2\times 10^6$，该复杂度完全可行。
+
+---
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+def count_cells(n, m, grid):
+    # 四个方向：上、下、左、右
+    dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    ans = 0
+
+    # 枚举每一个单元格
+    for i in range(n):
+        for j in range(m):
+            # 墙不能翻转，直接跳过
+            if grid[i][j] == '#':
+                continue
+
+            deg = 0  # 当前非墙单元格的非墙邻居数量
+
+            # 统计四个方向中有多少个非墙邻居
+            for dx, dy in dirs:
+                ni, nj = i + dx, j + dy
+                if 0 <= ni < n and 0 <= nj < m and grid[ni][nj] != '#':
+                    deg += 1
+
+            # 邻居数为偶数，则翻转后整体奇偶性不变
+            if deg % 2 == 0:
+                ans += 1
+
+    return ans
+
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    t = int(data[0])
+    idx = 1
+    out = []
+
+    for _ in range(t):
+        n = int(data[idx])
+        m = int(data[idx + 1])
+        idx += 2
+
+        grid = []
+        for _ in range(n):
+            grid.append(data[idx].decode())
+            idx += 1
+
+        out.append(str(count_cells(n, m, grid)))
+
+    sys.stdout.write("\n".join(out))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    // 计算当前网格中，翻转后奇偶性仍然不变的非墙单元格数量
+    public static int countCells(int n, int m, char[][] grid) {
+        // 四个方向：上、下、左、右
+        int[] dx = {-1, 1, 0, 0};
+        int[] dy = {0, 0, -1, 1};
+
+        int ans = 0;
+
+        // 枚举每一个单元格
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                // 墙不能翻转，直接跳过
+                if (grid[i][j] == '#') {
+                    continue;
+                }
+
+                int deg = 0; // 当前非墙单元格的非墙邻居数量
+
+                // 统计四个方向中非墙邻居的个数
+                for (int k = 0; k < 4; k++) {
+                    int ni = i + dx[k];
+                    int nj = j + dy[k];
+
+                    if (ni >= 0 && ni < n && nj >= 0 && nj < m && grid[ni][nj] != '#') {
+                        deg++;
+                    }
+                }
+
+                // 邻居数为偶数，则翻转后整体奇偶性不变
+                if (deg % 2 == 0) {
+                    ans++;
+                }
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+
+        int T = Integer.parseInt(br.readLine().trim());
+
+        while (T-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            int m = Integer.parseInt(st.nextToken());
+
+            char[][] grid = new char[n][];
+            for (int i = 0; i < n; i++) {
+                grid[i] = br.readLine().toCharArray();
+            }
+
+            sb.append(countCells(n, m, grid)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+// 计算当前网格中，翻转后奇偶性仍然不变的非墙单元格数量
+int countCells(int n, int m, const vector<string>& grid) {
+    // 四个方向：上、下、左、右
+    int dx[4] = {-1, 1, 0, 0};
+    int dy[4] = {0, 0, -1, 1};
+
+    int ans = 0;
+
+    // 枚举每一个单元格
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            // 墙不能翻转，直接跳过
+            if (grid[i][j] == '#') {
+                continue;
+            }
+
+            int deg = 0; // 当前非墙单元格的非墙邻居数量
+
+            // 统计四个方向中有多少个非墙邻居
+            for (int k = 0; k < 4; k++) {
+                int ni = i + dx[k];
+                int nj = j + dy[k];
+
+                if (ni >= 0 && ni < n && nj >= 0 && nj < m && grid[ni][nj] != '#') {
+                    deg++;
+                }
+            }
+
+            // 邻居数为偶数，则翻转后整体奇偶性不变
+            if (deg % 2 == 0) {
+                ans++;
+            }
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n, m;
+        cin >> n >> m;
+
+        vector<string> grid(n);
+        for (int i = 0; i < n; i++) {
+            cin >> grid[i];
+        }
+
+        cout << countCells(n, m, grid) << '\n';
+    }
+
+    return 0;
+}
+```

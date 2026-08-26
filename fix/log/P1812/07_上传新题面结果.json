@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1812",
+  "title": "循环可达",
+  "docId": 902,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "trial_videosol": ""
+}

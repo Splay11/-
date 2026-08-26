@@ -1,0 +1,418 @@
+## 解题思路
+
+设字符串为 $s$，对任意 $i<j$，若 $s_i > s_j$（字母序严格晚于），则称 $(i,j)$ 为一个**冲突对**，序列的**冲突度**定义为冲突对的总数。
+
+- 先计算原始序列的冲突度 $\text{inv}$；
+- 再考虑执行一次操作后冲突度的最大增量 $\Delta$；
+- 最终答案为 $\text{inv} + \max(0, \Delta)$。
+
+### 1. 操作对冲突度的影响
+
+一次操作选择下标 $i < j$，将：
+- $s_i$ 变为它的下一个字母（循环，$z$ 下一个为 $a$）；
+- $s_j$ 变为它的上一个字母（循环，$a$ 上一个为 $z$）。
+
+分别考虑只修改左端点 $i$ 和只修改右端点 $j$ 时，冲突度的变化量，并修正两端点同时修改时 $(i,j)$ 对的变化：
+
+- $A_i$：仅将 $s_i$ 变为下一个字母时，冲突度的变化；
+- $B_j$：仅将 $s_j$ 变为上一个字母时，冲突度的变化；
+- $C(x,y)$：两端点同时修改时，$(i,j)$ 对的修正值（消除重复计算）。
+
+那么选择 $(i,j)$ 操作后，冲突度的增量为：
+
+$$
+A_i + B_j + C(s_i, s_j)
+$$
+
+题目要求全局最大增量，即求 $\max_{i<j} (A_i + B_j + C(s_i, s_j))$。
+
+### 2. 计算 $A_i$ 与 $B_j$
+
+设当前位置字符为 $c$（$0$ ~ $25$），前缀长度为 $i$，后缀长度为 $n-i-1$。
+
+**计算 $A_i$（$c$ 变为 $c+1$）**
+- 若 $c \neq z$（即 $c<25$）：
+  - 左边恰好等于 $c+1$ 的字符原来满足 $s_k > c$，变后不再满足，贡献减少 $\text{prefix}[c+1]$；
+  - 右边恰好等于 $c$ 的字符原来不满足 $c > s_k$，变后满足 $c+1 > s_k$，贡献增加 $\text{suffix}[c]$；
+  - $A_i = -\text{prefix}[c+1] + \text{suffix}[c]$
+- 若 $c = z$（$c=25$，变为 $a$）：
+  - 左边：原来 $s_k > z$ 恒假，变后 $s_k > a$ 对所有非 $a$ 成立，增加 $(i - \text{prefix}[a])$；
+  - 右边：原来 $z > s_k$ 对非 $z$ 成立，变后 $a > s_k$ 恒假，减少 $(n-i-1 - \text{suffix}[z])$；
+  - $A_i = (i - \text{prefix}[a]) - (n-i-1 - \text{suffix}[z])$
+
+其中 $\text{prefix}[x]$ 表示下标 $i$ 左边字符 $x$ 的个数，$\text{suffix}[x]$ 表示下标 $i$ 右边字符 $x$ 的个数。
+
+**计算 $B_j$（$c$ 变为 $c-1$）**
+- 若 $c \neq a$（即 $c>0$）：
+  - 左边等于 $c$ 的字符原来不满足 $s_k > c$，变后满足 $s_k > c-1$，增加 $\text{prefix}[c]$；
+  - 右边等于 $c-1$ 的字符原来满足 $c > s_k$，变后不再满足，减少 $\text{suffix}[c-1]$；
+  - $B_j = \text{prefix}[c] - \text{suffix}[c-1]$
+- 若 $c = a$（$c=0$，变为 $z$）：
+  - 左边：原来 $s_k > a$ 对非 $a$ 成立，变后 $s_k > z$ 恒假，减少 $(j - \text{prefix}[a])$；
+  - 右边：原来 $a > s_k$ 恒假，变后 $z > s_k$ 对非 $z$ 成立，增加 $(n-j-1 - \text{suffix}[z])$；
+  - $B_j = -(j - \text{prefix}[a]) + (n-j-1 - \text{suffix}[z])$
+
+### 3. 修正项 $C(x,y)$
+
+设 $x' = \text{next}(x)$，$y' = \text{prev}(y)$，对于 $(i,j)$ 对，操作前贡献 $[x > y]$，操作后贡献 $[x' > y']$。而 $A_i+B_j$ 中分别按“只改左”、“只改右”各算了一次，因此修正项为：
+
+$$
+C(x,y) = [x' > y'] - [x' > y] - [x > y'] + [x > y]
+$$
+
+由于字母只有 $26$ 种，可预先打表计算出 $C$。
+
+### 4. 线性时间求最优操作
+
+我们要求：
+
+$$
+\max_{i<j} \left( A_i + B_j + C(s_i, s_j) \right)
+$$
+
+从左向右枚举右端点 $j$，维护数组 $\text{best}[x]$，表示在 $j$ 左侧所有字符为 $x$ 的 $i$ 中，$A_i$ 的最大值。对于当前 $j$，枚举所有可能的左端点字符 $x$，计算：
+
+$$
+\max_{x} ( \text{best}[x] + C(x, s_j) ) + B_j
+$$
+
+每次枚举 $x$ 只需常数时间，因此整体复杂度为 $O(26n)$，即线性时间。
+
+最终答案为 $\text{inv} + \max(0, \text{最大增量})$。
+
+## 复杂度分析
+
+- **时间复杂度**：预处理原冲突度、计算 $A_i, B_j$ 以及扫描求最优操作均需 $O(26n)$，由于 $26$ 为常数，视为 $O(n)$。所有测试数据总长度不超过 $2 \times 10^5$，满足要求。
+- **空间复杂度**：需要长度为 $n$ 的 $A, B$ 数组及长度为 $26$ 的辅助数组，空间复杂度 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve_one(n, s):
+    # 将字符转为 0 ~ 25
+    a = [ord(ch) - ord('a') for ch in s]
+
+    # 字符总出现次数
+    total = [0] * 26
+    for c in a:
+        total[c] += 1
+
+    A = [0] * n
+    B = [0] * n
+
+    # 计算原始冲突度
+    inv = 0
+    pre = [0] * 26
+    seen = 0
+
+    for i in range(n):
+        c = a[i]
+
+        # 左边比 c 大的字符个数
+        not_greater = 0
+        for x in range(c + 1):
+            not_greater += pre[x]
+        inv += seen - not_greater
+
+        prefix_len = i
+        suffix_len = n - i - 1
+
+        # 计算 A[i]
+        if c < 25:  # 不是 'z'
+            suffix_c = total[c] - pre[c] - 1
+            A[i] = -pre[c + 1] + suffix_c
+        else:  # 'z' -> 'a'
+            suffix_z = total[25] - pre[25] - 1
+            A[i] = (prefix_len - pre[0]) - (suffix_len - suffix_z)
+
+        # 计算 B[i]
+        if c > 0:  # 不是 'a'
+            suffix_prev = total[c - 1] - pre[c - 1]
+            B[i] = pre[c] - suffix_prev
+        else:  # 'a' -> 'z'
+            suffix_z = total[25] - pre[25]
+            B[i] = -(prefix_len - pre[0]) + (suffix_len - suffix_z)
+
+        # 更新前缀计数
+        pre[c] += 1
+        seen += 1
+
+    # 预处理修正表 C[x][y]
+    C = [[0] * 26 for _ in range(26)]
+    for x in range(26):
+        nx = (x + 1) % 26
+        for y in range(26):
+            py = (y - 1 + 26) % 26
+            old_val = 1 if x > y else 0
+            left_only = 1 if nx > y else 0
+            right_only = 1 if x > py else 0
+            new_val = 1 if nx > py else 0
+            C[x][y] = new_val - left_only - right_only + old_val
+
+    NEG = -10 ** 18
+    best = [NEG] * 26
+    best_delta = 0
+
+    for j in range(n):
+        y = a[j]
+        cur = NEG
+        for x in range(26):
+            if best[x] != NEG:
+                value = best[x] + C[x][y]
+                if value > cur:
+                    cur = value
+
+        if cur != NEG:
+            candidate = cur + B[j]
+            if candidate > best_delta:
+                best_delta = candidate
+
+        # 当前 j 可作为未来的左端点 i
+        if A[j] > best[y]:
+            best[y] = A[j]
+
+    return inv + best_delta
+
+def main():
+    input = sys.stdin.readline
+    T = int(input().strip())
+    ans = []
+    for _ in range(T):
+        n = int(input().strip())
+        s = input().strip()
+        ans.append(str(solve_one(n, s)))
+    print("\n".join(ans))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class Main {
+    static long solveOne(int n, String s) {
+        int[] a = new int[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = s.charAt(i) - 'a';
+        }
+
+        int[] total = new int[26];
+        for (int i = 0; i < n; i++) {
+            total[a[i]]++;
+        }
+
+        long[] A = new long[n];
+        long[] B = new long[n];
+
+        // 计算原始冲突度
+        long inv = 0;
+        int[] pre = new int[26];
+        int seen = 0;
+
+        for (int i = 0; i < n; i++) {
+            int c = a[i];
+
+            int notGreater = 0;
+            for (int x = 0; x <= c; x++) {
+                notGreater += pre[x];
+            }
+            inv += (long) seen - notGreater;
+
+            int prefixLen = i;
+            int suffixLen = n - i - 1;
+
+            // 计算 A[i]
+            if (c < 25) {
+                int suffixC = total[c] - pre[c] - 1;
+                A[i] = -pre[c + 1] + suffixC;
+            } else {
+                int suffixZ = total[25] - pre[25] - 1;
+                A[i] = (long) (prefixLen - pre[0]) - (suffixLen - suffixZ);
+            }
+
+            // 计算 B[i]
+            if (c > 0) {
+                int suffixPrev = total[c - 1] - pre[c - 1];
+                B[i] = pre[c] - suffixPrev;
+            } else {
+                int suffixZ = total[25] - pre[25];
+                B[i] = -(long) (prefixLen - pre[0]) + (suffixLen - suffixZ);
+            }
+
+            pre[c]++;
+            seen++;
+        }
+
+        // 修正表 C
+        int[][] C = new int[26][26];
+        for (int x = 0; x < 26; x++) {
+            int nx = (x + 1) % 26;
+            for (int y = 0; y < 26; y++) {
+                int py = (y - 1 + 26) % 26;
+                int oldVal = x > y ? 1 : 0;
+                int leftOnly = nx > y ? 1 : 0;
+                int rightOnly = x > py ? 1 : 0;
+                int newVal = nx > py ? 1 : 0;
+                C[x][y] = newVal - leftOnly - rightOnly + oldVal;
+            }
+        }
+
+        long NEG = -(long) 4e18;
+        long[] best = new long[26];
+        for (int i = 0; i < 26; i++) best[i] = NEG;
+
+        long bestDelta = 0;
+
+        for (int j = 0; j < n; j++) {
+            int y = a[j];
+            long cur = NEG;
+            for (int x = 0; x < 26; x++) {
+                if (best[x] != NEG) {
+                    long value = best[x] + C[x][y];
+                    if (value > cur) cur = value;
+                }
+            }
+
+            if (cur != NEG) {
+                long candidate = cur + B[j];
+                if (candidate > bestDelta) bestDelta = candidate;
+            }
+
+            if (A[j] > best[y]) best[y] = A[j];
+        }
+
+        return inv + bestDelta;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+
+        while (T-- > 0) {
+            int n = Integer.parseInt(br.readLine().trim());
+            String s = br.readLine().trim();
+            sb.append(solveOne(n, s)).append('\n');
+        }
+
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+long long solve_one(int n, const string &s) {
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) a[i] = s[i] - 'a';
+
+    vector<int> total(26, 0);
+    for (int c : a) total[c]++;
+
+    vector<long long> A(n), B(n);
+
+    // 计算原始冲突度
+    long long inv = 0;
+    vector<int> pre(26, 0);
+    int seen = 0;
+
+    for (int i = 0; i < n; i++) {
+        int c = a[i];
+
+        int not_greater = 0;
+        for (int x = 0; x <= c; x++) not_greater += pre[x];
+        inv += 1LL * seen - not_greater;
+
+        int prefix_len = i;
+        int suffix_len = n - i - 1;
+
+        // 计算 A[i]
+        if (c < 25) {
+            int suffix_c = total[c] - pre[c] - 1;
+            A[i] = -pre[c + 1] + suffix_c;
+        } else {
+            int suffix_z = total[25] - pre[25] - 1;
+            A[i] = 1LL * (prefix_len - pre[0]) - (suffix_len - suffix_z);
+        }
+
+        // 计算 B[i]
+        if (c > 0) {
+            int suffix_prev = total[c - 1] - pre[c - 1];
+            B[i] = pre[c] - suffix_prev;
+        } else {
+            int suffix_z = total[25] - pre[25];
+            B[i] = -1LL * (prefix_len - pre[0]) + (suffix_len - suffix_z);
+        }
+
+        pre[c]++;
+        seen++;
+    }
+
+    // 修正表 C[x][y]
+    int C[26][26];
+    for (int x = 0; x < 26; x++) {
+        int nx = (x + 1) % 26;
+        for (int y = 0; y < 26; y++) {
+            int py = (y - 1 + 26) % 26;
+            int old_val = (x > y ? 1 : 0);
+            int left_only = (nx > y ? 1 : 0);
+            int right_only = (x > py ? 1 : 0);
+            int new_val = (nx > py ? 1 : 0);
+            C[x][y] = new_val - left_only - right_only + old_val;
+        }
+    }
+
+    const long long NEG = -(long long)4e18;
+    vector<long long> best(26, NEG);
+    long long best_delta = 0;
+
+    for (int j = 0; j < n; j++) {
+        int y = a[j];
+        long long cur = NEG;
+        for (int x = 0; x < 26; x++) {
+            if (best[x] != NEG) {
+                long long value = best[x] + C[x][y];
+                cur = max(cur, value);
+            }
+        }
+
+        if (cur != NEG) {
+            long long candidate = cur + B[j];
+            best_delta = max(best_delta, candidate);
+        }
+
+        best[y] = max(best[y], A[j]);
+    }
+
+    return inv + best_delta;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        string s;
+        cin >> n >> s;
+        cout << solve_one(n, s) << '\n';
+    }
+
+    return 0;
+}
+```

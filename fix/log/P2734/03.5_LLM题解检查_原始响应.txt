@@ -1,0 +1,123 @@
+## 解题思路
+
+1. **最高合成频率**：当只选择一种晶体时，合成频率等于该晶体本身的频率。因此，所有单种晶体的频率中的最大值即为可达到的最高合成频率。即：
+   \[
+   \text{最高频率} = \max(f_1, f_2, \dots, f_n)
+   \]
+
+2. **最低合成频率**：对于任意组合，合成频率为所选频率的最大公因子（GCF）。最大公因子具有单调性：加入更多的数只会使最大公因子变小或保持不变。并且任意非空子集的最大公因子不会超过子集中的最小频率。因此，当选择全部 $n$ 种晶体时，得到的合成频率最小，等于所有频率的最大公因子。即：
+   \[
+   \text{最低频率} = \text{gcf}(f_1, f_2, \dots, f_n)
+   \]
+
+3. **算法步骤**：
+   - 读取晶体数量 $n$ 和频率数组 $f$。
+   - 用变量 `max_freq` 记录遍历过程中的最大值。
+   - 用变量 `min_gcf` 依次计算所有频率的最大公因子（初始值可以设为 $0$，因为 $\text{gcf}(0, x) = x$；或直接设为第一个频率）。
+   - 输出 `min_gcf` 和 `max_freq`。
+
+## 复杂度分析
+
+- **时间复杂度**：遍历数组一次求最大值，再配合辗转相除法计算全局最大公因子，每次辗转相除的时间复杂度为 $O(\log M)$，其中 $M$ 是频率值大小。整体时间复杂度为 $O(n \log M)$，可近似视为 $O(n)$。
+- **空间复杂度**：只用了几个辅助变量，空间复杂度为 $O(1)$（不计输入存储）。
+
+## 代码实现
+
+### Python
+
+```python
+def main():
+    n = int(input())
+    f = list(map(int, input().split()))
+    
+    # 计算所有频率的最大公因子，初始为 f[0]
+    min_freq = f[0]
+    # 记录最高频率
+    max_freq = f[0]
+    
+    for i in range(1, n):
+        import math
+        min_freq = math.gcd(min_freq, f[i])
+        if f[i] > max_freq:
+            max_freq = f[i]
+    
+    print(min_freq, max_freq)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    // 计算两个数的最大公因子（辗转相除法）
+    public static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = a;
+            a = b;
+            b = temp % b;
+        }
+        return a;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] f = new int[n];
+        
+        for (int i = 0; i < n; i++) {
+            f[i] = sc.nextInt();
+        }
+        
+        int minFreq = f[0];
+        int maxFreq = f[0];
+        
+        for (int i = 1; i < n; i++) {
+            minFreq = gcd(minFreq, f[i]);
+            if (f[i] > maxFreq) {
+                maxFreq = f[i];
+            }
+        }
+        
+        System.out.println(minFreq + " " + maxFreq);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// 求两个数的最大公因子
+int gcd(int a, int b) {
+    return b == 0 ? a : gcd(b, a % b);
+}
+
+int main() {
+    int n;
+    cin >> n;
+    vector<int> f(n);
+    for (int i = 0; i < n; i++) {
+        cin >> f[i];
+    }
+    
+    int min_freq = 0;      // gcd(0, x) = x，用于累求全局最大公因子
+    int max_freq = f[0];
+    
+    for (int i = 0; i < n; i++) {
+        min_freq = gcd(min_freq, f[i]);
+        if (f[i] > max_freq) {
+            max_freq = f[i];
+        }
+    }
+    
+    cout << min_freq << " " << max_freq << endl;
+    return 0;
+}
+```

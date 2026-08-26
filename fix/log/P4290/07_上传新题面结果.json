@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P4290",
+  "title": "第3题-完美称重",
+  "docId": 3387,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心",
+    "其他",
+    "构造"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

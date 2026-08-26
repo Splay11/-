@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4974",
+  "title": "第1题-超标断面取样",
+  "docId": 4317,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "模拟",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

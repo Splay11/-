@@ -1,0 +1,122 @@
+## 解题思路
+
+### 1. 目标函数按位拆分
+
+设需要构造两两不同的正整数序列 $b_1,\dots,b_n$。
+目标为最小化
+
+$$
+F=\sum_{1\le i<j\le n}(b_i \operatorname{xor} b_j).
+$$
+
+按位独立性：对任一第 $t$ 位（权值 $2^t$），若有 $c_t$ 个数该位为 1，则这一位对总和的贡献为
+
+$$
+c_t\cdot (n-c_t)\cdot 2^t,
+$$
+
+因为只有“一零”或“零一”的配对才贡献 $2^t$。因此**每一位都希望 $c_t$ 尽量接近 0 或 n**，尤其是高位（权大）必须避免被一部分数为 0、一部分数为 1。
+
+### 2. 固定最高位
+
+设 $p=2^k$ 是满足 $p\ge n$ 的最小二幂（即 $p=1\ll\lceil\log_2 n\rceil$）。
+把所有数放进区间 $[p,\,p+n-1]\subseteq[p,\,2p-1]$ 中：
+
+* 这 $n$ 个数的第 $k$ 位全为 1，因而该位贡献为 0；
+* 更高位全为 0，贡献也为 0；
+* 只有低于第 $k$ 位的部分会产生贡献，但这些数在 $[0,\,n-1]$ 的相对形态**完全相同**（与是否加上 $p$ 无关），等价于对 $0,1,\dots,n-1$ 的配对异或。
+
+直观地看，这样做把所有数“聚在同一半区”，避免高位出现 0/1 混杂，从而使总代价最小。事实上，若把数分到两个半区，跨区的每一对都会额外贡献 $2^k$，显然更劣。
+
+因此任选
+
+$$
+b_i = p + (i-1),\quad i=1,\dots,n
+$$
+
+即可达到最小值。示例：$n=3$ 时，$p=4$，输出 $4,5,6$。
+
+### 3. 实现要点
+
+* 线性输出即可；
+* 先循环把 $p$ 扩到不小于 $n$ 的二幂；
+* 所有数均为正，且最大值 $<3n$（因为 $p<n\cdot2$），安全无溢出。
+
+## 复杂度分析
+
+* 时间复杂度：$O(n)$，只需一次生成与打印。
+* 空间复杂度：$O(1)$ 额外空间（除输出外）。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+n = int(sys.stdin.readline().strip())
+
+# 计算 p = 最小的 >= n 的二次幂
+p = 1
+while p < n:
+    p <<= 1
+
+# 输出 p, p+1, ..., p+n-1
+ans = [str(p + i) for i in range(n)]
+print(" ".join(ans))
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine();              // 读取 n
+        int n = Integer.parseInt(line.trim());
+
+        // 计算 p：最小的 >= n 的 2 的幂
+        int p = 1;
+        while (p < n) p <<= 1;
+
+        // 依次输出 p, p+1, ..., p+n-1
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            if (i > 0) sb.append(' ');
+            sb.append(p + i);
+        }
+        System.out.println(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    long long n;
+    if (!(cin >> n)) return 0; // 忽略异常输入
+
+    // 计算 p = 最小的 >= n 的二次幂
+    long long p = 1;
+    while (p < n) p <<= 1;
+
+    // 输出 p, p+1, ..., p+n-1
+    for (long long i = 0; i < n; ++i) {
+        if (i) cout << ' ';
+        cout << (p + i);
+    }
+    cout << '\n';
+    return 0;
+}
+```

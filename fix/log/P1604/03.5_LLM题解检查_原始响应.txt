@@ -1,0 +1,289 @@
+## 解题思路
+
+1. **问题转化**：  
+   初始时有火焰的格子记为 `1`，干燥柴堆记为 `0`。每次操作可以选择一个已燃烧的格子，将火焰蔓延到相邻的未燃烧格子，并记录该次被点燃的格子编号。所有格子最终都要被点燃，求不同点燃序列的总数。
+
+2. **连续 `0` 段的内部顺序**：  
+   将连续的 `0` 看作一个独立段落。设一段连续 `0` 的长度为 $k$。  
+   - 若该段**左右两侧都有火焰**（即该段位于某两个 `1` 之间），则点燃这段内部的顺序有 $2^{k-1}$ 种：每次都可以选择从左边或右边相邻的已燃格子向段内蔓延，直到最后一个格子只有一种选择。  
+   - 若该段**只有一侧有火焰**（即该段位于整个序列的最左端或最右端），则内部点燃顺序唯一，只能从有火的一侧依次蔓延进去。
+
+3. **段落之间的排列**：  
+   所有待点燃的 `0` 总数为 $m$，假设各连续段长度为 $k_1, k_2, \dots, k_t$。不同段落之间的点燃顺序可以任意交错，相当于把 $t$ 段元素合并排列，方案数为：
+   \[
+   C(m, k_1) \times C(m-k_1, k_2) \times \cdots = \frac{m!}{k_1!\,k_2!\,\cdots\,k_t!}
+   \]
+
+4. **最终答案**：  
+   设所有连续 `0` 段中，位于左右均有火焰的段（中间段）的集合为 $M$，则不同点燃序列的总数为：
+   \[
+   \text{ans} = \frac{m!}{\prod k_i!} \times \prod_{i \in M} 2^{k_i-1} \pmod{10^9+7}
+   \]
+   通过预处理阶乘和阶乘的逆元，可在 $O(1)$ 时间内计算组合数；幂次使用快速幂计算。
+
+5. **实现细节**：  
+   - 读入字符串 $s$，找到第一个 `1` 和最后一个 `1` 的位置，用于判断一段 `0` 是否为中间段。  
+   - 遍历 $s$，提取每一段连续 `0` 的长度，并记录它是否在第一个 `1` 和最后一个 `1` 之间（即左右均有火焰）。  
+   - 使用预处理的阶乘数组 `fac` 与逆元数组 `invfac` 依次累乘组合数，并对中间段额外乘以 $2^{k_i-1}$。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$。预处理阶乘与逆元需要 $O(n)$，遍历字符串及计算组合数均为 $O(1)$ 每次。
+- **空间复杂度**：$O(n)$。主要用于存储阶乘和逆阶乘数组。
+
+## 代码实现
+
+### Python
+
+```python
+MOD = 10**9 + 7
+
+def solve():
+    n = int(input())
+    s = input().strip()
+    
+    # 预处理阶乘和阶乘逆元
+    fac = [1] * (n + 1)
+    for i in range(1, n + 1):
+        fac[i] = fac[i-1] * i % MOD
+    invfac = [1] * (n + 1)
+    invfac[n] = pow(fac[n], MOD - 2, MOD)
+    for i in range(n, 0, -1):
+        invfac[i-1] = invfac[i] * i % MOD
+    
+    def C(nn, kk):
+        if kk < 0 or kk > nn:
+            return 0
+        return fac[nn] * invfac[kk] % MOD * invfac[nn - kk] % MOD
+
+    # 找到第一个和最后一个 '1' 的位置
+    first_one = -1
+    last_one = -1
+    for i, ch in enumerate(s):
+        if ch == '1':
+            if first_one == -1:
+                first_one = i
+            last_one = i
+
+    # 提取所有连续0段，并判断是否为中间段
+    segments = []        # 所有0段的长度
+    middle_segments = [] # 位于两个'1'之间的0段长度
+    i = 0
+    while i < n:
+        if s[i] == '1':
+            i += 1
+            continue
+        j = i
+        while j + 1 < n and s[j+1] == '0':
+            j += 1
+        length = j - i + 1
+        segments.append(length)
+        if first_one < i and j < last_one:
+            middle_segments.append(length)
+        i = j + 1
+
+    total = sum(segments)  # 所有待点燃格子数
+    ans = 1
+    for length in segments:
+        ans = ans * C(total, length) % MOD
+        total -= length
+
+    # 中间段乘以 2^{length-1}
+    for length in middle_segments:
+        ans = ans * pow(2, length - 1, MOD) % MOD
+
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final int MOD = 1_000_000_007;
+    static final int N = 100005; // 根据数据范围 n <= 1e5
+    
+    static long[] fac = new long[N];
+    static long[] invfac = new long[N];
+    
+    // 快速幂
+    static long qpow(long a, long b) {
+        long res = 1;
+        a %= MOD;
+        while (b > 0) {
+            if ((b & 1) == 1) res = res * a % MOD;
+            a = a * a % MOD;
+            b >>= 1;
+        }
+        return res;
+    }
+    
+    // 预处理阶乘和逆元
+    static void precompute(int n) {
+        fac[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            fac[i] = fac[i-1] * i % MOD;
+        }
+        invfac[n] = qpow(fac[n], MOD - 2);
+        for (int i = n - 1; i >= 0; i--) {
+            invfac[i] = invfac[i+1] * (i + 1) % MOD;
+        }
+    }
+    
+    static long C(int n, int k) {
+        if (k < 0 || k > n) return 0;
+        return fac[n] * invfac[k] % MOD * invfac[n - k] % MOD;
+    }
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine());
+        String s = br.readLine();
+        
+        precompute(n);
+        
+        // 找到第一个和最后一个 '1'
+        int firstOne = -1, lastOne = -1;
+        for (int i = 0; i < n; i++) {
+            if (s.charAt(i) == '1') {
+                if (firstOne == -1) firstOne = i;
+                lastOne = i;
+            }
+        }
+        
+        List<Integer> allSegments = new ArrayList<>();
+        List<Integer> middleSegments = new ArrayList<>();
+        
+        int i = 0;
+        while (i < n) {
+            if (s.charAt(i) == '1') {
+                i++;
+                continue;
+            }
+            int j = i;
+            while (j + 1 < n && s.charAt(j + 1) == '0') {
+                j++;
+            }
+            int len = j - i + 1;
+            allSegments.add(len);
+            // 如果这一段完全在第一个'1'和最后一个'1'之间，则为中间段
+            if (firstOne < i && j < lastOne) {
+                middleSegments.add(len);
+            }
+            i = j + 1;
+        }
+        
+        int total = 0;
+        for (int len : allSegments) total += len;
+        
+        long ans = 1;
+        for (int len : allSegments) {
+            ans = ans * C(total, len) % MOD;
+            total -= len;
+        }
+        for (int len : middleSegments) {
+            ans = ans * qpow(2, len - 1) % MOD;
+        }
+        
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+const int N = 1e5 + 10;
+const int MOD = 1e9 + 7;
+
+ll fac[N], invfac[N];
+
+ll qpow(ll a, ll b) {
+    ll res = 1;
+    a %= MOD;
+    while (b) {
+        if (b & 1) res = res * a % MOD;
+        a = a * a % MOD;
+        b >>= 1;
+    }
+    return res;
+}
+
+void precompute(int n) {
+    fac[0] = 1;
+    for (int i = 1; i <= n; ++i) {
+        fac[i] = fac[i-1] * i % MOD;
+    }
+    invfac[n] = qpow(fac[n], MOD - 2);
+    for (int i = n - 1; i >= 0; --i) {
+        invfac[i] = invfac[i+1] * (i + 1) % MOD;
+    }
+}
+
+ll C(int n, int k) {
+    if (k < 0 || k > n) return 0;
+    return fac[n] * invfac[k] % MOD * invfac[n - k] % MOD;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n;
+    string s;
+    cin >> n >> s;
+    
+    precompute(n);
+    
+    int firstOne = -1, lastOne = -1;
+    for (int i = 0; i < n; ++i) {
+        if (s[i] == '1') {
+            if (firstOne == -1) firstOne = i;
+            lastOne = i;
+        }
+    }
+    
+    vector<int> allSegments, middleSegments;
+    int i = 0;
+    while (i < n) {
+        if (s[i] == '1') {
+            ++i;
+            continue;
+        }
+        int j = i;
+        while (j + 1 < n && s[j + 1] == '0') {
+            ++j;
+        }
+        int len = j - i + 1;
+        allSegments.push_back(len);
+        if (firstOne < i && j < lastOne) {
+            middleSegments.push_back(len);
+        }
+        i = j + 1;
+    }
+    
+    int total = 0;
+    for (int len : allSegments) total += len;
+    
+    ll ans = 1;
+    for (int len : allSegments) {
+        ans = ans * C(total, len) % MOD;
+        total -= len;
+    }
+    for (int len : middleSegments) {
+        ans = ans * qpow(2, len - 1) % MOD;
+    }
+    
+    cout << ans << "\n";
+    return 0;
+}
+```

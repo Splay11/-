@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1520",
+  "title": "第1题-遗迹数字谜题",
+  "docId": 545,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "哈希表",
+  "videosol": "",
+  "trial_videosol": ""
+}

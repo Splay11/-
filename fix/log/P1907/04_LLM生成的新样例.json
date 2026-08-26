@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1",
+      "output": "1",
+      "explanation": "$N=1$ 时铭牌只有一行，内容就是 `1`。这是规模最小的边界情形。"
+    },
+    {
+      "input": "2",
+      "output": "22\n2",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "3",
+      "output": "333\n33\n3",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

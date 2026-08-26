@@ -1,0 +1,205 @@
+## 解题思路
+
+1. **问题分析**  
+   树上每条简单路径的共鸣能量由路径上结点的能量值决定：  
+   - 若路径上所有结点能量值均为 $3$，则能量为 $3$；  
+   - 若均为 $5$，则能量为 $5$；  
+   - 若同时出现 $3$ 和 $5$，则能量为 $15$。  
+
+   因此，只有路径上的结点能量值完全相同时，共鸣能量才为 $3$ 或 $5$；否则为 $15$。
+
+2. **连通块划分**  
+   将树看作只保留能量值为 $3$ 的结点形成的子图（忽略 $5$ 的结点），会得到若干个极大连通块；类似地，只保留能量值为 $5$ 的结点也会得到若干极大连通块。  
+   对于每个连通块，其内部任意两点间的简单路径一定只经过块内的结点，因此路径上的能量值全部相同，共鸣能量即为该块的能量值（$3$ 或 $5$）。
+
+3. **路径计数与贡献**  
+   - 树中所有简单路径的总数为 $\frac{n(n-1)}{2}$。  
+   - 对于大小为 $cnt$ 的能量值为 $val$ 的连通块，其内部路径数为 $\frac{cnt(cnt-1)}{2}$，这些路径的共鸣能量均为 $val$，贡献为 $val \times \frac{cnt(cnt-1)}{2}$。  
+   - 用总路径数减去所有同能量连通块内部的路径数之和，即可得到“跨越不同能量值”的路径数量，这些路径的共鸣能量为 $15$。  
+   - 总答案 = $\sum_{每个连通块} val \times \frac{cnt(cnt-1)}{2} + 15 \times \left( \frac{n(n-1)}{2} - \sum_{每个连通块} \frac{cnt(cnt-1)}{2} \right)$。
+
+4. **算法流程**  
+   - 读入 $n$ 和每个结点的能量值 $a_i$（只可能为 $3$ 或 $5$）。  
+   - 用邻接表存储树，结点编号统一转为 $0 \sim n-1$。  
+   - 遍历所有结点，对每个未访问的结点，用栈（DFS）找出与其能量值相同的连通块，统计结点数 $cnt$。  
+   - 累加该连通块内部的路径数及其贡献（能量 × 路径数）。  
+   - 最后加上跨能量块路径的贡献（$15 \times$ 剩余路径数），输出答案。  
+   - 因为 $n \le 10^5$，答案可能较大，须使用 $64$ 位整数。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$  
+  每个结点和每条边在 DFS 过程中均被访问常数次。
+- **空间复杂度**：$O(n)$  
+  主要用于邻接表、访问标记数组和栈。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(1 << 25)   # 实际上本题使用显式栈，无需此设置，保留以防万一
+
+def main():
+    input = sys.stdin.readline
+    n = int(input())
+    a = list(map(int, input().split()))
+    # 邻接表
+    g = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        g[u].append(v)
+        g[v].append(u)
+
+    visited = [False] * n
+    total_path = n * (n - 1) // 2
+    same_path = 0          # 所有同能量连通块内部路径总数
+    ans = 0
+
+    for i in range(n):
+        if not visited[i]:
+            val = a[i]
+            cnt = 0
+            stack = [i]
+            visited[i] = True
+            while stack:
+                u = stack.pop()
+                cnt += 1
+                for v in g[u]:
+                    if not visited[v] and a[v] == val:
+                        visited[v] = True
+                        stack.append(v)
+            block_path = cnt * (cnt - 1) // 2
+            ans += block_path * val
+            same_path += block_path
+
+    # 跨能量块路径贡献
+    ans += (total_path - same_path) * 15
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine());
+        int[] a = new int[n];
+        String[] parts = br.readLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            a[i] = Integer.parseInt(parts[i]);
+        }
+
+        List<Integer>[] g = new ArrayList[n];
+        for (int i = 0; i < n; i++) g[i] = new ArrayList<>();
+        for (int i = 0; i < n - 1; i++) {
+            parts = br.readLine().split(" ");
+            int u = Integer.parseInt(parts[0]) - 1;
+            int v = Integer.parseInt(parts[1]) - 1;
+            g[u].add(v);
+            g[v].add(u);
+        }
+
+        boolean[] visited = new boolean[n];
+        long totalPath = (long) n * (n - 1) / 2;
+        long samePath = 0;
+        long ans = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                int val = a[i];
+                int cnt = 0;
+                Deque<Integer> stack = new ArrayDeque<>();
+                stack.push(i);
+                visited[i] = true;
+                while (!stack.isEmpty()) {
+                    int u = stack.pop();
+                    cnt++;
+                    for (int v : g[u]) {
+                        if (!visited[v] && a[v] == val) {
+                            visited[v] = true;
+                            stack.push(v);
+                        }
+                    }
+                }
+                long blockPath = (long) cnt * (cnt - 1) / 2;
+                ans += blockPath * val;
+                samePath += blockPath;
+            }
+        }
+
+        ans += (totalPath - samePath) * 15;
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; ++i) cin >> a[i];
+
+    vector<vector<int>> g(n);
+    for (int i = 1; i < n; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u; --v;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+
+    vector<bool> visited(n, false);
+    long long total_path = 1LL * n * (n - 1) / 2;
+    long long same_path = 0;
+    long long ans = 0;
+
+    for (int i = 0; i < n; ++i) {
+        if (!visited[i]) {
+            int val = a[i];
+            int cnt = 0;
+            vector<int> stack;
+            stack.push_back(i);
+            visited[i] = true;
+            while (!stack.empty()) {
+                int u = stack.back();
+                stack.pop_back();
+                ++cnt;
+                for (int v : g[u]) {
+                    if (!visited[v] && a[v] == val) {
+                        visited[v] = true;
+                        stack.push_back(v);
+                    }
+                }
+            }
+            long long block_path = 1LL * cnt * (cnt - 1) / 2;
+            ans += block_path * val;
+            same_path += block_path;
+        }
+    }
+
+    ans += (total_path - same_path) * 15;
+    cout << ans << "\n";
+
+    return 0;
+}
+```

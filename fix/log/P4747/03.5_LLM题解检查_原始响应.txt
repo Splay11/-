@@ -1,0 +1,309 @@
+## 解题思路
+
+题目要求将 $1 \sim n$ 排成一个序列 $b_1,b_2,\dots,b_n$，每个数恰好出现一次，并且对于所有偶数下标 $i$，数对 $(b_{i-1},b_i)$ 都必须是**安全对**。  
+安全对的定义是：两个整数之和不是罕数，且差的绝对值也不是罕数。
+
+罕数是指大于 $1$ 且只能被 $1$ 和自身整除的正整数（即质数）。  
+因此，条件等价于：每个相邻数对的和与差的绝对值都不能是质数。
+
+### 核心观察
+- 如果两个数**奇偶性相同**，则它们的和一定是偶数；只要这个和大于 $2$，就一定是合数，不会是罕数。
+- 同时，它们的差的绝对值也是偶数；只要不等于 $2$，也一定不是罕数。
+- 因此，**最理想的做法是把同奇偶性的数两两配对，并让它们的差不等于 $2$**。
+
+基于这一观察，可以通过固定模式构造出合法的连续段，再根据 $n$ 的模 $8$ 余数拼接成最终答案。
+
+### 合法块的构造
+#### 长度为 $8$ 的块（基础块）
+对于连续的 $8$ 个数，从起点 $s$ 开始，可以按如下顺序排列：
+$$
+s,\ s+4,\ s+1,\ s+5,\ s+2,\ s+6,\ s+3,\ s+7
+$$
+展开成数对为 $(s,s+4),(s+1,s+5),(s+2,s+6),(s+3,s+7)$。  
+每一对的两个数奇偶性相同，差均为 $4$，不是罕数；和均为大于 $2$ 的偶数，也不是罕数。因此这个块一定满足条件。
+
+#### 特化块（用于处理余数）
+若 $n$ 不能恰好被 $8$ 个一组填满，则采用预制的固定块处理剩余部分：
+- **$n \bmod 8 = 4$**：最后使用一个长度为 $12$ 的块（平移自以下模式）  
+  $1,5,2,6,3,9,4,10,7,11,8,12$
+- **$n \bmod 8 = 2$**：开头先放一个长度为 $10$ 的固定块  
+  $1,5,2,6,3,9,4,10,7,8$
+- **$n \bmod 8 = 6$**：开头先放一个长度为 $14$ 的固定块  
+  $1,5,2,6,3,7,4,12,8,14,9,13,10,11$
+
+这些预制块均满足安全对条件，且覆盖了 $1$ 到对应长度的所有整数。
+
+### 无解情况
+直接验证可知：
+- $n = 2$：只有 $(1,2)$，和为 $3$ 是罕数；
+- $n = 4, 6$：不存在合法方案。
+
+因此，当 $n \in \{2, 4, 6\}$ 时直接输出 $-1$，其余情况均可按上述规则构造出答案。
+
+## 复杂度分析
+- 时间复杂度：每组数据生成答案需要 $O(n)$ 时间，所有测试数据 $n$ 的总和不超过 $2\times10^5$，因此总体复杂度 $O(\sum n)$，在时限内安全。
+- 空间复杂度：需要存储长度为 $n$ 的答案序列，空间 $O(n)$，可直接输出或存放后输出。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def build_permutation(n):
+    """返回长度为 n 的合法序列，若无解返回空列表"""
+    if n == 2 or n == 4 or n == 6:
+        return []
+
+    ans = []
+
+    def add_block8(s):
+        """加入一个长度为 8 的合法块"""
+        ans.extend([s, s + 4, s + 1, s + 5, s + 2, s + 6, s + 3, s + 7])
+
+    def add_block12(s):
+        """加入一个长度为 12 的合法块"""
+        ans.extend([s, s + 4, s + 1, s + 5, s + 2, s + 8,
+                    s + 3, s + 9, s + 6, s + 10, s + 7, s + 11])
+
+    if n % 8 == 0:
+        s = 1
+        while s <= n:
+            add_block8(s)
+            s += 8
+
+    elif n % 8 == 4:
+        s = 1
+        while s <= n - 12:
+            add_block8(s)
+            s += 8
+        add_block12(n - 11)   # 最后的 12 块起点为 n-11
+
+    elif n % 8 == 2:
+        # 固定 10 块
+        ans.extend([1, 5, 2, 6, 3, 9, 4, 10, 7, 8])
+        s = 11
+        while s <= n:
+            add_block8(s)
+            s += 8
+
+    else:  # n % 8 == 6
+        # 固定 14 块
+        ans.extend([1, 5, 2, 6, 3, 7, 4, 12, 8, 14, 9, 13, 10, 11])
+        s = 15
+        while s <= n:
+            add_block8(s)
+            s += 8
+
+    return ans
+
+def main():
+    data = sys.stdin.read().strip().split()
+    t = int(data[0])
+    idx = 1
+    out_lines = []
+
+    for _ in range(t):
+        n = int(data[idx]); idx += 1
+        res = build_permutation(n)
+        if not res:
+            out_lines.append("-1")
+        else:
+            out_lines.append(" ".join(map(str, res)))
+    
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    // 构造长度为 n 的合法序列，若无解返回空列表
+    public static ArrayList<Integer> buildPermutation(int n) {
+        ArrayList<Integer> ans = new ArrayList<>();
+
+        if (n == 2 || n == 4 || n == 6) {
+            return ans;
+        }
+
+        if (n % 8 == 0) {
+            int s = 1;
+            while (s <= n) {
+                addBlock8(ans, s);
+                s += 8;
+            }
+        } else if (n % 8 == 4) {
+            int s = 1;
+            while (s <= n - 12) {
+                addBlock8(ans, s);
+                s += 8;
+            }
+            addBlock12(ans, n - 11);
+        } else if (n % 8 == 2) {
+            // 固定 10 块
+            int[] block10 = {1, 5, 2, 6, 3, 9, 4, 10, 7, 8};
+            for (int x : block10) ans.add(x);
+
+            int s = 11;
+            while (s <= n) {
+                addBlock8(ans, s);
+                s += 8;
+            }
+        } else { // n % 8 == 6
+            // 固定 14 块
+            int[] block14 = {1, 5, 2, 6, 3, 7, 4, 12, 8, 14, 9, 13, 10, 11};
+            for (int x : block14) ans.add(x);
+
+            int s = 15;
+            while (s <= n) {
+                addBlock8(ans, s);
+                s += 8;
+            }
+        }
+
+        return ans;
+    }
+
+    private static void addBlock8(ArrayList<Integer> ans, int s) {
+        ans.add(s);
+        ans.add(s + 4);
+        ans.add(s + 1);
+        ans.add(s + 5);
+        ans.add(s + 2);
+        ans.add(s + 6);
+        ans.add(s + 3);
+        ans.add(s + 7);
+    }
+
+    private static void addBlock12(ArrayList<Integer> ans, int s) {
+        ans.add(s);
+        ans.add(s + 4);
+        ans.add(s + 1);
+        ans.add(s + 5);
+        ans.add(s + 2);
+        ans.add(s + 8);
+        ans.add(s + 3);
+        ans.add(s + 9);
+        ans.add(s + 6);
+        ans.add(s + 10);
+        ans.add(s + 7);
+        ans.add(s + 11);
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        int t = fs.nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        while (t-- > 0) {
+            int n = fs.nextInt();
+            ArrayList<Integer> ans = buildPermutation(n);
+
+            if (ans.isEmpty()) {
+                sb.append(-1).append('\n');
+            } else {
+                for (int i = 0; i < ans.size(); i++) {
+                    if (i > 0) sb.append(' ');
+                    sb.append(ans.get(i));
+                }
+                sb.append('\n');
+            }
+        }
+
+        System.out.print(sb);
+    }
+
+    static class FastScanner {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreElements()) {
+                st = new StringTokenizer(br.readLine());
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+void addBlock8(vector<int>& ans, int s) {
+    ans.insert(ans.end(), {s, s + 4, s + 1, s + 5, s + 2, s + 6, s + 3, s + 7});
+}
+
+void addBlock12(vector<int>& ans, int s) {
+    ans.insert(ans.end(), {s, s + 4, s + 1, s + 5, s + 2, s + 8,
+                           s + 3, s + 9, s + 6, s + 10, s + 7, s + 11});
+}
+
+vector<int> buildPermutation(int n) {
+    vector<int> ans;
+    if (n == 2 || n == 4 || n == 6) return ans;
+
+    if (n % 8 == 0) {
+        for (int s = 1; s <= n; s += 8) addBlock8(ans, s);
+    } else if (n % 8 == 4) {
+        int s = 1;
+        while (s <= n - 12) {
+            addBlock8(ans, s);
+            s += 8;
+        }
+        addBlock12(ans, n - 11);
+    } else if (n % 8 == 2) {
+        int block10[10] = {1, 5, 2, 6, 3, 9, 4, 10, 7, 8};
+        for (int x : block10) ans.push_back(x);
+        for (int s = 11; s <= n; s += 8) addBlock8(ans, s);
+    } else { // n % 8 == 6
+        int block14[14] = {1, 5, 2, 6, 3, 7, 4, 12, 8, 14, 9, 13, 10, 11};
+        for (int x : block14) ans.push_back(x);
+        for (int s = 15; s <= n; s += 8) addBlock8(ans, s);
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n;
+        cin >> n;
+
+        vector<int> ans = buildPermutation(n);
+        if (ans.empty()) {
+            cout << -1 << '\n';
+        } else {
+            for (size_t i = 0; i < ans.size(); ++i) {
+                if (i) cout << ' ';
+                cout << ans[i];
+            }
+            cout << '\n';
+        }
+    }
+    return 0;
+}
+```

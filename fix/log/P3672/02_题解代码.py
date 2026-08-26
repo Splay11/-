@@ -1,0 +1,286 @@
+## 解题思路
+
+### 关键结论
+
+把树任选一点（如 1）作为根，设每条父子边 (parent, child) 的子树规模为 `sz[child]`。
+若删除这条边，切下来的那个连通块正好是 `child` 的整棵子树，其点数为 `sz[child]`。
+因此要使最终每个连通块都是偶数，当且仅当我们删除的每一条边都满足其**子树规模为偶数**；若 `n` 本身为奇数则无解。
+
+于是问题转化为：
+
+1. 统计满足 `sz[child]` 为偶数的边数 `m`；
+2. 从这些边里选出恰好 `k` 条即可，方案数为 `C(m, k)`；若 `k > m` 或 `n` 为奇数则答案为 0。
+
+### 算法步骤
+
+1. 建图，根在 1 做一次 DFS/BFS 得到拓扑顺序与父子关系；
+2. 逆序累加得到每个节点 `sz`；
+3. 统计 `m = |{ child | sz[child] 为偶数 }|`（不含根）；
+4. 用组合数计算 `C(m, k)`，模数 `MOD = 1e9+7`。预处理阶乘与逆元，或只到 `n` 即可（`m ≤ n-1`）。
+
+## 复杂度分析
+
+* 时间复杂度：O(n)，一次遍历与一次组合数计算。
+* 空间复杂度：O(n)，存图与辅助数组。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10**9 + 7
+read = sys.stdin.readline
+
+n_k = read().strip()
+if not n_k:
+    print(0)
+    sys.exit(0)
+n, k = map(int, n_k.split())
+g = [[] for _ in range(n + 1)]
+for _ in range(n - 1):
+    u, v = map(int, read().split())
+    g[u].append(v)
+    g[v].append(u)
+
+if n % 2 == 1:
+    print(0)
+    sys.exit(0)
+
+# 迭代 DFS：求父亲、遍历顺序
+parent = [0] * (n + 1)
+order = []
+st = [1]
+parent[1] = -1
+while st:
+    u = st.pop()
+    order.append(u)
+    for v in g[u]:
+        if v == parent[u]:
+            continue
+        parent[v] = u
+        st.append(v)
+
+# 逆序累加子树大小
+sz = [1] * (n + 1)
+for u in reversed(order):
+    p = parent[u]
+    if p != -1:
+        sz[p] += sz[u]
+
+# 统计偶子树边数
+m = 0
+for v in range(2, n + 1):
+    if sz[v] % 2 == 0:
+        m += 1
+
+# 组合数 C(m, k)
+if k > m:
+    print(0)
+    sys.exit(0)
+
+# 预处理阶乘与逆元（到 n 即可）
+fac = [1] * (n + 1)
+for i in range(1, n + 1):
+    fac[i] = fac[i - 1] * i % MOD
+
+def mod_pow(a, e):
+    r = 1
+    while e:
+        if e & 1:
+            r = r * a % MOD
+        a = a * a % MOD
+        e >>= 1
+    return r
+
+inv_fac = [1] * (n + 1)
+inv_fac[n] = mod_pow(fac[n], MOD - 2)
+for i in range(n - 1, -1, -1):
+    inv_fac[i] = inv_fac[i + 1] * (i + 1) % MOD
+
+def C(nv, kv):
+    if kv < 0 or kv > nv:
+        return 0
+    return fac[nv] * inv_fac[kv] % MOD * inv_fac[nv - kv] % MOD
+
+print(C(m, k))
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+public class Main {
+    static final long MOD = 1_000_000_007L;
+
+    // 快速幂
+    static long modPow(long a, long e) {
+        long r = 1;
+        while (e > 0) {
+            if ((e & 1) == 1) r = (r * a) % MOD;
+            a = (a * a) % MOD;
+            e >>= 1;
+        }
+        return r;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int n = Integer.parseInt(st.nextToken());
+        int k = Integer.parseInt(st.nextToken());
+
+        ArrayList<Integer>[] g = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) g[i] = new ArrayList<>();
+
+        // 读边，建无向图
+        for (int i = 0; i < n - 1; i++) {
+            st = new StringTokenizer(br.readLine());
+            int u = Integer.parseInt(st.nextToken());
+            int v = Integer.parseInt(st.nextToken());
+            g[u].add(v);
+            g[v].add(u);
+        }
+
+        if ((n & 1) == 1) {
+            System.out.println(0);
+            return;
+        }
+
+        // 迭代 DFS 获取父亲与访问顺序
+        int[] parent = new int[n + 1];
+        int[] order = new int[n];
+        int[] stack = new int[n];
+        int top = 0, idx = 0;
+        stack[top++] = 1;
+        parent[1] = -1;
+        while (top > 0) {
+            int u = stack[--top];
+            order[idx++] = u;
+            for (int v : g[u]) {
+                if (v == parent[u]) continue;
+                parent[v] = u;
+                stack[top++] = v;
+            }
+        }
+
+        // 逆序累加子树大小
+        int[] sz = new int[n + 1];
+        for (int i = 1; i <= n; i++) sz[i] = 1;
+        for (int i = idx - 1; i >= 0; i--) {
+            int u = order[i];
+            int p = parent[u];
+            if (p != -1) sz[p] += sz[u];
+        }
+
+        // 统计偶子树边数 m
+        int m = 0;
+        for (int v = 2; v <= n; v++) if ((sz[v] & 1) == 0) m++;
+
+        if (k > m) {
+            System.out.println(0);
+            return;
+        }
+
+        // 组合数 C(m, k) 预处理到 n
+        long[] fac = new long[n + 1];
+        long[] ifac = new long[n + 1];
+        fac[0] = 1;
+        for (int i = 1; i <= n; i++) fac[i] = fac[i - 1] * i % MOD;
+        ifac[n] = modPow(fac[n], MOD - 2);
+        for (int i = n - 1; i >= 0; i--) ifac[i] = ifac[i + 1] * (i + 1) % MOD;
+
+        long ans = fac[m] * ifac[k] % MOD * ifac[m - k] % MOD;
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+const long long MOD = 1000000007LL;
+
+long long modpow(long long a, long long e) {
+    long long r = 1;
+    while (e) {
+        if (e & 1) r = r * a % MOD;
+        a = a * a % MOD;
+        e >>= 1;
+    }
+    return r;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, k;
+    if (!(cin >> n >> k)) return 0;
+
+    vector<vector<int>> g(n + 1);
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v; cin >> u >> v;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+
+    if (n % 2 == 1) { // 总点数为奇数，无解
+        cout << 0 << '\n';
+        return 0;
+    }
+
+    // 迭代 DFS：求父亲与访问顺序
+    vector<int> parent(n + 1, 0), order;
+    order.reserve(n);
+    vector<int> st; st.reserve(n);
+    st.push_back(1);
+    parent[1] = -1;
+    while (!st.empty()) {
+        int u = st.back(); st.pop_back();
+        order.push_back(u);
+        for (int v : g[u]) {
+            if (v == parent[u]) continue;
+            parent[v] = u;
+            st.push_back(v);
+        }
+    }
+
+    // 逆序累加子树大小
+    vector<int> sz(n + 1, 1);
+    for (int i = (int)order.size() - 1; i >= 0; --i) {
+        int u = order[i];
+        int p = parent[u];
+        if (p != -1) sz[p] += sz[u];
+    }
+
+    // 统计偶子树边数 m
+    int m = 0;
+    for (int v = 2; v <= n; ++v) if (sz[v] % 2 == 0) ++m;
+
+    if (k > m) { cout << 0 << '\n'; return 0; }
+
+    // 组合数 C(m, k) —— 预处理到 n
+    vector<long long> fac(n + 1), ifac(n + 1);
+    fac[0] = 1;
+    for (int i = 1; i <= n; ++i) fac[i] = fac[i - 1] * i % MOD;
+    ifac[n] = modpow(fac[n], MOD - 2);
+    for (int i = n - 1; i >= 0; --i) ifac[i] = ifac[i + 1] * (i + 1) % MOD;
+
+    auto C = [&](int N, int K)->long long{
+        if (K < 0 || K > N) return 0;
+        return fac[N] * ifac[K] % MOD * ifac[N - K] % MOD;
+    };
+
+    cout << C(m, k) << '\n';
+    return 0;
+}
+```

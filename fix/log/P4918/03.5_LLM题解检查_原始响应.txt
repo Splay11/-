@@ -1,0 +1,117 @@
+## 解题思路
+
+本题弹珠的移动规则看似复杂，但可以归纳出优美的性质，从而直接得到答案。
+
+设标记序列为 $g$（下标从 $1$ 到 $L$），并记整个序列中字符 `'L'` 的个数为 $cnt$。弹珠从某个起始位置 $s$ 出发，最终离开方向由以下结论决定：
+
+- 若 $s \le cnt$，弹珠最终从左侧离开（方向 `'L'`）；
+- 若 $s > cnt$，弹珠最终从右侧离开（方向 `'R'`）。
+
+因此，对于所有起始位置 $1,2,\dots,L$，答案即为前 $cnt$ 个字符 `'L'` 接上后面 $L-cnt$ 个字符 `'R'`。
+
+**证明要点**（对应新题面描述）：
+
+1. **访问区间连续性**：弹珠每次停靠在一个从未停留过的位置上。可以证明，任意时刻已经停留过的位置构成一个连续区间 $[l, r]$，且当前停留的位置必定是该区间的左端点 $l$ 或右端点 $r$。  
+   - 初始时区间为 $[s, s]$，当前在 $s$。  
+   - 若当前位置标记为 `'L'`，弹珠向左移动至第一个未停留位置，即 $l-1$，区间变为 $[l-1, r]$，当前停在 $l-1$（新左端点）。  
+   - 若标记为 `'R'`，弹珠向右移动至 $r+1$，区间变为 $[l, r+1]$，当前停在 $r+1$（新右端点）。  
+   因此区间始终连续，且当前位置始终在端点。
+
+2. **`'L'`、`'R'` 的计数关系**：在访问区间 $[l, r]$ 中，除当前停留位置 $p$（$p$ 为 $l$ 或 $r$）外，其余位置中的 `'L'` 个数等于 $s - l$，`'R'` 个数等于 $r - s$。该性质可通过上述移动过程的归纳保持。
+
+3. **离开条件的推导**：
+   - 若弹珠最终从左边离开（经过位置 $0$，最终方向记为 `'L'`），则离开前一刻必定停在位置 $1$ 且该处标记为 `'L'`。此时区间为 $[1, r]$，$l=1$，$p=1$。根据计数关系，除当前位置外，`'L'` 个数为 $s - l = s - 1$。整个序列的 `'L'` 总数 $cnt$ 必定包含这个 $1$ 处的 `'L'` 以及那些“除当前位置外”的 `'L'`，再加上 $r+1$ 到 $L$ 之间可能存在的 `'L'`（未被访问）。由 $s - 1 \le cnt - 1$ 可推出 $s \le cnt$。反之，若 $s \le cnt$ 则必从左侧离开。  
+   - 类似地，从右侧离开（经过 $L+1$，方向 `'R'`）当且仅当 $s > cnt$。
+
+综上，对于每个 $s$，结果仅取决于 $s$ 与 $cnt$ 的大小关系，于是答案字符串可以直接按 `'L'` 和 `'R'` 分段构造。
+
+## 复杂度分析
+
+对于单个用例，统计 `'L'` 的个数并构造答案字符串均只需线性扫描，时间复杂度 $O(L)$，空间复杂度 $O(L)$（存储输出字符串）。所有用例的长度总和 $\sum L \le 2\times 10^5$，因此整体时间 $O(\sum L)$，空间 $O(\max L)$，完全满足题目要求。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve(L, g):
+    # 统计 'L' 的个数
+    cnt = sum(1 for c in g if c == 'L')
+    # 前 cnt 个位置从左出界，后面从右出界
+    return 'L' * cnt + 'R' * (L - cnt)
+
+def main():
+    data = sys.stdin.read().split()
+    q = int(data[0])
+    idx = 1
+    out_lines = []
+    for _ in range(q):
+        L = int(data[idx]); idx += 1
+        g = data[idx]; idx += 1
+        out_lines.append(solve(L, g))
+    sys.stdout.write('\n'.join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+
+public class Main {
+    static String solve(int L, String g) {
+        int cnt = 0;
+        for (int i = 0; i < L; i++) {
+            if (g.charAt(i) == 'L') cnt++;
+        }
+        // 构造答案：前 cnt 个为 L，其余为 R
+        return "L".repeat(cnt) + "R".repeat(L - cnt);
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int q = Integer.parseInt(br.readLine().trim());
+        StringBuilder out = new StringBuilder();
+        while (q-- > 0) {
+            int L = Integer.parseInt(br.readLine().trim());
+            String g = br.readLine().trim();
+            out.append(solve(L, g)).append('\n');
+        }
+        System.out.print(out);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+string solve(int L, const string& g) {
+    int cnt = 0;
+    for (char c : g) {
+        if (c == 'L') ++cnt;
+    }
+    // 前 cnt 个位置为 L，之后为 R
+    return string(cnt, 'L') + string(L - cnt, 'R');
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int q;
+    cin >> q;
+    while (q--) {
+        int L;
+        string g;
+        cin >> L >> g;
+        cout << solve(L, g) << '\n';
+    }
+    return 0;
+}
+```

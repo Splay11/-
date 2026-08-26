@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4233",
+  "title": "第3题-石碑上的加密算式",
+  "docId": 3308,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "字符串"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

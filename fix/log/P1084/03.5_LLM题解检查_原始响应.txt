@@ -1,0 +1,160 @@
+## 解题思路
+
+1. **问题分析**  
+   给定长度为 $n$ 的信号序列，需要对其中的**恰好 $k$ 个**信号值进行调节，每个信号值最多被调节一次。调节方式有两种：放大（乘以 $2$）或衰减（除以 $2$ 并向下取整）。未选中的信号值保持原值。目标是最小化操作后序列的极差（最大值与最小值之差）。
+
+2. **核心观察**  
+   由于每个数只能操作一次，并且操作只会改变单个值，**最优策略一定是：选择序列中最小的一部分信号值进行放大，选择最大的一部分信号值进行衰减**。  
+   理由：对中间值进行操作无法有效缩小极差；放大最小值或衰减最大值能在不扩大另一侧的情况下压缩区间。
+
+3. **算法设计**  
+   - 将数组 $a$ 从小到大排序。  
+   - 枚举将前 $i$ 小的信号值放大（乘以 $2$）的数量 $i$，其中 $0 \le i \le k$。  
+     那么剩余的 $k - i$ 个操作数将分配给最大的那些信号值，即后 $k - i$ 个信号值进行衰减（除以 $2$ 向下取整）。  
+   - 对于每一组 $(i, k-i)$，操作后的序列可以划分为三个部分：
+     - 第一部分：前 $i$ 个元素（最小值区域），全部变为 $a[0] \times 2, \dots, a[i-1] \times 2$。
+     - 第三部分：后 $k-i$ 个元素（最大值区域），全部变为 $a[n-(k-i)] / 2, \dots, a[n-1] / 2$。
+     - 第二部分：中间未操作的元素（如果 $n \neq k$），保持不变，下标范围从 $i$ 到 $n-(k-i)-1$。
+   - 分别从这三个部分中提取出当前序列的**全局最大值**和**全局最小值**，计算极差 $mx - mi$。
+   - 枚举所有 $i$，记录最小的极差作为答案。
+
+4. **细节处理**  
+   - 只有对应的部分确实存在时才更新最大最小值（例如 $i>0$ 才考虑第一部分，$k-i>0$ 才考虑第三部分，$n \neq k$ 才考虑第二部分）。
+   - 最小值初始化为一个很大的数（如 $10^9$ 以上），最大值初始化为 $0$（因为信号值为正整数）。
+   - 除法直接使用整数除法即可，等价于向下取整。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n \log n)$。排序需要 $O(n \log n)$ 时间，后续枚举 $i$ 从 $0$ 到 $k$ 需要 $O(k) \le O(n)$ 时间，整体复杂度由排序决定。
+- **空间复杂度**：$O(n)$。需要存储信号序列，排序时可能产生额外开销，但总体为线性空间（不计排序中可能使用的栈空间）。
+
+## 代码实现
+
+### Python
+
+```python
+def solve():
+    import sys
+    input = sys.stdin.read
+    data = input().split()
+    if not data:
+        return
+    n = int(data[0])
+    k = int(data[1])
+    a = list(map(int, data[2:2 + n]))
+    a.sort()
+    
+    INF = 10**10
+    ans = INF
+    for i in range(0, k + 1):
+        mi = INF
+        mx = 0
+        # 第一部分：前i个值放大
+        if i > 0:
+            mi = min(mi, a[0] * 2)
+            mx = max(mx, a[i - 1] * 2)
+        # 第三部分：后(k-i)个值衰减
+        if k - i > 0:
+            # 注意下标：后(k-i)个的起始位置为 n - (k - i)
+            mi = min(mi, a[n - (k - i)] // 2)
+            mx = max(mx, a[n - 1] // 2)
+        # 第二部分：中间未操作的部分
+        if n != k:
+            # 第二部分的范围是 [i, n - (k - i) - 1]
+            mi = min(mi, a[i])
+            mx = max(mx, a[n - (k - i) - 1])
+        ans = min(ans, mx - mi)
+    
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int k = sc.nextInt();
+        int[] a = new int[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = sc.nextInt();
+        }
+        Arrays.sort(a);
+        
+        int INF = (int) 1e9;
+        int ans = INF;
+        for (int i = 0; i <= k; i++) {
+            int mi = INF;
+            int mx = 0;
+            // 第一部分：前 i 个值放大
+            if (i > 0) {
+                mi = Math.min(mi, a[0] * 2);
+                mx = Math.max(mx, a[i - 1] * 2);
+            }
+            // 第三部分：后 (k - i) 个值衰减
+            if (k - i > 0) {
+                mi = Math.min(mi, a[n - (k - i)] / 2);
+                mx = Math.max(mx, a[n - 1] / 2);
+            }
+            // 第二部分：中间未操作的部分
+            if (n != k) {
+                mi = Math.min(mi, a[i]);
+                mx = Math.max(mx, a[n - (k - i) - 1]);
+            }
+            ans = Math.min(ans, mx - mi);
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n, k;
+    cin >> n >> k;
+    vector<int> a(n);
+    for (int i = 0; i < n; ++i) {
+        cin >> a[i];
+    }
+    sort(a.begin(), a.end());
+    
+    const int INF = 1e9;
+    int ans = INF;
+    for (int i = 0; i <= k; ++i) {
+        int mi = INF, mx = 0;
+        // 第一部分：前 i 个值放大
+        if (i > 0) {
+            mi = min(mi, a[0] * 2);
+            mx = max(mx, a[i - 1] * 2);
+        }
+        // 第三部分：后 (k - i) 个值衰减
+        if (k - i > 0) {
+            mi = min(mi, a[n - (k - i)] / 2);
+            mx = max(mx, a[n - 1] / 2);
+        }
+        // 第二部分：中间未操作的部分
+        if (n != k) {
+            mi = min(mi, a[i]);
+            mx = max(mx, a[n - (k - i) - 1]);
+        }
+        ans = min(ans, mx - mi);
+    }
+    cout << ans << '\n';
+    
+    return 0;
+}
+```

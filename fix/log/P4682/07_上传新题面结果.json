@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4682",
+  "title": "绩效晋升计划",
+  "docId": 3923,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "数据结构",
+    "线段树"
+  ],
+  "alg_tag": "线段树",
+  "ai_alg_tags": "线段树",
+  "videosol": "",
+  "trial_videosol": ""
+}

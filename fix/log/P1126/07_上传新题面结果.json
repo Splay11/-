@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1126",
+  "title": "核心值子序列",
+  "docId": 132,
+  "hidden": false,
+  "difficulty": 0,
+  "tag": [
+    "腾讯"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

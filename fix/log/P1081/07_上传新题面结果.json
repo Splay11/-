@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1081",
+  "title": "第3题-断边色差",
+  "docId": 82,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树形DP",
+  "trial_videosol": ""
+}

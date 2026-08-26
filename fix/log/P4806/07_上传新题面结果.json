@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4806",
+  "title": "第2题-寻找最近的安全点",
+  "docId": 4074,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "排序算法"
+  ],
+  "alg_tag": "排序算法",
+  "ai_alg_tags": "排序算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

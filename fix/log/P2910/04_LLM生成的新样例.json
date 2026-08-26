@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "5\nabCCd",
+      "output": "AbcCD",
+      "explanation": "初始休眠。\n- $a$ 小写：改为 $A$，切到唤醒；\n- $b$ 小写：唤醒下不处理；\n- $C$ 大写：改为 $c$，切回休眠；\n- $C$ 大写：休眠下不处理；\n- $d$ 小写：改为 $D$，切到唤醒。\n结果为 $AbcCD$。"
+    },
+    {
+      "input": "1\na",
+      "output": "A",
+      "explanation": "初始休眠，$a$ 为小写，改为 $A$。"
+    },
+    {
+      "input": "1\nA",
+      "output": "A",
+      "explanation": "初始休眠，$A$ 为大写，不满足改写条件，保持 $A$。"
+    },
+    {
+      "input": "3\nABC",
+      "output": "ABC",
+      "explanation": "全程休眠遇到的都是大写，一次改写都不触发，输出原串 $ABC$。"
+    }
+  ]
+}

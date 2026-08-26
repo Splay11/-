@@ -1,0 +1,134 @@
+## 题解
+
+要求选择 k 个数求出现次数最多的数最大是多少。
+
+根据出现频率排序从小到大排序，并判断当前的数是否能在选中的数作为众数出现。
+
+用一个变量 $t$ 记录已经选择的数字的总和，如果当前数字的频率加上 $t$ 以及剩余数字的最大贡献（即剩余数字个数乘以当前数字的频率）大于等于 $k$，就可以选择当前数字更新答案。
+
+时间复杂度 $O(n \log n)$，空间复杂度 $O(n)$。
+
+## AC代码
+### Python
+```py
+from collections import Counter
+T = int(input())
+for _ in range(T):
+    n, k = map(int, input().split())
+    a = list(map(int, input().split()))
+    d = Counter(a)
+    v = []
+    for kk, val in d.items():
+        v.append((val, kk))
+    v.sort()
+    t = 0
+    res = 0
+    cnt = len(v)
+    for L, R in v:
+        cnt -= 1
+        if L + t + cnt * L >= k:
+            res = max(res, R) 
+        t += L
+    print(res)
+
+```
+### java
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int T = scanner.nextInt();
+
+        for (int t = 0; t < T; t++) {
+            int n = scanner.nextInt();
+            int k = scanner.nextInt();
+            int[] a = new int[n];
+
+            for (int i = 0; i < n; i++) {
+                a[i] = scanner.nextInt();
+            }
+
+            // 计算频次
+            Map<Integer, Integer> frequencyMap = new HashMap<>();
+            for (int num : a) {
+                frequencyMap.put(num, frequencyMap.getOrDefault(num, 0) + 1);
+            }
+
+            // 将频次与元素对存储在列表中
+            List<int[]> v = new ArrayList<>();
+            for (Map.Entry<Integer, Integer> entry : frequencyMap.entrySet()) {
+                v.add(new int[]{entry.getValue(), entry.getKey()});
+            }
+
+            // 按频次升序排序
+            v.sort((o1, o2) -> Integer.compare(o1[0], o2[0]));
+
+            int tSum = 0;
+            int res = 0;
+            int cnt = v.size();
+
+            // 寻找满足条件的最大元素
+            for (int[] pair : v) {
+                int L = pair[0];
+                int R = pair[1];
+                cnt--;
+
+                if (L + tSum + cnt * L >= k) {
+                    res = Math.max(res, R);
+                }
+                tSum += L;
+            }
+
+            System.out.println(res);
+        }
+
+        scanner.close();
+    }
+}
+```
+
+### C++
+```C++
+#include<bits/stdc++.h>
+using namespace std;
+
+const int N = 1e5 + 10;
+
+int t, n, k, a[N];
+unordered_map<int,int> hmap;
+
+bool cmp(int a, int b){
+	return a > b;
+}
+
+int main(){
+	scanf("%d", &t);
+	while(t--){
+		hmap.clear();
+		scanf("%d%d", &n, &k);
+		for(int i = 1; i <= n; i++) {
+			scanf("%d", &a[i]);
+			if(hmap.count(a[i]) == 0) hmap[a[i]] = 1;
+			else hmap[a[i]]++;
+		}
+		sort(a + 1, a + n + 1, cmp);
+		n = unique(a + 1, a + n + 1) - a - 1;
+		//printf("n = %d\n", n);
+		int ans = 0;
+		while(k){
+			ans = 0;
+			for(int i = 1; i <= n && k; i++){
+				if(hmap[a[i]]) {
+					ans = max(ans, a[i]);
+					k--;
+					hmap[a[i]]--;
+				}
+			}
+		}
+		printf("%d\n", ans);
+	}
+	return 0;
+}
+```

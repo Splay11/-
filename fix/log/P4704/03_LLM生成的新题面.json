@@ -1,0 +1,6 @@
+{
+  "title": "工单稀疏加权",
+  "content": "客服中台要把一段长度为 $L$ 的工单片段做成摘要向量。给定单头查询、键、值矩阵 $Q,K,V \\in \\mathbb{R}^{L \\times d}$，以及每行保留个数 $k_{\\mathrm{top}}$，系统采用双门控折线映射再加 Top-$k$ 稀疏，得到可解释的注意力权重，再对 $V$ 加权求和。实现时仅允许使用 $numpy$、$pandas$ 或 $scikit$-$learn$。\n\n默认门限系数 $\\alpha=0.2$，$\\beta=0.6$，且 $\\beta>\\alpha$；$k_{\\mathrm{top}} \\le L$。\n\n计算步骤：\n\n`1.` 初始打分 $S=QK^{\\top}/\\sqrt{d}$，得到 $L \\times L$ 矩阵。\n\n`2.` 对每一行做双门控折线映射。设该行最大值为 $s_{\\max}$，门限 $t_1=\\alpha s_{\\max}$，$t_2=\\beta s_{\\max}$。对每个分数 $x$：若 $x<t_1$ 则映射为 `0`；若 $t_1 \\le x < t_2$ 则映射为 $(x-t_1)/(t_2-t_1)$；若 $x \\ge t_2$ 则映射为 `1`。\n\n`3.` 每行只保留映射后最大的 $k_{\\mathrm{top}}$ 个位置，其余置 `0`。若行长小于 $k_{\\mathrm{top}}$ 则全保留。\n\n`4.` 行归一化：若一行全为 `0`，改为均匀分布；否则将该行除以行和，使和为 `1`，得到权重矩阵 $A$。\n\n`5.` 输出 $O=AV$，同时返回 $A$。\n\n约束：$2 \\le L \\le 6$，$2 \\le d \\le 4$，所有元素为浮点数。",
+  "input_description": "标准输入仅一行 JSON 对象，包含键 `Q`、`K`、`V`（均为 $L \\times d$ 的二维实数数组）以及整数 `k_top`。可选键 `alpha`、`beta` 缺省时分别取 `0.2` 与 `0.6`，且须满足 $\\beta>\\alpha$。保证 $2 \\le L \\le 6$，$2 \\le d \\le 4$，$2 \\le k_{\\mathrm{top}} \\le L$。",
+  "output_description": "输出一行 JSON 对象，包含键 `A`（$L \\times L$）与 `O`（$L \\times d$）。所有数值用四舍五入保留 `6` 位小数。"
+}

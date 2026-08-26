@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3359",
+  "title": "第2题-邻站异协议",
+  "docId": 2701,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "bfs"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树",
+  "videosol": "",
+  "trial_videosol": ""
+}

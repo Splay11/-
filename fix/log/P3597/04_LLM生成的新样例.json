@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "4 3\nAbCd\ntoUpperCase(1)\ntoLowerCase(0)\ntoUpperCase(3)",
+      "output": "aBCD",
+      "explanation": "初始串为 `AbCd`。\n\n- `toUpperCase(1)`：位置 `1` 的 `'b'` 变为 `'B'`，得到 `ABCd`；\n- `toLowerCase(0)`：位置 `0` 的 `'A'` 变为 `'a'`，得到 `aBCd`；\n- `toUpperCase(3)`：位置 `3` 的 `'d'` 变为 `'D'`，得到 `aBCD`。"
+    },
+    {
+      "input": "1 1\nz\ntoLowerCase(0)",
+      "output": "z",
+      "explanation": "只有一个字符 `'z'`，对其执行 `toLowerCase(0)` 后仍为 `'z'`。"
+    },
+    {
+      "input": "3 2\nXYZ\ntoLowerCase(0)\ntoUpperCase(2)",
+      "output": "xYZ",
+      "explanation": "`toLowerCase(0)` 把 `'X'` 变成 `'x'`，`toUpperCase(2)` 时 `'Z'` 已是大写，保持不变，结果为 `xYZ`。"
+    }
+  ]
+}

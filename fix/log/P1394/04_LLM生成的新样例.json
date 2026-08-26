@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "aa",
+      "output": "1",
+      "explanation": "`aa` 长度恰好为 `2` 且首尾相同，是最短的同端片段。答案为 `1`。"
+    },
+    {
+      "input": "aaaa",
+      "output": "2",
+      "explanation": "可以切成 `aa` 与 `aa` 两段，每段都是同端片段。\n这是能得到的最多段数，答案为 `2`。"
+    }
+  ]
+}

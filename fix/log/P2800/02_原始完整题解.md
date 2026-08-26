@@ -1,0 +1,183 @@
+# 题解
+
+## 题面描述
+
+给定 $k$ 个数组，其中第 $i$ 个数组包含 $n_i$ 个整数。  
+目标是判断是否存在两个不同的数组，通过分别删除其中的一个元素后，两个数组剩余元素的和相等。  
+
+---
+
+## 思路
+
+- 对于每个数组，先计算所有元素的和 $S$。  
+- 对数组中的每个元素 $a$，计算删除该元素后剩余元素的和，即 $S - a$。  
+- 使用一个哈希表（例如 $unordered\_map$ 或字典）记录每个删除操作产生的剩余和，并标记它来源于哪个数组。  
+- 遍历每个数组的所有可能剩余和，检查哈希表中是否已经存在来自不同数组的相同剩余和。  
+  - 如果存在，则说明满足条件，直接输出 "YES"；  
+  - 否则将该剩余和记录到哈希表中。  
+
+该方法的时间复杂度主要为每个数组的两次遍历，总体复杂度为 $O(n_1+n_2+\cdots+n_k)$，且所有数组中元素总数不超过 $5\times10^5$。
+
+---
+
+## 代码分析
+
+- **求和操作**：  
+  对每个数组遍历 $n_i$ 个元素求和，时间复杂度为 $O(n_i)$。
+
+- **删除元素后求和**：  
+  对每个元素计算 $S-a$ 并存入集合，时间复杂度也是 $O(n_i)$。
+
+- **哈希表查找和插入**：  
+  对每个删除操作的结果在哈希表中检查是否已经存在来自其他数组的同样结果，平均查找与插入操作均为常数时间，因此总体时间复杂度为 $O(n_1+n_2+\cdots+n_k)$。
+
+---
+
+## C++
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <unordered_set>
+using namespace std;
+using ll = long long;
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T; // 测试数据组数
+    cin >> T;
+    while(T--){
+        int k; // 数组个数
+        cin >> k;
+        unordered_map<ll,int> m; // 哈希表，键为剩余和，值为对应数组的编号
+        bool found = false; // 标记是否找到符合条件的两个数组
+        for(int i = 0; i < k; i++){
+            int n; // 当前数组元素个数
+            cin >> n;
+            ll sum = 0;
+            int *arr = new int[n];
+            for(int j = 0; j < n; j++){
+                cin >> arr[j];
+                sum += arr[j]; // 计算数组所有元素的和
+            }
+            unordered_set<ll> st; // 用于去重当前数组删除不同元素后的剩余和
+            for(int j = 0; j < n; j++){
+                st.insert(sum - arr[j]);
+            }
+            // 检查当前数组中每个剩余和是否在之前的数组中出现过
+            for(auto x : st){
+                if(m.count(x) && m[x] != i){
+                    found = true;
+                }
+            }
+            // 将当前数组的剩余和添加到哈希表中，并记录数组编号
+            for(auto x : st) m[x] = i;
+            delete [] arr;
+        }
+        cout << (found ? "YES" : "NO") << "\n";
+    }
+    return 0;
+}
+```
+
+## Python
+
+```python
+# 读取标准输入
+import sys
+
+def main():
+    input_data = sys.stdin.read().split()
+    index = 0
+    T = int(input_data[index])  # 测试数据组数
+    index += 1
+    res = []
+    
+    # 遍历每组测试数据
+    for _ in range(T):
+        k = int(input_data[index])  # 数组个数
+        index += 1
+        m = {}  # 字典，键为剩余和，值为对应数组的编号
+        found = False
+        
+        # 遍历每个数组
+        for i in range(k):
+            n = int(input_data[index])  # 当前数组中元素个数
+            index += 1
+            arr = list(map(int, input_data[index:index+n]))  # 当前数组
+            index += n
+            s = sum(arr)  # 数组所有元素的和
+            st = set()  # 用于存储当前数组中不同的剩余和
+            for a in arr:
+                st.add(s - a)
+            # 检查当前数组中删除一个元素后的剩余和是否出现在其他数组中
+            for x in st:
+                if x in m and m[x] != i:
+                    found = True
+            # 将当前数组的所有剩余和存入字典中，记录数组编号
+            for x in st:
+                m[x] = i
+        
+        res.append("YES" if found else "NO")
+    
+    # 输出所有结果，每个结果一行
+    sys.stdout.write("\n".join(res))
+
+if __name__ == '__main__':
+    main()
+```
+## Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt(); // 测试数据组数
+        StringBuilder sb = new StringBuilder();
+        
+        // 遍历每组测试数据
+        for (int t = 0; t < T; t++) {
+            int k = sc.nextInt(); // 数组个数
+            // 使用HashMap存储删除一个元素后的剩余和及对应数组编号
+            HashMap<Long, Integer> m = new HashMap<>();
+            boolean found = false; // 标记是否找到满足条件的两个数组
+            
+            // 遍历每个数组
+            for (int i = 0; i < k; i++) {
+                int n = sc.nextInt(); // 当前数组元素个数
+                long sum = 0;
+                int[] arr = new int[n];
+                
+                for (int j = 0; j < n; j++) {
+                    arr[j] = sc.nextInt();
+                    sum += arr[j]; // 计算数组所有元素的和
+                }
+                HashSet<Long> set = new HashSet<>(); // 存储当前数组中不同的剩余和
+                
+                // 计算删除每个元素后的剩余和
+                for (int j = 0; j < n; j++) {
+                    set.add(sum - arr[j]);
+                }
+                
+                // 检查当前数组的剩余和是否出现在之前的数组中
+                for (Long x : set) {
+                    if (m.containsKey(x) && m.get(x) != i) {
+                        found = true;
+                    }
+                }
+                
+                // 将当前数组的剩余和添加到HashMap中，并记录数组编号
+                for (Long x : set) {
+                    m.put(x, i);
+                }
+            }
+            sb.append(found ? "YES" : "NO").append("\n");
+        }
+        System.out.print(sb);
+        sc.close();
+    }
+}
+```

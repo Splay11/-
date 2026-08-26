@@ -1,0 +1,124 @@
+## 解题思路
+
+问题等价于求满足 $k^2 \le W$ 的最大整数 $k$，即求 $W$ 的算术平方根再向下取整 $\lfloor \sqrt{W} \rfloor$。
+
+由于直接逐个尝试会导致超时（$W$ 最大可达 $2^{31}-1$），可以采用**二分查找**在答案的取值范围中搜索：
+
+1. **处理简单情形**：若 $W < 2$，则 $k = W$，直接返回。
+2. **确定二分上下界**：当 $W \ge 2$ 时，答案不会超过 $\left\lfloor \dfrac{W}{2} \right\rfloor + 1$，因此取 $l=1$，$r=\left\lfloor \dfrac{W}{2} \right\rfloor + 1$。
+3. **二分查找**：
+   - 每次取中点 $mid = l + (r - l) / 2$，避免 $l+r$ 溢出。
+   - 判断 $mid$ 是否满足 $mid^2 \le W$。为避免直接乘法造成整数溢出，改用除法等价判断：`mid <= W / mid`。
+   - 若成立，说明 $mid$ 是一个可行解，记录 $ans = mid$，并向右搜索更大的可能值：$l = mid + 1$。
+   - 若不成立，说明 $mid$ 太大，向左缩小范围：$r = mid - 1$。
+4. 当 $l > r$ 时循环结束，$ans$ 即为最大可行边长。
+
+## 复杂度分析
+
+- **时间复杂度**：二分查找每次将搜索区间减半，循环次数为 $O(\log W)$，每次比较和除法均为常数时间，因此总时间复杂度 $O(\log W)$。
+- **空间复杂度**：仅使用了几个整型变量，没有额外数组或递归栈，空间复杂度 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def max_square_side(W: int) -> int:
+    """返回满足 k^2 <= W 的最大整数 k"""
+    if W < 2:
+        return W
+    l, r = 1, W // 2 + 1
+    ans = 0
+    while l <= r:
+        mid = l + (r - l) // 2
+        # 用除法避免乘法溢出（Python 无溢出风险，但保持思路一致）
+        if mid <= W // mid:
+            ans = mid          # mid 是可行解，记录下来
+            l = mid + 1        # 向右寻找更大的边长
+        else:
+            r = mid - 1        # mid 太大，向左缩小范围
+    return ans
+
+def main():
+    data = sys.stdin.read().strip()
+    if not data:
+        return
+    W = int(data)
+    print(max_square_side(W))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class Main {
+    // 返回满足 k^2 <= W 的最大整数 k
+    static int maxSquareSide(int W) {
+        if (W < 2) return W;
+        int l = 1, r = W / 2 + 1;
+        int ans = 0;
+        while (l <= r) {
+            int mid = l + (r - l) / 2; // 防溢出
+            // 用除法判断 mid^2 <= W，避免乘法溢出
+            if (mid <= W / mid) {
+                ans = mid;
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine();
+        if (line != null && !line.trim().isEmpty()) {
+            int W = Integer.parseInt(line.trim());
+            System.out.println(maxSquareSide(W));
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+using namespace std;
+
+// 返回满足 k^2 <= W 的最大整数 k
+int maxSquareSide(int W) {
+    if (W < 2) return W;
+    int l = 1, r = W / 2 + 1;
+    int ans = 0;
+    while (l <= r) {
+        int mid = l + (r - l) / 2; // 防溢出
+        // 用除法判断 mid^2 <= W，避免乘法溢出
+        if (mid <= W / mid) {
+            ans = mid;
+            l = mid + 1;    // 向右搜索
+        } else {
+            r = mid - 1;    // 向左搜索
+        }
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int W;
+    if (cin >> W) {
+        cout << maxSquareSide(W) << '\n';
+    }
+    return 0;
+}
+```

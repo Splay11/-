@@ -1,0 +1,11 @@
+{
+  "pid": "P1304",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:44:29",
+  "end_time": "2026-08-19 19:44:30",
+  "new_title": "折半功率对齐",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

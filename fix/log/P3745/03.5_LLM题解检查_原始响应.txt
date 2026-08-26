@@ -1,0 +1,196 @@
+## 解题思路
+
+本题要求判断一个整数 $n$ 是否可以表示为四个基元数（即大于 $1$ 且只有 $1$ 和自身两个正因数的整数，等价于质数）之和，若存在解则输出任意一种拆分方案，否则输出 $-1$。
+
+解决思路基于以下数论性质和构造方法：
+
+1. **最小和判断**：因为最小的四个基元数均为 $2$，其和为 $2+2+2+2=8$。因此当 $n < 8$ 时必然无解。题目数据保证 $n \ge 8$，此步仅做完整性说明。
+2. **奇偶性转化**：将四个基元数之和的问题转化为“将一个偶数拆分为两个基元数之和”的子问题。
+   - 若 $n$ 为偶数，可以先拆分出 $2$ 和 $2$，剩余部分 $m = n - 4$ 仍为偶数。
+   - 若 $n$ 为奇数，可以先拆分出 $2$ 和 $3$，剩余部分 $m = n - 5$ 变为偶数。
+3. **偶数拆分为两个基元数之和**：对于偶数 $m \ge 4$，我们可以用贪心构造的方法找到两个基元数 $p$ 和 $q$ 使得 $p + q = m$。
+   - 特判 $m = 4$，它可以拆为 $2+2$。
+   - 否则，先尝试 $2 + (m-2)$，检查 $m-2$ 是否为基元数；若是则直接返回。
+   - 若上述不成立，则从 $p=3$ 开始枚举所有奇数 $p$，同时检查 $p$ 和 $m-p$ 是否均为基元数，找到即返回。由于强哥德巴赫猜想在题目数据范围（$n \le 10^9$）内成立，这样的拆分总是存在的。
+4. **基元数判定**：使用试除法（用 $6k \pm 1$ 优化）判断一个数是否为基元数，时间复杂度为 $O(\sqrt{N})$，足够高效。
+
+## 复杂度分析
+
+对于每组数据，核心操作包括：
+- 常数次基元数判定（每次判定 $O(\sqrt{n})$）；
+- 偶数拆分时枚举奇数 $p$，但实际枚举次数极少，通常很快找到解。
+
+因此总时间复杂度为 $O(t \sqrt{n})$，其中 $t \le 10$，$\sqrt{n} \le 31623$，可以轻松通过。  
+空间复杂度仅需常数个变量，为 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+# 基元数判定（试除法，使用6k±1优化）
+def is_prime(n: int) -> bool:
+    if n < 2:
+        return False
+    if n % 2 == 0:
+        return n == 2
+    if n % 3 == 0:
+        return n == 3
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+# 将偶数 m 拆为两个基元数之和
+def two_primes_sum(m: int):
+    if m == 4:
+        return 2, 2
+    if is_prime(m - 2):
+        return 2, m - 2
+    p = 3
+    while p <= m - 3:
+        if is_prime(p) and is_prime(m - p):
+            return p, m - p
+        p += 2
+    return None  # 理论上不会到达
+
+def solve_case(n: int) -> str:
+    if n < 8:
+        return "-1"
+    if n % 2 == 0:
+        a, b = two_primes_sum(n - 4)
+        return f"2 2 {a} {b}"
+    else:
+        a, b = two_primes_sum(n - 5)
+        return f"2 3 {a} {b}"
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    t = data[0]
+    idx = 1
+    out = []
+    for _ in range(t):
+        n = data[idx]; idx += 1
+        out.append(solve_case(n))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    // 基元数判定
+    static boolean isPrime(long n) {
+        if (n < 2) return false;
+        if (n % 2 == 0) return n == 2;
+        if (n % 3 == 0) return n == 3;
+        long i = 5;
+        while (i * i <= n) {
+            if (n % i == 0 || n % (i + 2) == 0) return false;
+            i += 6;
+        }
+        return true;
+    }
+
+    // 将偶数 m 拆为两个基元数之和
+    static long[] twoPrimesSum(long m) {
+        if (m == 4) return new long[]{2, 2};
+        if (isPrime(m - 2)) return new long[]{2, m - 2};
+        for (long p = 3; p <= m - 3; p += 2) {
+            if (isPrime(p) && isPrime(m - p)) {
+                return new long[]{p, m - p};
+            }
+        }
+        return null; // 理论上不会到达
+    }
+
+    static String solveCase(long n) {
+        if (n < 8) return "-1";
+        if ((n & 1) == 0) {
+            long[] ab = twoPrimesSum(n - 4);
+            return "2 2 " + ab[0] + " " + ab[1];
+        } else {
+            long[] ab = twoPrimesSum(n - 5);
+            return "2 3 " + ab[0] + " " + ab[1];
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int t = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < t; i++) {
+            long n = Long.parseLong(br.readLine().trim());
+            sb.append(solveCase(n)).append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// 基元数判定
+bool is_prime(long long n) {
+    if (n < 2) return false;
+    if (n % 2 == 0) return n == 2;
+    if (n % 3 == 0) return n == 3;
+    long long i = 5;
+    while (i * i <= n) {
+        if (n % i == 0 || n % (i + 2) == 0) return false;
+        i += 6;
+    }
+    return true;
+}
+
+// 将偶数 m 拆为两个基元数之和
+pair<long long, long long> two_primes_sum(long long m) {
+    if (m == 4) return {2, 2};
+    if (is_prime(m - 2)) return {2, m - 2};
+    for (long long p = 3; p <= m - 3; p += 2) {
+        if (is_prime(p) && is_prime(m - p)) {
+            return {p, m - p};
+        }
+    }
+    return {0, 0}; // 理论上不会到达
+}
+
+string solve_case(long long n) {
+    if (n < 8) return "-1";
+    if ((n & 1) == 0) {
+        auto ab = two_primes_sum(n - 4);
+        return "2 2 " + to_string(ab.first) + " " + to_string(ab.second);
+    } else {
+        auto ab = two_primes_sum(n - 5);
+        return "2 3 " + to_string(ab.first) + " " + to_string(ab.second);
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    if (!(cin >> t)) return 0;
+    while (t--) {
+        long long n;
+        cin >> n;
+        cout << solve_case(n) << "\n";
+    }
+    return 0;
+}
+```

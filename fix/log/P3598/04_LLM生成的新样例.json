@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "3\n1 2 1 4\n1 6 1 7\n5 8 3 8",
+      "output": "YES\nNO\nYES",
+      "explanation": "第一组：$\\dfrac{1}{2}+\\dfrac{1}{4}=\\dfrac{3}{4}$，约分后分母为 `4`，只含质因子 `2`，是有限位小数，输出 `YES`。\n\n第二组：$\\dfrac{1}{6}+\\dfrac{1}{7}=\\dfrac{13}{42}$，约分后分母 $42=2\\times 3\\times 7$，去掉 `2` 和 `5` 后仍剩 `21`，输出 `NO`。\n\n第三组：$\\dfrac{5}{8}+\\dfrac{3}{8}=1$，是整数，输出 `YES`。"
+    },
+    {
+      "input": "1\n1 1 1 1",
+      "output": "YES",
+      "explanation": "$\\dfrac{1}{1}+\\dfrac{1}{1}=2$，是整数，输出 `YES`。"
+    }
+  ]
+}

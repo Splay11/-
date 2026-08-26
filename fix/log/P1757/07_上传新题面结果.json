@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1757",
+  "title": "偶数段对半",
+  "docId": 856,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

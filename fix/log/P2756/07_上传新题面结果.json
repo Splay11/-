@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2756",
+  "title": "第2题-十字翻新",
+  "docId": 2388,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "搜索",
+    "枚举"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

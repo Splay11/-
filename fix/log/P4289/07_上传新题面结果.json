@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4289",
+  "title": "第2题-受限的健身步长",
+  "docId": 3386,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划",
+    "快速倍增法"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "数学",
+  "videosol": "",
+  "trial_videosol": ""
+}

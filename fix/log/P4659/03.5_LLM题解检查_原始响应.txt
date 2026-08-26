@@ -1,0 +1,332 @@
+## 解题思路
+
+本题的核心观察是：每次操作只会在区间 $[l, r]$ 内所有相邻的机柜 $(j, j+1)$ 之间创建网线。因此，任意时刻整张图由若干连通组构成，且**每个连通组一定对应一段连续的机柜编号**（即一个闭区间 $[L, R]$）。这是因为只有相邻机柜之间才存在网线，连通性只能沿编号线性传播。
+
+由于连通组天然是连续区间，我们只需要维护当前所有的连通组区间，并在每次操作后进行以下处理：
+
+1. **区间合并**：给定新的铺设区间 $[l, r]$，由于 $l$ 到 $r$ 之间所有相邻网线均已存在，这一整段必然落入同一个连通组。该新区间可能与已有的连通组区间相交或相邻（但注意：仅当已有区间与 $[l, r]$ 有公共机柜时才能合并；比如已有 $[1,3]$，新铺 $[4,5]$，$3$ 与 $4$ 之间没有网线，不能合并）。因此我们需要将 $[l, r]$ 与所有有交集的现有区间合并，最终形成一个大的连通组区间。
+
+2. **查询**：从机柜 $x$ 出发能到达的最大编号，等于包含 $x$ 的那个连通组区间的右端点；若 $x$ 不在任何连通组内（即孤立），则答案为 $x$ 本身。
+
+为了高效支持上述操作，使用**有序映射**（平衡二叉搜索树）存储所有连通组区间，以左端点为键、右端点为值。处理一次操作 $(l, r, x)$ 的步骤为：
+
+- 找到左端点不大于 $l$ 的最后一个区间（即前驱），若其右端点 $\ge l$，说明该区间与 $[l, r]$ 相交，则将其删除，并更新当前合并区间的左右端点 $l, r$ 为较小的左端点和较大的右端点。
+- 然后不断查找左端点 $\ge l$ 且键 $\le r$ 的后续区间，这些区间均与当前合并区间相交，将它们逐一删除，并用它们的右端点更新 $r$。
+- 将最终合并得到的大区间 $[l, r]$ 插入有序映射。
+- 查询 $x$：查找前驱区间（左端点 $\le x$），若该区间存在且右端点 $\ge x$，则答案为该右端点；否则答案为 $x$。
+
+这样，过程中每个连通组区间至多被插入一次、删除一次，合并时的扫描删除总次数是线性的，配合有序映射的 $O(\log m)$ 单次查找/插入，总复杂度得以保证。
+
+## 复杂度分析
+
+设操作天数为 $m$。有序映射中维护的区间个数不会超过 $m$。
+
+- 每次操作需要常数次前驱/后驱查找和插入操作，单次复杂度 $O(\log m)$。
+- 虽然单次操作可能删除多个重叠区间，但每个区间在整个过程中只会被删除一次，总删除次数为 $O(m)$。
+
+因此总时间复杂度为 $O(m \log m)$。
+
+空间复杂度主要来自映射中存储的区间，为 $O(m)$。
+
+机柜总数 $n$ 最高可达 $10^9$，但该算法只与操作次数 $m$ 有关，不会因 $n$ 过大而超限，在 $m \le 10^6$ 时效率合适。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import random
+
+# Treap 节点
+class Node:
+    def __init__(self, key, val):
+        self.key = key          # 区间左端点
+        self.val = val          # 区间右端点
+        self.pri = random.randint(1, 1 << 30)  # 随机优先级
+        self.left = None
+        self.right = None
+
+# 按 key 分裂，返回 (< key, >= key)
+def split(root, key):
+    if root is None:
+        return None, None
+    if root.key < key:
+        a, b = split(root.right, key)
+        root.right = a
+        return root, b
+    else:
+        a, b = split(root.left, key)
+        root.left = b
+        return a, root
+
+# 合并两棵 Treap，要求左边所有 key 都小于右边
+def merge(a, b):
+    if a is None:
+        return b
+    if b is None:
+        return a
+    if a.pri < b.pri:
+        a.right = merge(a.right, b)
+        return a
+    else:
+        b.left = merge(a, b.left)
+        return b
+
+# 插入一个新区间节点
+def insert(root, node):
+    if root is None:
+        return node
+    if node.pri < root.pri:
+        a, b = split(root, node.key)
+        node.left = a
+        node.right = b
+        return node
+    if node.key < root.key:
+        root.left = insert(root.left, node)
+    else:
+        root.right = insert(root.right, node)
+    return root
+
+# 查找 key <= x 的前驱节点
+def find_prev(root, x):
+    ans = None
+    cur = root
+    while cur is not None:
+        if cur.key <= x:
+            ans = cur
+            cur = cur.right
+        else:
+            cur = cur.left
+    return ans
+
+# 删除并返回最小节点
+def pop_min(root):
+    if root.left is None:
+        return root.right, root
+    new_left, node = pop_min(root.left)
+    root.left = new_left
+    return root, node
+
+# 删除并返回最大节点
+def pop_max(root):
+    if root.right is None:
+        return root.left, root
+    new_right, node = pop_max(root.right)
+    root.right = new_right
+    return root, node
+
+# 查找最小节点
+def get_min(root):
+    cur = root
+    while cur.left is not None:
+        cur = cur.left
+    return cur
+
+# 处理所有操作
+def solve_operations(ops):
+    root = None
+    ans = []
+
+    for l, r, x in ops:
+        # 先按 l 分裂，左边都是左端点 < l 的区间
+        a, b = split(root, l)
+
+        # 检查左边最后一个区间是否与 [l, r] 相交
+        prev = find_prev(a, 10**30)
+        if prev is not None and prev.val >= l:
+            a, node = pop_max(a)
+            l = min(l, node.key)
+            r = max(r, node.val)
+
+        # 把右边所有与 [l, r] 相交的区间不断合并进来
+        while b is not None:
+            first = get_min(b)
+            if first.key > r:
+                break
+            b, node = pop_min(b)
+            r = max(r, node.val)
+
+        # 插入合并后的新区间
+        root = merge(a, merge(Node(l, r), b))
+
+        # 查询 x 所在连通组的最右端点
+        node = find_prev(root, x)
+        if node is not None and node.val >= x:
+            ans.append(str(node.val))
+        else:
+            ans.append(str(x))
+
+    return ans
+
+def main():
+    input = sys.stdin.readline
+    n, m = map(int, input().split())
+    ops = []
+    for _ in range(m):
+        l, r, x = map(int, input().split())
+        ops.append((l, r, x))
+
+    res = solve_operations(ops)
+    sys.stdout.write("\n".join(res))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+
+public class Main {
+
+    // 处理所有操作：区间合并与查询
+    public static StringBuilder solveOperations(int[][] ops) {
+        // key 为区间左端点，value 为区间右端点
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+        StringBuilder sb = new StringBuilder();
+
+        for (int[] op : ops) {
+            int l = op[0];
+            int r = op[1];
+            int x = op[2];
+
+            // 先看左边最后一个区间是否与 [l, r] 相交
+            Map.Entry<Integer, Integer> entry = map.floorEntry(l);
+            if (entry != null && entry.getValue() >= l) {
+                l = Math.min(l, entry.getKey());
+                r = Math.max(r, entry.getValue());
+                map.remove(entry.getKey());
+            }
+
+            // 不断合并所有与 [l, r] 相交的后续区间
+            entry = map.ceilingEntry(l);
+            while (entry != null && entry.getKey() <= r) {
+                r = Math.max(r, entry.getValue());
+                map.remove(entry.getKey());
+                entry = map.ceilingEntry(l);
+            }
+
+            // 插入合并后的新区间
+            map.put(l, r);
+
+            // 查询 x 所在连通组的最右端点
+            entry = map.floorEntry(x);
+            if (entry != null && entry.getValue() >= x) {
+                sb.append(entry.getValue()).append('\n');
+            } else {
+                sb.append(x).append('\n');
+            }
+        }
+
+        return sb;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        int n = Integer.parseInt(st.nextToken());
+        int m = Integer.parseInt(st.nextToken());
+
+        int[][] ops = new int[m][3];
+        for (int i = 0; i < m; i++) {
+            st = new StringTokenizer(br.readLine());
+            ops[i][0] = Integer.parseInt(st.nextToken());
+            ops[i][1] = Integer.parseInt(st.nextToken());
+            ops[i][2] = Integer.parseInt(st.nextToken());
+        }
+
+        StringBuilder ans = solveOperations(ops);
+        System.out.print(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <map>
+#include <vector>
+#include <array>
+
+using namespace std;
+
+// 处理所有操作：区间合并与查询
+vector<int> solveOperations(const vector<array<int, 3>>& ops) {
+    // key 为区间左端点，value 为区间右端点
+    map<int, int> mp;
+    vector<int> ans;
+    ans.reserve(ops.size());
+
+    for (auto& op : ops) {
+        int l = op[0];
+        int r = op[1];
+        int x = op[2];
+
+        // 先看左边最后一个区间是否与 [l, r] 相交
+        auto it = mp.upper_bound(l);
+        if (it != mp.begin()) {
+            auto pre = prev(it);
+            if (pre->second >= l) {
+                l = min(l, pre->first);
+                r = max(r, pre->second);
+                mp.erase(pre);
+            }
+        }
+
+        // 不断合并所有与 [l, r] 相交的后续区间
+        it = mp.lower_bound(l);
+        while (it != mp.end() && it->first <= r) {
+            r = max(r, it->second);
+            auto toErase = it++;
+            mp.erase(toErase);
+        }
+
+        // 插入合并后的新区间
+        mp[l] = r;
+
+        // 查询 x 所在连通组的最右端点
+        it = mp.upper_bound(x);
+        if (it != mp.begin()) {
+            auto pre = prev(it);
+            if (pre->second >= x) {
+                ans.push_back(pre->second);
+            } else {
+                ans.push_back(x);
+            }
+        } else {
+            ans.push_back(x);
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+
+    vector<array<int, 3>> ops(m);
+    for (int i = 0; i < m; i++) {
+        cin >> ops[i][0] >> ops[i][1] >> ops[i][2];
+    }
+
+    vector<int> ans = solveOperations(ops);
+    for (int v : ans) {
+        cout << v << '\n';
+    }
+
+    return 0;
+}
+```

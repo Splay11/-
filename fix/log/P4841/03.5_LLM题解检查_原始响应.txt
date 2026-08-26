@@ -1,0 +1,269 @@
+## 解题思路
+
+本题的核心在于理解“取模操作”的特点与顺序选择的自由度。  
+设 $n$ 个能量调节器的参数为 $a_1, a_2, \dots, a_n$，当前能量值为 $y$，使用参数为 $a$ 的调节器后，能量变为 $y \bmod a$。
+
+**关键性质：**  
+- 若 $y < a$，则 $y \bmod a = y$，能量保持不变；  
+- 若 $y \ge a$，则 $0 \le y \bmod a < a$，能量会严格变小。
+
+设所有调节器参数的最小值为 $mn$。  
+- 如果初始能量 $x < mn$，那么对于任意调节器都有 $x < a$，每次操作都不会改变能量值，因此最终能量必定为 $x$，无需任何计算。
+- 如果 $x \ge mn$，我们希望最终能量尽量大。注意到：无论怎样排列，只要某一时刻能量值 $\ge mn$，就一定存在至少一个参数 $a \le$ 当前能量（因为 $mn$ 本身就在参数中，且 $mn \le$ 当前能量），操作后能量会严格小于 $a \le$ 当前能量，最终必定会落到小于 $mn$ 的状态。因此最终答案一定满足 $ans < mn$。
+
+于是问题转化为：在所有可能的操作顺序下，初始能量 $x$ 经过若干次有效取模（只有 $a \le y$ 才会改变 $y$）后，可以得到哪些 $< mn$ 的值，其中的最大值即为答案。
+
+由于参数最大不超过 $2000$，所有可能的能量值状态只需要考虑 $0$ 到 $2000$（因为一旦能量小于等于某个参数，后续取模结果必在该范围内）。我们可以用 BFS（或 DP）找出所有可达状态：
+
+1. 对每个调节器参数 $a_i$，若 $a_i \le x$，则将 $x \bmod a_i$ 加入初始可达状态集。
+2. 从每个已可达状态 $v$ 出发，枚举每一个参数 $a_i$：若 $a_i \le v$，则转移到新状态 $v \bmod a_i$，若该状态之前未访问则加入队列。
+3. 遍历所有 $0 \le i < mn$ 的状态，若状态 $i$ 可达，则更新答案 $ans = i$。
+
+为了加速枚举，可以预先对调节器参数去重（相同参数作用完全相同），实际转移时只使用不同的参数值。所有参数值均 $\le 2000$，状态总数不超过 $2001$，每条边转移 $O(k)$，其中 $k$ 为不同参数的个数，总复杂度完全可接受。
+
+## 复杂度分析
+
+设 $M = \max(a_i) \le 2000$，$K$ 为不同参数值的个数（$K \le n$）。  
+- 状态数不超过 $M+1$，每个状态至多入队一次；每次扩展枚举 $K$ 个不同参数，转移时间为 $O(K)$。  
+- 对于每组数据，BFS 时间复杂度为 $O(M \cdot K)$。  
+- 所有测试数据的 $n$ 之和不超过 $5000$，因此 $K$ 的总和也不超过 $5000$，整体运行时间完全可行。
+
+空间复杂度：需要记录 $0 \sim M$ 的访问数组及去重后的参数数组，为 $O(M)$。
+
+综上：  
+- 时间复杂度 $O(T + \sum M \cdot K)$，在最坏情况下可视为 $O(5000 \times 2000)$，可以通过。  
+- 空间复杂度 $O(M)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from collections import deque
+
+def solve_one(n, x, arr):
+    mn = min(arr)
+    # 初始能量已经小于最小参数，所有操作均无效
+    if x < mn:
+        return x
+    
+    # 去重，得到不同的参数值
+    nums = list(set(arr))
+    max_a = max(arr)
+    
+    vis = [False] * (max_a + 1)
+    q = deque()
+    
+    # 第一次有效取模，产生初始状态
+    for a in nums:
+        if a <= x:
+            r = x % a
+            if not vis[r]:
+                vis[r] = True
+                q.append(r)
+    
+    # BFS 扩展所有可达状态
+    while q:
+        v = q.popleft()
+        for a in nums:
+            if a <= v:          # 只有 a <= v 时取模才会改变值
+                nv = v % a
+                if not vis[nv]:
+                    vis[nv] = True
+                    q.append(nv)
+    
+    # 在所有小于 mn 的可达状态中取最大值
+    ans = 0
+    for i in range(mn):
+        if vis[i]:
+            ans = i
+    return ans
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    t = data[0]
+    idx = 1
+    out = []
+    for _ in range(t):
+        n = data[idx]
+        x = data[idx + 1]
+        idx += 2
+        arr = data[idx:idx + n]
+        idx += n
+        out.append(str(solve_one(n, x, arr)))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    static long solveOne(int n, long x, int[] arr) {
+        int mn = arr[0];
+        int maxA = arr[0];
+        for (int a : arr) {
+            mn = Math.min(mn, a);
+            maxA = Math.max(maxA, a);
+        }
+
+        // 初始能量小于最小参数，直接返回 x
+        if (x < mn) {
+            return x;
+        }
+
+        // 参数去重
+        boolean[] exist = new boolean[maxA + 1];
+        List<Integer> nums = new ArrayList<>();
+        for (int a : arr) {
+            if (!exist[a]) {
+                exist[a] = true;
+                nums.add(a);
+            }
+        }
+
+        boolean[] vis = new boolean[maxA + 1];
+        Queue<Integer> q = new LinkedList<>();
+
+        // 初始可达状态
+        for (int a : nums) {
+            if (a <= x) {
+                int r = (int)(x % a);
+                if (!vis[r]) {
+                    vis[r] = true;
+                    q.offer(r);
+                }
+            }
+        }
+
+        // BFS
+        while (!q.isEmpty()) {
+            int v = q.poll();
+            for (int a : nums) {
+                if (a <= v) {
+                    int nv = v % a;
+                    if (!vis[nv]) {
+                        vis[nv] = true;
+                        q.offer(nv);
+                    }
+                }
+            }
+        }
+
+        // 小于 mn 的最大可达值
+        int ans = 0;
+        for (int i = 0; i < mn; i++) {
+            if (vis[i]) {
+                ans = i;
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            int n = sc.nextInt();
+            long x = sc.nextLong();
+            int[] arr = new int[n];
+            for (int i = 0; i < n; i++) {
+                arr[i] = sc.nextInt();
+            }
+            sb.append(solveOne(n, x, arr)).append('\n');
+        }
+        System.out.print(sb);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+long long solveOne(int n, long long x, vector<int>& arr) {
+    int mn = *min_element(arr.begin(), arr.end());
+    int maxA = *max_element(arr.begin(), arr.end());
+
+    // 初始能量小于最小参数，直接返回 x
+    if (x < mn) {
+        return x;
+    }
+
+    // 去重
+    vector<int> nums;
+    vector<bool> exist(maxA + 1, false);
+    for (int a : arr) {
+        if (!exist[a]) {
+            exist[a] = true;
+            nums.push_back(a);
+        }
+    }
+
+    vector<bool> vis(maxA + 1, false);
+    queue<int> q;
+
+    // 初始状态：x 对各参数取模的结果
+    for (int a : nums) {
+        if (a <= x) {
+            int r = x % a;
+            if (!vis[r]) {
+                vis[r] = true;
+                q.push(r);
+            }
+        }
+    }
+
+    // BFS
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
+        for (int a : nums) {
+            if (a <= v) {
+                int nv = v % a;
+                if (!vis[nv]) {
+                    vis[nv] = true;
+                    q.push(nv);
+                }
+            }
+        }
+    }
+
+    // 小于 mn 的最大可达值
+    int ans = 0;
+    for (int i = 0; i < mn; i++) {
+        if (vis[i]) {
+            ans = i;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        long long x;
+        cin >> n >> x;
+        vector<int> arr(n);
+        for (int i = 0; i < n; i++) {
+            cin >> arr[i];
+        }
+        cout << solveOne(n, x, arr) << '\n';
+    }
+    return 0;
+}
+```

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5180",
+  "title": "第1题-车位指示复位",
+  "docId": 4485,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

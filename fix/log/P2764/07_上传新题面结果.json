@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2764",
+  "title": "第3题-优势区间",
+  "docId": 2396,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "数据结构",
+    "树状数组"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树状数组",
+  "videosol": "",
+  "trial_videosol": ""
+}

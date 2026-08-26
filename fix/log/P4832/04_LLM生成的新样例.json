@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "5\n3\n4\n7\n8\n11",
+      "output": "Yes\nNo\nYes\nNo\nYes",
+      "explanation": "长度为奇数时中间位置可调，任意 $m \\ge n$ 都能构成对称正整数序列，输出 `Yes`；长度为偶数时元素和只能是偶数，无法覆盖所有 $m$，输出 `No`。\n\n因此 `3,7,11` 输出 `Yes`，`4,8` 输出 `No`。"
+    },
+    {
+      "input": "2\n9\n100",
+      "output": "Yes\nNo",
+      "explanation": "`9` 为奇数，输出 `Yes`；`100` 为偶数，输出 `No`。"
+    }
+  ]
+}

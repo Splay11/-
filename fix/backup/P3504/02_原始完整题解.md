@@ -1,0 +1,236 @@
+## 解题思路
+
+### 观察与等价变形
+
+`“ab” 是回文` ⇔ `a` 与 `b` 互为逆序（长度相同）。
+由此：
+
+* `s1s2` 回文 ⇒ `s1 = reverse(s2)`
+* `s2s3` 回文 ⇒ `s2 = reverse(s3)`
+  连起来得到：`s1 = s3`，`s2 = reverse(s1)`。
+
+所以一个长度为 `3k` 的超级回文串的**充要结构**为：
+`s = A + reverse(A) + A`，其中 `A` 是长度为 `k` 的十进制串（`A` 首字符不能为 0）。
+例如 `A=123` ⇒ `s=123321123`。
+
+于是问题转化为：统计所有 `k≥1`，使得 `A` 为 `k` 位（首位非 0），且
+`A·10^(2k) + reverse(A)·10^k + A` 落在区间 `[l,r]`。
+
+### 计数函数 f(x)
+
+设 `f(x)` 为 `≤ x` 的超级回文数个数，答案为 `f(r) - f(l-1)`。
+
+对每个 `k=1..6`（因为 `3k ≤ 18`）：
+
+1. 若 `3k < len(x)`，该长度的数全部纳入，数量为 `9 * 10^(k-1)`（`A` 的个数）。
+2. 若 `3k == len(x)`，只需统计其中 `≤ x` 的个数。
+   利用单调性：`A` 递增时构造出的数也递增。
+   因而在区间 `[10^(k-1), 10^k - 1]` 上**二分**出最大的 `A` 使得
+   `make(A, k) ≤ x`，则贡献为 `max(0, A* - 10^(k-1) + 1)`。
+
+`make(A,k)` 直接用数值构造：
+`A*10^(2k) + rev(A)*10^k + A`（`rev(A)` 为 `A` 的十进制反转；末尾 0 翻转成前导 0 放在中间，不违背规则）。
+
+### 正确性说明（简要）
+
+* 必要性：由回文性质推出 `s` 必为 `A + reverse(A) + A` 结构。
+* 充分性：该结构显然满足 `s1s2` 与 `s2s3` 都是回文。
+* 单调性：构造出的 `s` 以 `A` 为前缀，数值随 `A` 的字典序单调增加，因此可二分。
+
+### 复杂度
+
+* `k` 最多 6，二分每次 \~20 步，常数时间。
+* 每组查询 **O(1)**，总空间 **O(1)**。可轻松应对 `T ≤ 1e4`。
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+# 预计算 10 的幂
+POW10 = [1]
+for _ in range(19):
+    POW10.append(POW10[-1] * 10)
+
+def rev_int(x, k):
+    """把 k 位整数 x 翻转（十进制），返回整数"""
+    r = 0
+    for _ in range(k):
+        r = r * 10 + x % 10
+        x //= 10
+    return r
+
+def make_num(a, k):
+    """由 A 与 k 构造 A + rev(A) + A 的数值"""
+    return a * POW10[2 * k] + rev_int(a, k) * POW10[k] + a
+
+def count_leq(x):
+    """<= x 的超级回文个数"""
+    if x < 0:
+        return 0
+    s = str(x)
+    n = len(s)
+    ans = 0
+    for k in range(1, 7):  # 3k <= 18
+        if 3 * k < n:
+            ans += 9 * POW10[k - 1]
+        elif 3 * k == n:
+            lo = POW10[k - 1]
+            hi = POW10[k] - 1
+            # 二分最大 A
+            L, R, best = lo, hi, lo - 1
+            while L <= R:
+                mid = (L + R) // 2
+                val = make_num(mid, k)
+                if val <= x:
+                    best = mid
+                    L = mid + 1
+                else:
+                    R = mid - 1
+            if best >= lo:
+                ans += best - lo + 1
+    return ans
+
+def main():
+    data = sys.stdin.read().strip().split()
+    it = iter(data)
+    T = int(next(it))
+    out = []
+    for _ in range(T):
+        l = int(next(it)); r = int(next(it))
+        out.append(str(count_leq(r) - count_leq(l - 1)))
+    print("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static long[] pow10 = new long[20];
+    static {
+        pow10[0] = 1L;
+        for (int i = 1; i < 20; i++) pow10[i] = pow10[i-1] * 10L;
+    }
+
+    // 把 k 位整数 a 反转（十进制），返回整数
+    static long revInt(long a, int k) {
+        long r = 0;
+        for (int i = 0; i < k; i++) {
+            r = r * 10 + a % 10;
+            a /= 10;
+        }
+        return r;
+    }
+
+    // 构造 A + rev(A) + A
+    static long makeNum(long a, int k) {
+        return a * pow10[2*k] + revInt(a, k) * pow10[k] + a;
+    }
+
+    // 统计 <= x 的数量
+    static long countLeq(long x) {
+        if (x < 0) return 0;
+        int n = Long.toString(x).length();
+        long ans = 0;
+        for (int k = 1; k <= 6; k++) {
+            if (3*k < n) {
+                ans += 9L * pow10[k-1];
+            } else if (3*k == n) {
+                long lo = pow10[k-1], hi = pow10[k] - 1;
+                long L = lo, R = hi, best = lo - 1;
+                while (L <= R) {
+                    long mid = (L + R) >>> 1;
+                    long v = makeNum(mid, k);
+                    if (v <= x) { best = mid; L = mid + 1; }
+                    else R = mid - 1;
+                }
+                if (best >= lo) ans += best - lo + 1;
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        for (int t = 0; t < T; t++) {
+            String[] p = br.readLine().trim().split("\\s+");
+            long l = Long.parseLong(p[0]);
+            long r = Long.parseLong(p[1]);
+            sb.append(countLeq(r) - countLeq(l - 1)).append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using int64 = long long;
+
+long long pow10[20];
+
+long long revInt(long long a, int k){
+    long long r = 0;
+    for(int i = 0; i < k; ++i){
+        r = r * 10 + a % 10;
+        a /= 10;
+    }
+    return r;
+}
+
+long long makeNum(long long a, int k){
+    return a * pow10[2*k] + revInt(a, k) * pow10[k] + a;
+}
+
+long long countLeq(long long x){
+    if(x < 0) return 0;
+    int n = to_string(x).size();
+    long long ans = 0;
+    for(int k = 1; k <= 6; ++k){
+        if(3*k < n){
+            ans += 9LL * pow10[k-1];
+        }else if(3*k == n){
+            long long lo = pow10[k-1], hi = pow10[k]-1;
+            long long L = lo, R = hi, best = lo - 1;
+            while(L <= R){
+                long long mid = (L + R) >> 1;
+                long long v = makeNum(mid, k);
+                if(v <= x){ best = mid; L = mid + 1; }
+                else R = mid - 1;
+            }
+            if(best >= lo) ans += best - lo + 1;
+        }
+    }
+    return ans;
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    pow10[0] = 1;
+    for(int i = 1; i < 20; ++i) pow10[i] = pow10[i-1] * 10LL;
+
+    int T; 
+    if(!(cin >> T)) return 0;
+    while(T--){
+        long long l, r; 
+        cin >> l >> r;
+        cout << (countLeq(r) - countLeq(l - 1)) << "\n";
+    }
+    return 0;
+}
+```

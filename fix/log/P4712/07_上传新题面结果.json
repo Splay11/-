@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4712",
+  "title": "跳跃重排",
+  "docId": 3960,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

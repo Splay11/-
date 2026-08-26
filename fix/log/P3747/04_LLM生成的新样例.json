@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1\nz",
+      "output": "No",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "2\naa",
+      "output": "Yes",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "4\nabba",
+      "output": "Yes",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

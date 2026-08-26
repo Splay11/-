@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4737",
+  "title": "第1题-组合词统计",
+  "docId": 3996,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "哈希表"
+  ],
+  "alg_tag": "哈希表",
+  "ai_alg_tags": "哈希表",
+  "videosol": "",
+  "trial_videosol": ""
+}

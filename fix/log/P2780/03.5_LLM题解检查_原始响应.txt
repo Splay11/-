@@ -1,0 +1,111 @@
+## 解题思路
+
+1. 观察题目中的一次操作：选定 $i,j$，令 $a_i$ 变为 $a_i \times a_j$，$a_j$ 变为 $\operatorname{lcm}(a_i, a_j)$。  
+2. 我们只关心每颗水晶魔力值能否被 $2$ 整除，因此只需考虑奇偶性。  
+   - 若 $a_i$ 为奇数，$a_j$ 为偶数，则 $a_i \times a_j$ 含有因子 $2$，变为偶数；$\operatorname{lcm}(a_i, a_j)$ 也含有偶数因子，仍为偶数。  
+   - 若两者均为奇数，乘积和最小公倍数仍为奇数。  
+3. 因此：  
+   - 只要初始数组中存在至少一颗魔力值为偶数的水晶，就可以用该偶数水晶与每一个奇数水晶各进行一次操作，将奇数全部变为偶数。最少操作次数恰好等于初始奇数水晶的数量。  
+   - 如果初始所有水晶魔力值均为奇数，则无论如何操作都无法产生偶数，无法达成目标。  
+4. 综上，算法流程为：  
+   - 遍历所有 $a_i$，统计奇数个数 $odd$，并记录是否存在偶数 $hasEven$。  
+   - 若 $hasEven$ 为真，输出 $odd$；否则输出 $-1$。
+
+## 复杂度分析
+
+- 时间复杂度：只需一次遍历数组，每个元素进行常数次操作，故为 $O(n)$。  
+- 空间复杂度：仅使用几个辅助变量，不随数据规模增长，故为 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    n = int(data[0])
+    a = list(map(int, data[1:1+n]))
+    
+    odd_cnt = 0
+    has_even = False
+    for x in a:
+        if x % 2 == 0:
+            has_even = True
+        else:
+            odd_cnt += 1
+    
+    if has_even:
+        print(odd_cnt)
+    else:
+        print(-1)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int oddCnt = 0;
+        boolean hasEven = false;
+        for (int i = 0; i < n; i++) {
+            int a = sc.nextInt();
+            if (a % 2 == 0) {
+                hasEven = true;
+            } else {
+                oddCnt++;
+            }
+        }
+        if (hasEven) {
+            System.out.println(oddCnt);
+        } else {
+            System.out.println(-1);
+        }
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n;
+    cin >> n;
+    int oddCnt = 0;
+    bool hasEven = false;
+    
+    for (int i = 0; i < n; ++i) {
+        int a;
+        cin >> a;
+        if (a % 2 == 0) {
+            hasEven = true;
+        } else {
+            ++oddCnt;
+        }
+    }
+    
+    if (hasEven) {
+        cout << oddCnt << "\n";
+    } else {
+        cout << -1 << "\n";
+    }
+    return 0;
+}
+```

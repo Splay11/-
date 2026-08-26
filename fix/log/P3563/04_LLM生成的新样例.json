@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "5\n160\n240\n0\n260\n399",
+      "output": "D\nD C\nother\nG C\nother",
+      "explanation": "- $v=160$：只落在 D 档 $[160,250]$，输出 `D`。\n- $v=240$：同时落在 D 档与 C 档，按顺序输出 `D C`。\n- $v=0$：三档都不命中，输出 `other`。\n- $v=260$：命中 G 档与 C 档，输出 `G C`。\n- $v=399$：超出所有区间，输出 `other`。"
+    },
+    {
+      "input": "2\n180\n350",
+      "output": "D\nG",
+      "explanation": "$v=180$ 只属于 D 档；$v=350$ 是 G 档右端点，只输出 `G`。"
+    }
+  ]
+}

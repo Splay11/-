@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2676",
+  "title": "第1题-完美阶梯",
+  "docId": 2193,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

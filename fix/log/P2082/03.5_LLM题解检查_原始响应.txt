@@ -1,0 +1,135 @@
+## 解题思路
+
+题目要求在原始字符串 $s$ 中，通过修改字母，使得某处出现一个连续的子串恰好等于固定的安全验证码 `"AcMer"`，并且总修改代价最小。修改代价分为两类：
+
+- 如果改变字母的大小写状态（例如 `a` 改成 `A` 或 `A` 改成 `a`），每次花费 $6$；
+- 如果保持大小写不变、只改变为另一个字母（同为大写或同为小写），每次花费 $5$。
+
+由于目标串 `"AcMer"` 长度只有 $5$，而原串 $s$ 长度 $n$ 满足 $5 \le n \le 2\times 10^5$，因此可以采用线性扫描的方法：
+
+1. 枚举所有可能的起始位置 $i$，使得子串 $s[i:i+5]$ 的长度恰好为 $5$。
+2. 对于每个子串，逐字符与目标串 `"AcMer"` 比较，计算将该子串变成目标串所需的代价：
+   - 若当前字符与目标字符完全相同，代价为 $0$；
+   - 若不同但大小写属性相同（同为大写或同为小写），代价为 $5$；
+   - 若大小写属性不同，代价为 $6$。
+3. 所有子串的代价取最小值即为答案。
+
+该方法只需遍历字符串一次，每次检查常数个字符，因此效率很高。
+
+## 复杂度分析
+
+- 时间复杂度：需要枚举 $n-4$ 个长度为 $5$ 的子串，每个子串比较 $5$ 位，计算量为 $O(5 \times (n-4)) = O(n)$。  
+- 空间复杂度：仅使用常数个变量，不需要额外存储，空间复杂度为 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+def solve(s: str) -> int:
+    target = "AcMer"
+    ans = float('inf')
+    # 枚举所有长度为5的子串
+    for i in range(len(s) - 4):
+        cost = 0
+        for j in range(5):
+            cur = s[i + j]
+            tar = target[j]
+            if cur == tar:
+                continue
+            # 判断当前字符与目标字符大小写是否相同
+            if cur.islower() == tar.islower():
+                cost += 5   # 同为大写或同为小写，修改代价为5
+            else:
+                cost += 6   # 大小写状态不同，修改代价为6
+        ans = min(ans, cost)
+    return ans
+
+if __name__ == "__main__":
+    s = input().strip()
+    print(solve(s))
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static int solve(String s) {
+        String target = "AcMer";
+        int ans = Integer.MAX_VALUE;
+
+        // 枚举所有长度为5的子串
+        for (int i = 0; i <= s.length() - 5; i++) {
+            int cost = 0;
+            for (int j = 0; j < 5; j++) {
+                char cur = s.charAt(i + j);
+                char tar = target.charAt(j);
+                if (cur == tar) continue;
+
+                // 判断大小写属性是否相同
+                boolean sameCase = Character.isLowerCase(cur) == Character.isLowerCase(tar);
+                if (sameCase) {
+                    cost += 5;   // 大小写不变，只换字母，代价5
+                } else {
+                    cost += 6;   // 改变大小写，代价6
+                }
+            }
+            ans = Math.min(ans, cost);
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String s = sc.nextLine().trim();
+        System.out.println(solve(s));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+#include <climits>
+using namespace std;
+
+// 判断字符是否为小写字母
+bool isLower(char c) {
+    return c >= 'a' && c <= 'z';
+}
+
+int solve(const string& s) {
+    string target = "AcMer";
+    int ans = INT_MAX;
+
+    // 枚举所有长度为5的子串
+    for (int i = 0; i <= (int)s.size() - 5; ++i) {
+        int cost = 0;
+        for (int j = 0; j < 5; ++j) {
+            char cur = s[i + j];
+            char tar = target[j];
+            if (cur == tar) continue;
+
+            // 判断大小写属性是否相同
+            if (isLower(cur) == isLower(tar)) {
+                cost += 5;   // 大小写相同，仅换字母
+            } else {
+                cost += 6;   // 大小写不同
+            }
+        }
+        ans = min(ans, cost);
+    }
+    return ans;
+}
+
+int main() {
+    string s;
+    cin >> s;
+    cout << solve(s) << endl;
+    return 0;
+}
+```

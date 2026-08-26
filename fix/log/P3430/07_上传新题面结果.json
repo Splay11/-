@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3430",
+  "title": "第2题-残核密钥",
+  "docId": 2772,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "其他",
+    "数学"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "BFS",
+  "videosol": "https://www.bilibili.com/video/BV19MebzuExD/?vd_source=0f2b5f5dae4beb99b68547471f7432e0",
+  "trial_videosol": ""
+}

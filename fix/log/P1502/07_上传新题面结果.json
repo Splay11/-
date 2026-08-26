@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1502",
+  "title": "第2题-环形传送带上的包裹",
+  "docId": 526,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

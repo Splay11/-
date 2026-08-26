@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3446",
+  "title": "第3题-消除干扰信号",
+  "docId": 2788,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "https://www.bilibili.com/video/BV1eKeBzaEu1/?spm_id_from=333.1387.list.card_archive.click&vd_source=0f2b5f5dae4beb99b68547471f7432e0",
+  "trial_videosol": ""
+}

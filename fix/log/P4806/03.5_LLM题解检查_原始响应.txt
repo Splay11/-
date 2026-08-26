@@ -1,0 +1,162 @@
+## 解题思路
+
+我们需要在一维整数直线上，从当前坐标 $s$ 出发，走到一个不处于任何危险区间内的位置 $x$，并使得移动距离 $|x-s|$ 最小。危险区间以闭区间 $[l_i, r_i]$ 的形式给出，且不同区间可能重叠或相邻。  
+
+可以把所有危险区间合并成若干个不相交且不相邻的大区间，然后判断 $s$ 是否落在这些合并后的区间内部：
+
+1. 将输入的 $n$ 个区间按左端点从小到大排序。  
+2. 依次扫描排序后的区间，合并那些相交或相邻的区间。具体地，若当前区间 $[L, R]$ 满足 $L \le cur\_r + 1$（因为整数坐标上，$[cur\_l, cur\_r]$ 和 $[L, R]$ 若满足 $L \le cur\_r+1$ 则它们之间没有空隙），则扩展当前合并区间的右端点为 $\max(cur\_r, R)$；否则得到了一个完整的合并区间 $[cur\_l, cur\_r]$。  
+3. 在每形成一个完整的合并区间时，检查 $s$ 是否落在该区间内（即 $cur\_l \le s \le cur\_r$）。  
+   - 若 $s$ 不在任何合并区间内，说明 $s$ 自身就是一个安全点，距离为 $0$。  
+   - 若 $s$ 落在某个合并区间 $[L, R]$ 内，则最近的安全点只可能是 $L-1$ 或 $R+1$，对应的移动距离分别是 $s - (L-1) = s - L + 1$ 和 $(R+1) - s = R - s + 1$，答案为这两者中的较小值。  
+
+由于危险区间的端点绝对值不超过 $10^6$，并且所有测试数据中 $n$ 的总和不超过 $5\times 10^5$，上述合并与判断过程可以高效完成。
+
+## 复杂度分析
+
+- 时间复杂度：每组测试需要对 $n$ 个区间排序，复杂度 $O(n \log n)$，随后扫描合并 $O(n)$；总时间复杂度为 $O(\sum n \log n)$，在题目限制下可行。  
+- 空间复杂度：存储所有区间需要 $O(n)$ 额外空间。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve_case(n, s, zones):
+    # 按左端点排序
+    zones.sort()
+    cur_l, cur_r = zones[0]
+    for i in range(1, n):
+        L, R = zones[i]
+        # 若当前区间与合并区间相交或相邻，则扩展合并区间
+        if L <= cur_r + 1:
+            cur_r = max(cur_r, R)
+        else:
+            # 检查 s 是否在当前合并的区间内
+            if cur_l <= s <= cur_r:
+                return min(s - cur_l + 1, cur_r - s + 1)
+            cur_l, cur_r = L, R
+    # 检查最后一个合并区间
+    if cur_l <= s <= cur_r:
+        return min(s - cur_l + 1, cur_r - s + 1)
+    return 0
+
+def main():
+    input = sys.stdin.readline
+    T = int(input().strip())
+    ans = []
+    for _ in range(T):
+        n, s = map(int, input().split())
+        zones = [tuple(map(int, input().split())) for _ in range(n)]
+        ans.append(str(solve_case(n, s, zones)))
+    print("\n".join(ans))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int solveCase(int n, int s, int[][] zones) {
+        // 按左端点排序
+        Arrays.sort(zones, (a, b) -> a[0] != b[0] ? a[0] - b[0] : a[1] - b[1]);
+        int curL = zones[0][0], curR = zones[0][1];
+        for (int i = 1; i < n; i++) {
+            int L = zones[i][0], R = zones[i][1];
+            // 若当前区间与合并区间相交或相邻，则扩展合并区间
+            if (L <= curR + 1) {
+                curR = Math.max(curR, R);
+            } else {
+                // 检查 s 是否在当前合并的区间内
+                if (curL <= s && s <= curR) {
+                    return Math.min(s - curL + 1, curR - s + 1);
+                }
+                curL = L;
+                curR = R;
+            }
+        }
+        // 检查最后一个合并区间
+        if (curL <= s && s <= curR) {
+            return Math.min(s - curL + 1, curR - s + 1);
+        }
+        return 0;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            String[] first = br.readLine().split(" ");
+            int n = Integer.parseInt(first[0]);
+            int s = Integer.parseInt(first[1]);
+            int[][] zones = new int[n][2];
+            for (int i = 0; i < n; i++) {
+                String[] parts = br.readLine().split(" ");
+                zones[i][0] = Integer.parseInt(parts[0]);
+                zones[i][1] = Integer.parseInt(parts[1]);
+            }
+            sb.append(solveCase(n, s, zones)).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int solve_case(int n, int s, vector<pair<int, int>>& zones) {
+    // 按左端点排序
+    sort(zones.begin(), zones.end());
+    int curL = zones[0].first, curR = zones[0].second;
+    for (int i = 1; i < n; i++) {
+        int L = zones[i].first, R = zones[i].second;
+        // 若当前区间与合并区间相交或相邻，则扩展合并区间
+        if (L <= curR + 1) {
+            curR = max(curR, R);
+        } else {
+            // 检查 s 是否在当前合并的区间内
+            if (curL <= s && s <= curR) {
+                return min(s - curL + 1, curR - s + 1);
+            }
+            curL = L;
+            curR = R;
+        }
+    }
+    // 检查最后一个合并区间
+    if (curL <= s && s <= curR) {
+        return min(s - curL + 1, curR - s + 1);
+    }
+    return 0;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while (T--) {
+        int n, s;
+        cin >> n >> s;
+        vector<pair<int, int>> zones(n);
+        for (int i = 0; i < n; i++) {
+            cin >> zones[i].first >> zones[i].second;
+        }
+        cout << solve_case(n, s, zones) << '\n';
+    }
+    return 0;
+}
+```

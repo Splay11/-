@@ -1,0 +1,295 @@
+## 解题思路
+
+1. **核心转化**  
+   一个连通点集的评分乘积能被 $10$ 整除，等价于乘积中同时含有至少一个因子 $2$ 和至少一个因子 $5$。  
+   因此我们可以只关注每个节点评分 $a_i$ 中是否含有因子 $2$ 和因子 $5$，并将该信息压缩成一个 $[0,3]$ 的状态：
+   - `0`：既不含因子 $2$ 也不含因子 $5$；
+   - `1`：只含因子 $5$；
+   - `2`：只含因子 $2$；
+   - `3`：同时含有因子 $2$ 和因子 $5$。
+
+2. **动态规划定义**  
+   设 $dp[u][s]$ 表示在以 $u$ 为根的子树中，**所有包含节点 $u$ 的连通点集**里，因子状态恰好为 $s$ 的集合个数。  
+   特别地，只选 $u$ 一个节点也构成一个连通点集。
+
+3. **状态初始化**  
+   对于节点 $u$，计算 $a_u$ 的状态 $s_u$，则单独的 $\{u\}$ 是一个连通点集，故 $dp[u][s_u] = 1$，其余状态为 $0$。
+
+4. **子树合并（后序遍历）**  
+   在 DFS 回溯时，将子节点 $v$ 的 $dp[v]$ 合并到 $dp[u]$ 中。  
+   枚举 $u$ 当前已有的状态 $i$ 和 $v$ 的状态 $j$：  
+   - 合并后的连通点集同时包含 $u$ 和 $v$ 子树中的节点，因子状态变为 $i \mid j$（按位或）；  
+   - 数量上，这些组合贡献 $dp[u][i] \times dp[v][j]$ 个新集合。  
+   用临时数组累加后再更新 $dp[u]$，避免重复计算。最终 $dp[u][3]$ 即为以 $u$ 为“最浅节点”的幸运集个数。
+
+5. **答案统计**  
+   树上所有幸运集必定有唯一的深度最小的节点，因此我们在每个节点 $u$ 处理完成后，将 $dp[u][3]$ 累加入答案。  
+   最后输出对 $10^9+7$ 取模的结果。
+
+6. **避免递归深度**  
+   使用栈手动模拟 DFS 的后序遍历，保证 $n \le 10^5$ 时不会栈溢出。
+
+---
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$。每个节点初始化仅 $O(1)$，与子节点合并时只进行 $4 \times 4$ 次常数运算，整棵树遍历一次。
+- 空间复杂度：$O(n)$。邻接表、$dp$ 数组和栈均占用线性空间。
+
+---
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10**9 + 7
+
+def get_factor(num, f):
+    """返回 num 中因子 f 的个数"""
+    cnt = 0
+    while num % f == 0:
+        cnt += 1
+        num //= f
+    return cnt
+
+def main():
+    data = sys.stdin.read().split()
+    it = iter(data)
+    n = int(next(it))
+    a = [0] * (n + 1)
+    for i in range(1, n + 1):
+        a[i] = int(next(it))
+    
+    adj = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u = int(next(it)); v = int(next(it))
+        adj[u].append(v)
+        adj[v].append(u)
+
+    dp = [[0] * 4 for _ in range(n + 1)]
+    ans = 0
+    # 栈模拟后序遍历，元素为 (当前节点, 父节点, 是否已访问)
+    stack = [(1, -1, False)]
+
+    while stack:
+        u, p, visited = stack.pop()
+        if not visited:
+            # 计算当前节点的因子状态
+            cnt2 = get_factor(a[u], 2)
+            cnt5 = get_factor(a[u], 5)
+            has2 = 1 if cnt2 >= 1 else 0
+            has5 = 1 if cnt5 >= 1 else 0
+            state = (has2 << 1) | has5
+            dp[u] = [0] * 4
+            dp[u][state] = 1
+
+            # 当前节点处理完成后进入回溯阶段
+            stack.append((u, p, True))
+            for v in adj[u]:
+                if v != p:
+                    stack.append((v, u, False))
+        else:
+            # 合并所有子节点的 dp
+            for v in adj[u]:
+                if v == p:
+                    continue
+                tmp = [0] * 4
+                for i in range(4):
+                    if dp[u][i] == 0:
+                        continue
+                    for j in range(4):
+                        if dp[v][j] == 0:
+                            continue
+                        k = i | j
+                        tmp[k] = (tmp[k] + dp[u][i] * dp[v][j]) % MOD
+                for k in range(4):
+                    dp[u][k] = (dp[u][k] + tmp[k]) % MOD
+            # 累加以 u 为最浅节点的幸运集
+            ans = (ans + dp[u][3]) % MOD
+
+    print(ans)
+
+if __name__ == '__main__':
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    static final int MOD = 1000000007;
+    static final int MAXN = 100005;
+    static List<Integer>[] adj = new ArrayList[MAXN];
+    static long[][] dp = new long[MAXN][4];
+    static int[] a = new int[MAXN];
+
+    // 计算 num 中因子 f 的个数
+    static int getFactor(int num, int f) {
+        int cnt = 0;
+        while (num % f == 0) {
+            cnt++;
+            num /= f;
+        }
+        return cnt;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        
+        for (int i = 1; i <= n; i++) {
+            a[i] = sc.nextInt();
+            adj[i] = new ArrayList<>();
+        }
+
+        for (int i = 0; i < n - 1; i++) {
+            int u = sc.nextInt();
+            int v = sc.nextInt();
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+
+        // 栈模拟DFS，每个元素为 [当前节点, 父节点, 访问标记]
+        Stack<int[]> stack = new Stack<>();
+        stack.push(new int[]{1, -1, 0});  // 1 为根，父节点 -1，未访问
+        long ans = 0;
+
+        while (!stack.isEmpty()) {
+            int[] cur = stack.pop();
+            int u = cur[0], p = cur[1], visited = cur[2];
+
+            if (visited == 0) {
+                int cnt2 = getFactor(a[u], 2);
+                int cnt5 = getFactor(a[u], 5);
+                boolean has2 = cnt2 >= 1;
+                boolean has5 = cnt5 >= 1;
+                int state = (has2 ? 2 : 0) | (has5 ? 1 : 0);
+                Arrays.fill(dp[u], 0);
+                dp[u][state] = 1;
+
+                // 递归处理子节点
+                stack.push(new int[]{u, p, 1});
+                for (int v : adj[u]) {
+                    if (v != p) {
+                        stack.push(new int[]{v, u, 0});
+                    }
+                }
+            } else {
+                // 回溯：合并子节点状态
+                for (int v : adj[u]) {
+                    if (v != p) {
+                        long[] tmp = new long[4];
+                        for (int i = 0; i < 4; i++) {
+                            for (int j = 0; j < 4; j++) {
+                                int k = i | j;
+                                tmp[k] = (tmp[k] + dp[u][i] * dp[v][j]) % MOD;
+                            }
+                        }
+                        for (int k = 0; k < 4; k++) {
+                            dp[u][k] = (dp[u][k] + tmp[k]) % MOD;
+                        }
+                    }
+                }
+                ans = (ans + dp[u][3]) % MOD;
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MOD = 1000000007;
+const int MAXN = 1e5 + 5;
+
+vector<int> adj[MAXN];
+array<long long, 4> dp[MAXN];
+int a[MAXN];
+
+// 计算 num 中因子 f 的个数
+int get_factor(int num, int f) {
+    int cnt = 0;
+    while (num % f == 0) {
+        cnt++;
+        num /= f;
+    }
+    return cnt;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    cin >> n;
+    for (int i = 1; i <= n; ++i)
+        cin >> a[i];
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    // 栈模拟后序遍历，元组为 (节点, 父节点, 是否已访问)
+    stack<tuple<int, int, bool>> st;
+    st.emplace(1, -1, false);
+    long long ans = 0;
+
+    while (!st.empty()) {
+        auto [u, p, visited] = st.top();
+        st.pop();
+
+        if (!visited) {
+            // 计算当前节点的因子状态
+            int cnt2 = get_factor(a[u], 2);
+            int cnt5 = get_factor(a[u], 5);
+            bool has2 = cnt2 >= 1;
+            bool has5 = cnt5 >= 1;
+            int state = (has2 << 1) | has5;
+            dp[u].fill(0);
+            dp[u][state] = 1;
+
+            // 先处理子节点，再回溯
+            st.emplace(u, p, true);
+            for (int v : adj[u]) {
+                if (v != p) {
+                    st.emplace(v, u, false);
+                }
+            }
+        } else {
+            // 合并所有子节点的 dp
+            for (int v : adj[u]) {
+                if (v == p) continue;
+                array<long long, 4> tmp = {0};
+                for (int i = 0; i < 4; ++i) {
+                    if (dp[u][i] == 0) continue;
+                    for (int j = 0; j < 4; ++j) {
+                        if (dp[v][j] == 0) continue;
+                        int k = i | j;
+                        tmp[k] = (tmp[k] + dp[u][i] * dp[v][j]) % MOD;
+                    }
+                }
+                for (int k = 0; k < 4; ++k) {
+                    dp[u][k] = (dp[u][k] + tmp[k]) % MOD;
+                }
+            }
+            // 统计以 u 为最浅节点的幸运集
+            ans = (ans + dp[u][3]) % MOD;
+        }
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
+```

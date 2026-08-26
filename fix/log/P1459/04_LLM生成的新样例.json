@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "ab",
+      "output": "ba",
+      "explanation": "字母表为 $\\{a,b\\}$。第一位不能为 $a$，第二位不能为 $b$，且必须用到 $a$ 与 $b$，因此得到 `ba`。"
+    },
+    {
+      "input": "aaaa",
+      "output": "-1",
+      "explanation": "字母表大小为 `1`，每一位都只能填 $a$，无法与原串对应位不同，输出 `-1`。"
+    },
+    {
+      "input": "aab",
+      "output": "bba",
+      "explanation": "字母表为 $\\{a,b\\}$。前两位不能为 $a$，填 $b$；第三位不能为 $b$，填 $a$，得到 `bba`，字母表仍为 $\\{a,b\\}$。"
+    },
+    {
+      "input": "abab",
+      "output": "baba",
+      "explanation": "字母表大小为 `2`，每位只有另一种字母可选，逐位替换得到 `baba`。"
+    }
+  ]
+}

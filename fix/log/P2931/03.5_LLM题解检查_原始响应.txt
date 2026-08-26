@@ -1,0 +1,67 @@
+## 解题思路
+
+1. 本题可以转化为图染色问题：将 $n$ 个位置看作 $n$ 个顶点，若两个位置的编号 $i$ 与 $j$ 满足 $\gcd(i, j) > 1$，则在顶点 $i$ 与 $j$ 之间连一条边。题目要求相邻顶点必须染不同颜色，最少需要的颜色数就是该图的色数。
+
+2. 观察图的结构：所有偶数编号的位置两两之间 $\gcd \ge 2$，因此构成一个完全图（团）。偶数位置共有 $\lfloor n/2 \rfloor$ 个，该团需要至少 $\lfloor n/2 \rfloor$ 种不同颜色，所以答案至少为 $\lfloor n/2 \rfloor$。
+
+3. 可以构造一种染色方案恰好使用 $\lfloor n/2 \rfloor$ 种颜色：
+   - 给每个偶数编号的位置分配一种与众不同的颜色。
+   - 奇数编号的位置可以与某些偶数位置互质，因此不必受颜色冲突限制；即便与某些偶数位置不互质，也可以复用某些已使用的颜色。可以证明 $\lfloor n/2 \rfloor$ 种颜色足以完成整体染色。
+
+4. 特殊情况：当 $n=1$ 时只有一个位置，不存在任何限制条件，只需 $1$ 种标签。
+
+综上所述，当 $n=1$ 时答案为 $1$，否则答案为 $\lfloor n/2 \rfloor$（即 $n/2$ 向下取整）。
+
+## 复杂度分析
+
+- 时间复杂度：$O(1)$，仅进行简单的条件判断与除法。
+- 空间复杂度：$O(1)$，仅使用常数个变量。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    n = int(sys.stdin.readline())
+    # 当 n = 1 时最少需要 1 种标签，否则最少标签数等于偶数位置的个数
+    print(1 if n == 1 else n // 2)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        long n = Long.parseLong(in.readLine().trim());
+        // n = 1 时只需 1 种标签，否则答案为偶数位置的个数（n / 2 向下取整）
+        System.out.println(n == 1 ? 1 : n / 2);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    long long n;
+    cin >> n;
+    // 当 n = 1 时最少需要 1 种标签，否则答案为偶数位置个数，即 n/2 向下取整
+    cout << (n == 1 ? 1 : n / 2) << "\n";
+    return 0;
+}
+```

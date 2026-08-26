@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "4",
+      "output": "2",
+      "explanation": "`4` 是大于 `2` 的偶数，可写成两个质数之和 $2+2$，答案为 `2`。"
+    },
+    {
+      "input": "5",
+      "output": "1",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "6",
+      "output": "2",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

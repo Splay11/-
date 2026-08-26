@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1809",
+  "title": "第3题-避四之选",
+  "docId": 901,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

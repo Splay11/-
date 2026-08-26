@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1965",
+  "title": "第3题-灯带积分",
+  "docId": 1068,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

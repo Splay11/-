@@ -1,0 +1,11 @@
+{
+  "pid": "P2924",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:43:32",
+  "end_time": "2026-08-19 19:43:33",
+  "new_title": "第3题-托盘轮转可排",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

@@ -1,0 +1,1 @@
+prefix[i] = cnt[1] + cnt[2] + … + cnt[i]

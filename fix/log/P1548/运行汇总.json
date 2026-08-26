@@ -1,0 +1,11 @@
+{
+  "pid": "P1548",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:43:09",
+  "end_time": "2026-08-19 19:43:10",
+  "new_title": "展柜直角三点",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "1\n4\n1 2 3 4",
+      "output": "No",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "1\n4\n1 2 3 4\n3",
+      "output": "No",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

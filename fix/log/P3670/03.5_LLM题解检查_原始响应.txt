@@ -1,0 +1,191 @@
+## 解题思路
+
+本题要求对原始字符串 $s$ 按下标从小到大的顺序依次处理每个字符，但在判断规则时需要**使用原始字符串中前一位置的字符形态**，而非已经变换后的形态。因此可以分两步走：遍历的同时读取原串进行形态比较，将变换结果存入新字符串中。
+
+定义两个辅助操作：
+
+1. **形态翻转**：将高位形态（大写字母 `'A'` ~ `'Z'`）变为低位形态（对应小写），低位形态（小写字母 `'a'` ~ `'z'`）变为高位形态。
+2. **同形态后移**：在同形态（即同为高位或同为低位）内将字母向后移动一位，并循环：
+   - 低位 `'z'` 变为 `'a'`，其他小写字母取 ASCII 码 +1；
+   - 高位 `'Z'` 变为 `'A'`，其他大写字母取 ASCII 码 +1。
+
+具体处理流程：
+
+- 对于第 $1$ 个字符 $s_1$（下标 $i=1$，代码中索引 $0$），直接进行形态翻转。
+- 对于第 $i$ 个字符（$i \ge 2$），比较**原始字符串**中 $s_i$ 与 $s_{i-1}$ 的形态（是否同为高位或同为低位）：
+  - 若形态不同，则将 $s_i$ 进行形态翻转；
+  - 若形态相同，则将 $s_i$ 进行同形态后移一位。
+
+由于每个字符只处理一次，且所有操作均为 $O(1)$，算法非常高效。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$。只需对长度为 $n$ 的字符串进行一次线性扫描，每个字符执行常数次操作。
+- 空间复杂度：$O(n)$。需要额外的结果字符串存储变换后的内容；若某些语言允许原地修改字符串，也至少需要 $O(n)$ 空间保存答案。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def is_lower(c: str) -> bool:
+    """判断字符是否为低位形态（小写字母）"""
+    return 'a' <= c <= 'z'
+
+def flip(c: str) -> str:
+    """翻转形态：高位↔低位"""
+    if is_lower(c):
+        return chr(ord(c) - 32)   # 低位变高位
+    else:
+        return chr(ord(c) + 32)   # 高位变低位
+
+def next_same_case(c: str) -> str:
+    """同形态后移一位，循环"""
+    if is_lower(c):
+        return 'a' if c == 'z' else chr(ord(c) + 1)
+    else:
+        return 'A' if c == 'Z' else chr(ord(c) + 1)
+
+def main() -> None:
+    data = sys.stdin.read().splitlines()
+    if not data:
+        return
+    n = int(data[0].strip())
+    s = data[1].strip()
+    
+    ans = []
+    for i in range(n):
+        c = s[i]
+        if i == 0:
+            # 规则：首个字符形态翻转
+            ans.append(flip(c))
+        else:
+            prev = s[i - 1]          # 使用原始字符串中前一字符
+            diff = (is_lower(c) != is_lower(prev))
+            if diff:
+                ans.append(flip(c))
+            else:
+                ans.append(next_same_case(c))
+    
+    print(''.join(ans))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class Main {
+    // 判断是否为低位形态（小写字母）
+    static boolean isLower(char c) {
+        return c >= 'a' && c <= 'z';
+    }
+
+    // 形态翻转
+    static char flip(char c) {
+        if (isLower(c)) return (char)(c - ('a' - 'A')); // 低位变高位
+        else return (char)(c + ('a' - 'A'));            // 高位变低位
+    }
+
+    // 同形态后移一位，循环
+    static char nextSameCase(char c) {
+        if (isLower(c)) {
+            return c == 'z' ? 'a' : (char)(c + 1);
+        } else {
+            return c == 'Z' ? 'A' : (char)(c + 1);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String lineN = br.readLine();
+        while (lineN != null && lineN.trim().isEmpty()) {
+            lineN = br.readLine();
+        }
+        int n = Integer.parseInt(lineN.trim());
+        String s = br.readLine().trim();
+
+        StringBuilder ans = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+            char c = s.charAt(i);
+            if (i == 0) {
+                ans.append(flip(c));          // 首个字符翻转
+            } else {
+                char prev = s.charAt(i - 1);  // 原串前一字符
+                boolean diff = (isLower(c) != isLower(prev));
+                if (diff) {
+                    ans.append(flip(c));
+                } else {
+                    ans.append(nextSameCase(c));
+                }
+            }
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+// 判断是否为低位形态（小写字母）
+bool isLower(char c) {
+    return c >= 'a' && c <= 'z';
+}
+
+// 形态翻转
+char flip(char c) {
+    if (isLower(c)) return char(c - ('a' - 'A')); // 低位变高位
+    else return char(c + ('a' - 'A'));            // 高位变低位
+}
+
+// 同形态后移一位，循环
+char nextSameCase(char c) {
+    if (isLower(c)) {
+        return (c == 'z') ? 'a' : char(c + 1);
+    } else {
+        return (c == 'Z') ? 'A' : char(c + 1);
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    string s;
+    cin >> n;
+    cin >> s;
+
+    string ans;
+    ans.reserve(n);
+
+    for (int i = 0; i < n; ++i) {
+        char c = s[i];
+        if (i == 0) {
+            ans.push_back(flip(c));          // 首个字符翻转
+        } else {
+            char prev = s[i - 1];            // 原串前一字符
+            bool diff = (isLower(c) != isLower(prev));
+            if (diff) {
+                ans.push_back(flip(c));
+            } else {
+                ans.push_back(nextSameCase(c));
+            }
+        }
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
+```

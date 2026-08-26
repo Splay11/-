@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2699",
+  "title": "第2题-栖息邻域",
+  "docId": 2265,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "搜索"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "BFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

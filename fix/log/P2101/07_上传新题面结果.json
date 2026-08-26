@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2101",
+  "title": "码头提货同步",
+  "docId": 1208,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

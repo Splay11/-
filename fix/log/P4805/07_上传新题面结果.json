@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4805",
+  "title": "第1题-宝物争夺的最小分差",
+  "docId": 4073,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

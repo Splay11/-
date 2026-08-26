@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P2907",
+  "title": "第1题-花坛排布方案",
+  "docId": 2541,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "搜索",
+    "枚举",
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

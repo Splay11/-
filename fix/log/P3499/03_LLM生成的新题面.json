@@ -1,0 +1,6 @@
+{
+  "title": "谐振三元组",
+  "content": "给定两个正整数 $L$ 和 $R$，统计满足下列条件的三元组 $(a,b,c)$ 的个数：\n\n- $L \\le a < b < c \\le R$；\n- $\\max(a,b,c) < \\operatorname{lcm}(a,b,c) < a+b+c$。\n\n其中 $\\max$ 表示三者中的最大值，$\\operatorname{lcm}$ 表示三者的最小公倍数（能同时被它们整除的最小正整数）。\n\n数据范围：测试组数 $t$ 满足 $1 \\le t \\le 10^4$；每组满足 $1 \\le L \\le R \\le 10^{18}$ 且 $R-L+1 \\ge 3$。",
+  "input_description": "第一行包含一个整数 $t$（$1 \\le t \\le 10^4$），表示测试组数。\n接下来 $t$ 行，每行包含两个整数 $L$ 和 $R$（$1 \\le L \\le R \\le 10^{18}$，$R-L+1 \\ge 3$），表示区间端点。",
+  "output_description": "对于每个测试组，在一行输出一个整数，表示满足条件的三元组个数。"
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4950",
+  "title": "第2题-跃迁与步行",
+  "docId": 4284,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "最短路算法"
+  ],
+  "alg_tag": "最短路算法",
+  "ai_alg_tags": "最短路算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

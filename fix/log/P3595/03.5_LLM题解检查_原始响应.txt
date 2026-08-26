@@ -1,0 +1,121 @@
+## 解题思路
+
+需要构造一个长度为 $L$ 的排列 $p_1, p_2, \dots, p_L$，使其恰好有 $K$ 个跃升点。  
+跃升点的定义为：对于 $i \ge 3$，若 $p_i \ge \max(p_{i-2}, p_{i-1})$，则 $i$ 是一个跃升点。
+
+观察发现，如果排列的前一段是严格递增的，那么从第 $3$ 个位置开始，每个新加入的数都会大于它前面两个数，从而形成跃升点。具体地：
+
+- 取 $K+2$ 个连续递增的数放在排列的最前面，这些数从第 $3$ 个位置到第 $K+2$ 个位置一共会形成 $K$ 个跃升点。
+- 剩下的 $L - (K+2)$ 个数如果按严格递减顺序排列，它们会逐渐变小，不会再超过前两个较大的数，因此不会产生新的跃升点。
+
+构造方法如下：
+
+1. 选出最大的 $K+2$ 个数，即 $\{L - K - 1, L - K, \dots, L\}$，按升序依次填入排列的前 $K+2$ 个位置。
+2. 将剩下的数 $\{1, 2, \dots, L - K - 2\}$ 按降序填入剩余的位置。
+
+这样构造出的排列一定满足恰好有 $K$ 个跃升点。由于题目要求输出任意一种合法排列，该构造总是有效的。
+
+## 复杂度分析
+
+- 对于每组测试数据，只需按规则生成排列并输出，时间复杂度为 $O(L)$。
+- 除存储输出结果之外，仅需常数级别的额外空间，空间复杂度为 $O(1)$（不考虑输出的线性空间）。
+- 所有测试用例的 $L$ 之和不超过 $2 \times 10^5$，总时间复杂度 $O(\sum L)$，可以高效通过。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    data = sys.stdin.read().strip().split()
+    t = int(data[0])
+    idx = 1
+    out_lines = []
+    for _ in range(t):
+        L = int(data[idx])
+        K = int(data[idx + 1])
+        idx += 2
+        
+        ans = []
+        # 前 K+2 个位置放最大的 K+2 个数，升序
+        for x in range(L - K - 1, L + 1):
+            ans.append(x)
+        # 剩余位置放剩下的数，降序
+        for x in range(L - K - 2, 0, -1):
+            ans.append(x)
+        
+        out_lines.append(" ".join(map(str, ans)))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        int T = Integer.parseInt(br.readLine().trim());
+        while (T-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int L = Integer.parseInt(st.nextToken());
+            int K = Integer.parseInt(st.nextToken());
+            
+            // 前 K+2 个数：最大 K+2 个数升序
+            for (int x = L - K - 1; x <= L; ++x) {
+                sb.append(x).append(' ');
+            }
+            // 剩余部分递减
+            for (int x = L - K - 2; x >= 1; --x) {
+                sb.append(x);
+                if (x > 1) sb.append(' ');
+            }
+            sb.append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int T;
+    cin >> T;
+    while (T--) {
+        int L, K;
+        cin >> L >> K;
+        vector<int> ans;
+        ans.reserve(L);
+        // 前 K+2 个位置：最大 K+2 个数升序
+        for (int x = L - K - 1; x <= L; ++x) {
+            ans.push_back(x);
+        }
+        // 剩余部分递减
+        for (int x = L - K - 2; x >= 1; --x) {
+            ans.push_back(x);
+        }
+        for (int i = 0; i < L; ++i) {
+            if (i) cout << ' ';
+            cout << ans[i];
+        }
+        cout << '\n';
+    }
+    return 0;
+}
+```

@@ -1,0 +1,433 @@
+## 解题思路
+
+1. **读取并解析输入**  
+   读取一行自然语言文本，长度不超过 $200$ 个字符。通过关键词匹配提取订单信息：
+   - 设备类型：优先判断 `旗舰型`、`加强型`，否则为 `标准型`。
+   - 服务等级：优先判断 `晶镀养护`、`深度养护`，否则为基础养护。
+   - 会员身份：先判断 `非会员`、`不是会员` 等否定表达，再判断是否包含 `会员`。
+   - 节假日：先判断 `非节假日`、`不是节假日` 等否定表达，再判断是否包含 `节假日`。
+   - 附加服务：先判断整体无附加项目的表达，再在服务名之前最近分隔符后的片段中检测否定词，避免误判。
+   - 场地方式：出现 `露天`、`非室内` 等按露天处理，否则出现 `室内` 按室内场地处理。
+
+2. **分步计算费用**  
+   所有金额使用整数运算，避免浮点误差。
+   - **设备基础价**：标准型 $38$ 元，加强型 $58$ 元，旗舰型 $78$ 元。
+   - **服务等级加价**：  
+     基础养护不加价；  
+     深度养护增加 $80\%$ 后向上取整，使用 `(base * 9 + 4) / 5`；  
+     晶镀养护增加 $150\%$ 后向上取整，使用 `(base * 5 + 1) / 2`。
+   - **会员折扣**：加价后的金额打 $85$ 折并向下取整，使用 `(after_type * 85) / 100`，得到 `wash_cost`。
+   - **附加费**：除尘维护 $28$ 元，液路清理 $45$ 元，累加未选择为 $0$。
+   - **节假日加成**：对 `wash_cost + 附加费` 若为节假日，增加 $20\%$ 后向上取整，使用 `(sum * 6 + 4) / 5`。
+   - **场地费**：室内场地 $15$ 元，露天场地 $0$ 元，在节假日加成后加入。
+
+3. **输出 JSON**  
+   只输出包含 `total_bill`、`wash_cost`、`car_type` 三个字段的标准 JSON 字符串，其中 `car_type` 只能是 `标准型`、`加强型` 或 `旗舰型`。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$，其中 $n$ 为输入文本长度。所有关键词查找和否定词检测均在线性时间内完成。
+- 空间复杂度：$O(1)$，仅使用常数个变量存储解析结果和中间金额。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import json
+
+
+def contains(s, sub):
+    return sub in s
+
+
+def is_service_chosen(text, name):
+    # 整体否定附加项目
+    global_neg = ["无附加项目", "无附加服务", "没有附加项目", "没有附加服务",
+                  "不要附加", "不加附加", "无需附加", "免附加", "取消附加"]
+    for neg in global_neg:
+        if neg in text:
+            return False
+
+    pos = text.find(name)
+    if pos == -1:
+        return False
+
+    # 取关键词前最近分隔符之后的片段，避免“不是会员，选择了除尘维护”被误判
+    separators = ["，", ",", "。", ".", "；", ";", "！", "!", "？", "?", "、", " "]
+    start = 0
+    for sep in separators:
+        p = text.rfind(sep, 0, pos)
+        if p != -1:
+            end = p + len(sep)
+            if end > start:
+                start = end
+
+    pre = text[start:pos]
+    neg_words = ["不", "无", "没", "未", "别", "免", "拒绝", "取消"]
+    for w in neg_words:
+        if w in pre:
+            return False
+    return True
+
+
+def main():
+    s = sys.stdin.readline().strip()
+
+    # 设备类型与基础价
+    if contains(s, "旗舰型"):
+        car_type = "旗舰型"
+        base = 78
+    elif contains(s, "加强型"):
+        car_type = "加强型"
+        base = 58
+    else:
+        car_type = "标准型"
+        base = 38
+
+    # 服务等级加价
+    if contains(s, "晶镀养护"):
+        # 增加 150% 后向上取整：乘以 2.5 向上取整
+        after_type = (base * 5 + 1) // 2
+    elif contains(s, "深度养护"):
+        # 增加 80% 后向上取整：乘以 1.8 向上取整
+        after_type = (base * 9 + 4) // 5
+    else:
+        after_type = base
+
+    # 会员折扣
+    if contains(s, "非会员") or contains(s, "不是会员"):
+        member = False
+    elif contains(s, "会员"):
+        member = True
+    else:
+        member = False
+
+    if member:
+        wash_cost = (after_type * 85) // 100  # 85折向下取整
+    else:
+        wash_cost = after_type
+
+    # 附加费
+    addon = 0
+    if is_service_chosen(s, "除尘维护"):
+        addon += 28
+    if is_service_chosen(s, "液路清理"):
+        addon += 45
+
+    # 节假日判断
+    if contains(s, "非节假日") or contains(s, "不是节假日"):
+        holiday = False
+    elif contains(s, "节假日"):
+        holiday = True
+    else:
+        holiday = False
+
+    before_holiday = wash_cost + addon
+    if holiday:
+        after_holiday = (before_holiday * 6 + 4) // 5  # 增加 20% 后向上取整
+    else:
+        after_holiday = before_holiday
+
+    # 场地费
+    if contains(s, "露天") or contains(s, "非室内") or contains(s, "不是室内"):
+        site_fee = 0
+    elif contains(s, "室内"):
+        site_fee = 15
+    else:
+        site_fee = 0
+
+    total_bill = after_holiday + site_fee
+
+    result = {
+        "total_bill": total_bill,
+        "wash_cost": wash_cost,
+        "car_type": car_type
+    }
+    print(json.dumps(result, ensure_ascii=False, separators=(',', ':')))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    static boolean contains(String s, String sub) {
+        return s.contains(sub);
+    }
+
+    static boolean isServiceChosen(String text, String name) {
+        String[] globalNeg = {"无附加项目", "无附加服务", "没有附加项目", "没有附加服务",
+                "不要附加", "不加附加", "无需附加", "免附加", "取消附加"};
+        for (String neg : globalNeg) {
+            if (text.contains(neg)) {
+                return false;
+            }
+        }
+
+        int pos = text.indexOf(name);
+        if (pos < 0) {
+            return false;
+        }
+
+        String[] seps = {"，", ",", "。", ".", "；", ";", "！", "!", "？", "?", "、", " "};
+        int start = 0;
+        for (String sep : seps) {
+            if (pos > 0) {
+                int p = text.lastIndexOf(sep, pos - 1);
+                if (p >= 0) {
+                    int end = p + sep.length();
+                    if (end > start) {
+                        start = end;
+                    }
+                }
+            }
+        }
+
+        String pre = text.substring(start, pos);
+        String[] negWords = {"不", "无", "没", "未", "别", "免", "拒绝", "取消"};
+        for (String w : negWords) {
+            if (pre.contains(w)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String s = sc.nextLine().trim();
+
+        String carType;
+        int base;
+        if (s.contains("旗舰型")) {
+            carType = "旗舰型";
+            base = 78;
+        } else if (s.contains("加强型")) {
+            carType = "加强型";
+            base = 58;
+        } else {
+            carType = "标准型";
+            base = 38;
+        }
+
+        int afterType;
+        if (s.contains("晶镀养护")) {
+            afterType = (base * 5 + 1) / 2;
+        } else if (s.contains("深度养护")) {
+            afterType = (base * 9 + 4) / 5;
+        } else {
+            afterType = base;
+        }
+
+        boolean member;
+        if (s.contains("非会员") || s.contains("不是会员")) {
+            member = false;
+        } else if (s.contains("会员")) {
+            member = true;
+        } else {
+            member = false;
+        }
+
+        int washCost;
+        if (member) {
+            washCost = (afterType * 85) / 100;
+        } else {
+            washCost = afterType;
+        }
+
+        int addon = 0;
+        if (isServiceChosen(s, "除尘维护")) {
+            addon += 28;
+        }
+        if (isServiceChosen(s, "液路清理")) {
+            addon += 45;
+        }
+
+        boolean holiday;
+        if (s.contains("非节假日") || s.contains("不是节假日")) {
+            holiday = false;
+        } else if (s.contains("节假日")) {
+            holiday = true;
+        } else {
+            holiday = false;
+        }
+
+        int beforeHoliday = washCost + addon;
+        int afterHoliday;
+        if (holiday) {
+            afterHoliday = (beforeHoliday * 6 + 4) / 5;
+        } else {
+            afterHoliday = beforeHoliday;
+        }
+
+        int siteFee;
+        if (s.contains("露天") || s.contains("非室内") || s.contains("不是室内")) {
+            siteFee = 0;
+        } else if (s.contains("室内")) {
+            siteFee = 15;
+        } else {
+            siteFee = 0;
+        }
+
+        int totalBill = afterHoliday + siteFee;
+
+        System.out.println("{\"total_bill\":" + totalBill +
+                ",\"wash_cost\":" + washCost +
+                ",\"car_type\":\"" + carType + "\"}");
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+bool contains(const string& s, const string& sub) {
+    return s.find(sub) != string::npos;
+}
+
+bool isServiceChosen(const string& text, const string& name) {
+    vector<string> globalNeg = {"无附加项目", "无附加服务", "没有附加项目", "没有附加服务",
+                                "不要附加", "不加附加", "无需附加", "免附加", "取消附加"};
+    for (const string& neg : globalNeg) {
+        if (contains(text, neg)) {
+            return false;
+        }
+    }
+
+    size_t pos = text.find(name);
+    if (pos == string::npos) {
+        return false;
+    }
+
+    vector<string> seps = {"，", ",", "。", ".", "；", ";", "！", "!", "？", "?", "、", " "};
+    size_t start = 0;
+    if (pos > 0) {
+        for (const string& sep : seps) {
+            size_t p = text.rfind(sep, pos - 1);
+            if (p != string::npos) {
+                size_t end = p + sep.length();
+                if (end > start) {
+                    start = end;
+                }
+            }
+        }
+    }
+
+    string pre = text.substr(start, pos - start);
+    vector<string> negWords = {"不", "无", "没", "未", "别", "免", "拒绝", "取消"};
+    for (const string& w : negWords) {
+        if (pre.find(w) != string::npos) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    getline(cin, s);
+
+    // 去除首尾空白
+    while (!s.empty() && (s.back() == ' ' || s.back() == '\t')) {
+        s.pop_back();
+    }
+    while (!s.empty() && (s.front() == ' ' || s.front() == '\t')) {
+        s.erase(s.begin());
+    }
+
+    string car_type;
+    int base;
+
+    if (s.find("旗舰型") != string::npos) {
+        car_type = "旗舰型";
+        base = 78;
+    } else if (s.find("加强型") != string::npos) {
+        car_type = "加强型";
+        base = 58;
+    } else {
+        car_type = "标准型";
+        base = 38;
+    }
+
+    int after_type;
+    if (s.find("晶镀养护") != string::npos) {
+        after_type = (base * 5 + 1) / 2;
+    } else if (s.find("深度养护") != string::npos) {
+        after_type = (base * 9 + 4) / 5;
+    } else {
+        after_type = base;
+    }
+
+    bool member;
+    if (s.find("非会员") != string::npos || s.find("不是会员") != string::npos) {
+        member = false;
+    } else if (s.find("会员") != string::npos) {
+        member = true;
+    } else {
+        member = false;
+    }
+
+    int wash_cost;
+    if (member) {
+        wash_cost = (after_type * 85) / 100;
+    } else {
+        wash_cost = after_type;
+    }
+
+    int addon = 0;
+    if (isServiceChosen(s, "除尘维护")) {
+        addon += 28;
+    }
+    if (isServiceChosen(s, "液路清理")) {
+        addon += 45;
+    }
+
+    bool holiday;
+    if (s.find("非节假日") != string::npos || s.find("不是节假日") != string::npos) {
+        holiday = false;
+    } else if (s.find("节假日") != string::npos) {
+        holiday = true;
+    } else {
+        holiday = false;
+    }
+
+    int before_holiday = wash_cost + addon;
+    int after_holiday;
+    if (holiday) {
+        after_holiday = (before_holiday * 6 + 4) / 5;
+    } else {
+        after_holiday = before_holiday;
+    }
+
+    int site_fee;
+    if (s.find("露天") != string::npos || s.find("非室内") != string::npos || s.find("不是室内") != string::npos) {
+        site_fee = 0;
+    } else if (s.find("室内") != string::npos) {
+        site_fee = 15;
+    } else {
+        site_fee = 0;
+    }
+
+    int total_bill = after_holiday + site_fee;
+
+    cout << "{\"total_bill\":" << total_bill
+         << ",\"wash_cost\":" << wash_cost
+         << ",\"car_type\":\"" << car_type << "\"}" << '\n';
+
+    return 0;
+}
+```

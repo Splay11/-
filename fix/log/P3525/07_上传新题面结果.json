@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3525",
+  "title": "第2题-石板跳跃",
+  "docId": 2868,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

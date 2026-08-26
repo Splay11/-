@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2778",
+  "title": "第2题-乘积的二进制尾零",
+  "docId": 2410,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "二进制"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

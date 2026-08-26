@@ -1,0 +1,424 @@
+## 解题思路
+
+先把题意重新整理一下。
+
+对于某个值 $x$，假设它在数组中的出现位置依次为
+
+$$
+p_1 < p_2 < \dots < p_m
+$$
+
+那么题目中的“相邻等值对”其实就是这组位置中的相邻两个：
+
+$$
+(p_1,p_2),(p_2,p_3),\dots,(p_{m-1},p_m)
+$$
+
+因为定义里要求：在 $i,j$ 之间，不存在更早出现的同值位置落在这对下标之间，这就等价于“同一个值的相邻两次出现”。
+
+于是问题变成：
+
+* 对每个值 $x$；
+* 枚举它的相邻出现位置对 $(p_t,p_{t+1})$；
+* 统计区间 $[p_t,p_{t+1}]$ 中有多少个数严格小于 $x$；
+* 把这些数量全部加起来。
+
+
+
+### 核心转化
+
+如果我们按数值从小到大处理，处理到值 $x$ 时：
+
+* 所有 **小于 $x$** 的位置都已经被加入某个数据结构中；
+* 所有 **大于等于 $x$** 的位置都还没有加入。
+
+这样一来，对于值 $x$ 的某一对相邻出现位置 $(l,r)$，区间 $[l,r]$ 中“严格小于 $x$ 的元素个数”，就等于：
+
+$$
+\text{区间 }[l,r]\text{ 中已加入的位置数}
+$$
+
+这就变成了一个经典问题：
+
+* 单点加入
+* 区间求和
+
+使用树状数组即可高效完成。
+
+
+
+### 具体做法
+
+#### 1. 按值存储出现位置
+
+用一个数组 `pos[x]` 保存值 $x$ 在原数组中的所有出现位置。
+
+例如数组为：
+
+$$
+[2,1,2,1,2]
+$$
+
+那么：
+
+* `pos[1] = [2,4]`
+* `pos[2] = [1,3,5]`
+
+
+
+#### 2. 用树状数组维护“更小值的位置”
+
+我们从小到大枚举值 $x=1,2,\dots,n$。
+
+设当前树状数组中维护的是：**所有值严格小于 $x$ 的元素位置**，每个位置记为 $1$。
+
+此时对于 `pos[x]` 中相邻的两个位置 `l, r`：
+
+* 区间 $[l,r]$ 中严格小于 $x$ 的元素个数
+* 就是树状数组查询得到的区间和
+
+即：
+
+$$
+\text{contrib}(l,r)=\text{sum}(r)-\text{sum}(l-1)
+$$
+
+把所有相邻位置对的贡献累加即可。
+
+
+
+#### 3. 当前值处理完后，再把它的所有位置加入树状数组
+
+因为这些位置对后面的更大值来说，属于“严格小于当前更大值”的元素。
+
+
+
+### 为什么这样做是正确的
+
+处理值 $x$ 时：
+
+* 树状数组中恰好只包含所有值 $<x$ 的位置；
+* 不包含值 $=x$ 或 $>x$ 的位置。
+
+因此，对于值 $x$ 的任意相邻等值对 $(l,r)$，树状数组在区间 $[l,r]$ 内统计到的位置数，恰好就是：
+
+$$
+|{k\in[l,r]\mid a_k<x}|
+$$
+
+这与题目定义的贡献完全一致。
+
+并且每个相邻等值对只会在处理其对应值时被计算一次，不重不漏，所以总和正确。
+
+
+## 复杂度分析
+
+设当前测试数据长度为 $n$。
+
+### 时间复杂度
+
+* 建立每个值的出现位置表：$O(n)$
+* 每个位置最多执行一次树状数组插入：$O(n\log n)$
+* 每个相邻等值对最多查询一次区间和，总次数不超过 $n-1$：$O(n\log n)$
+
+所以总时间复杂度为：
+
+$$
+O(n\log n)
+$$
+
+由于所有测试数据的 $n$ 总和不超过 $2\times 10^5$，因此整体复杂度完全可行。
+
+### 空间复杂度
+
+* 存储出现位置：$O(n)$
+* 树状数组：$O(n)$
+
+所以空间复杂度为：
+
+$$
+O(n)
+$$
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 树状数组，支持单点增加、前缀和查询
+class Fenwick:
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (n + 1)
+
+    # 在下标 idx 位置加上 delta
+    def add(self, idx, delta):
+        while idx <= self.n:
+            self.tree[idx] += delta
+            idx += idx & -idx
+
+    # 查询前缀和 [1..idx]
+    def sum(self, idx):
+        res = 0
+        while idx > 0:
+            res += self.tree[idx]
+            idx -= idx & -idx
+        return res
+
+    # 查询区间和 [l..r]
+    def range_sum(self, l, r):
+        return self.sum(r) - self.sum(l - 1)
+
+
+# 计算单组测试数据答案
+def solve_case(n, a):
+    # pos[x] 保存值 x 的所有出现位置
+    pos = [[] for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        pos[a[i - 1]].append(i)
+
+    bit = Fenwick(n)
+    ans = 0
+
+    # 按值从小到大处理
+    for x in range(1, n + 1):
+        arr = pos[x]
+
+        # 先统计值 x 的所有相邻等值对贡献
+        for i in range(len(arr) - 1):
+            l = arr[i]
+            r = arr[i + 1]
+            ans += bit.range_sum(l, r)
+
+        # 再把值 x 的所有位置加入树状数组
+        for p in arr:
+            bit.add(p, 1)
+
+    return ans
+
+
+def main():
+    input = sys.stdin.readline
+    T = int(input().strip())
+    for _ in range(T):
+        n = int(input().strip())
+        a = list(map(int, input().split()))
+        print(solve_case(n, a))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    // 树状数组，支持单点增加、前缀和查询
+    static class Fenwick {
+        int n;
+        int[] tree;
+
+        Fenwick(int n) {
+            this.n = n;
+            this.tree = new int[n + 1];
+        }
+
+        // 在下标 idx 位置加上 delta
+        void add(int idx, int delta) {
+            while (idx <= n) {
+                tree[idx] += delta;
+                idx += idx & -idx;
+            }
+        }
+
+        // 查询前缀和 [1..idx]
+        int sum(int idx) {
+            int res = 0;
+            while (idx > 0) {
+                res += tree[idx];
+                idx -= idx & -idx;
+            }
+            return res;
+        }
+
+        // 查询区间和 [l..r]
+        int rangeSum(int l, int r) {
+            return sum(r) - sum(l - 1);
+        }
+    }
+
+    // 计算单组测试数据答案
+    static long solveCase(int n, int[] a) {
+        // pos[x] 保存值 x 的所有出现位置
+        ArrayList<Integer>[] pos = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            pos[i] = new ArrayList<>();
+        }
+
+        for (int i = 1; i <= n; i++) {
+            pos[a[i]].add(i);
+        }
+
+        Fenwick bit = new Fenwick(n);
+        long ans = 0;
+
+        // 按值从小到大处理
+        for (int x = 1; x <= n; x++) {
+            ArrayList<Integer> arr = pos[x];
+
+            // 先统计值 x 的所有相邻等值对贡献
+            for (int i = 0; i + 1 < arr.size(); i++) {
+                int l = arr.get(i);
+                int r = arr.get(i + 1);
+                ans += bit.rangeSum(l, r);
+            }
+
+            // 再把值 x 的所有位置加入树状数组
+            for (int p : arr) {
+                bit.add(p, 1);
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        StringBuilder sb = new StringBuilder();
+
+        int T = fs.nextInt();
+        while (T-- > 0) {
+            int n = fs.nextInt();
+            int[] a = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                a[i] = fs.nextInt();
+            }
+            sb.append(solveCase(n, a)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+
+    // 简洁输入工具
+    static class FastScanner {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreElements()) {
+                st = new StringTokenizer(br.readLine());
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 树状数组，支持单点增加、前缀和查询
+class Fenwick {
+private:
+    int n;
+    vector<int> tree;
+
+public:
+    Fenwick(int n) : n(n), tree(n + 1, 0) {}
+
+    // 在下标 idx 位置加上 delta
+    void add(int idx, int delta) {
+        while (idx <= n) {
+            tree[idx] += delta;
+            idx += idx & -idx;
+        }
+    }
+
+    // 查询前缀和 [1..idx]
+    int sum(int idx) {
+        int res = 0;
+        while (idx > 0) {
+            res += tree[idx];
+            idx -= idx & -idx;
+        }
+        return res;
+    }
+
+    // 查询区间和 [l..r]
+    int rangeSum(int l, int r) {
+        return sum(r) - sum(l - 1);
+    }
+};
+
+// 计算单组测试数据答案
+long long solveCase(int n, const vector<int>& a) {
+    // pos[x] 保存值 x 的所有出现位置
+    vector<vector<int>> pos(n + 1);
+    for (int i = 1; i <= n; i++) {
+        pos[a[i]].push_back(i);
+    }
+
+    Fenwick bit(n);
+    long long ans = 0;
+
+    // 按值从小到大处理
+    for (int x = 1; x <= n; x++) {
+        vector<int>& arr = pos[x];
+
+        // 先统计值 x 的所有相邻等值对贡献
+        for (int i = 0; i + 1 < (int)arr.size(); i++) {
+            int l = arr[i];
+            int r = arr[i + 1];
+            ans += bit.rangeSum(l, r);
+        }
+
+        // 再把值 x 的所有位置加入树状数组
+        for (int p : arr) {
+            bit.add(p, 1);
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        cin >> n;
+        vector<int> a(n + 1);
+
+        for (int i = 1; i <= n; i++) {
+            cin >> a[i];
+        }
+
+        cout << solveCase(n, a) << '\n';
+    }
+
+    return 0;
+}
+```

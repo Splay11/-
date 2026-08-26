@@ -1,0 +1,121 @@
+## 解题思路
+
+### 关键性质
+
+* 每个元素除以 $2$ 的余数决定其极性：余 $0$ 为 $0$‑极性（即偶数），余 $1$ 为 $1$‑极性（即奇数）。
+* 两个数合并时，乘积的极性由因子极性决定：
+  * 两个均为 $1$‑极性，结果才是 $1$‑极性；
+  * 只要有一个 $0$‑极性数参与，结果就是 $0$‑极性。
+* 由此可得一条重要性质：**一旦序列中出现 $0$‑极性数，就永远不可能再变回 $1$‑极性**。  
+  因此，如果序列中存在 $0$‑极性数，最终只能让所有元素都变成 $0$‑极性。
+* 设序列中 $1$‑极性数的个数为 `cnt1`，是否存在 $0$‑极性数记为 `has0`。
+  * 若 `has0 == false`（全为 $1$‑极性）：已经满足要求，无需操作，答案为 $0$；
+  * 若 `has0 == true`：每次操作最多让一个 $1$‑极性数变为 $0$‑极性（将相邻的 $1$‑极性数与已有的 $0$‑极性数合并），因此最少操作次数下界为 `cnt1`。  
+    该下界可以达到：随便选取一个 $0$‑极性元素，不断与相邻的 $1$‑极性元素合并，每次操作消耗一个 $1$‑极性元素，恰好 `cnt1` 次。
+
+### 最终答案
+
+* 若序列包含 $0$‑极性数，输出 $1$‑极性数的个数；
+* 若序列全为 $1$‑极性数，输出 $0$。
+
+## 复杂度分析
+
+* 每组测试数据只需一次线性扫描，统计 $1$‑极性数个数并判断是否存在 $0$‑极性数。
+* 时间复杂度：$O(n)$，所有测试数据的总复杂度为 $O(\sum n)$，其中 $\sum n \le 2 \times 10^5$。
+* 空间复杂度：$O(1)$，仅用常数个变量。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    it = iter(data)
+    t = next(it)
+    out_lines = []
+    for _ in range(t):
+        n = next(it)
+        cnt1 = 0          # 记录 1-极性（奇数）的个数
+        has0 = False      # 是否出现 0-极性（偶数）
+        for _ in range(n):
+            x = next(it)
+            if x % 2 == 0:
+                has0 = True
+            else:
+                cnt1 += 1
+        # 若存在 0-极性，最少操作为 1-极性的个数；否则已全为 1-极性，答案为 0
+        ans = cnt1 if has0 else 0
+        out_lines.append(str(ans))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        int T = Integer.parseInt(br.readLine());
+        while (T-- > 0) {
+            int n = Integer.parseInt(br.readLine());
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int cnt1 = 0;        // 1-极性（奇数）个数
+            boolean has0 = false; // 是否存在 0-极性（偶数）
+            for (int i = 0; i < n; i++) {
+                int x = Integer.parseInt(st.nextToken());
+                if ((x & 1) == 0) {
+                    has0 = true;
+                } else {
+                    cnt1++;
+                }
+            }
+            // 如果有 0-极性，答案为 1-极性的总数；否则序列全是 1-极性，答案为 0
+            sb.append(has0 ? cnt1 : 0).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        cin >> n;
+        int cnt1 = 0;          // 1-极性（奇数）个数
+        bool has0 = false;     // 是否存在 0-极性（偶数）
+        for (int i = 0; i < n; ++i) {
+            int x;
+            cin >> x;
+            if (x % 2 == 0) {
+                has0 = true;
+            } else {
+                cnt1++;
+            }
+        }
+        // 如果出现 0-极性，答案是 1-极性的总数；否则答案为 0
+        cout << (has0 ? cnt1 : 0) << '\n';
+    }
+    return 0;
+}
+```

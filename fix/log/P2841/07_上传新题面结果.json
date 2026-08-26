@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2841",
+  "title": "第1题-工艺首现配方",
+  "docId": 2474,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "字符串",
+  "videosol": "",
+  "trial_videosol": ""
+}

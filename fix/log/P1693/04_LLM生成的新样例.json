@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "abcyoux",
+      "output": "youabcx",
+      "explanation": "字符 `y`、`o`、`u` 各出现 `1` 次，因此最多可以拼出 `1` 段连续的 `you`。\n\n一种合法方案是先写出 `you`，再按剩余字母 `a`、`b`、`c`、`x` 依次拼接，得到 `youabcx`。"
+    },
+    {
+      "input": "zzzz",
+      "output": "zzzz",
+      "explanation": "字符串中没有 `y`、`o`、`u`，无法形成连续片段 `you`。\n\n重排后仍为 `zzzz`，连续 `you` 的个数为 `0`。"
+    },
+    {
+      "input": "yoyouuabc",
+      "output": "youyouabc",
+      "explanation": "字符 `y`、`o`、`u` 各出现 `2` 次，最多可拼出 `2` 段连续的 `you`。\n\n先写出 `youyou`，剩余字母为 `a`、`b`、`c`，得到 `youyouabc`。"
+    },
+    {
+      "input": "o",
+      "output": "o",
+      "explanation": "只有一个字符 `o`，无法拼出 `you`，答案即为 `o`。"
+    }
+  ]
+}

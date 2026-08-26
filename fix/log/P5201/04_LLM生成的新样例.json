@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "1\n6\n(()())",
+      "output": "2 1 1 1 1 2",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "1\n6\n(()())\n6",
+      "output": "2 1 1 1 1 2",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

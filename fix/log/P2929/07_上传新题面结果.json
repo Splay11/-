@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2929",
+  "title": "第1题-符文石的和谐组合",
+  "docId": 2564,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "数论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

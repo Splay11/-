@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1694",
+  "title": "统一校准代价",
+  "docId": 794,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "trial_videosol": ""
+}

@@ -1,0 +1,197 @@
+## 解题思路
+
+1. 首先计算不进行任何交换时的总得分：
+   \[
+   S_{\text{original}} = \sum_{i=1}^{n} (score_i - base_i) \cdot mult_i
+   \]
+
+2. 考虑选择两个不同的关卡 \(i\) 和 \(j\)，交换它们的基础分 \(base_i\) 与 \(base_j\)。交换后总得分的变化量（增益）为：
+   \[
+   \text{gain} = (base_i - base_j) \cdot (mult_i - mult_j)
+   \]
+   因此问题转化为寻找一对下标 \(i, j\)，使该增益最大。
+
+3. 由于总得分最多进行一次交换，也可以不交换，因此最大增益应至少为 \(0\)（不交换对应增益 \(0\)）。最终答案为：
+   \[
+   S_{\text{max}} = S_{\text{original}} + \max(0, \max_{i,j} \text{gain})
+   \]
+
+4. 注意到 \(mult_i\) 的取值范围很小（\(1\) 到 \(1000\)），可以按 \(mult\) 值将关卡分组。对于每个可能的 \(mult\) 值 \(v\)，记录该组中 \(base_i\) 的最小值 \(min\_base[v]\) 和最大值 \(max\_base[v]\)。
+
+5. 枚举所有可能的 \(mult\) 值对 \((c_i, c_j)\)，其中 \(c_i \le c_j\)：
+   - 从倍率为 \(c_j\) 的关卡中选 \(base\) 最大的，从倍率为 \(c_i\) 的关卡中选 \(base\) 最小的，交换后增益为  
+     \[
+     (max\_base[c_j] - min\_base[c_i]) \cdot (c_j - c_i)
+     \]
+   - 由于 \(c_i \le c_j\) 时该乘积非负，枚举所有组合即可覆盖所有可能产生正增益的情况。遍历过程中维护最大增益即可。
+
+6. 最后将原始得分加上最大增益输出。
+
+## 复杂度分析
+
+- **时间复杂度**：\(O(n + M^2)\)，其中 \(M = 1000\) 是 \(mult_i\) 的值域上界。遍历数组分组需要 \(O(n)\)，双重循环枚举 \(mult\) 值对需要 \(O(M^2)\)。对于 \(n \le 10^5\)，该复杂度完全可行。
+- **空间复杂度**：\(O(M)\)，仅需维护两个长度为 \(M+1\) 的数组记录每个 \(mult\) 值对应的最大与最小基础分。
+
+## 代码实现
+
+### Python
+
+```python
+def solve():
+    import sys
+    data = sys.stdin.read().split()
+    n = int(data[0])
+    base = list(map(int, data[1:n+1]))
+    score = list(map(int, data[n+1:2*n+1]))
+    mult = list(map(int, data[2*n+1:3*n+1]))
+
+    # 计算原始总得分
+    original = 0
+    for i in range(n):
+        original += (score[i] - base[i]) * mult[i]
+
+    # 按倍率分组，记录每个倍率对应的最大和最小基础分
+    MAX_V = 1000
+    INF = 10**9
+    min_base = [INF] * (MAX_V + 1)
+    max_base = [-INF] * (MAX_V + 1)
+
+    for i in range(n):
+        m = mult[i]
+        b = base[i]
+        if b < min_base[m]:
+            min_base[m] = b
+        if b > max_base[m]:
+            max_base[m] = b
+
+    # 枚举倍率对，计算最大增益
+    max_gain = 0  # 可以不交换，增益至少为0
+    for ci in range(1, MAX_V + 1):
+        if min_base[ci] == INF:
+            continue
+        for cj in range(ci, MAX_V + 1):
+            if max_base[cj] == -INF:
+                continue
+            gain = (max_base[cj] - min_base[ci]) * (cj - ci)
+            if gain > max_gain:
+                max_gain = gain
+
+    print(original + max_gain)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] base = new int[n];
+        int[] score = new int[n];
+        int[] mult = new int[n];
+
+        for (int i = 0; i < n; i++) base[i] = sc.nextInt();
+        for (int i = 0; i < n; i++) score[i] = sc.nextInt();
+        for (int i = 0; i < n; i++) mult[i] = sc.nextInt();
+
+        // 计算原始总得分
+        long original = 0;
+        for (int i = 0; i < n; i++) {
+            original += (long)(score[i] - base[i]) * mult[i];
+        }
+
+        // 按倍率分组，记录每个倍率对应的最大和最小基础分
+        int MAX_V = 1000;
+        long[] min_base = new long[MAX_V + 1];
+        long[] max_base = new long[MAX_V + 1];
+        long INF = (long) 1e9;
+        for (int v = 1; v <= MAX_V; v++) {
+            min_base[v] = INF;
+            max_base[v] = -INF;
+        }
+
+        for (int i = 0; i < n; i++) {
+            int m = mult[i];
+            long b = base[i];
+            if (b < min_base[m]) min_base[m] = b;
+            if (b > max_base[m]) max_base[m] = b;
+        }
+
+        // 枚举倍率对，计算最大增益
+        long max_gain = 0;  // 可以不交换
+        for (int ci = 1; ci <= MAX_V; ci++) {
+            if (min_base[ci] == INF) continue;
+            for (int cj = ci; cj <= MAX_V; cj++) {
+                if (max_base[cj] == -INF) continue;
+                long gain = (max_base[cj] - min_base[ci]) * (cj - ci);
+                if (gain > max_gain) {
+                    max_gain = gain;
+                }
+            }
+        }
+
+        System.out.println(original + max_gain);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int> base(n), score(n), mult(n);
+    for (int i = 0; i < n; ++i) cin >> base[i];
+    for (int i = 0; i < n; ++i) cin >> score[i];
+    for (int i = 0; i < n; ++i) cin >> mult[i];
+
+    // 计算原始总得分
+    long long original = 0;
+    for (int i = 0; i < n; ++i) {
+        original += 1LL * (score[i] - base[i]) * mult[i];
+    }
+
+    // 按倍率分组，记录每个倍率对应的最大和最小基础分
+    const int MAX_V = 1000;
+    const long long INF = 1e9;
+    vector<long long> min_base(MAX_V + 1, INF);
+    vector<long long> max_base(MAX_V + 1, -INF);
+
+    for (int i = 0; i < n; ++i) {
+        int m = mult[i];
+        long long b = base[i];
+        if (b < min_base[m]) min_base[m] = b;
+        if (b > max_base[m]) max_base[m] = b;
+    }
+
+    // 枚举倍率对，计算最大增益
+    long long max_gain = 0;  // 可以不交换
+    for (int ci = 1; ci <= MAX_V; ++ci) {
+        if (min_base[ci] == INF) continue;
+        for (int cj = ci; cj <= MAX_V; ++cj) {
+            if (max_base[cj] == -INF) continue;
+            long long gain = (max_base[cj] - min_base[ci]) * (cj - ci);
+            if (gain > max_gain) {
+                max_gain = gain;
+            }
+        }
+    }
+
+    cout << original + max_gain << '\n';
+    return 0;
+}
+```

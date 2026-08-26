@@ -1,0 +1,189 @@
+## 解题思路
+
+先根据题意提炼条件：
+
+1. 像素画的长和宽都必须是偶数，也就是$n$和$m$都为偶数。
+2. 像素画中至少能拆解出一个边长为$2$的像素正方形。
+
+一个边长为$2$的像素正方形，本质上就是存在一个 $2 \times 2$ 的子矩阵，四个位置全都是 `'1'`。
+
+所以这题的做法非常直接：
+
+* 先判断$n$和$m$是否都为偶数，如果不是，直接输出 `NO`。
+* 如果是偶数，再在整个矩阵中枚举所有左上角位置，检查是否存在某个 $2 \times 2$ 的区域满足四个格子都是 `'1'`。
+* 只要找到一个这样的 $2 \times 2$ 正方形，就说明满足题意，输出 `YES`；
+* 如果全部检查完都没有，输出 `NO`。
+
+这里用到的算法就是二维遍历（枚举所有 $2 \times 2$ 子矩阵）。
+
+实现时可以单独写一个函数负责判断当前像素画是否优美，主函数里只负责输入输出，符合 $ACM$ 模式要求。
+
+## 复杂度分析
+
+设像素画大小为$n \times m$。
+
+需要枚举所有可能的 $2 \times 2$ 子矩阵，一共有 $(n-1)\times(m-1)$ 个，每次判断只需常数时间。
+
+* 时间复杂度：$O(nm)$
+* 空间复杂度：$O(1)$（不计输入存储）
+
+该复杂度对于$n,m \le 500$完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+def is_beautiful(n, m, grid):
+    # 长和宽必须都是偶数
+    if n % 2 != 0 or m % 2 != 0:
+        return False
+
+    # 枚举所有 2x2 子矩阵
+    for i in range(n - 1):
+        for j in range(m - 1):
+            # 如果四个位置都是 1，说明存在边长为 2 的像素正方形
+            if grid[i][j] == '1' and grid[i][j + 1] == '1' and grid[i + 1][j] == '1' and grid[i + 1][j + 1] == '1':
+                return True
+
+    return False
+
+
+def main():
+    # 输入测试组数
+    T = int(input())
+    for _ in range(T):
+        # 输入长和宽
+        n, m = map(int, input().split())
+        # 输入像素画
+        grid = [input().strip() for _ in range(n)]
+
+        # 输出结果
+        if is_beautiful(n, m, grid):
+            print("YES")
+        else:
+            print("NO")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 判断当前像素画是否优美
+    public static boolean isBeautiful(int n, int m, String[] grid) {
+        // 长和宽必须都是偶数
+        if (n % 2 != 0 || m % 2 != 0) {
+            return false;
+        }
+
+        // 枚举所有 2x2 子矩阵
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < m - 1; j++) {
+                // 判断四个位置是否都是 '1'
+                if (grid[i].charAt(j) == '1' &&
+                    grid[i].charAt(j + 1) == '1' &&
+                    grid[i + 1].charAt(j) == '1' &&
+                    grid[i + 1].charAt(j + 1) == '1') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // 输入测试组数
+        int T = sc.nextInt();
+
+        while (T-- > 0) {
+            // 输入长和宽
+            int n = sc.nextInt();
+            int m = sc.nextInt();
+
+            // 输入像素画
+            String[] grid = new String[n];
+            for (int i = 0; i < n; i++) {
+                grid[i] = sc.next();
+            }
+
+            // 输出结果
+            if (isBeautiful(n, m, grid)) {
+                System.out.println("YES");
+            } else {
+                System.out.println("NO");
+            }
+        }
+
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+// 判断当前像素画是否优美
+bool isBeautiful(int n, int m, const vector<string>& grid) {
+    // 长和宽必须都是偶数
+    if (n % 2 != 0 || m % 2 != 0) {
+        return false;
+    }
+
+    // 枚举所有 2x2 子矩阵
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < m - 1; j++) {
+            // 判断四个位置是否都是 '1'
+            if (grid[i][j] == '1' &&
+                grid[i][j + 1] == '1' &&
+                grid[i + 1][j] == '1' &&
+                grid[i + 1][j + 1] == '1') {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+int main() {
+    // 输入测试组数
+    int T;
+    cin >> T;
+
+    while (T--) {
+        // 输入长和宽
+        int n, m;
+        cin >> n >> m;
+
+        // 输入像素画
+        vector<string> grid(n);
+        for (int i = 0; i < n; i++) {
+            cin >> grid[i];
+        }
+
+        // 输出结果
+        if (isBeautiful(n, m, grid)) {
+            cout << "YES" << '\n';
+        } else {
+            cout << "NO" << '\n';
+        }
+    }
+
+    return 0;
+}
+```

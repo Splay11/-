@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2899",
+  "title": "服务器宕机后的残余算力",
+  "docId": 2533,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "树形dp",
+    "dfs"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树形DP",
+  "videosol": "",
+  "trial_videosol": ""
+}

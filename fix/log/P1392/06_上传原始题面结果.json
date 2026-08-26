@@ -1,0 +1,9 @@
+{
+  "message": "testdata upload success",
+  "pid": "P1392",
+  "uploadedCount": 2,
+  "uploadedFiles": [
+    "original_statement.md",
+    "original_title.txt"
+  ]
+}

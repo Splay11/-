@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3630",
+  "title": "数字消除计分",
+  "docId": 2973,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

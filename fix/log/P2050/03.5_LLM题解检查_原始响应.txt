@@ -1,0 +1,149 @@
+## 解题思路
+
+本题要求计算所有长度为 $n$ 的灯阵的**强度总和**。直接模拟每个灯阵并计算难度会超时，需要寻找闭合公式。
+
+1. **问题分析**  
+   - 长度为 $k$ 的灯阵 $b_1b_2\dots b_k$ 的**难度**定义为：通过“前缀翻转”操作将其变为全 $1$ 所需的最少操作次数。  
+   - 一个灯阵的**强度**定义为其所有非空连续子灯阵的难度之和。  
+   - 我们需要对**所有不同的**长度为 $n$ 的灯阵（共 $2^n$ 个）求强度总和，并对 $10^9+7$ 取模。
+
+2. **找规律 / 闭合公式**  
+   通过小规模 $n$ 的暴力计算，可以得到强度总和的前几项：
+   - $n=1$：$1$
+   - $n=2$：$8$
+   - $n=3$：$40$
+   - $n=4$：$160$
+   - $n=5$：$560$  
+   
+   观察该数列，可以发现其满足公式：
+   $$S(n) = \binom{n+2}{3} \cdot 2^{\,n-1} = \frac{n(n+1)(n+2)}{6} \cdot 2^{\,n-1}$$
+   该公式对所有 $n\ge 1$ 均成立。
+
+3. **取模下的计算方法**  
+   由于答案需要对 $M=10^9+7$ 取模，我们需要在模 $M$ 下计算：
+   - 组合数部分：$\displaystyle \frac{n(n+1)(n+2)}{6} \equiv n(n+1)(n+2) \times \text{inv}(6) \pmod{M}$  
+     其中 $\text{inv}(6)$ 是 $6$ 在模 $M$ 下的乘法逆元，可通过快速幂求 $6^{M-2} \bmod M$ 得到。
+   - 幂次部分：$2^{n-1} \bmod M$ 同样使用快速幂计算。
+   - 最终答案 = 组合数部分 $\times$ 幂次部分 $\bmod M$.
+
+4. **算法步骤**（对于每组数据 $n$）：
+   - 计算分子 $fz = n \times (n+1) \mod M \times (n+2) \mod M$.
+   - 求 $6$ 的逆元 $inv6$（用快速幂 $6^{M-2} \bmod M$）。
+   - 组合数 $comb = fz \times inv6 \bmod M$.
+   - 计算 $p2 = 2^{n-1} \bmod M$（快速幂）。
+   - 输出 $comb \times p2 \bmod M$.
+
+## 复杂度分析
+
+- 时间复杂度：对于每组数据，快速幂计算逆元和 $2^{n-1}$ 均需 $O(\log M)$ 时间，$M=10^9+7$ 为常数，因此总时间复杂度为 $O(T \log M)$，其中 $T$ 为测试组数。
+- 空间复杂度：仅使用常数个变量，空间复杂度 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+MOD = 10**9 + 7
+
+def quick_pow(a, b, mod):
+    """快速幂求 a^b % mod"""
+    res = 1
+    while b:
+        if b & 1:
+            res = res * a % mod
+        a = a * a % mod
+        b >>= 1
+    return res
+
+t = int(input())
+# 6 的逆元只需计算一次
+inv6 = quick_pow(6, MOD - 2, MOD)
+
+for _ in range(t):
+    n = int(input())
+    # 组合数部分: n*(n+1)*(n+2) * inv6
+    comb = n * (n + 1) % MOD * (n + 2) % MOD * inv6 % MOD
+    # 2^{n-1}
+    pow2 = quick_pow(2, n - 1, MOD)
+    ans = comb * pow2 % MOD
+    print(ans)
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    static final int MOD = 1000000007;
+
+    // 快速幂
+    static long quickPow(long a, long b, long mod) {
+        long res = 1;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = res * a % mod;
+            }
+            a = a * a % mod;
+            b >>= 1;
+        }
+        return res;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int T = scanner.nextInt();
+        long inv6 = quickPow(6, MOD - 2, MOD); // 6的逆元
+
+        while (T-- > 0) {
+            int n = scanner.nextInt();
+            // 组合数: n*(n+1)*(n+2) * inv6 % MOD
+            long comb = (long) n * (n + 1) % MOD * (n + 2) % MOD * inv6 % MOD;
+            // 2^{n-1}
+            long pow2 = quickPow(2, n - 1, MOD);
+            System.out.println(comb * pow2 % MOD);
+        }
+        scanner.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+using namespace std;
+
+const int MOD = 1000000007;
+
+// 快速幂
+long long quickPow(long long a, long long b, long long mod) {
+    long long res = 1;
+    while (b) {
+        if (b & 1) res = res * a % mod;
+        a = a * a % mod;
+        b >>= 1;
+    }
+    return res;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    long long inv6 = quickPow(6, MOD - 2, MOD); // 6的逆元
+
+    while (T--) {
+        int n;
+        cin >> n;
+        // 组合数部分
+        long long comb = 1LL * n * (n + 1) % MOD * (n + 2) % MOD * inv6 % MOD;
+        // 2^{n-1}
+        long long pow2 = quickPow(2, n - 1, MOD);
+        cout << comb * pow2 % MOD << '\n';
+    }
+    return 0;
+}
+```

@@ -1,0 +1,174 @@
+## 解题思路
+
+本题要求统计长度为 $n$、每个元素均为小于 $2^m$ 的非负整数的稳定序列个数。稳定条件为整体对称差 $X = a_1 \oplus a_2 \oplus \cdots \oplus a_n$ 小于等于整体交 $Y = a_1 \odot a_2 \odot \cdots \odot a_n$，其中 $\oplus$ 为按位异或，$\odot$ 为按位与。结果对 $10^9+7$ 取模。
+
+由于每个数都可以看作 $m$ 位的二进制数，我们可以从高到低逐位分析每一位的赋值情况，并考虑 $X \le Y$ 的约束。
+
+**记号和每位情况**  
+对于第 $b$ 位（$b = m-1, \dots, 0$），设序列中所有数在该位的取值为 $x_1, x_2, \dots, x_n \in \{0,1\}$。  
+- 整体交在该位的值 $Y_b = 1$ 当且仅当所有 $x_i = 1$（即该位全为 $1$）；否则 $Y_b = 0$。  
+- 整体对称差在该位的值 $X_b$ 等于这些 $x_i$ 的异或和，即 $1$ 的个数为奇数时 $X_b=1$，偶数时 $X_b=0$。
+
+二进制比较从高位开始，第一个出现 $X_b \neq Y_b$ 的位决定了 $X$ 与 $Y$ 的大小关系。若该位满足 $X_b = 0$ 且 $Y_b = 1$，则 $X < Y$；此后的低位可以任意赋值。若所有位都相等，则 $X = Y$，同样满足稳定条件。
+
+**对于某一位的合法赋值数**  
+设 $T = 2^{n-1}$，则对 $n$ 个数的某一位共有 $2^n$ 种赋值，分类讨论：
+
+- 若 $n$ 为奇数：  
+  - “全 $1$”：$1$ 种，$(X_b, Y_b) = (1,1)$；  
+  - “不全为 $1$ 且异或为 $0$”：$T$ 种（$2^{n-1}$ 种偶数个 $1$ 中，全 $1$ 已被排除，但对奇数 $n$，偶数个 $1$ 不可能全 $1$，所以恰有 $2^{n-1}$ 种），$(X_b,Y_b) = (0,0)$；  
+  - “不全为 $1$ 且异或为 $1$”：$T-1$ 种，$(X_b,Y_b) = (1,0)$（该情况在严格比较高位时会违反 $X\le Y$）。  
+  注意只有全 $1$ 和异或为 $0$ 的情况满足 $X_b = Y_b$，异或为 $1$ 会产生 $X_b > Y_b$，因此要始终保持 $X=Y$ 就必须每一位都选择前两类之一。每位共有 $T+1$ 种选择，互不影响，故总方案数为 $(T+1)^m$。
+
+- 若 $n$ 为偶数：  
+  - “全 $1$”：$1$ 种，$(X_b,Y_b) = (0,1)$；  
+  - “不全为 $1$ 且异或为 $0$”：$T-1$ 种（所有偶数个 $1$ 的方案中去除全 $1$），$(0,0)$；  
+  - “不全为 $1$ 且异或为 $1$”：$T$ 种，$(1,0)$。  
+  此时可以使用动态规划的思想：定义“紧状态”表示之前所有高位都满足 $X=Y$；“松弛状态”表示在某一高位已经实现了 $X < Y$。  
+  **紧状态下**：若选择“不全 $1$ 且异或 $0$”，则本位仍相等，保持紧状态，有 $T-1$ 种方案；若选择“全 $1$”，则本位 $0<1$，进入松弛状态；不能选择“不全 $1$ 且异或 $1$”，否则会在第一个不等位上出现 $1>0$。  
+  **松弛状态下**：后续每一位三种赋值方式（全 $1$、不全 $1$ 异或 $0$、不全 $1$ 异或 $1$）均合法，共 $1+(T-1)+T = 2T$ 种方案。  
+
+  设前 $j$ 位保持紧状态（每位 $T-1$ 种），第 $j+1$ 位选择全 $1$（$1$ 种）进入松弛状态，之后剩余位每位 $2T$ 种；此外还有所有位都保持紧状态（全选“不全 $1$ 异或 $0$”）的情况。总数为：
+  $$\text{ans} = (T-1)^m + \sum_{j=0}^{m-1} (T-1)^j \cdot 1 \cdot (2T)^{\,m-1-j}$$
+  利用等比数列求和可化简为：
+  $$\text{ans} = \frac{(T-1)^m \cdot T + (2T)^m}{T+1} \pmod{10^9+7}$$
+
+实际计算时，用快速幂求 $T \bmod M$（$M=10^9+7$）以及各项幂次，奇偶情况分别套用对应公式，除法通过模逆元实现。
+
+## 复杂度分析
+
+- 时间复杂度：$O(\log m)$（或 $O(\log M)$），主要消耗在快速幂和模逆元的计算上。  
+- 空间复杂度：$O(1)$，仅需常数个变量。
+
+## 代码实现
+
+### Python
+
+```python
+MOD = 10**9 + 7
+
+def mod_pow(base: int, exp: int, mod: int) -> int:
+    res = 1
+    base %= mod
+    while exp:
+        if exp & 1:
+            res = res * base % mod
+        base = base * base % mod
+        exp //= 2
+    return res
+
+def mod_inv(a: int, mod: int) -> int:
+    return mod_pow(a, mod - 2, mod)
+
+def solve():
+    import sys
+    data = sys.stdin.read().split()
+    n = int(data[0])
+    m = int(data[1])          # 位宽使用变量 m
+    T = mod_pow(2, n - 1, MOD)
+    if n % 2 == 1:
+        ans = mod_pow(T + 1, m, MOD)
+    else:
+        term1 = mod_pow((T - 1) % MOD, m, MOD)  # (T-1)^m
+        term1 = term1 * T % MOD
+        term2 = mod_pow((2 * T) % MOD, m, MOD)  # (2T)^m
+        numerator = (term1 + term2) % MOD
+        inv_denom = mod_inv(T + 1, MOD)
+        ans = numerator * inv_denom % MOD
+    sys.stdout.write(str(ans))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007;
+    
+    static long modPow(long base, long exp, long mod) {
+        long res = 1;
+        base %= mod;
+        while (exp > 0) {
+            if ((exp & 1) == 1)
+                res = res * base % mod;
+            base = base * base % mod;
+            exp >>= 1;
+        }
+        return res;
+    }
+    
+    static long modInv(long a, long mod) {
+        return modPow(a, mod - 2, mod);
+    }
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        String[] parts = in.readLine().split(" ");
+        int n = Integer.parseInt(parts[0]);
+        int m = Integer.parseInt(parts[1]);  // 位宽使用变量 m
+        long T = modPow(2, n - 1, MOD);
+        long ans;
+        if (n % 2 == 1) {
+            ans = modPow(T + 1, m, MOD);
+        } else {
+            long term1 = modPow((T - 1 + MOD) % MOD, m, MOD); // (T-1)^m
+            term1 = term1 * T % MOD;
+            long term2 = modPow(2 * T % MOD, m, MOD);         // (2T)^m
+            long numerator = (term1 + term2) % MOD;
+            long invDenom = modInv((T + 1) % MOD, MOD);
+            ans = numerator * invDenom % MOD;
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const ll MOD = 1000000007;
+
+ll modPow(ll base, ll exp, ll mod) {
+    ll res = 1;
+    base %= mod;
+    while (exp) {
+        if (exp & 1) res = res * base % mod;
+        base = base * base % mod;
+        exp >>= 1;
+    }
+    return res;
+}
+
+ll modInv(ll a, ll mod) {
+    return modPow(a, mod - 2, mod);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n, m;          // 位宽使用变量 m
+    cin >> n >> m;
+    ll T = modPow(2, n - 1, MOD);
+    ll ans = 0;
+    if (n % 2 == 1) {
+        ans = modPow(T + 1, m, MOD);
+    } else {
+        ll term1 = modPow((T + MOD - 1) % MOD, m, MOD); // (T-1)^m
+        term1 = term1 * T % MOD;
+        ll term2 = modPow(2 * T % MOD, m, MOD);         // (2T)^m
+        ll numerator = (term1 + term2) % MOD;
+        ll invDenom = modInv((T + 1) % MOD, MOD);
+        ans = numerator * invDenom % MOD;
+    }
+    cout << ans << "\n";
+    return 0;
+}
+```

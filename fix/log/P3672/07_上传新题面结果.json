@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3672",
+  "title": "第3题-对称分割网络",
+  "docId": 3015,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "组合数"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树",
+  "videosol": "",
+  "trial_videosol": ""
+}

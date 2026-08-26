@@ -1,0 +1,138 @@
+## 解题思路
+
+根据类别约束条件，类别较小的任务必须分配较小的处理编号，因此三个类别的任务将按类别顺序依次占据连续的编号区间：
+
+- 类别 0 的所有任务分配到编号 $1, 2, \dots, \text{cnt}_0$；
+- 类别 1 的所有任务分配到编号 $\text{cnt}_0 + 1, \dots, \text{cnt}_0 + \text{cnt}_1$；
+- 类别 2 的所有任务分配到编号 $\text{cnt}_0 + \text{cnt}_1 + 1, \dots, N$。
+
+在同类别的任务之间，编号的分配没有顺序限制，因此问题转化为：对每个类别，将给定的一组初始优先级 $p$ 与一段连续的编号 $s$ 进行匹配，使得该组内 $\sum |p_i - s_i|$ 最小。这是一个经典的贪心问题：将两个数组分别排序后，按照大小顺序一一对应，即可使对应元素的绝对差之和最小。
+
+整体算法步骤：
+
+1. 读入 $N$、初始优先级数组 $p$ 和类别数组 $t$。
+2. 将任务按类别 $t_i$ 分成三组，每组存放对应的初始优先级 $p_i$。
+3. 初始化当前编号 $x = 1$，答案 $\text{ans} = 0$。
+4. 依次处理类别 $0, 1, 2$：
+   - 将该组内的优先级数组排序；
+   - 对排序后的每一个优先级 $val$，累加 $|val - x|$ 到答案中，并将编号 $x$ 增加 1。
+5. 输出 $\text{ans}$。
+
+## 复杂度分析
+
+- 时间复杂度：$O(N \log N)$。将每个任务分到对应组别需要 $O(N)$；对三个组分别排序，总排序代价为 $O(N \log N)$；最后遍历所有任务计算答案需要 $O(N)$。
+- 空间复杂度：$O(N)$。需要存储输入数组以及分组后的优先级列表。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    n = int(next(it))
+    p = [int(next(it)) for _ in range(n)]
+    t = [int(next(it)) for _ in range(n)]
+    
+    # 按类别分组，三个列表分别存放类别0、1、2的初始优先级
+    groups = [[] for _ in range(3)]
+    for pi, ti in zip(p, t):
+        groups[ti].append(pi)
+    
+    ans = 0
+    x = 1  # 当前分配的处理编号
+    for i in range(3):
+        groups[i].sort()
+        for val in groups[i]:
+            ans += abs(val - x)
+            x += 1
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        int[] p = new int[n];
+        String[] parts = br.readLine().trim().split("\\s+");
+        for (int i = 0; i < n; i++) {
+            p[i] = Integer.parseInt(parts[i]);
+        }
+        int[] t = new int[n];
+        parts = br.readLine().trim().split("\\s+");
+        for (int i = 0; i < n; i++) {
+            t[i] = Integer.parseInt(parts[i]);
+        }
+        
+        // 按类别分组
+        List<Integer>[] groups = new List[3];
+        for (int i = 0; i < 3; i++) {
+            groups[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < n; i++) {
+            groups[t[i]].add(p[i]);
+        }
+        
+        long ans = 0;
+        long x = 1;  // 当前分配的处理编号
+        for (int i = 0; i < 3; i++) {
+            Collections.sort(groups[i]);
+            for (int val : groups[i]) {
+                ans += Math.abs(val - x);
+                x++;
+            }
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n;
+    cin >> n;
+    vector<int> p(n), t(n);
+    for (int i = 0; i < n; ++i) cin >> p[i];
+    for (int i = 0; i < n; ++i) cin >> t[i];
+    
+    // 按类别分组
+    vector<vector<int>> groups(3);
+    for (int i = 0; i < n; ++i) {
+        groups[t[i]].push_back(p[i]);
+    }
+    
+    long long ans = 0;
+    long long x = 1;  // 当前分配的处理编号
+    for (int i = 0; i < 3; ++i) {
+        sort(groups[i].begin(), groups[i].end());
+        for (int val : groups[i]) {
+            ans += abs(val - x);
+            ++x;
+        }
+    }
+    cout << ans << "\n";
+    return 0;
+}
+```

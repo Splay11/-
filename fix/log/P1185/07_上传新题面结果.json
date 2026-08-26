@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1185",
+  "title": "第3题-数字修剪师",
+  "docId": 191,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

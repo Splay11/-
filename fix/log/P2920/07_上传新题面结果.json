@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2920",
+  "title": "第2题-窗口能量查询",
+  "docId": 2554,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "前缀和",
+    "质数筛"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

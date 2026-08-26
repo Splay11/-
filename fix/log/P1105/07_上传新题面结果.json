@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1105",
+  "title": "第3题-逐级传达",
+  "docId": 115,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二叉树",
+  "trial_videosol": ""
+}

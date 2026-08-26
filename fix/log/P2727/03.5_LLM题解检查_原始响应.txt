@@ -1,0 +1,180 @@
+## 解题思路
+
+本题的目标是在一次调整后最小化全公司员工的层级总和，其中员工的层级定义为该员工到 CEO（员工 1）的简单路径上的边数。
+
+**关键观察：**
+1. 初始时，整棵树的层级总和 $S$ 可以通过一次深度优先搜索（DFS）求出。  
+   令 `depth[u]` 表示员工 $u$ 的层级（CEO 的层级为 0），则 $S = \sum_{u=1}^{n} depth[u]$。
+2. 考虑选择任意一名非 CEO 员工 $x$ 并将其所在团队整体划归 CEO 直接领导。  
+   设以 $x$ 为根的子树大小为 `sz[x]`。操作后，$x$ 将直接连接到 CEO 之下，其层级变为 $1$；子树内任意员工 $u$ 的新层级变为 $1 + (depth[u] - depth[x])$。  
+   因此，子树中每个员工的层级减少量均为：
+   $$
+   depth[u] - [1 + (depth[u] - depth[x])] = depth[x] - 1
+   $$
+   整个团队带来的层级总和减少量为：
+   $$
+   \text{improve} = sz[x] \times (depth[x] - 1)
+   $$
+3. 为了使最终的层级总和最小，我们需要选择使 `improve` 最大的员工 $x$（$x \neq 1$）。  
+   最终答案为：
+   $$
+   ans = S - \max_{x \neq 1} \big( sz[x] \times (depth[x] - 1) \big)
+   $$
+
+**算法步骤：**
+- 用邻接表存储树，以员工 1 为根进行 DFS。
+- 在 DFS 过程中计算每个员工的深度（层级）和子树大小，并累加初始总层级 $S$。
+- 对于每个非根节点，计算其潜在减少量并维护最大值。
+- 输出 $S - \text{最大减少量}$。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$  
+  只进行了一次深度优先搜索，每个节点和边均被访问常数次。
+- **空间复杂度**：$O(n)$  
+  需要存储树的邻接表、深度数组和子树大小数组，辅助栈空间（递归深度）在最坏情况下为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(300000)
+
+def main():
+    n = int(sys.stdin.readline())
+    tree = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u, v = map(int, sys.stdin.readline().split())
+        tree[u].append(v)
+        tree[v].append(u)
+
+    depth = [0] * (n + 1)          # 层级（深度）
+    subtree_size = [0] * (n + 1)   # 子树大小
+    total_depth = 0                # 初始层级总和 S
+    best = 0                       # 最大减少量
+
+    def dfs(u, parent, d):
+        nonlocal total_depth, best
+        depth[u] = d
+        total_depth += d           # 累加层级
+        subtree_size[u] = 1
+        for v in tree[u]:
+            if v == parent:
+                continue
+            dfs(v, u, d + 1)
+            subtree_size[u] += subtree_size[v]
+        if u != 1:                 # 只考虑非 CEO 的员工
+            improvement = subtree_size[u] * (d - 1)
+            if improvement > best:
+                best = improvement
+
+    dfs(1, 0, 0)                  # 从 CEO 开始，层级为 0
+    print(total_depth - best)
+
+if __name__ == '__main__':
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int n;
+    static List<List<Integer>> tree;
+    static int[] depth;
+    static int[] subtreeSize;
+    static long totalDepth = 0;
+    static long best = 0;
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(br.readLine().trim());
+        tree = new ArrayList<>(n + 1);
+        for (int i = 0; i <= n; i++) {
+            tree.add(new ArrayList<>());
+        }
+        depth = new int[n + 1];
+        subtreeSize = new int[n + 1];
+
+        for (int i = 1; i < n; i++) {
+            String[] parts = br.readLine().split(" ");
+            int u = Integer.parseInt(parts[0]);
+            int v = Integer.parseInt(parts[1]);
+            tree.get(u).add(v);
+            tree.get(v).add(u);
+        }
+
+        dfs(1, 0, 0);               // 从 CEO 开始，层级为 0
+        System.out.println(totalDepth - best);
+    }
+
+    static void dfs(int u, int parent, int d) {
+        depth[u] = d;
+        totalDepth += d;            // 累加层级
+        subtreeSize[u] = 1;
+        for (int v : tree.get(u)) {
+            if (v == parent) continue;
+            dfs(v, u, d + 1);
+            subtreeSize[u] += subtreeSize[v];
+        }
+        if (u != 1) {               // 非 CEO 员工
+            long improvement = (long) subtreeSize[u] * (d - 1);
+            best = Math.max(best, improvement);
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+typedef long long ll;
+
+int n;
+vector<vector<int>> tree;
+vector<int> depth, subtreeSize;
+ll totalDepth = 0, best = 0;
+
+void dfs(int u, int parent, int d) {
+    depth[u] = d;
+    totalDepth += d;                // 累加层级
+    subtreeSize[u] = 1;
+    for (int v : tree[u]) {
+        if (v == parent) continue;
+        dfs(v, u, d + 1);
+        subtreeSize[u] += subtreeSize[v];
+    }
+    if (u != 1) {                   // 非 CEO 员工
+        ll improvement = (ll)subtreeSize[u] * (d - 1);
+        if (improvement > best) best = improvement;
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cin >> n;
+    tree.resize(n + 1);
+    depth.resize(n + 1, 0);
+    subtreeSize.resize(n + 1, 0);
+
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        cin >> u >> v;
+        tree[u].push_back(v);
+        tree[v].push_back(u);
+    }
+
+    dfs(1, 0, 0);                   // 从 CEO 开始，层级为 0
+    cout << totalDepth - best << "\n";
+    return 0;
+}
+```

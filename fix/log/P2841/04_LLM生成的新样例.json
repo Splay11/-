@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "3\nxyzzy\nxyyzx\nhello\nworld\nmississippi\nmisp",
+      "output": "YES\nNO\nYES",
+      "explanation": "第一组：`xyzzy` 与 `xyyzx` 的指纹都是 `xyz`，输出 `YES`。\n第二组：`hello` 的指纹为 `helo`，`world` 的指纹为 `world`，输出 `NO`。\n第三组：`mississippi` 与 `misp` 的指纹都是 `misp`，输出 `YES`。"
+    },
+    {
+      "input": "1\nzzzz\nz",
+      "output": "YES",
+      "explanation": "两个串的指纹都是 `z`，同源，输出 `YES`。"
+    },
+    {
+      "input": "2\nqwerty\nqwyert\nunique\nuniq",
+      "output": "NO\nNO",
+      "explanation": "第一组指纹分别为 `qwerty` 与 `qwyert`，不同。\n第二组 `unique` 的指纹为 `uniqe`，`uniq` 的指纹为 `uniq`，不同。两组均为 `NO`。"
+    }
+  ]
+}

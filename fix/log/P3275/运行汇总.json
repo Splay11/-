@@ -1,0 +1,11 @@
+{
+  "pid": "P3275",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:43:37",
+  "end_time": "2026-08-19 19:43:37",
+  "new_title": "第3题-产线切分对账",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

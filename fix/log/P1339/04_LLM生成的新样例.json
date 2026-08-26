@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1\n7",
+      "output": "0",
+      "explanation": "只有一个格点时，它关于主对角线的对称位置就是自己，差值为 `0`。\n这是 $n=1$ 的边界情形。"
+    },
+    {
+      "input": "3\n1 2 3\n4 5 6\n7 8 9",
+      "output": "16",
+      "explanation": "上三角三对差值为 $\\lvert 2-4\\rvert=2$、$\\lvert 3-7\\rvert=4$、$\\lvert 6-8\\rvert=2$，每对在求和中出现两次。\n总偏差为 $2\\times(2+4+2)=16$。"
+    },
+    {
+      "input": "1\n8",
+      "output": "0",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

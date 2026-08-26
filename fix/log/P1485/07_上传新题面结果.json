@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1485",
+  "title": "第2题-提取完整序列",
+  "docId": 510,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "哈希表",
+  "trial_videosol": ""
+}

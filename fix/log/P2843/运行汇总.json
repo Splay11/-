@@ -1,0 +1,11 @@
+{
+  "pid": "P2843",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:43:27",
+  "end_time": "2026-08-19 19:43:28",
+  "new_title": "第3题-连号货格分件",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

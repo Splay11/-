@@ -1,0 +1,21 @@
+```json
+{
+  "samples": [
+    {
+      "input": "3 10",
+      "output": "4",
+      "explanation": "从 $x=1$ 开始，按规则依次计算：$1 \\rightarrow 3 \\rightarrow 9 \\rightarrow 7 \\rightarrow 1$。\\n得到的不同值有 `1`、`3`、`9`、`7`，后续不再产生新值，因此总共有 `4` 个不同值。"
+    },
+    {
+      "input": "0 5",
+      "output": "2",
+      "explanation": "当 $p=0$ 时，对任意 $x$ 都有 $(x \\times 0) \\bmod q = 0$。\\n从 `1` 开始，第一次更新得到 `0`，之后永远停留在 `0`。\\n因此产生的不同值只有 `1` 和 `0`，共 `2` 个。"
+    },
+    {
+      "input": "6 9",
+      "output": "3",
+      "explanation": "序列更新过程：$1 \\times 6 \\bmod 9 = 6$，$6 \\times 6 \\bmod 9 = 0$，$0 \\times 6 \\bmod 9 = 0$。\\n依次出现的值为 `1`、`6`、`0`，之后不再产生新值，不同值总数为 `3`。"
+    }
+  ]
+}
+```

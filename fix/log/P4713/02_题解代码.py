@@ -1,0 +1,220 @@
+## 解题思路
+
+题目要求：对于每个给定整数 $x$，找到一个与 $x$ 的绝对差最小的质数 $p$；如果存在两个这样的质数，则输出较小的那个。
+
+核心做法是：
+
+先写一个判定质数的函数，再从 $x$ 开始向两边同时扩展查找。
+
+具体来说，设当前距离为 $d$：
+
+* 先判断 $x-d$ 是否是质数；
+* 如果是，直接返回它；
+* 否则再判断 $x+d$ 是否是质数；
+* 如果是，返回它。
+
+这样按距离从小到大枚举，第一次找到的质数一定是与 $x$ 绝对差最小的那个；并且因为先判断左边的 $x-d$，所以当左右两边距离相等时，会优先返回较小的那个，正好满足题意。
+
+判定质数时使用试除法：
+
+* 小于 $2$ 的数不是质数；
+* $2$ 是质数；
+* 大于 $2$ 的偶数不是质数；
+* 其余情况只需判断是否能被 $3$ 到 $\sqrt{n}$ 之间的奇数整除即可。
+
+由于数据范围是 $1 \le x \le 10^9$，而且测试组数最多只有 $30$ 组，使用这个做法完全可以通过。
+
+## 复杂度分析
+
+设最终找到的最近质数与 $x$ 的距离为 $d$。
+
+每次判断一个数是否为质数，时间复杂度是 $O(\sqrt{n})$，这里 $n$ 最大约为 $10^9$，所以单次判定复杂度可以记为 $O(\sqrt{x})$。
+
+在查找过程中，最多会检查大约 $2d+1$ 个数，因此总时间复杂度为：
+
+$O(d \cdot \sqrt{x})$
+
+其中 $d$ 一般很小，因此在本题范围内是可行的。
+
+空间复杂度为：
+
+$O(1)$
+
+只使用了常数额外空间。
+
+## 代码实现
+
+### Python
+
+```python
+def is_prime(n):
+    # 小于2不是质数
+    if n < 2:
+        return False
+    # 2是质数
+    if n == 2:
+        return True
+    # 大于2的偶数不是质数
+    if n % 2 == 0:
+        return False
+
+    # 只需判断奇数因子，枚举到 sqrt(n)
+    i = 3
+    while i * i <= n:
+        if n % i == 0:
+            return False
+        i += 2
+    return True
+
+
+def nearest_prime(x):
+    # 按距离从小到大枚举
+    d = 0
+    while True:
+        left = x - d
+        right = x + d
+
+        # 先判断左边，保证等距离时取较小者
+        if is_prime(left):
+            return left
+        if d != 0 and is_prime(right):
+            return right
+
+        d += 1
+
+
+def main():
+    t = int(input())
+    for _ in range(t):
+        x = int(input())
+        print(nearest_prime(x))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    public static boolean isPrime(int n) {
+        // 小于2不是质数
+        if (n < 2) {
+            return false;
+        }
+        // 2是质数
+        if (n == 2) {
+            return true;
+        }
+        // 大于2的偶数不是质数
+        if (n % 2 == 0) {
+            return false;
+        }
+
+        // 只判断奇数因子，枚举到 sqrt(n)
+        for (int i = 3; (long) i * i <= n; i += 2) {
+            if (n % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static int nearestPrime(int x) {
+        // 按距离从小到大枚举
+        int d = 0;
+        while (true) {
+            int left = x - d;
+            int right = x + d;
+
+            // 先判断左边，保证等距离时取较小者
+            if (isPrime(left)) {
+                return left;
+            }
+            if (d != 0 && isPrime(right)) {
+                return right;
+            }
+
+            d++;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int t = sc.nextInt();
+        while (t-- > 0) {
+            int x = sc.nextInt();
+            System.out.println(nearestPrime(x));
+        }
+
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+using namespace std;
+
+bool isPrime(int n) {
+    // 小于2不是质数
+    if (n < 2) {
+        return false;
+    }
+    // 2是质数
+    if (n == 2) {
+        return true;
+    }
+    // 大于2的偶数不是质数
+    if (n % 2 == 0) {
+        return false;
+    }
+
+    // 只判断奇数因子，枚举到 sqrt(n)
+    for (int i = 3; 1LL * i * i <= n; i += 2) {
+        if (n % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int nearestPrime(int x) {
+    // 按距离从小到大枚举
+    int d = 0;
+    while (true) {
+        int left = x - d;
+        int right = x + d;
+
+        // 先判断左边，保证等距离时取较小者
+        if (isPrime(left)) {
+            return left;
+        }
+        if (d != 0 && isPrime(right)) {
+            return right;
+        }
+
+        d++;
+    }
+}
+
+int main() {
+    int t;
+    cin >> t;
+
+    while (t--) {
+        int x;
+        cin >> x;
+        cout << nearestPrime(x) << '\n';
+    }
+
+    return 0;
+}
+```

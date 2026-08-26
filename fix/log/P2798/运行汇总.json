@@ -1,0 +1,11 @@
+{
+  "pid": "P2798",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 16:21:34",
+  "end_time": "2026-08-19 16:21:35",
+  "new_title": "第2题-乐句得分",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

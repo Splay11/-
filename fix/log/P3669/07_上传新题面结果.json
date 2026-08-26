@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3669",
+  "title": "第3题-通道或值限额",
+  "docId": 3012,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "数位dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

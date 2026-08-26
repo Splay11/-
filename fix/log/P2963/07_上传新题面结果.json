@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2963",
+  "title": "第1题-构造互质邻接矩阵",
+  "docId": 2598,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "其他",
+    "构造"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "构造",
+  "trial_videosol": ""
+}

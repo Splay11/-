@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3559",
+  "title": "第3题-和谐壁画",
+  "docId": 2902,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "组合数学"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

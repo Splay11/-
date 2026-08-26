@@ -1,0 +1,246 @@
+## 解题思路
+
+题目中给出的“相对静止”满足：
+
+* $a_{i,i}=1$
+* $a_{i,j}=a_{j,i}$
+* 具有传递性
+
+因此，这个关系本质上是一个**等价关系**。
+也就是说，所有列车会被划分成若干个集合，同一集合内的列车两两相对静止，表示它们**速度相同**；不同集合之间的列车速度不同。
+
+### 核心结论
+
+如果某辆列车真正静止，那么和它相对静止的所有列车速度也都相同，所以这一整个集合里的列车都真正静止。
+
+同时，不同集合速度不同，因此：
+
+* 真正静止的列车一定恰好来自某一个等价类
+* 不可能有两个不同等价类同时真正静止，否则它们速度同为 $0$，应当相对静止，与“属于不同集合”矛盾
+
+所以答案就是：
+
+* 最小值：所有等价类大小中的最小值
+* 最大值：所有等价类大小中的最大值
+
+### 如何求等价类
+
+把每辆列车看成一个点，若 $a_{i,j}=1$，说明它们在同一个等价类里。
+由于题目已经保证传递性，直接用 **DFS / BFS / 连通块统计** 即可求出每个等价类的大小。
+
+实现时：
+
+1. 枚举每辆列车
+2. 若未访问，则从它出发搜索所有与它相对静止的列车
+3. 统计这个连通块大小
+4. 更新最小值和最大值
+
+这里本质上使用的是 **图的连通块统计算法**
+
+## 复杂度分析
+
+设列车数量为 $n$。
+
+由于输入本身就是一个 $n \times n$ 的矩阵，在搜索过程中最多也要检查所有矩阵元素一次，因此：
+
+* 时间复杂度：$O(n^2)$
+* 空间复杂度：$O(n)$
+
+在 $n \le 500$ 的范围内完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+# 列车相对静止
+# 使用 DFS 统计等价类大小
+
+def dfs(start, g, vis, n):
+    # 统计当前连通块大小
+    stack = [start]
+    vis[start] = True
+    cnt = 0
+
+    while stack:
+        u = stack.pop()
+        cnt += 1
+        # 枚举所有列车，找与当前列车相对静止的点
+        for v in range(n):
+            if g[u][v] == 1 and not vis[v]:
+                vis[v] = True
+                stack.append(v)
+
+    return cnt
+
+
+def solve(n, g):
+    vis = [False] * n
+    mn = n
+    mx = 1
+
+    # 枚举每个等价类
+    for i in range(n):
+        if not vis[i]:
+            size = dfs(i, g, vis, n)
+            mn = min(mn, size)
+            mx = max(mx, size)
+
+    return mn, mx
+
+
+def main():
+    # 输入
+    n = int(input().strip())
+    g = [list(map(int, input().split())) for _ in range(n)]
+
+    # 求解
+    mn, mx = solve(n, g)
+
+    # 输出
+    print(mn, mx)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+
+    // 使用 DFS 统计一个连通块的大小
+    public static int dfs(int start, int[][] g, boolean[] vis, int n) {
+        Stack<Integer> stack = new Stack<>();
+        stack.push(start);
+        vis[start] = true;
+        int cnt = 0;
+
+        while (!stack.isEmpty()) {
+            int u = stack.pop();
+            cnt++;
+
+            // 枚举所有列车，找与当前列车相对静止的点
+            for (int v = 0; v < n; v++) {
+                if (g[u][v] == 1 && !vis[v]) {
+                    vis[v] = true;
+                    stack.push(v);
+                }
+            }
+        }
+
+        return cnt;
+    }
+
+    // 题面要求实现的功能写在外部函数里
+    public static int[] solve(int n, int[][] g) {
+        boolean[] vis = new boolean[n];
+        int mn = n;
+        int mx = 1;
+
+        // 枚举每个等价类
+        for (int i = 0; i < n; i++) {
+            if (!vis[i]) {
+                int size = dfs(i, g, vis, n);
+                mn = Math.min(mn, size);
+                mx = Math.max(mx, size);
+            }
+        }
+
+        return new int[]{mn, mx};
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // 输入
+        int n = sc.nextInt();
+        int[][] g = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                g[i][j] = sc.nextInt();
+            }
+        }
+
+        // 求解
+        int[] ans = solve(n, g);
+
+        // 输出
+        System.out.println(ans[0] + " " + ans[1]);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+// 使用 DFS 统计一个连通块的大小
+int dfs(int start, const vector<vector<int>>& g, vector<bool>& vis, int n) {
+    stack<int> st;
+    st.push(start);
+    vis[start] = true;
+    int cnt = 0;
+
+    while (!st.empty()) {
+        int u = st.top();
+        st.pop();
+        cnt++;
+
+        // 枚举所有列车，找与当前列车相对静止的点
+        for (int v = 0; v < n; v++) {
+            if (g[u][v] == 1 && !vis[v]) {
+                vis[v] = true;
+                st.push(v);
+            }
+        }
+    }
+
+    return cnt;
+}
+
+// 题面要求实现的功能写在外部函数里
+pair<int, int> solve(int n, const vector<vector<int>>& g) {
+    vector<bool> vis(n, false);
+    int mn = n;
+    int mx = 1;
+
+    // 枚举每个等价类
+    for (int i = 0; i < n; i++) {
+        if (!vis[i]) {
+            int size = dfs(i, g, vis, n);
+            mn = min(mn, size);
+            mx = max(mx, size);
+        }
+    }
+
+    return {mn, mx};
+}
+
+int main() {
+    // 输入
+    int n;
+    cin >> n;
+    vector<vector<int>> g(n, vector<int>(n));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cin >> g[i][j];
+        }
+    }
+
+    // 求解
+    pair<int, int> ans = solve(n, g);
+
+    // 输出
+    cout << ans.first << " " << ans.second << endl;
+
+    return 0;
+}
+```

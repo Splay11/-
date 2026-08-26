@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4688",
+  "title": "第1题-零频样本计数",
+  "docId": 3931,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "DFS"
+  ],
+  "alg_tag": "DFS",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

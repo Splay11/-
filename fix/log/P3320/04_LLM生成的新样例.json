@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1\n3\n000",
+      "output": "0 0 0",
+      "explanation": "全为 `0`，每个位置左侧都不存在不同字符，答案为 `0 0 0`。"
+    },
+    {
+      "input": "1\n1\n1",
+      "output": "0",
+      "explanation": "长度为 `1` 的边界：左侧为空，答案为 `0`。"
+    },
+    {
+      "input": "1\n3\n1",
+      "output": "0",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

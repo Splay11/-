@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2930",
+  "title": "第2题-第k个整理片段",
+  "docId": 2565,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "自定义排序"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "排序算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

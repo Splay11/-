@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1999",
+  "title": "冷链窗口限载",
+  "docId": 1102,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "trial_videosol": ""
+}

@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1997",
+  "title": "灯牌检修代价",
+  "docId": 1100,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

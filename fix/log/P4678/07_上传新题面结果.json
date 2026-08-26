@@ -1,0 +1,13 @@
+{
+  "message": "problem update success",
+  "pid": "P4678",
+  "title": "第2题-双子平方数",
+  "docId": 3919,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [],
+  "alg_tag": "暴力枚举",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

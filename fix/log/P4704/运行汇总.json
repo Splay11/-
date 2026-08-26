@@ -1,0 +1,11 @@
+{
+  "pid": "P4704",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:42:02",
+  "end_time": "2026-08-19 19:42:03",
+  "new_title": "第3题-工单稀疏加权",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

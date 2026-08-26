@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5227",
+  "title": "第1题-干线补站",
+  "docId": 4551,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "4\n3 1 5 2",
+      "output": "5\n7\n9\n5",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "1\n7",
+      "output": "0",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "5\n1 1 1 1 1",
+      "output": "0\n0\n0\n0\n0",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

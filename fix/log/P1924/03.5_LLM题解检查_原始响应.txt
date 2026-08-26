@@ -1,0 +1,395 @@
+## 解题思路
+
+本题采用最近邻投票策略（$K$-NN，$K=3$）对待分类作物进行品种识别。分类规则如下：
+
+1. **距离计算**：对于每一个参考样本（特征维度为 $m$），计算其与待分类作物之间的欧几里得距离。设参考样本特征向量为 $\mathbf{x}$，待分类作物特征向量为 $\mathbf{q}$，则距离为  
+   $$
+   d(\mathbf{x}, \mathbf{q}) = \sqrt{\sum_{j=1}^{m}(x_j - q_j)^2}
+   $$
+2. **选取近邻**：将所有参考样本按计算出的距离从小到大排序，取出距离最小的 $3$ 个样本（$K=3$）。
+3. **投票统计**：统计这 $3$ 个最近邻的品种标签出现次数，同时累计每个品种对应的距离之和。
+4. **决策规则**：
+   - 优先选择出现次数最多的品种作为预测结果；
+   - 若多个品种出现次数相同（并列最高），则比较这些品种对应的距离和，选择距离和最小的品种。
+5. **输出结果**：输出最终确定的品种标签（整数）。
+
+## 复杂度分析
+
+- 参考样本个数为 $n$，特征维度为 $m$。
+- 计算所有样本到待分类作物的距离需要 $O(n \times m)$ 时间。
+- 对距离排序需要 $O(n \log n)$ 时间。
+- 统计最近邻的类别及距离和为 $O(K) = O(1)$ 时间。
+
+因此：
+- **时间复杂度**：$O(n \times m + n \log n)$  
+- **空间复杂度**：$O(n)$，主要存储距离列表。
+
+## 代码实现
+
+### Python
+
+```python
+import math
+
+def classify_crop(reference_data, variety_labels, query):
+    """使用3-NN对作物品种进行分类"""
+    dist_list = []
+    # 计算待分类作物到每个参考样本的欧几里得距离
+    for i in range(len(reference_data)):
+        s = 0.0
+        for j in range(len(query)):
+            diff = reference_data[i][j] - query[j]
+            s += diff * diff
+        dist = math.sqrt(s)
+        dist_list.append((dist, variety_labels[i]))
+    
+    # 按距离从小到大排序
+    dist_list.sort(key=lambda x: x[0])
+    
+    k = 3
+    count_map = {}
+    dist_sum_map = {}
+    
+    # 统计最近3个样本的品种和距离和
+    for i in range(k):
+        dist, label = dist_list[i]
+        if label not in count_map:
+            count_map[label] = 0
+            dist_sum_map[label] = 0.0
+        count_map[label] += 1
+        dist_sum_map[label] += dist
+    
+    # 先按票数最高，再按距离和最小决定最终品种
+    best_label = -1
+    max_count = -1
+    min_dist_sum = float('inf')
+    
+    for label in count_map:
+        if count_map[label] > max_count:
+            max_count = count_map[label]
+            min_dist_sum = dist_sum_map[label]
+            best_label = label
+        elif count_map[label] == max_count:
+            if dist_sum_map[label] < min_dist_sum:
+                min_dist_sum = dist_sum_map[label]
+                best_label = label
+                
+    return best_label
+
+def main():
+    # 读取输入数据，eval可直接还原为Python列表
+    reference_data = eval(input())
+    variety_labels = eval(input())
+    query = eval(input())
+    
+    result = classify_crop(reference_data, variety_labels, query)
+    print(result)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    // 使用3-NN对作物品种进行分类
+    public static int classifyCrop(List<List<Double>> referenceData,
+                                   List<Integer> varietyLabels,
+                                   List<Double> query) {
+        int n = referenceData.size();
+        double[][] distances = new double[n][2]; // [距离, 标签]
+        
+        for (int i = 0; i < n; i++) {
+            double sum = 0.0;
+            List<Double> sample = referenceData.get(i);
+            for (int j = 0; j < query.size(); j++) {
+                double diff = sample.get(j) - query.get(j);
+                sum += diff * diff;
+            }
+            distances[i][0] = Math.sqrt(sum);
+            distances[i][1] = varietyLabels.get(i);
+        }
+        
+        // 按距离排序
+        Arrays.sort(distances, (a, b) -> Double.compare(a[0], b[0]));
+        
+        int k = 3;
+        Map<Integer, Integer> countMap = new HashMap<>();
+        Map<Integer, Double> distSumMap = new HashMap<>();
+        
+        for (int i = 0; i < k; i++) {
+            double dist = distances[i][0];
+            int label = (int) distances[i][1];
+            countMap.put(label, countMap.getOrDefault(label, 0) + 1);
+            distSumMap.put(label, distSumMap.getOrDefault(label, 0.0) + dist);
+        }
+        
+        int bestLabel = -1;
+        int maxCount = -1;
+        double minDistSum = Double.MAX_VALUE;
+        
+        for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
+            int label = entry.getKey();
+            int count = entry.getValue();
+            double sumDist = distSumMap.get(label);
+            if (count > maxCount) {
+                maxCount = count;
+                minDistSum = sumDist;
+                bestLabel = label;
+            } else if (count == maxCount && sumDist < minDistSum) {
+                minDistSum = sumDist;
+                bestLabel = label;
+            }
+        }
+        return bestLabel;
+    }
+    
+    // 解析形如[[1.0,2.0],[3.0,4.0]]的二维列表字符串
+    private static List<List<Double>> parse2DList(String s) {
+        s = s.trim();
+        // 去掉最外层的方括号
+        if (s.startsWith("[[")) s = s.substring(1, s.length() - 1);
+        List<List<Double>> result = new ArrayList<>();
+        int depth = 0;
+        StringBuilder currentList = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '[') {
+                depth++;
+                currentList = new StringBuilder();
+            } else if (c == ']') {
+                depth--;
+                if (depth == 0) {
+                    String inner = currentList.toString().trim();
+                    if (!inner.isEmpty()) {
+                        List<Double> row = new ArrayList<>();
+                        String[] parts = inner.split(",");
+                        for (String part : parts) {
+                            if (!part.trim().isEmpty())
+                                row.add(Double.parseDouble(part.trim()));
+                        }
+                        result.add(row);
+                    }
+                    currentList = new StringBuilder();
+                }
+            } else {
+                if (depth == 1) {
+                    currentList.append(c);
+                }
+            }
+        }
+        return result;
+    }
+    
+    // 解析一维整数列表：[0,1,2]
+    private static List<Integer> parseIntList(String s) {
+        s = s.trim();
+        if (s.startsWith("[") && s.endsWith("]")) s = s.substring(1, s.length() - 1);
+        String[] parts = s.split(",");
+        List<Integer> list = new ArrayList<>();
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (!trimmed.isEmpty()) {
+                list.add(Integer.parseInt(trimmed));
+            }
+        }
+        return list;
+    }
+    
+    // 解析一维实数列表：[1.5,2.5]
+    private static List<Double> parseDoubleList(String s) {
+        s = s.trim();
+        if (s.startsWith("[") && s.endsWith("]")) s = s.substring(1, s.length() - 1);
+        String[] parts = s.split(",");
+        List<Double> list = new ArrayList<>();
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (!trimmed.isEmpty()) {
+                list.add(Double.parseDouble(trimmed));
+            }
+        }
+        return list;
+    }
+    
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String line1 = sc.nextLine();
+        String line2 = sc.nextLine();
+        String line3 = sc.nextLine();
+        
+        List<List<Double>> referenceData = parse2DList(line1);
+        List<Integer> varietyLabels = parseIntList(line2);
+        List<Double> query = parseDoubleList(line3);
+        
+        int result = classifyCrop(referenceData, varietyLabels, query);
+        System.out.println(result);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cmath>
+#include <algorithm>
+#include <unordered_map>
+#include <sstream>
+#include <limits>
+
+using namespace std;
+
+// 根据3-NN算法对作物品种进行分类
+int classifyCrop(const vector<vector<double>>& referenceData,
+                 const vector<int>& varietyLabels,
+                 const vector<double>& query) {
+    int n = referenceData.size();
+    vector<pair<double, int>> distVec; // (距离, 标签)
+    
+    for (int i = 0; i < n; ++i) {
+        double sum = 0.0;
+        for (int j = 0; j < (int)query.size(); ++j) {
+            double diff = referenceData[i][j] - query[j];
+            sum += diff * diff;
+        }
+        double dist = sqrt(sum);
+        distVec.push_back({dist, varietyLabels[i]});
+    }
+    
+    // 按距离排序
+    sort(distVec.begin(), distVec.end());
+    
+    int k = 3;
+    unordered_map<int, int> countMap;
+    unordered_map<int, double> distSumMap;
+    
+    for (int i = 0; i < k; ++i) {
+        double dist = distVec[i].first;
+        int label = distVec[i].second;
+        countMap[label]++;
+        distSumMap[label] += dist;
+    }
+    
+    int bestLabel = -1;
+    int maxCount = -1;
+    double minDistSum = numeric_limits<double>::max();
+    
+    for (const auto& entry : countMap) {
+        int label = entry.first;
+        int cnt = entry.second;
+        double sumDist = distSumMap[label];
+        if (cnt > maxCount) {
+            maxCount = cnt;
+            minDistSum = sumDist;
+            bestLabel = label;
+        } else if (cnt == maxCount && sumDist < minDistSum) {
+            minDistSum = sumDist;
+            bestLabel = label;
+        }
+    }
+    return bestLabel;
+}
+
+// 辅助函数：去除首尾空白并去除最外层括号（如果存在）
+string stripBrackets(const string& s) {
+    string str = s;
+    // 去除首尾空格
+    while (!str.empty() && (str.front() == ' ' || str.front() == '\t')) str.erase(0,1);
+    while (!str.empty() && (str.back() == ' ' || str.back() == '\t')) str.pop_back();
+    if (!str.empty() && str.front() == '[' && str.back() == ']') {
+        str = str.substr(1, str.size()-2);
+    }
+    return str;
+}
+
+// 解析二维double列表，格式如 [[1.0,2.0],[3.0,4.0]]
+vector<vector<double>> parse2DList(const string& line) {
+    vector<vector<double>> result;
+    string s = stripBrackets(line);
+    // 遍历找出每一对 [ ... ] 内部内容
+    int i = 0;
+    while (i < (int)s.size()) {
+        if (s[i] == '[') {
+            int j = i+1;
+            int depth = 1;
+            while (j < (int)s.size() && depth > 0) {
+                if (s[j] == '[') depth++;
+                else if (s[j] == ']') depth--;
+                j++;
+            }
+            // 内部字符串为 s.substr(i+1, j-i-2)
+            string inner = s.substr(i+1, j-i-2);
+            vector<double> row;
+            // 分割逗号
+            stringstream ss(inner);
+            string token;
+            while (getline(ss, token, ',')) {
+                // 去除空格
+                while (!token.empty() && token.front() == ' ') token.erase(0,1);
+                while (!token.empty() && token.back() == ' ') token.pop_back();
+                if (!token.empty()) {
+                    row.push_back(stod(token));
+                }
+            }
+            result.push_back(row);
+            i = j;
+        } else {
+            i++;
+        }
+    }
+    return result;
+}
+
+// 解析一维整数列表：[1,2,3]
+vector<int> parseIntList(const string& line) {
+    vector<int> result;
+    string s = stripBrackets(line);
+    stringstream ss(s);
+    string token;
+    while (getline(ss, token, ',')) {
+        while (!token.empty() && token.front() == ' ') token.erase(0,1);
+        while (!token.empty() && token.back() == ' ') token.pop_back();
+        if (!token.empty()) {
+            result.push_back(stoi(token));
+        }
+    }
+    return result;
+}
+
+// 解析一维实数列表
+vector<double> parseDoubleList(const string& line) {
+    vector<double> result;
+    string s = stripBrackets(line);
+    stringstream ss(s);
+    string token;
+    while (getline(ss, token, ',')) {
+        while (!token.empty() && token.front() == ' ') token.erase(0,1);
+        while (!token.empty() && token.back() == ' ') token.pop_back();
+        if (!token.empty()) {
+            result.push_back(stod(token));
+        }
+    }
+    return result;
+}
+
+int main() {
+    string line1, line2, line3;
+    getline(cin, line1);
+    getline(cin, line2);
+    getline(cin, line3);
+    
+    vector<vector<double>> referenceData = parse2DList(line1);
+    vector<int> varietyLabels = parseIntList(line2);
+    vector<double> query = parseDoubleList(line3);
+    
+    int result = classifyCrop(referenceData, varietyLabels, query);
+    cout << result << endl;
+    
+    return 0;
+}
+```

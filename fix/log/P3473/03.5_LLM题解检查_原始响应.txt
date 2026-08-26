@@ -1,0 +1,198 @@
+## 解题思路
+
+本题要求找到正整数 $x$ 拆分成若干个大于 $1$ 的正整数的乘积后，这些整数的“得分”（即正因子个数）之和的最大值。设 $c(n)$ 表示 $n$ 的正因子个数，我们的目标是最大化 $\sum c(a_i)$。
+
+经过分析可以发现，最优拆分方案总是以下两种情况之一：
+
+1. **完全不拆分**：直接将 $x$ 作为一个整体，此时得分总和为 $c(x)$。
+2. **按“指数层”拆分**：将 $x$ 的质因数按指数分层，每一层取出所有可用的质数相乘，构成一个“平方自由”的因子，然后将这些因子相乘得到 $x$，此时得分总和等于各层因子得分之和。
+
+关于 $c(n)$ 的计算：若 $x$ 的质因数分解为 $x = \prod_{i=1}^m p_i^{e_i}$，则 $c(x) = \prod_{i=1}^m (e_i + 1)$，这一步对应不拆分时的答案。
+
+对于按层拆分的方案，设所有指数中的最大值为 $A = \max\{e_i\}$。对于 $\ell = 1, 2, \dots, A$，定义 $r_\ell$ 为满足 $e_i \ge \ell$ 的质因数个数。在第 $\ell$ 层，我们将所有 $e_i \ge \ell$ 的质数 $p_i$ 相乘，得到一个平方自由数，它的得分 $c = 2^{r_\ell}$。因为各层之间质数是独立的，总的得分和就是 $\sum_{\ell=1}^{A} 2^{r_\ell}$。
+
+该拆分方式被证明是最优的（任何其他拆分都不会严格超过这两者之一），因此最终答案即为
+
+$$\text{ans} = \max\!\left(c(x),\ \sum_{\ell=1}^{A} 2^{r_\ell}\right).$$
+
+**解决步骤**：
+- 对于每组询问的 $x$，试除分解得到所有质因子的指数列表 $\{e_i\}$。
+- 计算 $c(x) = \prod (e_i + 1)$。
+- 统计每层的 $r_\ell$，计算分层和 $S = \sum_{\ell=1}^{A} 2^{r_\ell}$。
+- 输出 $\max(c(x), S)$。
+
+## 复杂度分析
+
+对于每组数据，需要对 $x$ 进行质因数分解。这里采用试除法，单次时间复杂度为 $O(\sqrt{x})$。由于 $x \le 2 \times 10^5$，且数据组数 $T \le 10^4$，总运算量约为 $10^4 \times \sqrt{2\times 10^5} \approx 4.5 \times 10^6$，可以在时限内轻松运行。
+
+空间复杂度：仅需存储每个质因子的指数，数组长度不超过 $\log_2 x$，即 $O(\log x)$，额外开销可以忽略不计。
+
+- 时间复杂度：$O(T\sqrt{x_{\max}})$，其中 $x_{\max}=2\times 10^5$。
+- 空间复杂度：$O(\log x)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def factor_exps(n: int):
+    """返回正整数n的所有质因子的指数列表"""
+    exps = []
+    # 处理质数2
+    if n % 2 == 0:
+        c = 0
+        while n % 2 == 0:
+            n //= 2
+            c += 1
+        exps.append(c)
+    # 处理奇数质数
+    p = 3
+    while p * p <= n:
+        if n % p == 0:
+            c = 0
+            while n % p == 0:
+                n //= p
+                c += 1
+            exps.append(c)
+        p += 2
+    if n > 1:
+        exps.append(1)
+    return exps
+
+def solve():
+    data = sys.stdin.read().split()
+    if not data:
+        return
+    it = iter(data)
+    T = int(next(it))
+    out = []
+    for _ in range(T):
+        x = int(next(it))
+        exps = factor_exps(x)
+        # 计算 c(x) = ∏(e_i + 1)
+        tau = 1
+        for e in exps:
+            tau *= (e + 1)
+        # 按层计算总和 ∑ 2^{r_ell}
+        A = max(exps) if exps else 0
+        layer_sum = 0
+        for ell in range(1, A + 1):
+            r = sum(1 for e in exps if e >= ell)
+            layer_sum += (1 << r)
+        out.append(str(max(tau, layer_sum)))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static List<Integer> factorExps(long n) {
+        List<Integer> exps = new ArrayList<>();
+        if (n % 2 == 0) {
+            int c = 0;
+            while (n % 2 == 0) {
+                n /= 2;
+                c++;
+            }
+            exps.add(c);
+        }
+        for (long p = 3; p <= n / p; p += 2) {
+            if (n % p == 0) {
+                int c = 0;
+                while (n % p == 0) {
+                    n /= p;
+                    c++;
+                }
+                exps.add(c);
+            }
+        }
+        if (n > 1) exps.add(1);
+        return exps;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            long x = Long.parseLong(br.readLine().trim());
+            List<Integer> exps = factorExps(x);
+            // 计算 c(x)
+            long tau = 1;
+            for (int e : exps) tau *= (e + 1L);
+            // 分层和
+            int A = 0;
+            for (int e : exps) A = Math.max(A, e);
+            long layerSum = 0;
+            for (int ell = 1; ell <= A; ell++) {
+                int r = 0;
+                for (int e : exps) if (e >= ell) r++;
+                layerSum += (1L << r);
+            }
+            sb.append(Math.max(tau, layerSum)).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+vector<int> factor_exps(ll n) {
+    vector<int> exps;
+    if (n % 2 == 0) {
+        int c = 0;
+        while (n % 2 == 0) { n /= 2; ++c; }
+        exps.push_back(c);
+    }
+    for (ll p = 3; p <= n / p; p += 2) {
+        if (n % p == 0) {
+            int c = 0;
+            while (n % p == 0) { n /= p; ++c; }
+            exps.push_back(c);
+        }
+    }
+    if (n > 1) exps.push_back(1);
+    return exps;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while (T--) {
+        ll x;
+        cin >> x;
+        vector<int> exps = factor_exps(x);
+        // 计算 c(x)
+        ll tau = 1;
+        for (int e : exps) tau *= (e + 1);
+        // 分层和
+        int A = 0;
+        for (int e : exps) A = max(A, e);
+        ll layerSum = 0;
+        for (int ell = 1; ell <= A; ++ell) {
+            int r = 0;
+            for (int e : exps) if (e >= ell) ++r;
+            layerSum += (1LL << r);
+        }
+        cout << max(tau, layerSum) << '\n';
+    }
+    return 0;
+}
+```

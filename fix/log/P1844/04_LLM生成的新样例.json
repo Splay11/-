@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1\n1",
+      "output": "0",
+      "explanation": "只有一台调音器，序列已经单调，无需调整，输出 `0`。"
+    },
+    {
+      "input": "3\n1 2 4",
+      "output": "0",
+      "explanation": "初始刻度已经单调不降，每台都可以选择不操作，输出 `0`。"
+    },
+    {
+      "input": "1\n2",
+      "output": "0",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

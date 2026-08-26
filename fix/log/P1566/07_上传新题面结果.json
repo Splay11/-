@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1566",
+  "title": "第1题-最大收支偏差",
+  "docId": 589,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

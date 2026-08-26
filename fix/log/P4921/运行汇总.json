@@ -1,0 +1,11 @@
+{
+  "pid": "P4921",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:43:00",
+  "end_time": "2026-08-19 19:43:00",
+  "new_title": "第2题-吊销账号抬升掩码",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

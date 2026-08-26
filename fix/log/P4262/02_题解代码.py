@@ -1,0 +1,121 @@
+## 解题思路
+
+* 两个孩子各认识一个字符串：小明的字符串 `s`、小红的字符串 `t`。若先说 `x` 再说 `y`，小红的得分是满足“`x` 的后缀 = `y` 的前缀”的最大长度 `k`。
+* 题目等价为：分别计算
+
+  1. `k1 = LPSuffixPrefix(s, t)`（`t` 的最长前缀也是 `s` 的后缀）
+  2. `k2 = LPSuffixPrefix(t, s)`（`s` 的最长前缀也是 `t` 的后缀）
+     输出 `min(k1, k2)`。
+* 相关算法：使用 **KMP 的前缀函数** 或 **Z-Algorithm** 均可在线性时间求解“字符串 A 的后缀与字符串 B 的前缀的最大重合”。这里采用 **KMP 前缀函数**：
+  将 `pattern + '#' + text` 拼接（其中 `pattern` 为要匹配的“前缀串”，`text` 为被比较的“后缀串”，且 `#` 为未出现在原串中的分隔符），对整体求前缀函数，最后一个 `pi` 值即为所求的最大重合长度。
+
+## 复杂度分析
+
+* 计算一次前缀函数为 `O(n+m)`；两次计算仍为 `O(n+m)`。
+* 额外空间仅为前缀函数数组 `O(n+m)`。
+* 在题目给定的长度（≤1000）下，复杂度完全合适。
+
+## 代码实现
+
+### Python
+
+```python
+# 功能函数：返回 b 的最长前缀也是 a 的后缀的长度
+def overlap(a: str, b: str) -> int:
+    # 拼接：b 作为 pattern，a 作为 text
+    s = b + "#" + a
+    n = len(s)
+    pi = [0] * n
+    # 计算 KMP 前缀函数
+    for i in range(1, n):
+        j = pi[i - 1]
+        while j > 0 and s[i] != s[j]:
+            j = pi[j - 1]
+        if s[i] == s[j]:
+            j += 1
+        pi[i] = j
+    return pi[-1]  # 最后一个位置即为 a 的后缀与 b 的前缀最大重合
+
+def main():
+    import sys
+    data = sys.stdin.read().strip().splitlines()
+    s = data[0].strip()
+    t = data[1].strip()
+    k1 = overlap(s, t)
+    k2 = overlap(t, s)
+    print(min(k1, k2))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+// ACM 风格主类名固定为 Main
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 功能函数：返回 b 的最长前缀也是 a 的后缀的长度
+    static int overlap(String a, String b) {
+        String s = b + "#" + a; // b 作为 pattern，a 作为 text
+        int n = s.length();
+        int[] pi = new int[n];
+        // 计算前缀函数
+        for (int i = 1; i < n; i++) {
+            int j = pi[i - 1];
+            while (j > 0 && s.charAt(i) != s.charAt(j)) {
+                j = pi[j - 1];
+            }
+            if (s.charAt(i) == s.charAt(j)) j++;
+            pi[i] = j;
+        }
+        return pi[n - 1];
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String s = br.readLine().trim();
+        String t = br.readLine().trim();
+        int k1 = overlap(s, t);
+        int k2 = overlap(t, s);
+        System.out.println(Math.min(k1, k2));
+    }
+}
+```
+
+### C++
+
+```cpp
+// ACM 风格：主函数中读入与输出，功能函数在外部
+#include <bits/stdc++.h>
+using namespace std;
+
+// 功能函数：返回 b 的最长前缀也是 a 的后缀的长度
+int overlap(const string& a, const string& b) {
+    string s = b + "#" + a; // b 为模式串，a 为文本串
+    int n = (int)s.size();
+    vector<int> pi(n, 0);
+    // 计算 KMP 前缀函数
+    for (int i = 1; i < n; ++i) {
+        int j = pi[i - 1];
+        while (j > 0 && s[i] != s[j]) j = pi[j - 1];
+        if (s[i] == s[j]) ++j;
+        pi[i] = j;
+    }
+    return pi.back();
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    string s, t;
+    if (!(getline(cin, s))) return 0;
+    getline(cin, t);
+    int k1 = overlap(s, t);
+    int k2 = overlap(t, s);
+    cout << min(k1, k2) << "\n";
+    return 0;
+}
+```

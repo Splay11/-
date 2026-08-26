@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2677",
+  "title": "优雅子串",
+  "docId": 2194,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "字符串",
+    "哈希"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

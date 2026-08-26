@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3445",
+  "title": "第2题-密钥覆盖之谜",
+  "docId": 2787,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "异或"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

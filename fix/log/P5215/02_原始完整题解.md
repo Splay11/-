@@ -1,0 +1,106 @@
+## 解题思路
+
+本题考查对区间贡献函数的**上界分析**与**一次性观察**，不必真的做区间 DP。
+
+1. 设全局最大值为 $M=\max v_i$，全局最小值为 $m=\min v_i$。将整条序列作为一个子段时，贡献为
+   $$H(1,n)=(M-m)\times n$$
+2. 对任意合法划分，每一段 $[L,R]$ 都有
+   $$\max_{L\le i\le R}v_i-\min_{L\le i\le R}v_i\le M-m$$
+   因此该段贡献不超过 $(M-m)\times w(L,R)$。把各段相加，总贡献不超过
+   $$(M-m)\times\sum w(L,R)=(M-m)\times n$$
+3. 上界可被「整段不切」取到，故最优答案恒为 $(M-m)\times n$。实现时扫一遍数组求 $M,m$ 即可。
+
+常见假解：
+
+- 写出区间 DP / 单调栈等复杂划分，常数或复杂度吃不消（正解只需 $O(n)$）；
+- 答案只输出 $M-m$，漏乘长度 $n$；
+- 用 $32$ 位整数计算 $(M-m)\times n$，在 $M-m$ 与 $n$ 同时偏大时溢出；
+- 误以为切开「尖峰」更优：切开后各段极差更小，总和不会超过整段。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$，单次遍历求最值。
+- 空间复杂度：$O(1)$ 额外空间（不计读入数组）。
+
+## 代码实现
+
+### Python
+
+```python
+def max_fluctuation(n: int, v: list[int]) -> int:
+    # 整段作为唯一子段即可达到上界 (max-min)*n
+    return (max(v) - min(v)) * n
+
+
+def main() -> None:
+    n = int(input())
+    v = list(map(int, input().split()))
+    print(max_fluctuation(n, v))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 任意划分的贡献之和不超过 (全局 max - 全局 min) * n，整段取满即可。
+    static long maxFluctuation(int n, long[] v) {
+        long mn = v[0], mx = v[0];
+        for (int i = 1; i < n; i++) {
+            if (v[i] < mn) mn = v[i];
+            if (v[i] > mx) mx = v[i];
+        }
+        return (mx - mn) * n; // 需用 64 位，避免 (1e9)*n 溢出
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        long[] v = new long[n];
+        for (int i = 0; i < n; i++) {
+            v[i] = Long.parseLong(st.nextToken());
+        }
+        System.out.println(maxFluctuation(n, v));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+using int64 = long long;
+
+// 任意划分的贡献之和不超过 (全局 max - 全局 min) * n，整段取满即可。
+int64 max_fluctuation(int n, const vector<int64>& v) {
+    int64 mn = v[0], mx = v[0];
+    for (int i = 1; i < n; ++i) {
+        mn = min(mn, v[i]);
+        mx = max(mx, v[i]);
+    }
+    return (mx - mn) * n; // 必须用 64 位
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int64> v(n);
+    for (int i = 0; i < n; ++i) {
+        cin >> v[i];
+    }
+    cout << max_fluctuation(n, v) << '\n';
+    return 0;
+}
+```

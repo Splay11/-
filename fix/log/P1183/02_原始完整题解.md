@@ -1,0 +1,70 @@
+## 题目思路
+
+第一遍dfs求解这棵树上每个子树的大小$sz[i]$以及每个子树中红色结点的个数$r[i]$ . 我们假设1为根节点
+
+第二遍dfs，枚举每条边$(u,v)$，考虑将这条边删掉之后，子树的红色结点个数为$r[v]$ , 蓝色结点个数就是$sz[v] - r[v]$.  另一个颗树的红色结点个数就是$r[1] - r[v]$ . 蓝色结点个数就是$sz[1] - r[1] - (sz[v] - r[v])$
+
+判断一下是不是都 红色 > 蓝色即可
+
+### 类似题目:
+
+[P1170](http://codefun2000.com/p/P1170)  2023.04.08-美团春招-第五题-RGB树
+
+### 代码
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+const int maxn =1e5 + 5;
+string a;
+// 矢量版邻接矩阵 , 存每个点的邻接点
+vector<int> e[maxn];
+// sz , r 含义如上
+int sz[maxn] , r[maxn];
+// 第一遍 dfs 求出每个点的 sz 和 r 
+void dfs1 (int u , int fa){
+    sz[u] = 1;
+    r[u] = a[u] == 'R';
+    for (auto v : e[u]){
+        if (v == fa) continue;
+        dfs1(v , u);
+        sz[u] += sz[v];
+        r[u] += r[v];
+    }
+    return ;
+}
+// 第二遍 枚举每条边(u,v)
+int ans = 0;
+void dfs2 (int u , int fa){
+    for (auto v : e[u]){
+        if (v == fa) continue;
+        dfs2(v , u);
+        // 判断子树是否合法
+        if (r[v] <= sz[v] - r[v]) continue;
+        // 判断主树是否合法
+        int rest_sz = sz[1] - sz[v];
+        int rest_r = r[1] - r[v];
+        if (rest_r <= rest_sz - rest_r) continue;
+        // 都合法，则这条边可以，答案 + 1
+        ans++;
+    }
+    return ;
+}
+int main (){
+    int n;
+    cin >> n;
+    cin >> a;
+    // 读入
+    a = '#' + a;
+    for (int i = 1 ; i < n ; i++){
+        int x , y;
+        cin >> x >> y;
+        e[x].push_back(y);
+        e[y].push_back(x);
+    }
+    dfs1(1 , -1);
+    dfs2(1 , -1);
+    cout << ans << endl;
+    return 0;
+}
+```

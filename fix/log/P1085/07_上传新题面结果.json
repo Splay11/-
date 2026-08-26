@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1085",
+  "title": "组件选型",
+  "docId": 87,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "trial_videosol": ""
+}

@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1303",
+  "title": "批次号对切",
+  "docId": 315,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "trial_videosol": ""
+}

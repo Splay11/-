@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1547",
+  "title": "试剂邻禁排",
+  "docId": 572,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "trial_videosol": ""
+}

@@ -1,0 +1,132 @@
+## 解题思路
+
+对于给定的正整数 $N$，我们需要选择一个严格小于 $N$ 的正整数 $M$，使得 $(N + M) \times G(N, M)$ 最大，其中 $G(N, M)$ 表示 $N$ 与 $M$ 的最大公约数。
+
+**关键观察**：设 $g = G(N, M)$，则 $g$ 一定是 $N$ 的某个大于 1 的因数时才有可能获得比 $g = 1$ 更大的值。若 $g = 1$，最优的 $M = N - 1$，此时结果为 $2N - 1$。因此，我们可以把 $2N - 1$ 作为一个初始的候选答案。
+
+**算法步骤**：
+
+1. 初始化答案 $\textit{ans} = 2N - 1$，对应 $g = 1$ 的情况。
+2. 枚举 $N$ 的所有大于 1 的因数 $d$（也即可能的最大公约数）。
+   - 对于每个因数 $d$，我们需要选一个满足 $d \mid M$ 且 $M < N$ 的最大整数 $M$，这样才能使 $N + M$ 尽可能大。
+   - 这个 $M$ 可由 $M = \lfloor (N - 1) / d \rfloor \times d$ 获得。此时对应的表达式值为 $(N + M) \times d$。
+   - 用该值更新 $\textit{ans}$。
+3. 枚举因数时只需枚举 $i$ 从 $2$ 到 $\sqrt{N}$，若 $i$ 整除 $N$，则 $i$ 和 $N / i$ 都是 $N$ 的因数，二者均需计算上述候选值。
+4. 对所有测试数据重复上述过程，输出最终答案。
+
+因为 $G(N, M)$ 的值越大，乘积越有可能增大，而 $g > 1$ 时 $g$ 必然是 $N$ 的一个因数，所以该枚举过程不会遗漏最优解。
+
+## 复杂度分析
+
+- 对于每组数据，枚举 $N$ 的因数需要 $O(\sqrt{N})$ 时间。
+- 共有 $T$ 组数据，因此总时间复杂度为 $O(T \sqrt{N})$。当 $N \le 10^9$, $T \le 10^3$ 时，总运算量约 $10^3 \times 31623 \approx 3.16 \times 10^7$，可以在时限内完成。
+- 除了少量变量外没有额外空间开销，空间复杂度 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve():
+    input = sys.stdin.readline
+    t = int(input())
+    for _ in range(t):
+        n = int(input())
+        # 初始答案为 gcd = 1 时的最大值
+        ans = 2 * n - 1
+        
+        d = 2
+        while d * d <= n:
+            if n % d == 0:
+                # 因数 d
+                m = ((n - 1) // d) * d
+                ans = max(ans, (n + m) * d)
+                
+                # 对应的另一个因数 n // d
+                nd = n // d
+                m = ((n - 1) // nd) * nd
+                ans = max(ans, (n + m) * nd)
+            d += 1
+            
+        print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = sc.nextInt();
+        
+        while (t-- > 0) {
+            long n = sc.nextLong();
+            // gcd = 1 时的最优值
+            long ans = 2 * n - 1;
+            
+            // 枚举所有大于1的因数
+            for (long i = 2; i * i <= n; i++) {
+                if (n % i == 0) {
+                    // 因数 i
+                    long m = ((n - 1) / i) * i;
+                    ans = Math.max(ans, (n + m) * i);
+                    
+                    // 对应的另一个因数 n / i
+                    long ni = n / i;
+                    m = ((n - 1) / ni) * ni;
+                    ans = Math.max(ans, (n + m) * ni);
+                }
+            }
+            
+            System.out.println(ans);
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int t;
+    cin >> t;
+    while (t--) {
+        ll n;
+        cin >> n;
+        // gcd = 1 时最大值
+        ll ans = 2 * n - 1;
+        
+        // 枚举所有大于 1 的因数
+        for (ll i = 2; i * i <= n; ++i) {
+            if (n % i == 0) {
+                // 因数 i
+                ll m = ((n - 1) / i) * i;
+                ans = max(ans, (n + m) * i);
+                
+                // 对应的另一个因数 n / i
+                ll ni = n / i;
+                m = ((n - 1) / ni) * ni;
+                ans = max(ans, (n + m) * ni);
+            }
+        }
+        
+        cout << ans << '\n';
+    }
+    
+    return 0;
+}
+```

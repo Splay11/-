@@ -1,0 +1,165 @@
+## 解题思路
+
+题目定义一个正整数 $N$ 的“等级” $\ell(N)$ 为其十进制表示的数字个数（不含前导零）。要求找出一个 $N$ 满足：
+
+$$
+N \times \ell(N) = S
+$$
+
+若存在，输出任意一个满足条件的 $N$；否则输出 $-1$。
+
+由于 $N$ 的范围限制在 $1 \le N \le 10^{18}$，其位数 $\ell(N)$ 只可能是 $1 \sim 18$ 之间的整数，记作 $d$。于是问题转化为：是否存在一个 $d \in \{1,2,\dots,18\}$，使得：
+
+1. $S$ 能被 $d$ 整除，即 $S \bmod d = 0$；
+2. 令 $N = S / d$，检查 $N$ 的十进制位数是否恰好等于 $d$。
+
+如果找到了这样的 $d$，对应的 $N$ 就是答案；如果所有 $d$ 都不满足，则输出 $-1$。
+
+判断 $N$ 的位数是否等于 $d$ 可以通过预先计算 $10$ 的幂来完成：若 $10^{d-1} \le N < 10^{d}$，则说明 $N$ 的位数恰好为 $d$（特别地，$d=1$ 时判断 $1 \le N < 10$）。
+
+算法步骤：
+- 预处理数组 `p10`，其中 `p10[k] = 10^k`（$0 \le k \le 18$）。
+- 对于每个查询 $S$，枚举 $d$ 从 $1$ 到 $18$：
+  - 如果 $S \% d == 0$，计算 $N = S / d$，检查 $1 \le N \le 10^{18}$ 且 $10^{d-1} \le N < 10^{d}$，若成立则返回 $N$。
+- 若枚举结束仍无结果，返回 $-1$。
+
+因为最多只枚举 $18$ 种情况，每组数据都是常数时间。
+
+## 复杂度分析
+
+- 每组测试数据需要枚举 $d = 1 \dots 18$，共常数次运算，因此每组时间复杂度为 $O(1)$。
+- 总共有 $T$ 组数据，整体时间复杂度为 $O(T)$。
+- 只使用了预处理的常数大小数组和一些临时变量，空间复杂度为 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve(S, p10):
+    # 枚举可能的位数 d
+    for d in range(1, 19):
+        if S % d != 0:
+            continue
+        N = S // d
+        # 检查 N 的十进制位数是否正好为 d
+        if 1 <= N <= 10**18 and p10[d-1] <= N < p10[d]:
+            return N
+    return -1
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    t = int(data[0])
+    # 预处理 10 的幂
+    p10 = [1] * 19
+    for i in range(1, 19):
+        p10[i] = p10[i-1] * 10
+
+    out = []
+    for i in range(1, t+1):
+        S = int(data[i])
+        out.append(str(solve(S, p10)))
+    print('\n'.join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 判断 n 的十进制位数是否等于 d
+    static boolean check(long n, int d, long[] p10) {
+        return p10[d-1] <= n && n < p10[d];
+    }
+
+    static long solve(long S, long[] p10) {
+        // 枚举可能的位数 d
+        for (int d = 1; d <= 18; d++) {
+            if (S % d != 0) continue;
+            long N = S / d;
+            if (N >= 1 && N <= 1000000000000000000L && check(N, d, p10)) {
+                return N;
+            }
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+
+        // 预处理 10 的幂
+        long[] p10 = new long[19];
+        p10[0] = 1;
+        for (int i = 1; i <= 18; i++) {
+            p10[i] = p10[i-1] * 10;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < T; i++) {
+            long S = sc.nextLong();
+            sb.append(solve(S, p10)).append('\n');
+        }
+        System.out.print(sb);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+using int64 = long long;
+
+// 判断 n 的十进制位数是否等于 d
+bool check(int64 n, int d, const vector<int64>& p10) {
+    return p10[d-1] <= n && n < p10[d];
+}
+
+int64 solve(int64 S, const vector<int64>& p10) {
+    // 枚举可能的位数 d
+    for (int d = 1; d <= 18; ++d) {
+        if (S % d != 0) continue;
+        int64 N = S / d;
+        if (N >= 1 && N <= 1000000000000000000LL && check(N, d, p10)) {
+            return N;
+        }
+    }
+    return -1;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    // 预处理 10 的幂
+    vector<int64> p10(19);
+    p10[0] = 1;
+    for (int i = 1; i <= 18; ++i) {
+        p10[i] = p10[i-1] * 10;
+    }
+
+    while (T--) {
+        int64 S;
+        cin >> S;
+        cout << solve(S, p10) << '\n';
+    }
+
+    return 0;
+}
+```

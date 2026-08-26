@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3485",
+  "title": "第2题-平稳数的同余计数",
+  "docId": 2828,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "数位dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

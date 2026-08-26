@@ -1,0 +1,534 @@
+## 解题思路
+
+把每条约束
+$$
+a_i-a_j=k
+$$
+看成点 $i,j$ 之间的一条差分关系。
+
+如果我们设某个连通块内任选一个点的值为基准，那么这个连通块中所有点的值都会被唯一确定到“相对值”。这类问题本质上就是：
+
+* 建图
+* 在图上做 BFS / DFS
+* 维护每个点相对于所在连通块起点的“势能值”或“相对值”
+* 检查是否出现矛盾
+
+### 1. 建图方式
+
+由
+$$
+a_i-a_j=k
+$$
+可得
+$$
+a_i=a_j+k
+$$
+
+因此建两条边：
+
+* $j \to i$，边权为 $k$，表示若已知 $a_j$，则 $a_i=a_j+k$
+* $i \to j$，边权为 $-k$，表示若已知 $a_i$，则 $a_j=a_i-k$
+
+这样整张图就是一个带权无向图的等价表示。
+
+
+
+### 2. 连通块内求相对值
+
+设在某个连通块中任选一个起点 $s$，令它的相对值为
+$$
+d_s=0
+$$
+
+对于一条边 $u \to v$，权值为 $w$，表示
+$$
+a_v=a_u+w
+$$
+
+那么若已知 $d_u$，就应当有
+$$
+d_v=d_u+w
+$$
+
+于是我们可以用 BFS 或 DFS 遍历整张图：
+
+* 若点 $v$ 还未访问，则赋值 $d_v=d_u+w$
+* 若点 $v$ 已访问，则必须满足
+  $$
+  d_v=d_u+w
+  $$
+  否则说明约束冲突，无解
+
+这一步实际上是在做“带权并查集 / 差分约束图遍历”中的图遍历解法。
+
+
+
+### 3. 如何恢复真正的数组值
+
+对一个连通块来说，所有点的相对值 $d_i$ 已经确定，但真正的数组值还可以整体平移一个常数 $C$：
+
+$$
+a_i=d_i+C
+$$
+
+因为题目要求
+$$
+1 \le a_i \le 10^{18}
+$$
+
+所以需要对这个连通块中的所有点同时满足：
+
+$$
+1 \le d_i+C \le 10^{18}
+$$
+
+也就是：
+
+$$
+1-d_i \le C \le 10^{18}-d_i
+$$
+
+对整个连通块取交集，可得：
+
+$$
+C \ge 1-\min d_i
+$$
+
+$$
+C \le 10^{18}-\max d_i
+$$
+
+因此只要满足
+
+$$
+1-\min d_i \le 10^{18}-\max d_i
+$$
+
+也就是
+
+$$
+\max d_i-\min d_i \le 10^{18}-1
+$$
+
+这个连通块就可以合法赋值；否则即使约束本身不冲突，也无法让所有数都落在 $[1,10^{18}]$ 内，仍然无解。
+
+为了构造一个具体解，直接取
+
+$$
+C=1-\min d_i
+$$
+
+这样连通块中的最小值恰好变成 $1$，其余值自然是正整数。
+再检查最大值是否不超过 $10^{18}$ 即可。
+
+
+## 复杂度分析
+
+设一组数据有 $n$ 个点、$m$ 条约束。
+
+### 时间复杂度
+
+建图需要
+$$
+O(m)
+$$
+
+每个点和每条边在 BFS/DFS 中都只会被访问常数次，因此总遍历复杂度为
+$$
+O(n+m)
+$$
+
+所以每组测试数据总时间复杂度为
+$$
+O(n+m)
+$$
+
+题目保证所有测试中
+$$
+\sum n \le 5\times 10^5,\quad \sum m \le 5\times 10^5
+$$
+因此总复杂度完全可行。
+
+### 空间复杂度
+
+邻接表、访问数组、相对值数组、答案数组都为线性空间，因此空间复杂度为
+$$
+O(n+m)
+$$
+
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from collections import deque
+
+LIMIT = 10 ** 18
+
+# 求一组测试数据的答案
+def solve_case(n, m, edges):
+    # g[u] 中存储二元组 (v, w)，表示 a[v] = a[u] + w
+    g = [[] for _ in range(n + 1)]
+    for i, j, k in edges:
+        g[j].append((i, k))
+        g[i].append((j, -k))
+
+    # dist[u] 表示点 u 在所在连通块中的相对值
+    dist = [0] * (n + 1)
+    visited = [False] * (n + 1)
+    ans = [0] * (n + 1)
+
+    for start in range(1, n + 1):
+        if visited[start]:
+            continue
+
+        # BFS 遍历一个连通块
+        q = deque([start])
+        visited[start] = True
+        dist[start] = 0
+
+        comp = []
+        mn = 0
+        mx = 0
+
+        while q:
+            u = q.popleft()
+            comp.append(u)
+
+            if dist[u] < mn:
+                mn = dist[u]
+            if dist[u] > mx:
+                mx = dist[u]
+
+            for v, w in g[u]:
+                nd = dist[u] + w
+                if not visited[v]:
+                    visited[v] = True
+                    dist[v] = nd
+                    q.append(v)
+                else:
+                    # 已访问过则必须满足之前的相对值一致，否则矛盾
+                    if dist[v] != nd:
+                        return None
+
+        # 令连通块最小值恰好为 1
+        add = 1 - mn
+
+        # 检查平移后是否会超过 10^18
+        if mx + add > LIMIT:
+            return None
+
+        # 计算该连通块每个点的最终答案
+        for u in comp:
+            ans[u] = dist[u] + add
+
+    return ans[1:]
+
+
+def main():
+    input = sys.stdin.readline
+    T = int(input())
+    out = []
+
+    for _ in range(T):
+        n, m = map(int, input().split())
+        edges = []
+        for _ in range(m):
+            i, j, k = map(int, input().split())
+            edges.append((i, j, k))
+
+        res = solve_case(n, m, edges)
+        if res is None:
+            out.append("-1")
+        else:
+            out.append(" ".join(map(str, res)))
+
+    sys.stdout.write("\n".join(out))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long LIMIT = (long) 1e18;
+
+    // 邻接边，表示 a[to] = a[from] + w
+    static class Edge {
+        int to;
+        long w;
+
+        Edge(int to, long w) {
+            this.to = to;
+            this.w = w;
+        }
+    }
+
+    // 读入工具，使用 BufferedReader + StringTokenizer
+    static class InputReader {
+        BufferedReader br;
+        StringTokenizer st;
+
+        InputReader() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreTokens()) {
+                st = new StringTokenizer(br.readLine());
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+
+        long nextLong() throws IOException {
+            return Long.parseLong(next());
+        }
+    }
+
+    // 求一组测试数据的答案，无解返回 null
+    static long[] solveCase(int n, List<Edge>[] g) {
+        long[] dist = new long[n + 1];
+        boolean[] visited = new boolean[n + 1];
+        long[] ans = new long[n + 1];
+
+        ArrayDeque<Integer> queue = new ArrayDeque<>();
+
+        for (int start = 1; start <= n; start++) {
+            if (visited[start]) {
+                continue;
+            }
+
+            // BFS 遍历一个连通块
+            List<Integer> comp = new ArrayList<>();
+            queue.clear();
+            queue.offer(start);
+            visited[start] = true;
+            dist[start] = 0;
+
+            long mn = 0;
+            long mx = 0;
+
+            while (!queue.isEmpty()) {
+                int u = queue.poll();
+                comp.add(u);
+
+                if (dist[u] < mn) {
+                    mn = dist[u];
+                }
+                if (dist[u] > mx) {
+                    mx = dist[u];
+                }
+
+                for (Edge e : g[u]) {
+                    int v = e.to;
+                    long nd = dist[u] + e.w;
+
+                    if (!visited[v]) {
+                        visited[v] = true;
+                        dist[v] = nd;
+                        queue.offer(v);
+                    } else {
+                        // 已访问过则必须满足相对值一致，否则矛盾
+                        if (dist[v] != nd) {
+                            return null;
+                        }
+                    }
+                }
+            }
+
+            // 令该连通块最小值变成 1
+            long add = 1 - mn;
+
+            // 检查平移后最大值是否超过 10^18
+            if (mx + add > LIMIT) {
+                return null;
+            }
+
+            // 计算该连通块的最终答案
+            for (int u : comp) {
+                ans[u] = dist[u] + add;
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        InputReader in = new InputReader();
+        StringBuilder sb = new StringBuilder();
+
+        int T = in.nextInt();
+        while (T-- > 0) {
+            int n = in.nextInt();
+            int m = in.nextInt();
+
+            List<Edge>[] g = new ArrayList[n + 1];
+            for (int i = 1; i <= n; i++) {
+                g[i] = new ArrayList<>();
+            }
+
+            for (int t = 0; t < m; t++) {
+                int i = in.nextInt();
+                int j = in.nextInt();
+                long k = in.nextLong();
+
+                g[j].add(new Edge(i, k));
+                g[i].add(new Edge(j, -k));
+            }
+
+            long[] res = solveCase(n, g);
+            if (res == null) {
+                sb.append("-1\n");
+            } else {
+                for (int i = 1; i <= n; i++) {
+                    if (i > 1) {
+                        sb.append(' ');
+                    }
+                    sb.append(res[i]);
+                }
+                sb.append('\n');
+            }
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+const long long LIMIT = (long long)1e18;
+
+// 邻接边，表示 a[to] = a[from] + w
+struct Edge {
+    int to;
+    long long w;
+};
+
+// 求一组测试数据的答案，无解返回空数组
+vector<long long> solve_case(int n, const vector<vector<Edge>>& g) {
+    vector<long long> dist(n + 1, 0);
+    vector<int> visited(n + 1, 0);
+    vector<long long> ans(n + 1, 0);
+
+    queue<int> q;
+
+    for (int start = 1; start <= n; start++) {
+        if (visited[start]) {
+            continue;
+        }
+
+        // BFS 遍历一个连通块
+        vector<int> comp;
+        visited[start] = 1;
+        dist[start] = 0;
+        q.push(start);
+
+        long long mn = 0;
+        long long mx = 0;
+
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            comp.push_back(u);
+
+            if (dist[u] < mn) {
+                mn = dist[u];
+            }
+            if (dist[u] > mx) {
+                mx = dist[u];
+            }
+
+            for (const auto& e : g[u]) {
+                int v = e.to;
+                long long nd = dist[u] + e.w;
+
+                if (!visited[v]) {
+                    visited[v] = 1;
+                    dist[v] = nd;
+                    q.push(v);
+                } else {
+                    // 已访问过则必须满足相对值一致，否则矛盾
+                    if (dist[v] != nd) {
+                        return {};
+                    }
+                }
+            }
+        }
+
+        // 令该连通块最小值变成 1
+        long long add = 1 - mn;
+
+        // 检查平移后最大值是否超过 10^18
+        if (mx + add > LIMIT) {
+            return {};
+        }
+
+        // 计算该连通块的最终答案
+        for (int u : comp) {
+            ans[u] = dist[u] + add;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n, m;
+        cin >> n >> m;
+
+        vector<vector<Edge>> g(n + 1);
+
+        for (int t = 0; t < m; t++) {
+            int i, j;
+            long long k;
+            cin >> i >> j >> k;
+
+            g[j].push_back({i, k});
+            g[i].push_back({j, -k});
+        }
+
+        vector<long long> res = solve_case(n, g);
+
+        if (res.empty()) {
+            cout << -1 << '\n';
+        } else {
+            for (int i = 1; i <= n; i++) {
+                if (i > 1) {
+                    cout << ' ';
+                }
+                cout << res[i];
+            }
+            cout << '\n';
+        }
+    }
+
+    return 0;
+}
+```

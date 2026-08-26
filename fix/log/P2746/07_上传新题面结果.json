@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2746",
+  "title": "第1题-到发屏对称点",
+  "docId": 2377,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "搜索",
+    "枚举"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

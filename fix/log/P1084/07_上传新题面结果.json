@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1084",
+  "title": "第3题-最小极差调节",
+  "docId": 86,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

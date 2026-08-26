@@ -1,0 +1,396 @@
+## 解题思路
+
+本题要求找出使**条件混合度指数**最小的特征，本质上类似于决策树中基于基尼指数选择最优分裂特征。混合度指数 $M(S) = 1 - \sum_c p_c^2$ 与基尼指数等价。解题步骤分为以下几步：
+
+1. **解析输入**：读取一行字符串，将其转化为二维整数列表 `samples`。每个样本的最后一个元素是类别标签，前面的元素为各个特征值。记样本总数为 $n$，特征个数为 $m$。
+
+2. **计算整体统计量**：统计所有样本中各类别的全局数量 `total_counts`，用于后续计算 $D_2$ 的类别分布。
+
+3. **遍历每个特征，计算该特征的条件混合度指数**：
+   - 对于特征索引 $i$（$0 \le i < m$）：
+     - 统计该特征上每个取值 $a$ 对应的样本类别分布：用字典 `val_counts` 记录取值 $a$ 下每个类别的样本数。
+     - 若该特征只有一个取值，则无法进行有效划分，跳过。
+     - 初始化该特征的最小条件混合度指数 `feat_min` 为无穷大。
+     - 遍历该特征的每个唯一取值 $a$：
+       - 若取值为 $a$ 的样本数 $cnt_a$ 等于 $0$ 或等于 $n$，则划分退化为全数据集，跳过（题目保证存在有效划分，但代码中需排除）。
+       - $D_1$ 的混合度指数：  
+         $M_1 = 1 - \sum_{c} \left(\frac{\text{val\_counts}[a][c]}{cnt_a}\right)^2$
+       - $D_2$ 的混合度指数：  
+         $D_2$ 中类别 $c$ 的数量为 $\text{total\_counts}[c] - \text{val\_counts}[a][c]$，样本总数为 $n - cnt_a$。  
+         $M_2 = 1 - \sum_{c} \left(\frac{\text{total\_counts}[c] - \text{val\_counts}[a][c]}{n - cnt_a}\right)^2$
+       - 条件混合度指数：$M(D|A, a) = \frac{cnt_a}{n} M_1 + \frac{n - cnt_a}{n} M_2$
+       - 更新 `feat_min = min(feat_min, M(D|A, a))`
+     - 用 `feat_min` 更新全局最小条件混合度指数，并记录对应的特征索引。
+
+4. **返回结果**：输出使条件混合度指数最小的特征索引（从 0 开始）。如果多个特征得到相同的最小值，选取索引最小的那个（由于按顺序遍历，自动满足）。
+
+## 复杂度分析
+
+- **时间复杂度**：对于每个特征，统计每个取值的类别分布需要遍历所有 $n$ 个样本一次；然后计算每个取值的条件混合度指数时，需要遍历该取值下出现的类别，类别数不超过 $n$。因此每个特征的复杂度为 $O(n)$（统计）$+ O(k \cdot C)$（计算，$k$ 为该特征唯一值个数，$C$ 为类别数）。最坏情况下 $k$ 和 $C$ 均为 $O(n)$，单特征复杂度 $O(n^2)$，总体复杂度 $O(m \cdot n^2)$。代入 $n \le 1000, m \le 50$，约 $5 \times 10^7$ 次运算，在可接受范围内。
+- **空间复杂度**：需要存储数据集 $O(n \cdot (m+1))$，以及每个特征的取值统计字典，类别数不超过 $n$，总空间 $O(n \cdot m)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from collections import Counter
+
+def compute_impurity(counts, total):
+    """根据类别计数字典和总数计算混合度指数 M = 1 - sum(p_c^2)"""
+    if total == 0:
+        return 0.0
+    impurity = 1.0
+    for cnt in counts.values():
+        p = cnt / total
+        impurity -= p * p
+    return impurity
+
+def find_best_feature(samples):
+    n = len(samples)
+    if n == 0:
+        return -1
+    m = len(samples[0]) - 1  # 特征个数
+    if m == 0:
+        return -1
+    
+    # 提取所有标签，并统计全局类别分布
+    labels = [s[-1] for s in samples]
+    total_counts = Counter(labels)
+    
+    best_feature = -1
+    min_conditional_impurity = float('inf')
+    
+    for feat_idx in range(m):
+        # 统计该特征每个取值的类别分布
+        val_counts = {}  # {value: {class: count}}
+        for s in samples:
+            val = s[feat_idx]
+            lbl = s[-1]
+            if val not in val_counts:
+                val_counts[val] = Counter()
+            val_counts[val][lbl] += 1
+        
+        # 如果该特征只有一个取值，无法进行有效划分，跳过
+        if len(val_counts) <= 1:
+            continue
+        
+        feat_min = float('inf')
+        for val, class_cnt in val_counts.items():
+            cnt_a = sum(class_cnt.values())
+            if cnt_a == 0 or cnt_a == n:
+                continue  # 退化为全集，无效划分
+            
+            # 计算 D1 的混合度
+            imp1 = compute_impurity(class_cnt, cnt_a)
+            # 计算 D2 的类别计数
+            d2_counts = {}
+            for cls, total_c in total_counts.items():
+                d2_c = total_c - class_cnt.get(cls, 0)
+                if d2_c > 0:
+                    d2_counts[cls] = d2_c
+            cnt_b = n - cnt_a
+            imp2 = compute_impurity(d2_counts, cnt_b)
+            
+            cond_impurity = (cnt_a / n) * imp1 + (cnt_b / n) * imp2
+            if cond_impurity < feat_min:
+                feat_min = cond_impurity
+        
+        if feat_min < min_conditional_impurity:
+            min_conditional_impurity = feat_min
+            best_feature = feat_idx
+            
+    return best_feature
+
+def parse_input(s):
+    """将类似 Python 列表的字符串解析为 list[list[int]]"""
+    s = s.strip()
+    if not (s.startswith('[') and s.endswith(']')):
+        raise ValueError("输入格式错误")
+    # 使用 eval 在可信输入下是安全的，题目明确说明符合 Python 列表语法
+    return eval(s)
+
+def main():
+    data_str = sys.stdin.read()
+    try:
+        samples = parse_input(data_str)
+    except Exception:
+        return
+    if not isinstance(samples, list) or len(samples) == 0:
+        return
+    idx = find_best_feature(samples)
+    if idx != -1:
+        print(idx)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.useDelimiter("\\A").next(); // 读取全部输入
+        scanner.close();
+        int[][] samples = parseInput(line);
+        if (samples == null || samples.length == 0 || samples[0].length < 2) {
+            return;
+        }
+        int best = findBestFeature(samples);
+        System.out.println(best);
+    }
+
+    // 简单解析二维整数列表字符串，例如 "[[1,2,3],[4,5,6]]"
+    private static int[][] parseInput(String s) {
+        s = s.trim();
+        if (!s.startsWith("[[") || !s.endsWith("]]")) {
+            return null;
+        }
+        // 去掉最外层 [[]]
+        String inner = s.substring(2, s.length() - 2);
+        if (inner.isEmpty()) {
+            return new int[0][];
+        }
+        // 按 "],[" 分割每个样本
+        String[] rows = inner.split("\\],\\[");
+        int n = rows.length;
+        int[][] samples = new int[n][];
+        for (int i = 0; i < n; i++) {
+            String row = rows[i].trim();
+            // 可能前后还有 [ 或 ]，去掉
+            if (!row.startsWith("[")) row = "[" + row;
+            if (!row.endsWith("]")) row = row + "]";
+            row = row.substring(1, row.length() - 1);
+            if (row.isEmpty()) {
+                samples[i] = new int[0];
+                continue;
+            }
+            String[] parts = row.split(",");
+            int[] sample = new int[parts.length];
+            for (int j = 0; j < parts.length; j++) {
+                sample[j] = Integer.parseInt(parts[j].trim());
+            }
+            samples[i] = sample;
+        }
+        return samples;
+    }
+
+    private static double computeImpurity(Map<Integer, Integer> counts, int total) {
+        if (total == 0) return 0.0;
+        double impurity = 1.0;
+        for (int cnt : counts.values()) {
+            double p = (double) cnt / total;
+            impurity -= p * p;
+        }
+        return impurity;
+    }
+
+    private static int findBestFeature(int[][] samples) {
+        int n = samples.length;
+        int m = samples[0].length - 1; // 特征数
+        // 统计全局类别分布
+        Map<Integer, Integer> totalCounts = new HashMap<>();
+        for (int[] s : samples) {
+            int label = s[s.length - 1];
+            totalCounts.put(label, totalCounts.getOrDefault(label, 0) + 1);
+        }
+
+        int bestFeature = -1;
+        double minCond = Double.MAX_VALUE;
+
+        for (int f = 0; f < m; f++) {
+            // 统计该特征每个取值的类别分布
+            Map<Integer, Map<Integer, Integer>> valCounts = new HashMap<>();
+            for (int[] s : samples) {
+                int val = s[f];
+                int label = s[s.length - 1];
+                valCounts.computeIfAbsent(val, k -> new HashMap<>())
+                         .merge(label, 1, Integer::sum);
+            }
+            if (valCounts.size() <= 1) continue; // 无法有效划分
+
+            double featMin = Double.MAX_VALUE;
+            for (Map.Entry<Integer, Map<Integer, Integer>> entry : valCounts.entrySet()) {
+                Map<Integer, Integer> classCnt = entry.getValue();
+                int cntA = 0;
+                for (int c : classCnt.values()) cntA += c;
+                if (cntA == 0 || cntA == n) continue;
+
+                double imp1 = computeImpurity(classCnt, cntA);
+                // 计算 D2 的类别计数
+                Map<Integer, Integer> d2Counts = new HashMap<>();
+                int cntB = n - cntA;
+                for (Map.Entry<Integer, Integer> e : totalCounts.entrySet()) {
+                    int cls = e.getKey();
+                    int totalC = e.getValue();
+                    int cntInA = classCnt.getOrDefault(cls, 0);
+                    int inB = totalC - cntInA;
+                    if (inB > 0) {
+                        d2Counts.put(cls, inB);
+                    }
+                }
+                double imp2 = computeImpurity(d2Counts, cntB);
+                double cond = (cntA / (double) n) * imp1 + (cntB / (double) n) * imp2;
+                if (cond < featMin) {
+                    featMin = cond;
+                }
+            }
+            if (featMin < minCond) {
+                minCond = featMin;
+                bestFeature = f;
+            }
+        }
+        return bestFeature;
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <cmath>
+#include <sstream>
+#include <algorithm>
+
+using namespace std;
+
+// 解析形如 "[[1,2],[3,4]]" 的字符串为 vector<vector<int>>
+vector<vector<int>> parseInput(const string& s) {
+    vector<vector<int>> result;
+    string str = s;
+    // 去掉首尾空白
+    str.erase(0, str.find_first_not_of(" \t\n\r"));
+    str.erase(str.find_last_not_of(" \t\n\r") + 1);
+    if (str.size() < 4 || str[0] != '[' || str.back() != ']') return result;
+    // 去掉最外层括号
+    str = str.substr(2, str.size() - 4); // 去掉开头的"[["和结尾的"]]"
+    if (str.empty()) return result;
+    // 按 "],[" 分割
+    size_t pos = 0;
+    string delimiter = "],[";
+    while ((pos = str.find(delimiter)) != string::npos) {
+        string token = str.substr(0, pos);
+        // 提取数字
+        stringstream ss(token);
+        vector<int> sample;
+        int num;
+        char ch;
+        while (ss >> num) {
+            sample.push_back(num);
+            ss >> ch; // 读掉逗号
+        }
+        if (!sample.empty()) result.push_back(sample);
+        str.erase(0, pos + delimiter.length());
+    }
+    // 处理最后一段
+    if (!str.empty()) {
+        // 可能前面有[ 或后面有]
+        if (str.front() == '[') str.erase(0, 1);
+        if (str.back() == ']') str.pop_back();
+        stringstream ss(str);
+        vector<int> sample;
+        int num;
+        char ch;
+        while (ss >> num) {
+            sample.push_back(num);
+            ss >> ch;
+        }
+        if (!sample.empty()) result.push_back(sample);
+    }
+    return result;
+}
+
+double computeImpurity(const unordered_map<int, int>& counts, int total) {
+    if (total == 0) return 0.0;
+    double impurity = 1.0;
+    for (auto& kv : counts) {
+        double p = static_cast<double>(kv.second) / total;
+        impurity -= p * p;
+    }
+    return impurity;
+}
+
+int findBestFeature(const vector<vector<int>>& samples) {
+    int n = samples.size();
+    if (n == 0) return -1;
+    int m = samples[0].size() - 1;
+    if (m <= 0) return -1;
+    
+    // 全局类别分布
+    unordered_map<int, int> totalCounts;
+    for (const auto& s : samples) {
+        int label = s.back();
+        totalCounts[label]++;
+    }
+    
+    double minCond = 1e9;
+    int bestFeature = -1;
+    
+    for (int fi = 0; fi < m; ++fi) {
+        unordered_map<int, unordered_map<int, int>> valCounts;
+        for (const auto& s : samples) {
+            int val = s[fi];
+            int label = s.back();
+            valCounts[val][label]++;
+        }
+        if (valCounts.size() <= 1) continue; // 无法划分
+        
+        double featMin = 1e9;
+        for (auto& entry : valCounts) {
+            auto& classCnt = entry.second;
+            int cntA = 0;
+            for (auto& kv : classCnt) cntA += kv.second;
+            if (cntA == 0 || cntA == n) continue;
+            
+            double imp1 = computeImpurity(classCnt, cntA);
+            // 计算 D2 类别计数
+            unordered_map<int, int> d2Counts;
+            for (auto& tc : totalCounts) {
+                int cls = tc.first;
+                int cntInA = classCnt[cls];
+                int inB = tc.second - cntInA;
+                if (inB > 0) d2Counts[cls] = inB;
+            }
+            int cntB = n - cntA;
+            double imp2 = computeImpurity(d2Counts, cntB);
+            double cond = (cntA / (double)n) * imp1 + (cntB / (double)n) * imp2;
+            if (cond < featMin) featMin = cond;
+        }
+        if (featMin < minCond) {
+            minCond = featMin;
+            bestFeature = fi;
+        }
+    }
+    return bestFeature;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    string input;
+    getline(cin, input);
+    // 如果输入有多行，拼接（但题目说标准输入为一行）
+    // 为防万一，读取直到EOF
+    string rest;
+    while (getline(cin, rest)) {
+        input += rest;
+    }
+    
+    auto samples = parseInput(input);
+    if (samples.empty()) return 0;
+    int best = findBestFeature(samples);
+    if (best != -1) cout << best << endl;
+    return 0;
+}
+```

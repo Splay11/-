@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3606",
+  "title": "第2题-层级扩编",
+  "docId": 2949,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

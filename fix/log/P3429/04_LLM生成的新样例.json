@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "2 2",
+      "output": "Yes\n4 2",
+      "explanation": "仅有两个工位。取 $a_1=`2`\\times x=`4$，$a_2=x=`2$。\n此时 $\\operatorname{lcm}(4,2)=`4`=\\operatorname{lcm}(1,2)\\times `2$，且 $a_1\\neq `1`\\times `2$、$a_2\\neq `2`\\times `2$，故输出 $Yes$ 及该数组。"
+    },
+    {
+      "input": "3 7",
+      "output": "No",
+      "explanation": "工位数 $n=`3`\\ge `3$。此时任意满足最小公倍数条件的刻度都必须取 $a_i=i\\times x$，但这又违反第二条限制，因此无解，输出 $No$。"
+    },
+    {
+      "input": "2 1",
+      "output": "Yes\n2 1",
+      "explanation": "基准 $x=`1$。构造 $a=(`2`,`1`)$，即 $a_1=`2`x$、$a_2=x$。\n$\\operatorname{lcm}(2,1)=`2`=\\operatorname{lcm}(1,2)\\times `1$，且两项均不等于对应下标乘基准。"
+    },
+    {
+      "input": "4 100",
+      "output": "No",
+      "explanation": "$n=`4`\\ge `3$，与 $n=`3$ 同样会产生矛盾，输出 $No$。"
+    }
+  ]
+}

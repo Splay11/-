@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2827",
+  "title": "第2题-能量衰减",
+  "docId": 2459,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

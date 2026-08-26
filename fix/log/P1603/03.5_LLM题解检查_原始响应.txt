@@ -1,0 +1,185 @@
+## 解题思路
+
+本题可以使用动态规划求解，关键点在于机器人只能向右跳跃，因此可以按列递增顺序进行状态转移，保证无后效性。
+
+1. **状态定义**  
+   令 $f[i][j]$ 表示机器人从 $(1,1)$ 出发，到达第 $i$ 行第 $j$ 列的格子时，能够收集到的宝石总价值的最大值。  
+   初始时，$f[1][1] = w[1][1]$（$w[i][j]$ 表示格子 $(i,j)$ 的宝石价值），其余 $f[i][j]$ 初始化为一个极小的负数（例如 $-10^{18}$），表示暂不可达。
+
+2. **跳跃方式与方向向量**  
+   根据题意，机器人每次可以从当前格子 $(x,y)$ 跳跃到新格子 $(i,j)$，跳跃必须向右（$j > y$），且只有以下四种具体的位移组合：
+   - 先右移 $2$ 列，再上移 $1$ 行：行变化 $-1$，列变化 $+2$
+   - 先右移 $2$ 列，再下移 $1$ 行：行变化 $+1$，列变化 $+2$
+   - 先右移 $1$ 列，再上移 $2$ 行：行变化 $-2$，列变化 $+1$
+   - 先右移 $1$ 列，再下移 $2$ 行：行变化 $+2$，列变化 $+1$  
+   可以将这四个跳跃的 $(\Delta x, \Delta y)$ 保存到方向数组中，以便循环枚举。
+
+3. **状态转移**  
+   按列 $j$ 从 $2$ 到 $n$ 的顺序进行更新，对于每个格子 $(i,j)$，枚举四种可能的来源格子 $(i-\Delta x, j-\Delta y)$。  
+   若来源格子在网格范围内且之前可达（$f$ 值不为初始极小值），则更新：
+   $$
+   f[i][j] = \max\bigl(f[i][j],\ f[i-\Delta x][j-\Delta y] + w[i][j]\bigr)
+   $$
+
+4. **最终答案**  
+   题目要求机器人的目的地可以是矿区中的**任意可达格子**，并不要求必须到达最后一列。因此最终的最大宝石总价值应当取所有 $f[i][j]$ 中的最大值：
+   $$
+   \text{ans} = \max_{1 \le i,j \le n} f[i][j]
+   $$
+   由于宝石价值均为正整数，机器人在可到达的路径上收集的宝石越多总值越大，但受边界限制未必能到达所有格子，所以全局取最大值符合题意。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n^2)$。需要枚举每一列 $j$（$n-1$ 列），每列枚举 $n$ 行，每行枚举 $4$ 种跳跃来源，总操作次数约为 $4n^2$。
+- **空间复杂度**：$O(n^2)$。需要存储网格宝石价值矩阵和动态规划数组，大小均为 $n \times n$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    n = int(next(it))
+    w = [[0] * (n + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, n + 1):
+            w[i][j] = int(next(it))
+
+    INF = -10**18
+    f = [[INF] * (n + 1) for _ in range(n + 1)]
+    f[1][1] = w[1][1]
+
+    # 四种跳跃的 (行变化, 列变化)
+    moves = [(2, 1), (-2, 1), (1, 2), (-1, 2)]
+
+    for j in range(2, n + 1):          # 按列更新
+        for i in range(1, n + 1):      # 遍历所有行
+            for dx, dy in moves:       # 枚举来源格子
+                pi, pj = i - dx, j - dy
+                if 1 <= pi <= n and 1 <= pj <= n:
+                    if f[pi][pj] != INF:
+                        f[i][j] = max(f[i][j], f[pi][pj] + w[i][j])
+
+    ans = 0
+    for i in range(1, n + 1):
+        for j in range(1, n + 1):
+            if f[i][j] > ans:
+                ans = f[i][j]
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        int[][] w = new int[n + 1][n + 1];
+        for (int i = 1; i <= n; ++i) {
+            String[] parts = br.readLine().trim().split("\\s+");
+            for (int j = 1; j <= n; ++j) {
+                w[i][j] = Integer.parseInt(parts[j - 1]);
+            }
+        }
+
+        long INF = Long.MIN_VALUE / 2;
+        long[][] f = new long[n + 1][n + 1];
+        for (long[] row : f) {
+            Arrays.fill(row, INF);
+        }
+        f[1][1] = w[1][1];
+
+        // 四种跳跃的 (行变化, 列变化)
+        int[][] moves = { {2, 1}, {-2, 1}, {1, 2}, {-1, 2} };
+
+        for (int j = 2; j <= n; ++j) {          // 按列更新
+            for (int i = 1; i <= n; ++i) {      // 遍历所有行
+                for (int[] m : moves) {
+                    int pi = i - m[0], pj = j - m[1];
+                    if (pi >= 1 && pi <= n && pj >= 1 && pj <= n) {
+                        if (f[pi][pj] != INF) {
+                            f[i][j] = Math.max(f[i][j], f[pi][pj] + w[i][j]);
+                        }
+                    }
+                }
+            }
+        }
+
+        long ans = 0;
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= n; ++j) {
+                if (f[i][j] > ans) {
+                    ans = f[i][j];
+                }
+            }
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const long long INF = -1e18;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n;
+    cin >> n;
+    vector<vector<int>> w(n + 1, vector<int>(n + 1));
+    for (int i = 1; i <= n; ++i)
+        for (int j = 1; j <= n; ++j)
+            cin >> w[i][j];
+
+    vector<vector<long long>> f(n + 1, vector<long long>(n + 1, INF));
+    f[1][1] = w[1][1];
+
+    // 四种跳跃的 (行变化, 列变化)
+    int dx[4] = {2, -2, 1, -1};
+    int dy[4] = {1, 1, 2, 2};
+
+    for (int j = 2; j <= n; ++j) {          // 按列更新
+        for (int i = 1; i <= n; ++i) {      // 遍历所有行
+            for (int k = 0; k < 4; ++k) {
+                int pi = i - dx[k];
+                int pj = j - dy[k];
+                if (pi >= 1 && pi <= n && pj >= 1 && pj <= n) {
+                    if (f[pi][pj] != INF) {
+                        f[i][j] = max(f[i][j], f[pi][pj] + w[i][j]);
+                    }
+                }
+            }
+        }
+    }
+
+    long long ans = 0;
+    for (int i = 1; i <= n; ++i)
+        for (int j = 1; j <= n; ++j)
+            if (f[i][j] > ans)
+                ans = f[i][j];
+
+    cout << ans << '\n';
+    return 0;
+}
+```

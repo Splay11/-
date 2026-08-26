@@ -1,0 +1,154 @@
+## 解题思路
+
+设密钥串为 $s$，长度为 $n$，下标从 $1$ 开始。
+
+对于任意一个有效片段，假设它处于原串的位置 $[i, j]$（$1 \le i \le j \le n$），那么这个片段会被所有满足左端点 $\le i$ 且右端点 $\ge j$ 的**连续子串**所包含。  
+换句话说，有效片段 $s[i \dots j]$ 对答案的贡献次数为：
+
+$$
+i \times (n - j + 1)
+$$
+
+其中 $i$ 表示左端点可以选择的个数（$1 \sim i$），$n-j+1$ 表示右端点可以选择的个数（$j \sim n$）。
+
+**因此，原问题转化为：** 对于密钥串 $s$ 中的所有有效片段，求 $i \times (n-j+1)$ 之和。
+
+---
+
+### 高效计算方法
+
+枚举右端点 $j$，当 $s[j]$ 为偶数（即属于 $\{0,2,4,6,8\}$）时，所有合法的左端点 $i$ 可以分为两类：
+
+1. **长度为 $1$ 的片段**，即 $i = j$，此时没有前导零的问题，贡献 $j \times (n-j+1)$。  
+2. **长度大于 $1$ 的片段**，即 $1 \le i \le j-1$，且 $s[i] \neq '0'$（防止前导零）。  
+   这些 $i$ 的贡献之和为 $\displaystyle (n - j + 1) \times \sum_{\substack{1 \le i \le j-1 \\ s[i] \neq '0'}} i$。
+
+令 
+$$
+S_{j-1} = \sum_{\substack{1 \le i \le j-1 \\ s[i] \neq '0'}} i
+$$
+则右端点为 $j$ 的有效片段总贡献为
+$$
+(n-j+1) \times \bigl( S_{j-1} + j \bigr)
+$$
+
+### 实现细节
+
+我们可以在遍历时维护一个变量 `sum_nonzero`，表示当前已经遇到的所有非 `'0'` 字符位置 $i$ 的和（即 $S_{j-1}$）。  
+对于每个位置 $j$（从 $1$ 到 $n$）：
+
+- 若 $s[j]$ 是偶数，则把贡献 $(n-j+1) \times (\text{sum\_nonzero} + j)$ 累加到答案中；
+- 若 $s[j] \neq '0'$，则更新 `sum_nonzero = (sum_nonzero + j) % MOD`。
+
+最后输出累加结果对 $10^9+7$ 取模即可。
+
+---
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$，只需要对字符串进行一次遍历。
+- 空间复杂度：$O(1)$，仅使用常数个额外变量（不计输入字符串的存储）。
+
+---
+
+## 代码实现
+
+### Python
+
+```python
+MOD = 10**9 + 7
+
+n = int(input().strip())
+s = input().strip()
+
+ans = 0
+sum_nonzero = 0  # 维护所有 j 之前非 '0' 的位置索引和
+
+for j in range(1, n + 1):
+    ch = s[j - 1]
+    # 如果当前字符是偶数，计算贡献
+    if ch in "02468":
+        factor = (n - j + 1) % MOD
+        contribution = (sum_nonzero + j) % MOD  # S_{j-1} + j
+        ans = (ans + contribution * factor) % MOD
+    # 更新非零位置前缀和
+    if ch != '0':
+        sum_nonzero = (sum_nonzero + j) % MOD
+
+print(ans)
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    static final long MOD = 1000000007;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        String s = sc.next();
+        sc.close();
+
+        long ans = 0;
+        long sumNonzero = 0; // S_{j-1}
+
+        for (int j = 1; j <= n; j++) {
+            char ch = s.charAt(j - 1);
+            // 判断是否为偶数
+            if (ch == '0' || ch == '2' || ch == '4' || ch == '6' || ch == '8') {
+                long factor = (n - j + 1) % MOD;
+                long contribution = (sumNonzero + j) % MOD;
+                ans = (ans + contribution * factor) % MOD;
+            }
+            // 更新非零位置前缀和
+            if (ch != '0') {
+                sumNonzero = (sumNonzero + j) % MOD;
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+const long long MOD = 1000000007;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    string s;
+    cin >> n >> s;
+
+    long long ans = 0;
+    long long sumNonzero = 0; // S_{j-1}
+
+    for (int j = 1; j <= n; ++j) {
+        char ch = s[j - 1];
+        // 判断偶数
+        if (ch == '0' || ch == '2' || ch == '4' || ch == '6' || ch == '8') {
+            long long factor = (n - j + 1) % MOD;
+            long long contribution = (sumNonzero + j) % MOD;
+            ans = (ans + contribution * factor) % MOD;
+        }
+        // 更新非零位置前缀和
+        if (ch != '0') {
+            sumNonzero = (sumNonzero + j) % MOD;
+        }
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
+```

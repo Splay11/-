@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1925",
+  "title": "第3题-禁忌平方",
+  "docId": 1028,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

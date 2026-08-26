@@ -1,0 +1,219 @@
+============================================================
+OJ 题目重写与上传自动化脚本 - 需求梳理
+============================================================
+
+## 一、脚本目标
+编写一个 Python 自动化脚本，实现对 OJ 题目的重新编写与上传。完整流程：
+获取原始题面+题解 → LLM 生成新题面（不含样例）→ LLM 生成新样例 → 脚本拼接完整题面 → 上传原始题面为附加文件 → 上传新题面和新标题
+
+## 二、输入参数
+- `--pid`：必传参数（如 `P1001`）
+- `--mode`：可选参数，控制调试模式（默认完整流程）：
+  * 不传或 `0`：完整流程（所有步骤依次执行，无暂停）
+  * `1`：交互暂停模式（每个主要步骤后 input 暂停，全部执行完毕后也有一次暂停）
+  * `2`：仅获取数据（只执行 Step 1 + Step 2，保存到 log 目录后退出）
+  * `3`：仅生成数据（执行 Step 1~5，保存到 log 目录后退出，不上传）
+  * `4`：仅上传数据（从 log/{pid}/ 读取已生成数据，执行 Step 6 + Step 7）
+- `--force`：可选参数，强制覆盖模式。始终删除旧目录再运行
+- 默认覆盖逻辑：若 log/{pid}/ 已存在，检查 `运行汇总.json` 的 `overall_success` 字段：
+  * 完全成功 → 跳过该题目，直接退出
+  * 未完全成功或 JSON 不存在 → 自动清理旧目录，重新运行
+- `--base-url` 固定为 `https://codefun2000.com`
+- `--domain-id` 固定为 `system`
+
+### 提示词文件
+提示词从 `prompts/` 目录加载，使用 `{变量名}` 占位符进行动态渲染：
+- `prompts/step3_system.txt` — Step 3 系统提示词
+- `prompts/step3_user.txt` — Step 3 用户提示词模板，变量：`{original_statement}`, `{solution_code}`
+- `prompts/step35_system.txt` — Step 3.5 系统提示词
+- `prompts/step35_user.txt` — Step 3.5 用户提示词模板，变量：`{new_problem_desc}`, `{full_solution_md}`
+- `prompts/step4_system.txt` — Step 4 系统提示词
+- `prompts/step4_user.txt` — Step 4 用户提示词模板，变量：`{problem_desc}`, `{solution_code}`
+  - 格式参考段由脚本逻辑控制：提取到原始样例时直接在 prompt 末尾追加
+
+## 三、环境变量依赖
+- `HYDRO_API_UNAME` / `HYDRO_API_PASSWORD`：OJ API 认证
+- `DEEPSEEK_API_KEY`：LLM API 密钥
+- 脚本启动时检查，缺失则报错退出
+
+## 四、LLM 配置
+- 使用 DeepSeek API，模型 `deepseek-v4-pro`
+- base_url: `https://api.deepseek.com`
+- 参数参考 llm.py：`stream=False`, `reasoning_effort="high"`, `extra_body={"thinking": {"type": "enabled"}}`
+
+## 五、全局变量
+- 脚本顶部设置 `MAX_RETRIES = 3`，控制 LLM 调用失败重试次数
+
+## 六、执行流程
+
+### Step 1：获取原始题面
+- Step 1a：调用 GET `/api/problem/detail` 获取 Markdown 题面文本
+- Step 1b：调用 POST `/api/problem/list` 获取原始标题（pdoc.title）
+- 返回 (markdown_text, title)
+
+### Step 2：获取题解代码
+- 调用 GET `/api/problem/admin_solution`
+- 参数：domainId=system, uname, password, pid
+- 从响应的 `data` 数组中的题解文本中，提取第一个有效代码块：
+  * 匹配所有 ` ``` ... ``` ` 代码块（不限定语言标签）
+  * 跳过纯字母数字或长度 < 10 的块（避免误匹配语言标签）
+  * 取第一个符合条件的代码块
+- 如果未找到有效代码块，回退使用完整题解文本作为代码
+- 同时保留完整题解 Markdown 文本
+- 返回 (code, full_solution_markdown)
+
+### Step 3：LLM 生成新题面（第一次 LLM 调用）
+- 输入：原始题面 + 提取的 Python 题解代码
+- 要求 LLM：（详见 step3_system.txt）。硬性规则：业务背景写饱满；数据范围记法必须与原题对调（$2\\times 10^5$ ↔ `200000`，只换记法不改数值）
+- 失败重试最多 MAX_RETRIES 次
+
+### Step 3.5：检查题解是否需要修改（第二次 LLM 调用）
+- 输入：新题面 + 原始完整题解 Markdown
+- 要求 LLM 判断新题面与原题解是否有冲突（如题解提到新题面不存在的概念）
+- 如果无冲突：返回 need_modify=false，后续跳过题解上传
+- 如果有冲突：LLM 生成适配新题面的题解，最小化修改（只改文字描述和代码注释，保留算法和代码完全不变）
+- 失败重试最多 MAX_RETRIES 次（JSON 解析失败也会触发重试）
+
+### Step 4：LLM 生成新样例（第三次 LLM 调用）
+- 输入：Step 3 生成的新题面（含输入输出格式描述）+ 题解代码 + 原始题面第一条样例（作为格式参考）
+- 前置处理：
+  * 从原始题面中提取第一条样例的输入输出，匹配格式：
+    **输入**
+    ```
+    (...)
+    ```
+    **输出**
+    ```
+    (...)
+    ```
+  * 提取 输入/输出 后面代码块中的内容
+  * 如果提取成功，将原始样例作为格式参考加入提示词，并强调生成的新样例绝对不能出现原题面样例（整段输入、带字母/`?` 的特征行、至少 3 个数的原数据行都不得复用）
+  * 如果提取失败，不添加格式参考，保持原有提示词不变
+- 失败重试最多 MAX_RETRIES 次
+
+### Step 5：脚本拼接完整题面
+- 脚本负责将 Step 3 的题面（content + input_description + output_description）和 Step 4 的样例按模板拼接
+- 标题不包含在题面内容中，标题作为 API 参数单独传递
+- 拼接模板（参考"题目格式需求.txt"）：
+  ```
+  # 题目内容
+  {content}
+
+  # 输入描述
+  {input_description}
+
+  # 输出描述
+  {output_description}
+
+  ## 样例1
+  **输入**
+  ```
+  {sample1.input}
+  ```
+  **输出**
+  ```
+  {sample1.output}
+  ```
+  **说明**
+  {sample1.explanation}
+
+  ## 样例2
+  ...
+  ```
+
+### Step 6：上传原始题面作为附加文件
+- 调用 POST `/api/problem/upload_testdata`
+- 同时上传原始题面和原始标题：
+  - `original_statement.md` — 原始题面内容
+  - `original_title.txt` — 原始标题文本
+- `overwrite=true`
+
+### Step 7：上传新题面和新标题
+- 调用 POST `/api/problem/update`
+- 参数：domainId=system, uname, password, pid, title, content
+- title 为 Step 3 生成的标题（单独传递）
+- content 为 Step 5 拼接后的完整题面（不含标题行）
+- 只传 title 和 content，不传其他字段（hidden、difficulty、tag 等均不传，保持原样）
+
+### Step 8：上传题解（仅在 Step 3.5 判断需要修改时执行）
+- **Step 8a**：上传原始题解为附加文件
+  * 调用 POST `/api/problem/upload_testdata`
+  * 将原始题解保存为 `original_solution.md`，overwrite=true
+- **Step 8b**：上传修改后的题解
+  * 调用 POST `/api/problem/upload_sol`
+  * 参数：domainId=system, uname, password, pid, solution
+  * solution 为 Step 3.5 生成的修改后题解 Markdown
+
+## 七、调试模式详细说明
+
+### 模式 0（默认，不传 --mode）：完整流程
+所有 7 个步骤依次执行，无暂停，执行完毕后退出。
+
+### 模式 1（--mode 1）：交互暂停模式
+在每个主要步骤完成后暂停，等待用户按回车继续。共 6 个暂停点：
+- Step 1 完成后：查看原始题面
+- Step 2 完成后：查看题解代码
+- Step 3 完成后：查看 LLM 生成的新题面
+- Step 4 完成后：查看 LLM 生成的新样例
+- Step 5 完成后（上传前）：查看拼接后的完整题面，确认是否继续上传
+- Step 6 前：确认是否上传原始题面
+- Step 7 前：确认是否上传新题面
+
+### 模式 2（--mode 2）：仅获取数据
+只执行 Step 1 + Step 2，获取原始题面和题解代码，保存到 log 目录后退出。
+
+### 模式 3（--mode 3）：仅生成数据
+执行 Step 1 + Step 2 + Step 3 + Step 4 + Step 5（拼接），所有结果保存到 log 目录后退出。不执行上传步骤。
+
+### 模式 4（--mode 4）：仅上传数据
+跳过获取和生成步骤，直接从 `log/{pid}/` 目录读取已生成的数据：
+- 读取 `05_拼接后的完整题面.md` 作为 content
+- 读取 `03_LLM生成的新题面.json` 解析出 title
+- 读取 `01_原始题面.md` 作为原始题面
+- 如果 `03.5_修改后的题解.md` 存在，读取并上传题解
+执行 Step 6 + Step 7 + Step 8（条件）上传。
+
+## 八、日志与中间结果保存
+- 在脚本同目录下创建 `log/{pid}/` 文件夹
+- 保存以下内容：
+  * `01_原始题面.md` — Step 1 获取的原始题面
+  * `01_原始标题.txt` — Step 1 获取的原始标题
+  * `02_题解代码.py` — Step 2 提取的 Python 代码
+  * `02_原始完整题解.md` — Step 2 获取的原始完整题解 Markdown
+  * `03_LLM生成的新题面_原始响应.txt` — Step 3 LLM 返回的原始文本响应
+  * `03_LLM生成的新题面.json` — Step 3 解析后的题面 JSON 数据
+  * `03.5_LLM题解检查_原始响应.txt` — Step 3.5 LLM 返回的原始文本响应
+  * `03.5_题解检查结果.json` — Step 3.5 解析后的检查结果 JSON
+  * `03.5_修改后的题解.md` — Step 3.5 修改后的题解（仅当需要修改时）
+  * `04_LLM生成的新样例_原始响应.txt` — Step 4 LLM 返回的原始文本响应
+  * `04_LLM生成的新样例.json` — Step 4 解析后的样例 JSON 数据
+  * `05_拼接后的完整题面.md` — Step 5 拼接后的最终题面（即将上传的内容）
+  * `06_上传原始题面结果.json` — Step 6 API 返回结果
+  * `07_上传新题面结果.json` — Step 7 API 返回结果
+  * `08a_上传原始题解结果.json` — Step 8a API 返回结果（仅当题解有修改时）
+  * `08b_上传题解结果.json` — Step 8b API 返回结果（仅当题解有修改时）
+  * `运行汇总.json` — 执行完毕后的汇总信息（pid、标题、各步骤状态、时间等）
+  * `执行日志.txt` — 完整的执行日志
+  * `llm_conversations/` — LLM 对话记录子目录
+    - `step3_attempt{N}.json` — Step 3 每次尝试
+    - `step35_attempt{N}.json` — Step 3.5 每次尝试
+    - `step4_attempt{N}.json` — Step 4 每次尝试
+
+## 九、原始数据备份
+- 在 Step 1 + Step 2 获取原始题面、标题、完整题解后，备份到 `backup/{pid}/` 目录
+- 备份文件：`01_原始题面.md`、`01_原始标题.txt`、`02_原始完整题解.md`
+- 若备份目录已存在则跳过，防止重复运行时覆盖最初的原始数据
+
+## 十、错误处理
+- 每个步骤失败时记录错误并退出
+- LLM 调用支持重试（最多 MAX_RETRIES 次），每次重试间隔适当延时（如 2 秒）
+- LLM 返回 JSON 解析失败也视为调用失败，触发重试
+- API 调用失败记录 HTTP 状态码和响应内容
+
+## 十、注意事项
+- 上传过程中严禁修改题目的其他任何属性（时间限制、内存限制、标签等）
+- 只提取第一个 Python 代码块作为参考代码
+- 原始题面作为 testdata 附加文件上传，不覆盖已有测例（overwrite=false）
+- 新样例生成和新题面生成分成两次独立的 LLM 调用
+- 标题不包含在题面内容中，作为 API 参数 title 单独传递
+- 题面内容以 `# 题目内容` 开头，不含 `# {标题}` 行

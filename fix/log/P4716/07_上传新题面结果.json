@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4716",
+  "title": "第2题-电梯指令修正",
+  "docId": 3965,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数据结构",
+    "栈"
+  ],
+  "alg_tag": "栈",
+  "ai_alg_tags": "栈",
+  "videosol": "",
+  "trial_videosol": ""
+}

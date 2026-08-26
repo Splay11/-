@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "2 2 0\nalice 4039\nbob 1\nalice 4039\nbob 4039",
+      "output": "1",
+      "explanation": "商户 $alice$ 成交均价为 `4039`，与挂牌价之差为 `0`，不超过阈值 `0`。\n商户 $bob$ 成交均价为 `4039`，与挂牌价 `1` 之差为 `4038`，严格大于 `0`。\n因此仅 `1` 家商户漂移。"
+    },
+    {
+      "input": "2 0 10\njly 4039\ntou 1",
+      "output": "0",
+      "explanation": "没有任何成交记录，两家商户均不计入统计，答案为 `0`。"
+    },
+    {
+      "input": "1 2 0\ncat 2\ncat 1\ncat 5",
+      "output": "1",
+      "explanation": "均价为 $(1+5)/2=`3`$，与挂牌价 `2` 之差为 `1`，严格大于阈值 `0`，答案为 `1`。"
+    },
+    {
+      "input": "3 3 1\naa 5\nbb 5\ncc 5\naa 5\naa 6\nbb 5",
+      "output": "0",
+      "explanation": "$aa$ 两笔成交和为 `11`，$|11-5\\times 2|=`1`$ 不大于 $x\\times k=`2$，未漂移。\n$bb$ 均价恰好等于挂牌价。$cc$ 无成交，不计入。答案为 `0`。"
+    }
+  ]
+}

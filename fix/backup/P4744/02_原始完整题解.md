@@ -1,0 +1,282 @@
+## 解题思路
+
+题目给定阈值 $d$ 和最终保留下来的序列 $b$，要求构造一个正整数序列 $a$，按如下规则筛选后恰好得到 $b$：
+
+* $a_1$ 一定保留；
+* 对于 $i \ge 2$，若 $a_{i-1} + d \le a_i$，则 $a_i$ 被保留，否则被跳过。
+
+并且还要满足：
+
+1. $a$ 的长度 $m$ 尽量小；
+2. 在所有最短长度的方案中，$a$ 的字典序最小。
+
+### 核心思路
+
+先观察相邻两个保留元素 $b_{i-1}$ 和 $b_i$ 之间需要怎样构造。
+
+因为筛选规则只和“前一个原序列元素”有关，所以要让 $b_i$ 被保留，只需要保证它前面的那个数 $x$ 满足：
+
+$$
+x + d \le b_i
+$$
+
+而这个 $x$ 如果不想被保留，就还要满足它和前一个保留元素 $b_{i-1}$ 的关系：
+
+$$
+b_{i-1} + d > x
+$$
+
+于是分两种情况讨论。
+
+#### 情况一：$b_{i-1} + d \le b_i$
+
+这时直接把 $b_i$ 接在 $b_{i-1}$ 后面即可，因为它本身就会被保留。
+
+也就是说，这一段不需要插入额外元素。
+
+#### 情况二：$b_{i-1} + d > b_i$
+
+这时如果直接把 $b_i$ 接在后面，那么它会被跳过，显然不行。
+
+因此这两个保留元素之间至少要插入一个数，才能让 $b_i$ 的前一个元素变成别的数。
+
+为了让长度最短，只插入一个数即可。设这个数为 $x$，需要满足：
+
+$$
+b_{i-1} + d > x,\quad x + d \le b_i
+$$
+
+题目保证至少存在一个合法解，所以这种情况下一定能做到。为了让字典序最小，插入的这个数应尽量小，因此直接取最小正整数：
+
+$$
+x = 1
+$$
+
+为什么一定可行？
+
+因为既然整体有解，那么在 $b_i$ 前面一定存在某个数 $y$ 使得 $y + d \le b_i$。由于 $y$ 是正整数，所以必有 $b_i > d$，于是：
+
+$$
+1 + d \le b_i
+$$
+
+同时又因为当前属于第二种情况，$b_{i-1} + d > b_i > 1$，自然也有：
+
+$$
+b_{i-1} + d > 1
+$$
+
+所以插入 $1$ 一定合法，并且字典序最优。
+
+
+## 复杂度分析
+
+设最终保留序列长度为 $n$。
+
+### 时间复杂度
+
+只需线性扫描一次序列 $b$，每个元素处理一次，因此时间复杂度为：
+
+$$
+O(n)
+$$
+
+如果有多组测试数据，设所有测试数据的 $n$ 之和为 $S$，则总时间复杂度为：
+
+$$
+O(S)
+$$
+
+### 空间复杂度
+
+需要一个数组保存构造出的答案。最坏情况下每两个相邻元素之间都要插入一个数，此时答案长度为 $2n-1$，因此空间复杂度为：
+
+$$
+O(n)
+$$
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 构造满足要求的最短且字典序最小的序列
+def build_sequence(n, d, b):
+    ans = [b[0]]
+
+    # 依次处理每个要保留的元素
+    for i in range(1, n):
+        # 如果当前元素直接接在前一个保留元素后面仍能被保留
+        if b[i - 1] + d <= b[i]:
+            ans.append(b[i])
+        else:
+            # 否则必须插入一个数
+            # 为了长度最短，只插入一个
+            # 为了字典序最小，插入最小正整数 1
+            ans.append(1)
+            ans.append(b[i])
+
+    return ans
+
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    t = data[0]
+    idx = 1
+    out = []
+
+    for _ in range(t):
+        n = data[idx]
+        d = data[idx + 1]
+        idx += 2
+
+        b = data[idx:idx + n]
+        idx += n
+
+        ans = build_sequence(n, d, b)
+        out.append(str(len(ans)))
+        out.append(" ".join(map(str, ans)))
+
+    sys.stdout.write("\n".join(out))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    static StringTokenizer st;
+
+    // 读取下一个整数
+    static int nextInt() throws IOException {
+        while (st == null || !st.hasMoreTokens()) {
+            st = new StringTokenizer(br.readLine());
+        }
+        return Integer.parseInt(st.nextToken());
+    }
+
+    // 构造满足要求的最短且字典序最小的序列
+    static List<Integer> buildSequence(int n, int d, int[] b) {
+        List<Integer> ans = new ArrayList<>();
+        ans.add(b[0]);
+
+        // 依次处理每个要保留的元素
+        for (int i = 1; i < n; i++) {
+            // 如果当前元素可以直接被保留
+            if ((long) b[i - 1] + d <= b[i]) {
+                ans.add(b[i]);
+            } else {
+                // 否则必须插入一个数
+                // 取 1 可以保证字典序最小
+                ans.add(1);
+                ans.add(b[i]);
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        int t = nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        while (t-- > 0) {
+            int n = nextInt();
+            int d = nextInt();
+
+            int[] b = new int[n];
+            for (int i = 0; i < n; i++) {
+                b[i] = nextInt();
+            }
+
+            List<Integer> ans = buildSequence(n, d, b);
+
+            sb.append(ans.size()).append('\n');
+            for (int i = 0; i < ans.size(); i++) {
+                if (i > 0) {
+                    sb.append(' ');
+                }
+                sb.append(ans.get(i));
+            }
+            sb.append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 构造满足要求的最短且字典序最小的序列
+vector<int> buildSequence(int n, int d, const vector<int>& b) {
+    vector<int> ans;
+    ans.push_back(b[0]);
+
+    // 依次处理每个要保留的元素
+    for (int i = 1; i < n; i++) {
+        // 如果当前元素直接接在前一个保留元素后面仍能被保留
+        if ((long long)b[i - 1] + d <= b[i]) {
+            ans.push_back(b[i]);
+        } else {
+            // 否则必须插入一个数
+            // 只插入一个即可保证长度最短
+            // 插入 1 可以保证字典序最小
+            ans.push_back(1);
+            ans.push_back(b[i]);
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+
+    while (t--) {
+        int n, d;
+        cin >> n >> d;
+
+        vector<int> b(n);
+        for (int i = 0; i < n; i++) {
+            cin >> b[i];
+        }
+
+        vector<int> ans = buildSequence(n, d, b);
+
+        cout << ans.size() << '\n';
+        for (int i = 0; i < (int)ans.size(); i++) {
+            if (i > 0) {
+                cout << ' ';
+            }
+            cout << ans[i];
+        }
+        cout << '\n';
+    }
+
+    return 0;
+}
+```

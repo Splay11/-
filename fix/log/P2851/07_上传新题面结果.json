@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2851",
+  "title": "奇偶倍增",
+  "docId": 2484,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "二进制"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "递归",
+  "videosol": "",
+  "trial_videosol": ""
+}

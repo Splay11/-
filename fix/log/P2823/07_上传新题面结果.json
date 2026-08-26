@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2823",
+  "title": "第1题-异或成三角",
+  "docId": 2454,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "枚举"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

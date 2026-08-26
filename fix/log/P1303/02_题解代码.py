@@ -1,0 +1,51 @@
+#pragma GCC optimize("O3")
+#pragma GCC optimize("Ofast")
+#pragma GCC optimize("unroll-loops")
+#pragma GCC target("avx,avx2,fma")
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define out(x) cout << #x << '=' << (x) << endl
+#define out2(x, y) cout << #x << '=' << (x) << ',' << #y << '=' << (y) << endl 
+#define no cout << "No" << endl; return
+#define yes cout << "Yes" << endl; return
+#define outvec(a) for (auto &v : (a)) { cout << v << ' '; } cout << endl
+#define lowbit(x) ((x) & -(x))
+#define gcd __gcd 
+#define inf 0x3f3f3f3f3f3f3f3fLL
+#define infi 0x3f3f3f3f
+
+using ll = long long;
+using pii = pair<int, int>;
+
+template<typename T> ostream & operator << (ostream &out,const set<T>&obj){out<<"set(";for(auto it=obj.begin();it!=obj.end();it++) out<<(it==obj.begin()?"":", ")<<*it;out<<")";return out;}
+template<typename T1,typename T2> ostream & operator << (ostream &out,const map<T1,T2>&obj){out<<"map(";for(auto it=obj.begin();it!=obj.end();it++) out<<(it==obj.begin()?"":", ")<<it->first<<": "<<it->second;out<<")";return out;}
+template<typename T1,typename T2> ostream & operator << (ostream &out,const pair<T1,T2>&obj){out<<"<"<<obj.first<<", "<<obj.second<<">";return out;}
+template<typename T> ostream & operator << (ostream &out,const vector<T>&obj){out<<"vector(";for(auto it=obj.begin();it!=obj.end();it++) out<<(it==obj.begin()?"":", ")<<*it;out<<")";return out;}
+
+
+void solve() {
+	string n;
+	cin >> n;
+	int b = (n.back() - '0') % 2;
+	int ans = 0;
+	for (int i = 0; i < n.size() - 1; i++) {
+		if ((n[i] - '0') % 2 == b) {
+			ans++;
+		}
+	}
+	cout << ans << endl;
+}
+ 
+int main(void) {
+    ios::sync_with_stdio(false);
+    cin.tie(0); cout.tie(0);
+    int t = 1;
+	//cin >> t;
+    
+    while (t--) {
+    	solve(); 
+	}
+}

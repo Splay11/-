@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "3 1\nxyz\n1 2",
+      "output": "xxyyz",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "4 2\nwxyz\n2 2\n1 3",
+      "output": "wwxxxxyz",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "2 1\nab\n1 1",
+      "output": "aab",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

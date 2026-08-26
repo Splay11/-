@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1844",
+  "title": "第3题-倍半调序",
+  "docId": 944,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3649",
+  "title": "第3题-整街点亮",
+  "docId": 2992,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "二分"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2678",
+  "title": "第3题-调整关卡基础分",
+  "docId": 2195,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

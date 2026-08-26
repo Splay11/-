@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1083",
+  "title": "共鸣符文",
+  "docId": 85,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "哈希表",
+  "trial_videosol": ""
+}

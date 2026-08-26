@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3407",
+  "title": "第2题-位限约束下的最大总和",
+  "docId": 2749,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "动态规划",
+    "树形DP"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树形DP",
+  "videosol": "https://www.bilibili.com/video/BV1f3eAz3Ebe/?spm_id_from=333.1387.list.card_archive.click&vd_source=0f2b5f5dae4beb99b68547471f7432e0",
+  "trial_videosol": ""
+}

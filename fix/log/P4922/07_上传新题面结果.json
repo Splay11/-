@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4922",
+  "title": "第3题-频次还原档案号",
+  "docId": 4236,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

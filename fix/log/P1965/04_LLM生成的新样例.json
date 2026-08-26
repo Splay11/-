@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "6 1\n100102",
+      "output": "10",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "6 1\n100103",
+      "output": "10",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "6 1\n100104",
+      "output": "10",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+```json
+{
+  "samples": [
+    {
+      "input": "4\npositive A B C\nnegative A B D\npositive A C\nnegative B D\n2",
+      "output": "C\nD",
+      "explanation": "该样例共有 `4` 条反馈，其中 `'positive'` 和 `'negative'` 各 `2` 条，因此 $n_p = 2$，$n_n = 2$，总文档数 $N = 4$。\n\n各单词的频数统计如下：\n- 单词 `A`：正类出现 `2` 次，负类出现 `1` 次 → $A = 2, B = 1, C = 0, D = 1$\n- 单词 `B`：正类出现 `1` 次，负类出现 `2` 次 → $A = 1, B = 2, C = 1, D = 0$\n- 单词 `C`：正类出现 `2` 次，负类出现 `0` 次 → $A = 2, B = 0, C = 0, D = 2$\n- 单词 `D`：正类出现 `0` 次，负类出现 `2` 次 → $A = 0, B = 2, C = 2, D = 0$\n\n计算卡方值 $S$：\n- $S(\\text{C}) = 4.0$，$S(\\text{D}) = 4.0$\n- $S(\\text{A}) \\approx 1.333$，$S(\\text{B}) \\approx 1.333$\n\n按得分降序排列，得分相同时按字典序升序。由于 `C` 和 `D` 得分相同且 `C` 的字典序较小，因此前 `2` 个单词为 `C` 和 `D`。"
+    },
+    {
+      "input": "6\npositive word1 word2 word3\npositive word1 word4\npositive word2\nnegative word1 word3\nnegative word2 word3\nnegative word3\n3",
+      "output": "word3\nword4\nword1",
+      "explanation": "该样例包含 `6` 条反馈，其中正类 `3` 条，负类 `3` 条，$n_p = 3$，$n_n = 3$，$N = 6$。\n\n各单词频数：\n- `word1`：正类 `2` 次，负类 `1` 次 → $A = 2, B = 1, C = 1, D = 2$\n- `word2`：正类 `2` 次，负类 `1` 次 → $A = 2, B = 1, C = 1, D = 2$\n- `word3`：正类 `1` 次，负类 `3` 次 → $A = 1, B = 3, C = 2, D = 0$\n- `word4`：正类 `1` 次，负类 `0` 次 → $A = 1, B = 0, C = 2, D = 3$\n\n计算出的得分分别为：\n- $S(\\text{word3}) = 3.0$\n- $S(\\text{word4}) \\approx 1.2$\n- $S(\\text{word1}) \\approx 0.667$\n- $S(\\text{word2}) \\approx 0.667$\n\n得分相同时按字典序排序，`word1` < `word2`，因此最终前 `3` 个单词为 `word3`、`word4`、`word1`。"
+    },
+    {
+      "input": "2\npositive A B\nnegative A\n2",
+      "output": "B\nA",
+      "explanation": "仅包含 `2` 条反馈，正负类各 `1` 条，边界情况 $N = 2, n_p = 1, n_n = 1$。\n\n单词统计：\n- `A`：正类出现 `1` 次，负类出现 `1` 次 → $A = 1, B = 1, C = 0, D = 0$\n- `B`：正类出现 `1` 次，负类出现 `0` 次 → $A = 1, B = 0, C = 0, D = 1$\n\n计算得 $S(\\text{B}) = 2.0$，$S(\\text{A}) = 0.0$。按得分降序输出，`k = 2` 恰好等于词汇总数，因此输出 `B` 和 `A`。"
+    },
+    {
+      "input": "2\nneutral Hello\npositive World\n1",
+      "output": "-1",
+      "explanation": "输入格式错误：第一行给出 `N = 2`，但第二行的标签 `'neutral'` 不是合法的 `'positive'` 或 `'negative'`，因此程序直接输出 `-1` 并结束。"
+    }
+  ]
+}
+```

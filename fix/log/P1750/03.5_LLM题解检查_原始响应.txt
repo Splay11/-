@@ -1,0 +1,169 @@
+## 解题思路
+
+本问题要求统计删除一个下标区间 `[l, r]` 后，剩余序列（可以为空）满足非递减性质的方案总数。由于直接枚举所有区间会超时，我们可以利用双指针技巧在线性时间内完成。
+
+1. **问题转化**  
+   删除区间 `[l, r]` 后，剩余部分由前缀 `[1, l-1]` 和后缀 `[r+1, n]` 拼接而成。合法需要满足：
+   - 前缀自身非递减；
+   - 后缀自身非递减；
+   - 若前后缀均非空，还需满足 `a[l-1] <= a[r+1]`（哨兵处理边界）。
+   空序列（全删）也视为合法。
+
+2. **预处理最长非递减后缀**  
+   为了高效定位满足条件的右端点，先从右向左扫描找出最长非递减后缀的起始位置 `min_r`：  
+   即最小的下标 `p`，使得 `a[p] <= a[p+1] <= ... <= a[n]`。该过程可处理边界：在数组末尾添加哨兵 `a[n+1] = INF`（大于任何元素），保证扫描从 `n` 开始能正确捕获后缀。  
+   若后缀性质一直延伸到序列最前端，`min_r = 1`。
+
+3. **双指针扫描**  
+   设立左指针 `left` 枚举删除区间的左端点，同时维护右指针 `right` 表示使得剩余序列合法的**最小**右端点。  
+   - 初始 `right = min_r - 1`（即后缀起始位置的前一个位置）。  
+   - 对于每个合法的 `left`（前缀 `[1, left-1]` 非递减），先将 `right` 更新为 `max(right, left)` 以保证区间非空。  
+   - 然后在内层不断右移 `right`，直到 `a[right+1] >= a[left-1]` 成立（若后缀为空，即 `right = n`，则哨兵保证条件恒成立）。  
+   - 此时对于该 `left`，所有 $r \in [right, n]$ 的删除区间都合法，答案累加 $n - right + 1$。  
+   - 检查前缀是否仍能继续非递减：若 `a[left] < a[left-1]`，则停止枚举更大的 `left`；否则继续。  
+   为了简化边界判断，我们在序列首部添加哨兵 `a[0] = 0`（小于所有元素），从而使 `left-1 = 0` 时条件自动满足。
+
+4. **边界说明**  
+   - 当 `left = 1` 时，前缀为空，认为满足非递减条件；  
+   - 当 `right = n` 时，后缀为空，同样认为合法；  
+   - 空序列的情况被 `right = n` 且 `left = 1` 时计入。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$。预处理后缀只需一次反向扫描；双指针过程中 `left` 和 `right` 均单调递增，每个元素至多被访问常数次。  
+- **空间复杂度**：$O(n)$。主要为存储输入数组及哨兵的空间，所有操作在原数组上完成，无额外大容量结构。
+
+## 代码实现
+
+### Python
+
+```python
+def solve():
+    import sys
+    input = sys.stdin.readline
+    n = int(input())
+    a = list(map(int, input().split()))
+    # 添加哨兵，简化越界判断
+    a = [0] + a + [2 * 10**9]
+
+    # 寻找最长非递减后缀的起始位置 min_r
+    min_r = n
+    for i in range(n, 0, -1):
+        if a[i] <= a[i + 1]:
+            min_r = i
+        else:
+            break
+
+    ans = 0
+    right = min_r - 1               # 右指针初始为后缀前一个位置
+    for left in range(1, n + 1):
+        right = max(right, left)    # 保证区间 l <= r
+        # 移动右指针直到满足 a[left-1] <= a[right+1]
+        while right <= n and a[right + 1] < a[left - 1]:
+            right += 1
+        # 所有 r ∈ [right, n] 均合法
+        ans += n - right + 1
+        # 检查前缀是否还能保持非递减
+        if a[left] < a[left - 1]:
+            break
+
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] a = new int[n + 2];
+        // 读入数据并设置哨兵
+        a[0] = 0;                  // 左哨兵
+        a[n + 1] = 2000000000;     // 右哨兵
+        for (int i = 1; i <= n; i++) {
+            a[i] = sc.nextInt();
+        }
+
+        // 预处理最长非递减后缀起始位置
+        int minR = n;
+        for (int i = n; i >= 1; i--) {
+            if (a[i] <= a[i + 1]) {
+                minR = i;
+            } else {
+                break;
+            }
+        }
+
+        long ans = 0;
+        int right = minR - 1;
+        for (int left = 1; left <= n; left++) {
+            right = Math.max(right, left);
+            while (right <= n && a[right + 1] < a[left - 1]) {
+                right++;
+            }
+            ans += n - right + 1;
+            if (a[left] < a[left - 1]) {
+                break;
+            }
+        }
+
+        System.out.println(ans);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int> a(n + 2);
+    a[0] = 0;                  // 左哨兵
+    a[n + 1] = 2000000000;     // 右哨兵
+    for (int i = 1; i <= n; ++i) {
+        cin >> a[i];
+    }
+
+    // 预处理最长非递减后缀起始位置
+    int min_r = n;
+    for (int i = n; i >= 1; --i) {
+        if (a[i] <= a[i + 1]) {
+            min_r = i;
+        } else {
+            break;
+        }
+    }
+
+    long long ans = 0;
+    int right = min_r - 1;
+    for (int left = 1; left <= n; ++left) {
+        right = max(right, left);
+        while (right <= n && a[right + 1] < a[left - 1]) {
+            ++right;
+        }
+        ans += n - right + 1;
+        if (a[left] < a[left - 1]) {
+            break;
+        }
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
+```

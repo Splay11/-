@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1080",
+  "title": "第2题-三色回文",
+  "docId": 81,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "构造",
+  "trial_videosol": ""
+}

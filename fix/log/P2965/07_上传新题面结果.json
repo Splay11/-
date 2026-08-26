@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2965",
+  "title": "鸽群分区",
+  "docId": 2600,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "树形dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

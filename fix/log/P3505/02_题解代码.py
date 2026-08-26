@@ -1,0 +1,1 @@
+max(a,b,c,d) = lcm(a,b,c,d)

@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3431",
+  "title": "第3题-偶数辖区",
+  "docId": 2773,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划",
+    "换根dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "https://www.bilibili.com/video/BV15MebzgEt1/?vd_source=0f2b5f5dae4beb99b68547471f7432e0",
+  "trial_videosol": ""
+}

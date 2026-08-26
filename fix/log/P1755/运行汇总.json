@@ -1,0 +1,11 @@
+{
+  "pid": "P1755",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:44:11",
+  "end_time": "2026-08-19 19:44:12",
+  "new_title": "交替口令拼接",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

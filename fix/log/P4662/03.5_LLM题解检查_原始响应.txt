@@ -1,0 +1,326 @@
+## 解题思路
+
+题目要求找到第 $k$ 个「安全」的正整数。一个数是安全的，当且仅当：
+
+1.  不能被 $3$ 整除；
+2.  它的十进制表示中不包含数字 $3$。
+
+由于 $k$ 最大可达 $10^{18}$，直接暴力生成所有安全数不可行。这里采用**数位动态规划 + 按位构造**的方法。
+
+### 1. 状态设计
+
+一个数能否被 $3$ 整除，只取决于它的各位数字之和模 $3$ 的结果。因此我们可以定义：
+
+- `suf[i][r]`：还剩 $i$ 位需要填充，且当前前缀（已填部分）模 $3$ 等于 $r$ 时，最终能够组成的安全数的个数。
+
+因为不能出现数字 `3`，所以每一位可选的数字集合为：
+
+- 首位（最高位）不能为 `0`，可取 $[1,2,4,5,6,7,8,9]$；
+- 其余位可取 $[0,1,2,4,5,6,7,8,9]$。
+
+并且最终整个数模 $3$ 不能等于 $0$。
+
+预处理时，从 $0$ 位开始递推，可以填出所有长度下的方案数。
+
+### 2. 按长度统计安全数个数
+
+设 `cnt[L]` 表示恰好为 $L$ 位数的安全正整数的个数。它可以通过首位枚举后，调用 `suf[L-1][...]` 累加得到。
+
+### 3. 确定答案的长度
+
+对于给定的 $k$，从最短的长度开始尝试：  
+如果 $k > \text{cnt}[1]$，说明第 $k$ 个数不在 $1$ 位数中，将 $k$ 减去 $\text{cnt}[1]$，继续检查长度 $2, 3, \dots$，直到找到第一个满足 $k \le \text{cnt}[L]$ 的长度 $L$，此时答案是一个 $L$ 位数。
+
+### 4. 逐位构造答案
+
+确定长度后，从最高位到最低位，按从小到大的顺序尝试每一位可以填的数字。  
+假设当前前缀模 $3$ 为 `cur`，尝试填入数字 `d`，则新的模数为：
+
+$$
+\text{nxt} = (\text{cur} \times 10 + d) \bmod 3
+$$
+
+设剩余位数为 `rest`，那么使用 `suf[rest][nxt]` 可以得到以当前前缀为基础，后续能组成的安全数的个数。  
+若这个个数小于当前 $k$，说明答案不在该数字开头的分支里，将 $k$ 减去该个数，继续尝试下一个数字；  
+否则，确定当前位就是 `d`，更新前缀模值，继续构造下一位。
+
+由于我们按长度从小到大，同长度内按字典序（即数值序）枚举，整个过程正好得到升序排列的第 $k$ 个安全数。
+
+## 复杂度分析
+
+由于 $k \le 10^{18}$，安全数的位数不会很大，预处理到 $25$ 位已经足够覆盖。
+
+- 预处理时间复杂度：$O(L \times 10 \times 3)$，其中 $L \approx 25$，常数很小。
+- 单次询问时间复杂度：$O(L \times 10)$，构造每一位最多尝试 $9$ 个数字。
+- 空间复杂度：$O(L \times 3)$，用于存储 `suf` 数组。
+
+总复杂度足以应对 $t \le 10^4$ 个询问。
+
+## 代码实现
+
+### Python
+
+```python
+# 最大预处理位数，25 足够覆盖 k ≤ 1e18 的范围
+MAX_LEN = 25
+
+# 可选数字
+FIRST = [1, 2, 4, 5, 6, 7, 8, 9]      # 首位不能是 0
+OTHER = [0, 1, 2, 4, 5, 6, 7, 8, 9]   # 其余位
+
+# suf[i][r]：还剩 i 位要填，当前前缀模 3 为 r 时，最终能组成的安全数个数
+suf = [[0] * 3 for _ in range(MAX_LEN + 1)]
+
+# 边界：没有位可填时，当前数模 3 不为 0 才安全
+for r in range(3):
+    suf[0][r] = 1 if r != 0 else 0
+
+# 预处理后缀方案数
+for i in range(1, MAX_LEN + 1):
+    for r in range(3):
+        total = 0
+        for d in OTHER:
+            nr = (r * 10 + d) % 3
+            total += suf[i - 1][nr]
+        suf[i][r] = total
+
+# cnt[L]：恰好 L 位的安全数个数
+cnt = [0] * (MAX_LEN + 1)
+for length in range(1, MAX_LEN + 1):
+    total = 0
+    for d in FIRST:
+        total += suf[length - 1][d % 3]
+    cnt[length] = total
+
+
+def kth_number(k):
+    # 1. 确定答案的长度
+    length = 1
+    while k > cnt[length]:
+        k -= cnt[length]
+        length += 1
+
+    # 2. 按位构造答案
+    ans = []
+    cur_mod = 0
+    for pos in range(length):
+        digits = FIRST if pos == 0 else OTHER
+        rest = length - pos - 1
+        for d in digits:
+            nxt_mod = (cur_mod * 10 + d) % 3
+            ways = suf[rest][nxt_mod]
+            if k > ways:
+                k -= ways
+            else:
+                ans.append(str(d))
+                cur_mod = nxt_mod
+                break
+    return ''.join(ans)
+
+
+def main():
+    t = int(input())
+    for _ in range(t):
+        k = int(input())
+        print(kth_number(k))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    // 最大预处理位数
+    static final int MAX_LEN = 25;
+
+    // 首位和其他位可选数字
+    static int[] FIRST = {1, 2, 4, 5, 6, 7, 8, 9};
+    static int[] OTHER = {0, 1, 2, 4, 5, 6, 7, 8, 9};
+
+    // suf[i][r]：还剩 i 位要填，当前前缀模 3 为 r 时，最终能组成的安全数个数
+    static long[][] suf = new long[MAX_LEN + 1][3];
+
+    // cnt[L]：恰好 L 位的安全数个数
+    static long[] cnt = new long[MAX_LEN + 1];
+
+    // 预处理
+    static void init() {
+        // 边界：没有位可填时，当前数模 3 不为 0 才安全
+        for (int r = 0; r < 3; r++) {
+            suf[0][r] = (r != 0) ? 1 : 0;
+        }
+
+        // 预处理后缀方案数
+        for (int i = 1; i <= MAX_LEN; i++) {
+            for (int r = 0; r < 3; r++) {
+                long total = 0;
+                for (int d : OTHER) {
+                    int nr = (r * 10 + d) % 3;
+                    total += suf[i - 1][nr];
+                }
+                suf[i][r] = total;
+            }
+        }
+
+        // 统计每种长度的安全数个数
+        for (int len = 1; len <= MAX_LEN; len++) {
+            long total = 0;
+            for (int d : FIRST) {
+                total += suf[len - 1][d % 3];
+            }
+            cnt[len] = total;
+        }
+    }
+
+    // 求第 k 个安全数
+    static String kthNumber(long k) {
+        int len = 1;
+        while (k > cnt[len]) {
+            k -= cnt[len];
+            len++;
+        }
+
+        StringBuilder ans = new StringBuilder();
+        int curMod = 0;
+
+        // 按位构造答案
+        for (int pos = 0; pos < len; pos++) {
+            int[] digits = (pos == 0) ? FIRST : OTHER;
+            int rest = len - pos - 1;
+
+            for (int d : digits) {
+                int nxtMod = (curMod * 10 + d) % 3;
+                long ways = suf[rest][nxtMod];
+
+                if (k > ways) {
+                    k -= ways;
+                } else {
+                    ans.append(d);
+                    curMod = nxtMod;
+                    break;
+                }
+            }
+        }
+
+        return ans.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        init();
+
+        int t = sc.nextInt();
+        while (t-- > 0) {
+            long k = sc.nextLong();
+            System.out.println(kthNumber(k));
+        }
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+// 最大预处理位数
+const int MAX_LEN = 25;
+
+// 首位和其他位可选数字
+vector<int> FIRST = {1, 2, 4, 5, 6, 7, 8, 9};
+vector<int> OTHER = {0, 1, 2, 4, 5, 6, 7, 8, 9};
+
+// suf[i][r]：还剩 i 位要填，当前前缀模 3 为 r 时，最终能组成的安全数个数
+long long suf[MAX_LEN + 1][3];
+
+// cnt[L]：恰好 L 位的安全数个数
+long long cnt[MAX_LEN + 1];
+
+// 预处理
+void init() {
+    // 边界：没有位可填时，当前数模 3 不为 0 才安全
+    for (int r = 0; r < 3; r++) {
+        suf[0][r] = (r != 0 ? 1 : 0);
+    }
+
+    // 预处理后缀方案数
+    for (int i = 1; i <= MAX_LEN; i++) {
+        for (int r = 0; r < 3; r++) {
+            long long total = 0;
+            for (int d : OTHER) {
+                int nr = (r * 10 + d) % 3;
+                total += suf[i - 1][nr];
+            }
+            suf[i][r] = total;
+        }
+    }
+
+    // 统计每种长度的安全数个数
+    for (int len = 1; len <= MAX_LEN; len++) {
+        long long total = 0;
+        for (int d : FIRST) {
+            total += suf[len - 1][d % 3];
+        }
+        cnt[len] = total;
+    }
+}
+
+// 求第 k 个安全数
+string kthNumber(long long k) {
+    int len = 1;
+    while (k > cnt[len]) {
+        k -= cnt[len];
+        len++;
+    }
+
+    string ans = "";
+    int curMod = 0;
+
+    // 按位构造答案
+    for (int pos = 0; pos < len; pos++) {
+        vector<int>& digits = (pos == 0 ? FIRST : OTHER);
+        int rest = len - pos - 1;
+
+        for (int d : digits) {
+            int nxtMod = (curMod * 10 + d) % 3;
+            long long ways = suf[rest][nxtMod];
+
+            if (k > ways) {
+                k -= ways;
+            } else {
+                ans += char('0' + d);
+                curMod = nxtMod;
+                break;
+            }
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    init();
+
+    int t;
+    cin >> t;
+    while (t--) {
+        long long k;
+        cin >> k;
+        cout << kthNumber(k) << '\n';
+    }
+
+    return 0;
+}
+```

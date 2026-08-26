@@ -1,0 +1,307 @@
+## 解题思路
+
+在新题面中，对于每个能量值 $v$，它在序列中的出现位置从小到大排列为 $p_1 < p_2 < \dots < p_m$，相邻两个位置 $(p_k, p_{k+1})$ 构成一个**同频紧邻对**。该对的**低值干扰数**定义为区间 $[p_k, p_{k+1}]$ 内能量值严格小于 $v$ 的频点个数。要求所有同频紧邻对的低值干扰数之和。
+
+直接对每个同频紧邻暴力统计是 $O(n^2)$ 的，无法通过。我们需要高效计算任意区间内 “严格小于 $v$ 的元素个数” 。
+
+观察：如果我们**按能量值从小到大**的顺序逐步处理，那么处理到值 $v$ 时，所有能量值严格小于 $v$ 的频点都已经被“处理过”，而能量值 $\ge v$ 的频点尚未处理。因此，若能快速统计某个区间内已经处理过的元素个数，就得到了该区间内“严格小于 $v$ 的元素个数”。
+
+基于此，我们可以设计如下算法：
+
+1. 预处理位置表：用一个数组 `pos[v]`（`vector` 或列表）按顺序记录能量值 $v$ 在原始序列中出现的所有位置（下标从 1 开始）。
+2. 树状数组维护“已处理”位置：使用一棵树状数组（Fenwick Tree），初始全为 0。单点加入操作为将该位置的贡献加 1，区间查询可得到该区间内已加入的元素个数。
+3. 按值 $v$ 从 1 到 $n$（题目保证 $a_i \le n$）依次处理：
+   - 查询贡献：对于 `pos[v]` 中的每一对相邻位置 $(l, r)$，通过树状数组的区间求和查询 $[l, r]$ 内已加入的元素个数，这个数值就是该同频紧邻对的低值干扰数，累加到答案中。
+   - 加入当前位置：完成查询后，将 `pos[v]` 中所有位置在树状数组中执行单点加 1，表示这些位置的能量值 $v$ 已经可以被后续比 $v$ 大的值当作“严格小于”的元素来统计。
+4. 所有值处理完毕后，累加的和即为最终答案。
+
+该算法保证每个同频紧邻对只在处理其对应能量值时被计算一次，且树状数组在该时刻恰好保存了所有严格小于该值的频点位置，统计结果与题目定义完全一致。
+
+## 复杂度分析
+
+设当前测试数据的序列长度为 $n$。
+
+- **时间复杂度**：建立出现位置列表 $O(n)$；每个元素最多被加入树状数组一次，每次 $O(\log n)$；每个同频紧邻对查询一次区间和，总查询次数不超过 $n-1$，每次 $O(\log n)$。因此整体时间复杂度为 $O(n \log n)$。
+- **空间复杂度**：存储所有值出现位置的列表需要 $O(n)$ 额外空间；树状数组需要 $O(n)$ 额外空间。因此空间复杂度为 $O(n)$。
+
+所有测试数据的 $n$ 总和不超过 $2 \times 10^5$，因此算法可以高效运行。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+# 树状数组，支持单点增加、前缀和查询
+class Fenwick:
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (n + 1)
+
+    # 在下标 idx 位置加上 delta
+    def add(self, idx, delta):
+        while idx <= self.n:
+            self.tree[idx] += delta
+            idx += idx & -idx
+
+    # 查询前缀和 [1..idx]
+    def sum(self, idx):
+        res = 0
+        while idx > 0:
+            res += self.tree[idx]
+            idx -= idx & -idx
+        return res
+
+    # 查询区间和 [l..r]
+    def range_sum(self, l, r):
+        return self.sum(r) - self.sum(l - 1)
+
+
+def solve_case(n, a):
+    # pos[x] 保存能量值 x 的所有出现位置（下标从1开始）
+    pos = [[] for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        pos[a[i - 1]].append(i)
+
+    bit = Fenwick(n)
+    ans = 0
+
+    # 按能量值从小到大处理
+    for v in range(1, n + 1):
+        arr = pos[v]
+
+        # 先统计当前值 v 的所有同频紧邻对的低值干扰数
+        for i in range(len(arr) - 1):
+            l = arr[i]
+            r = arr[i + 1]
+            ans += bit.range_sum(l, r)
+
+        # 再将当前值 v 的所有位置加入树状数组
+        for p in arr:
+            bit.add(p, 1)
+
+    return ans
+
+
+def main():
+    input = sys.stdin.readline
+    T = int(input().strip())
+    for _ in range(T):
+        n = int(input().strip())
+        a = list(map(int, input().split()))
+        print(solve_case(n, a))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    // 树状数组，支持单点增加、前缀和查询
+    static class Fenwick {
+        int n;
+        int[] tree;
+
+        Fenwick(int n) {
+            this.n = n;
+            this.tree = new int[n + 1];
+        }
+
+        // 在下标 idx 位置加上 delta
+        void add(int idx, int delta) {
+            while (idx <= n) {
+                tree[idx] += delta;
+                idx += idx & -idx;
+            }
+        }
+
+        // 查询前缀和 [1..idx]
+        int sum(int idx) {
+            int res = 0;
+            while (idx > 0) {
+                res += tree[idx];
+                idx -= idx & -idx;
+            }
+            return res;
+        }
+
+        // 查询区间和 [l..r]
+        int rangeSum(int l, int r) {
+            return sum(r) - sum(l - 1);
+        }
+    }
+
+    // 计算单组测试数据答案
+    static long solveCase(int n, int[] a) {
+        // pos[x] 保存能量值 x 的所有出现位置（下标从1开始）
+        ArrayList<Integer>[] pos = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            pos[i] = new ArrayList<>();
+        }
+
+        for (int i = 1; i <= n; i++) {
+            pos[a[i]].add(i);
+        }
+
+        Fenwick bit = new Fenwick(n);
+        long ans = 0;
+
+        // 按能量值从小到大处理
+        for (int v = 1; v <= n; v++) {
+            ArrayList<Integer> arr = pos[v];
+
+            // 先统计当前值 v 的所有同频紧邻对的低值干扰数
+            for (int i = 0; i + 1 < arr.size(); i++) {
+                int l = arr.get(i);
+                int r = arr.get(i + 1);
+                ans += bit.rangeSum(l, r);
+            }
+
+            // 再将当前值 v 的所有位置加入树状数组
+            for (int p : arr) {
+                bit.add(p, 1);
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        StringBuilder sb = new StringBuilder();
+
+        int T = fs.nextInt();
+        while (T-- > 0) {
+            int n = fs.nextInt();
+            int[] a = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                a[i] = fs.nextInt();
+            }
+            sb.append(solveCase(n, a)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+
+    // 简洁输入工具
+    static class FastScanner {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreElements()) {
+                st = new StringTokenizer(br.readLine());
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 树状数组，支持单点增加、前缀和查询
+class Fenwick {
+private:
+    int n;
+    vector<int> tree;
+
+public:
+    Fenwick(int n) : n(n), tree(n + 1, 0) {}
+
+    // 在下标 idx 位置加上 delta
+    void add(int idx, int delta) {
+        while (idx <= n) {
+            tree[idx] += delta;
+            idx += idx & -idx;
+        }
+    }
+
+    // 查询前缀和 [1..idx]
+    int sum(int idx) {
+        int res = 0;
+        while (idx > 0) {
+            res += tree[idx];
+            idx -= idx & -idx;
+        }
+        return res;
+    }
+
+    // 查询区间和 [l..r]
+    int rangeSum(int l, int r) {
+        return sum(r) - sum(l - 1);
+    }
+};
+
+// 计算单组测试数据答案
+long long solveCase(int n, const vector<int>& a) {
+    // pos[x] 保存能量值 x 的所有出现位置（下标从1开始）
+    vector<vector<int>> pos(n + 1);
+    for (int i = 1; i <= n; i++) {
+        pos[a[i]].push_back(i);
+    }
+
+    Fenwick bit(n);
+    long long ans = 0;
+
+    // 按能量值从小到大处理
+    for (int v = 1; v <= n; v++) {
+        vector<int>& arr = pos[v];
+
+        // 先统计当前值 v 的所有同频紧邻对的低值干扰数
+        for (int i = 0; i + 1 < (int)arr.size(); i++) {
+            int l = arr[i];
+            int r = arr[i + 1];
+            ans += bit.rangeSum(l, r);
+        }
+
+        // 再将当前值 v 的所有位置加入树状数组
+        for (int p : arr) {
+            bit.add(p, 1);
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        cin >> n;
+        vector<int> a(n + 1);
+
+        for (int i = 1; i <= n; i++) {
+            cin >> a[i];
+        }
+
+        cout << solveCase(n, a) << '\n';
+    }
+
+    return 0;
+}
+```

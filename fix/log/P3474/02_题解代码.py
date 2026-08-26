@@ -1,0 +1,46 @@
+### 思路
+
+* **概率计算**: 对每个用户，先求每个类别的阅读次数占比 $p_i = \frac{c_i}{\sum_j c_j}$。
+* **忽略零项**: 若某类次数为 0，则该项 $p_i \log_2 p_i$ 视为 0，不参与求和。
+* **信息熵**: 按 $H = -\sum_{i=1}^{n} p_i \log_2 p_i$ 计算，底为 2。
+* **保留小数**: 结果用 `round(H, 3)` 保留到 3 位小数。
+* **输入输出**: 从标准输入读取 JSON 字符串，解析后计算；用 `json.dumps` 输出，保证双引号格式。
+
+### Python 
+
+```python
+import sys
+import json
+import math
+
+def compute_entropy(counts):
+    # counts: dict[str, int]，各类别阅读次数
+    total = sum(counts.values())
+    if total == 0:
+        return 0.0
+    H = 0.0
+    for c in counts.values():
+        if c <= 0:
+            continue
+        p = c / total
+        H -= p * math.log2(p)
+    return H
+
+def main():
+    # 从标准输入读取整段字符串（单行或多行都可）
+    raw = sys.stdin.read().strip()
+    decoder = json.JSONDecoder()
+    data, end = decoder.raw_decode(raw)  # 只取开头的第一个 JSON；忽略后面的内容
+
+    result = {}
+    for user, cat_counts in data.items():
+        H = compute_entropy(cat_counts)
+        result[user] = {"entropy": round(H, 3)}
+
+    # 输出为合法 JSON，双引号格式
+    print(json.dumps(result, ensure_ascii=False))
+
+if __name__ == "__main__":
+    main()
+
+```

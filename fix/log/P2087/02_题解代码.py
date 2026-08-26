@@ -1,0 +1,282 @@
+## 解题思路
+
+先把所有相邻对 $(i,i+1)$ 看成一条边，它的权值为 $s_i=a_i+a_{i+1}$。
+题目要求选择若干条边，满足：
+
+1. 选出的边权值都相同；
+2. 任意两条边不能相邻（因为每个下标最多出现一次）；
+3. 选择条数 $k>0$。
+
+于是问题转化为：
+
+对于每一种和 $x$，收集所有满足 $s_i=x$ 的位置 $i$，也就是边 $(i,i+1)$。
+在这些位置里，统计有多少种方式选出若干个下标，使任意两个下标不相邻，且至少选一个。
+最后把所有不同的和的答案加起来即可。
+
+### 关键性质
+
+若某个和 $x$ 对应的位置序列为
+$$p_1<p_2<\cdots<p_m$$
+
+只有当 $p_{j+1}=p_j+1$ 时，这两条边不能同时选。
+因此这些位置会被分成若干段连续块，例如：
+
+$$[l,l+1,\dots,r]$$
+
+在一个长度为 $t$ 的连续块中，等价于从一条长度为 $t$ 的线性序列中选若干个点，要求不能相邻。
+这是经典动态规划问题。
+
+### 经典结论
+
+长度为 $t$ 的序列中，选任意个互不相邻点的方案数（允许一个都不选）为：
+
+$$f_t$$
+
+满足斐波那契递推：
+
+$$f_0=1,\quad f_1=2,\quad f_t=f_{t-1}+f_{t-2}$$
+
+原因：
+
+* 不选第 $t$ 个位置：有 $f_{t-1}$ 种；
+* 选第 $t$ 个位置：第 $t-1$ 个不能选，有 $f_{t-2}$ 种。
+
+所以一个连续块长度为 $t$ 的贡献就是 $f_t$。
+
+不同连续块之间互不影响，因此某个和 $x$ 的总方案数（允许一个都不选）为所有块贡献的乘积：
+
+$$\prod f_{len_i}$$
+
+但题目要求至少选一个对，所以还要减去“一个都不选”的方案：
+
+$$\prod f_{len_i}-1$$
+
+### 实现方法
+
+1. 先枚举所有相邻对，计算每个位置的和 $s_i=a_i+a_{i+1}$。
+2. 用哈希表按和分组，存储所有出现位置 $i$。
+3. 预处理斐波那契式数组 $f$，其中最大长度不会超过 $n-1$。
+4. 对每个分组，扫描这些位置，分出若干个连续块，计算乘积后减一。
+5. 把所有和的结果累加，模 $10^9+7$ 输出。
+
+相关算法：
+
+* 哈希分组
+* 线性动态规划
+* 按连续段统计
+
+## 复杂度分析
+
+设数组长度为 $n$。
+
+* 相邻对一共只有 $n-1$ 个；
+* 分组总元素个数也是 $n-1$；
+* 每个位置只会被处理一次。
+
+所以：
+
+* 时间复杂度：$O(n)$
+* 空间复杂度：$O(n)$
+
+对于 $n\le 10^5$ 完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10**9 + 7
+
+# 计算答案的函数
+def solve(n, a):
+    # f[i] 表示长度为 i 的线性序列中，选若干个互不相邻位置的方案数（可一个不选）
+    f = [0] * n
+    f[0] = 1
+    if n > 1:
+        f[1] = 2
+    for i in range(2, n):
+        f[i] = (f[i - 1] + f[i - 2]) % MOD
+
+    # 按相邻对的和分组
+    groups = {}
+    for i in range(n - 1):
+        s = a[i] + a[i + 1]
+        if s not in groups:
+            groups[s] = []
+        groups[s].append(i)
+
+    ans = 0
+
+    # 逐组统计
+    for pos in groups.values():
+        ways = 1
+        cnt = 1  # 当前连续块长度
+
+        for i in range(1, len(pos)):
+            if pos[i] == pos[i - 1] + 1:
+                cnt += 1
+            else:
+                # 一个连续块结束，乘上其贡献
+                ways = ways * f[cnt] % MOD
+                cnt = 1
+
+        # 最后一个连续块
+        ways = ways * f[cnt] % MOD
+
+        # 减去一个都不选的情况
+        ans = (ans + ways - 1) % MOD
+
+    return ans
+
+
+def main():
+    input = sys.stdin.readline
+    n = int(input().strip())
+    a = list(map(int, input().split()))
+    print(solve(n, a))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007L;
+
+    // 计算答案的函数
+    static long solve(int n, long[] a) {
+        // f[i] 表示长度为 i 的线性序列中，选若干个互不相邻位置的方案数（可一个不选）
+        long[] f = new long[n];
+        f[0] = 1;
+        if (n > 1) {
+            f[1] = 2;
+        }
+        for (int i = 2; i < n; i++) {
+            f[i] = (f[i - 1] + f[i - 2]) % MOD;
+        }
+
+        // 按相邻对的和分组
+        HashMap<Long, ArrayList<Integer>> groups = new HashMap<>();
+        for (int i = 0; i < n - 1; i++) {
+            long s = a[i] + a[i + 1];
+            groups.computeIfAbsent(s, k -> new ArrayList<>()).add(i);
+        }
+
+        long ans = 0;
+
+        // 逐组统计
+        for (ArrayList<Integer> pos : groups.values()) {
+            long ways = 1;
+            int cnt = 1; // 当前连续块长度
+
+            for (int i = 1; i < pos.size(); i++) {
+                if (pos.get(i) == pos.get(i - 1) + 1) {
+                    cnt++;
+                } else {
+                    // 一个连续块结束，乘上其贡献
+                    ways = ways * f[cnt] % MOD;
+                    cnt = 1;
+                }
+            }
+
+            // 最后一个连续块
+            ways = ways * f[cnt] % MOD;
+
+            // 减去一个都不选的情况
+            ans = (ans + ways - 1 + MOD) % MOD;
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        String[] parts = br.readLine().trim().split(" ");
+        long[] a = new long[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = Long.parseLong(parts[i]);
+        }
+        System.out.println(solve(n, a));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+
+// 计算答案的函数
+long long solve(int n, const vector<long long>& a) {
+    // f[i] 表示长度为 i 的线性序列中，选若干个互不相邻位置的方案数（可一个不选）
+    vector<long long> f(n, 0);
+    f[0] = 1;
+    if (n > 1) {
+        f[1] = 2;
+    }
+    for (int i = 2; i < n; i++) {
+        f[i] = (f[i - 1] + f[i - 2]) % MOD;
+    }
+
+    // 按相邻对的和分组
+    unordered_map<long long, vector<int> > groups;
+    for (int i = 0; i < n - 1; i++) {
+        long long s = a[i] + a[i + 1];
+        groups[s].push_back(i);
+    }
+
+    long long ans = 0;
+
+    // 逐组统计
+    for (auto& entry : groups) {
+        vector<int>& pos = entry.second;
+        long long ways = 1;
+        int cnt = 1; // 当前连续块长度
+
+        for (int i = 1; i < (int)pos.size(); i++) {
+            if (pos[i] == pos[i - 1] + 1) {
+                cnt++;
+            } else {
+                // 一个连续块结束，乘上其贡献
+                ways = ways * f[cnt] % MOD;
+                cnt = 1;
+            }
+        }
+
+        // 最后一个连续块
+        ways = ways * f[cnt] % MOD;
+
+        // 减去一个都不选的情况
+        ans = (ans + ways - 1 + MOD) % MOD;
+    }
+
+    return ans;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    vector<long long> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+    cout << solve(n, a) << '\n';
+    return 0;
+}
+```

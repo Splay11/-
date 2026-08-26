@@ -1,0 +1,283 @@
+## 解题思路
+
+1. 计算所有节点数值的总和 $S$。  
+   如果 $S$ 是奇数，那么无论怎么切断边，所有连通块的和加起来一定是奇数。但每个连通块的和都是偶数时，它们的总和一定是偶数，矛盾。因此这种情况下不存在任何合法的方案，对于所有的 $k = 1, 2, \dots, n-1$，答案均为 $0$。
+
+2. 如果 $S$ 是偶数，则可以通过一次深度优先搜索（DFS）找出所有 **可以切断的边**。  
+   - 以节点 $1$ 作为根，对树进行 DFS，求出每个子树内所有节点的数值之和。  
+   - 对于树上的每一条边 $(u, v)$（假设 $v$ 是 $u$ 的子节点），若子树 $v$ 的数值和为偶数，则切断这条边后，该子树单独成为一个连通块（和为偶数），剩余部分的数值和 $S - \text{sub}_v$ 也一定是偶数。这样的一条边称为 **候选边**。  
+   - 统计候选边的数量，记为 $m$。
+
+3. 在这些候选边中，任意选择若干条切断都可以满足要求。要恰好切断 $k$ 条边，只需要从 $m$ 条候选边里选出 $k$ 条即可，其余边保持连接。  
+   因此，对于每个 $k$，方案数就是组合数 $\binom{m}{k}$ 对 $10^9+7$ 取模的结果。  
+   如果 $k > m$，则无法选出 $k$ 条边，方案数为 $0$。
+
+4. 最终需要输出 $k = 1$ 到 $n-1$ 的所有答案，用空格分隔。
+
+## 复杂度分析
+
+- **时间复杂度**：DFS 遍历整棵树需要 $O(n)$ 时间；预处理组合数（阶乘与逆元）需要 $O(m)$ 时间，而 $m \le n$。因此总时间复杂度为 $O(n)$。
+- **空间复杂度**：需要存储树的邻接表以及若干辅助数组，均为 $O(n)$ 量级。因此总空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(300000)
+MOD = 10**9 + 7
+
+n = int(sys.stdin.readline().strip())
+weight = list(map(int, sys.stdin.readline().strip().split()))
+tree = [[] for _ in range(n)]
+for _ in range(n - 1):
+    u, v = map(int, sys.stdin.readline().strip().split())
+    u -= 1
+    v -= 1
+    tree[u].append(v)
+    tree[v].append(u)
+
+total = sum(weight)
+# 总和为奇数时，所有答案都是 0
+if total % 2 == 1:
+    print(" ".join(["0"] * (n - 1)))
+    sys.exit(0)
+
+m = 0  # 候选边的数量
+
+def dfs(u, parent):
+    global m
+    s = weight[u]
+    for v in tree[u]:
+        if v == parent:
+            continue
+        sub = dfs(v, u)
+        s += sub
+        # 如果子树和为偶数，则该边为候选边
+        if sub % 2 == 0:
+            m += 1
+    return s
+
+dfs(0, -1)
+
+# 预处理阶乘与逆元，用于计算组合数 C(m, k)
+maxN = m
+fact = [1] * (maxN + 1)
+for i in range(1, maxN + 1):
+    fact[i] = fact[i - 1] * i % MOD
+
+def mod_exp(a, b):
+    res = 1
+    while b:
+        if b & 1:
+            res = res * a % MOD
+        a = a * a % MOD
+        b //= 2
+    return res
+
+inv_fact = [1] * (maxN + 1)
+inv_fact[maxN] = mod_exp(fact[maxN], MOD - 2)
+for i in range(maxN - 1, -1, -1):
+    inv_fact[i] = inv_fact[i + 1] * (i + 1) % MOD
+
+ans = []
+for k in range(1, n):
+    if k > m:
+        ans.append("0")
+    else:
+        comb = fact[m] * inv_fact[k] % MOD * inv_fact[m - k] % MOD
+        ans.append(str(comb))
+print(" ".join(ans))
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final int MOD = 1000000007;
+    static int n;
+    static int[] weight;
+    static ArrayList<Integer>[] tree;
+    static int m = 0;  // 候选边的数量
+
+    static long dfs(int u, int parent) {
+        long s = weight[u];
+        for (int v : tree[u]) {
+            if (v == parent) continue;
+            long sub = dfs(v, u);
+            s += sub;
+            if (sub % 2 == 0) {
+                m++;
+            }
+        }
+        return s;
+    }
+
+    static long modExp(long a, long b) {
+        long res = 1;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = res * a % MOD;
+            }
+            a = a * a % MOD;
+            b >>= 1;
+        }
+        return res;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(br.readLine().trim());
+        weight = new int[n];
+        tree = new ArrayList[n];
+        String[] ws = br.readLine().trim().split("\\s+");
+        long total = 0;
+        for (int i = 0; i < n; i++) {
+            weight[i] = Integer.parseInt(ws[i]);
+            total += weight[i];
+            tree[i] = new ArrayList<>();
+        }
+
+        for (int i = 0; i < n - 1; i++) {
+            String[] edge = br.readLine().trim().split("\\s+");
+            int u = Integer.parseInt(edge[0]) - 1;
+            int v = Integer.parseInt(edge[1]) - 1;
+            tree[u].add(v);
+            tree[v].add(u);
+        }
+
+        // 总和为奇数时，全部答案为 0
+        if (total % 2 == 1) {
+            StringBuilder sb = new StringBuilder();
+            for (int k = 1; k <= n - 1; k++) {
+                sb.append("0").append(k == n - 1 ? "\n" : " ");
+            }
+            System.out.print(sb);
+            return;
+        }
+
+        dfs(0, -1);
+
+        // 预处理阶乘和逆元
+        int maxN = m;
+        long[] fact = new long[maxN + 1];
+        long[] invFact = new long[maxN + 1];
+        fact[0] = 1;
+        for (int i = 1; i <= maxN; i++) {
+            fact[i] = fact[i - 1] * i % MOD;
+        }
+        invFact[maxN] = modExp(fact[maxN], MOD - 2);
+        for (int i = maxN - 1; i >= 0; i--) {
+            invFact[i] = invFact[i + 1] * (i + 1) % MOD;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int k = 1; k <= n - 1; k++) {
+            if (k > m) {
+                sb.append("0");
+            } else {
+                long comb = fact[m] * invFact[k] % MOD * invFact[m - k] % MOD;
+                sb.append(comb);
+            }
+            if (k != n - 1) sb.append(" ");
+        }
+        System.out.println(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int MOD = 1000000007;
+
+int n, m = 0;
+vector<int> weight;
+vector<vector<int>> tree;
+
+// 返回子树数值和（long long 防止溢出）
+long long dfs(int u, int parent) {
+    long long s = weight[u];
+    for (int v : tree[u]) {
+        if (v == parent) continue;
+        long long sub = dfs(v, u);
+        s += sub;
+        if (sub % 2 == 0) {
+            m++;
+        }
+    }
+    return s;
+}
+
+long long modExp(long long a, long long b) {
+    long long res = 1;
+    while (b) {
+        if (b & 1) res = res * a % MOD;
+        a = a * a % MOD;
+        b >>= 1;
+    }
+    return res;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    cin >> n;
+    weight.resize(n);
+    tree.resize(n);
+    long long total = 0;
+    for (int i = 0; i < n; i++) {
+        cin >> weight[i];
+        total += weight[i];
+    }
+    for (int i = 0; i < n - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--; v--;
+        tree[u].push_back(v);
+        tree[v].push_back(u);
+    }
+
+    // 总和为奇数时，所有答案均为 0
+    if (total % 2 == 1) {
+        for (int k = 1; k <= n - 1; k++) {
+            cout << 0 << (k == n - 1 ? "\n" : " ");
+        }
+        return 0;
+    }
+
+    dfs(0, -1);
+
+    int maxN = m;
+    vector<long long> fact(maxN + 1), invFact(maxN + 1);
+    fact[0] = 1;
+    for (int i = 1; i <= maxN; i++) {
+        fact[i] = fact[i - 1] * i % MOD;
+    }
+    invFact[maxN] = modExp(fact[maxN], MOD - 2);
+    for (int i = maxN - 1; i >= 0; i--) {
+        invFact[i] = invFact[i + 1] * (i + 1) % MOD;
+    }
+
+    for (int k = 1; k <= n - 1; k++) {
+        if (k > m) {
+            cout << 0;
+        } else {
+            long long ans = fact[m] * invFact[k] % MOD * invFact[m - k] % MOD;
+            cout << ans;
+        }
+        if (k != n - 1) cout << " ";
+    }
+    cout << "\n";
+    return 0;
+}
+```

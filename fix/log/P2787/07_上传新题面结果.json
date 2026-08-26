@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2787",
+  "title": "第2题-完美积方案",
+  "docId": 2419,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "数论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

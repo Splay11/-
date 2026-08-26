@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2874",
+  "title": "最优调整",
+  "docId": 2508,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "树形dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树形DP",
+  "videosol": "",
+  "trial_videosol": ""
+}

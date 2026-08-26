@@ -1,0 +1,188 @@
+## 解题思路
+
+本题按下标从小到大处理字符，但**判定规则用的是“原串的前一个字符的大小写”**，不是已经修改后的。
+因此做法非常直接：
+
+1. 读取原串 `s`，用它来**只判断**大小写；同时用一个可变结果容器（如 `StringBuilder` / 新串）来写入答案。
+2. 定义两个小函数：
+
+   * `flip(c)`：大小写翻转（`a↔A`）。
+   * `nextSameCase(c)`：在**同大小写**内的下一个字母并循环（`z→a`，`Z→A`）。
+3. 从左到右：
+
+   * `i=1`（下标从1计）：直接 `flip(s1)`。
+   * `i≥2`：比较 `s_i` 与**原串** `s_{i-1}` 的大小写是否不同：
+
+     * 若不同：输出 `flip(s_i)`；
+     * 否则：输出 `nextSameCase(s_i)`。
+
+因为只需一次线性扫描，且每步是 O(1) 操作，整体非常高效、稳定。
+
+## 复杂度分析
+
+* 时间复杂度：O(n)，每个字符处理一次。
+* 空间复杂度：O(n)（用于输出结果；若允许原地构造也至少需要 O(1) 额外辅助）。
+
+## 代码实现
+
+### Python
+
+```python
+# 读取输入并输出结果
+import sys
+
+def is_lower(c):
+    return 'a' <= c <= 'z'
+
+def flip(c):
+    # 大小写翻转
+    if is_lower(c):
+        return chr(ord(c) - 32)  # a->A
+    else:
+        return chr(ord(c) + 32)  # A->a
+
+def next_same_case(c):
+    # 同大小写内的下一个字母，支持循环
+    if is_lower(c):
+        return 'a' if c == 'z' else chr(ord(c) + 1)
+    else:
+        return 'A' if c == 'Z' else chr(ord(c) + 1)
+
+def main():
+    n_line = sys.stdin.readline().strip()
+    while n_line == '':
+        n_line = sys.stdin.readline().strip()
+    n = int(n_line)
+    s = sys.stdin.readline().strip()
+
+    # 使用原串 s 判断大小写，只在 ans 中写结果
+    ans = []
+
+    for i in range(n):
+        c = s[i]
+        if i == 0:
+            ans.append(flip(c))  # 规则1
+        else:
+            # 注意：比较的是原串的 s[i-1]
+            prev = s[i - 1]
+            diff = (is_lower(c) != is_lower(prev))
+            if diff:
+                ans.append(flip(c))
+            else:
+                ans.append(next_same_case(c))
+
+    print(''.join(ans))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class Main {
+    // 判断是否小写
+    static boolean isLower(char c) {
+        return c >= 'a' && c <= 'z';
+    }
+
+    // 大小写翻转
+    static char flip(char c) {
+        if (isLower(c)) return (char)(c - ('a' - 'A')); // a->A
+        else return (char)(c + ('a' - 'A'));            // A->a
+    }
+
+    // 同大小写内的下一个字母，支持循环
+    static char nextSameCase(char c) {
+        if (isLower(c)) {
+            return c == 'z' ? 'a' : (char)(c + 1);
+        } else {
+            return c == 'Z' ? 'A' : (char)(c + 1);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String lineN = br.readLine();
+        while (lineN != null && lineN.trim().isEmpty()) lineN = br.readLine();
+        int n = Integer.parseInt(lineN.trim());
+        String s = br.readLine().trim();
+
+        StringBuilder ans = new StringBuilder(n);
+
+        for (int i = 0; i < n; i++) {
+            char c = s.charAt(i);
+            if (i == 0) {
+                // 规则1：首字符翻转大小写
+                ans.append(flip(c));
+            } else {
+                // 注意：比较的是原串 s[i-1] 的大小写
+                char prev = s.charAt(i - 1);
+                boolean diff = (isLower(c) != isLower(prev));
+                if (diff) ans.append(flip(c));
+                else ans.append(nextSameCase(c));
+            }
+        }
+
+        System.out.println(ans.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// 判断是否小写
+bool isLower(char c) { return c >= 'a' && c <= 'z'; }
+
+// 大小写翻转
+char flip(char c) {
+    if (isLower(c)) return char(c - ('a' - 'A')); // a->A
+    else return char(c + ('a' - 'A'));            // A->a
+}
+
+// 同大小写内的下一个字母，支持循环
+char nextSameCase(char c) {
+    if (isLower(c)) {
+        return (c == 'z') ? 'a' : char(c + 1);
+    } else {
+        return (c == 'Z') ? 'A' : char(c + 1);
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    string s;
+    cin >> n;
+    cin >> s;
+
+    string ans;
+    ans.reserve(n);
+
+    for (int i = 0; i < n; ++i) {
+        char c = s[i];
+        if (i == 0) {
+            // 规则1：首字符翻转大小写
+            ans.push_back(flip(c));
+        } else {
+            // 注意：比较的是原串 s[i-1] 的大小写
+            char prev = s[i - 1];
+            bool diff = (isLower(c) != isLower(prev));
+            if (diff) ans.push_back(flip(c));
+            else ans.push_back(nextSameCase(c));
+        }
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
+```

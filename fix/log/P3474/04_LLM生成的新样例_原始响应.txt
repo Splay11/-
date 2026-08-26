@@ -1,0 +1,21 @@
+```json
+{
+  "samples": [
+    {
+      "input": "{\"nodeA\":{\"signalX\":10,\"signalY\":30}}",
+      "output": "{\"nodeA\":{\"entropy\":0.811}}",
+      "explanation": "对于节点 `nodeA`，总次数 $C = 10 + 30 = 40$。\n频率分别为 $p_X = \\frac{10}{40} = 0.25$，$p_Y = \\frac{30}{40} = 0.75$。\n熵 $H = -0.25 \\log_2 0.25 - 0.75 \\log_2 0.75$。\n计算得 $0.25 \\times 2 + 0.75 \\times (-\\log_2 0.75) \\approx 0.5 + 0.31125 = 0.81125$。\n保留三位小数得 `0.811`。"
+    },
+    {
+      "input": "{\"sensor2\":{\"alpha\":0,\"beta\":10,\"gamma\":20}}",
+      "output": "{\"sensor2\":{\"entropy\":0.918}}",
+      "explanation": "对于节点 `sensor2`，总次数 $C = 0 + 10 + 20 = 30$。\n$\\alpha$ 类次数为 `0`，对应项视为 `0` 且不参与求和。\n$\\beta$ 类频率 $p_{\\beta} = \\frac{10}{30} \\approx 0.3333$，$\\gamma$ 类频率 $p_{\\gamma} = \\frac{20}{30} \\approx 0.6667$。\n熵 $H = -p_{\\beta} \\log_2 p_{\\beta} - p_{\\gamma} \\log_2 p_{\\gamma} \\approx 0.5283 + 0.3899 = 0.9182$。\n保留三位小数得 `0.918`。说明即使有 `0` 次信号接收，也不影响多样性计算。"
+    },
+    {
+      "input": "{\"sensor3\":{\"A\":0,\"B\":0}}",
+      "output": "{\"sensor3\":{\"entropy\":0.0}}",
+      "explanation": "对于节点 `sensor3`，总次数 $C = 0 + 0 = 0$。\n根据定义，当 $C = 0$ 时，分布复杂度为 `0`。\n输出 `0.0`，展示了空数据或全部信号接收次数为零的边界情况。"
+    }
+  ]
+}
+```

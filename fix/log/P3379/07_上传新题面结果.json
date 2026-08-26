@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3379",
+  "title": "第1题-大写配额",
+  "docId": 2721,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "思维"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

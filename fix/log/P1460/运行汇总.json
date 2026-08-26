@@ -1,0 +1,11 @@
+{
+  "pid": "P1460",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 16:27:34",
+  "end_time": "2026-08-19 16:27:35",
+  "new_title": "第3题-往返配送",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

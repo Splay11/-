@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3275",
+  "title": "第3题-产线切分对账",
+  "docId": 2615,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "videosol": "",
+  "trial_videosol": ""
+}

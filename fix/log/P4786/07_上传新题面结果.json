@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4786",
+  "title": "第3题-最早同组时刻",
+  "docId": 4052,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "数据结构",
+    "并查集"
+  ],
+  "alg_tag": "并查集",
+  "ai_alg_tags": "并查集",
+  "videosol": "",
+  "trial_videosol": ""
+}

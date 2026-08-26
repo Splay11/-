@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4801",
+  "title": "第3题-脉冲同步",
+  "docId": 4067,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

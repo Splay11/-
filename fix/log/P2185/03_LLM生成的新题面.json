@@ -1,0 +1,6 @@
+{
+  "title": "间隔子段最大和",
+  "content": "选两个不相交非空连续子段，中间至少隔开 $K$ 个位置，最大化两段元素和。\n\n$1 \\le T \\le 5$，$1 \\le n \\le 10^5$，$-10^4 \\le a_i \\le 10^4$，$0 \\le K \\le n-2$。",
+  "input_description": "第一行 $T$。每组第一行 $n,K$，第二行 $n$ 个整数。",
+  "output_description": "每组一行一个整数。"
+}

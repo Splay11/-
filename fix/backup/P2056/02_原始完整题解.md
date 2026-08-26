@@ -1,0 +1,79 @@
+## 思路:线段树模拟
+
+我们需要实现：1.区间查询最值以及这个最值最靠左的位置 2.单点修改保质期为-1即可。
+
+然后每次进行操作先查询day 和 区间最值的关系，如果day > mx 那么就不用查，直接输出-1
+
+## 代码
+
+### python
+```python
+# 实现一个维护最大值的线段树
+# 1. 区间最值查询
+# 2. 单点最值更新
+class SegmentTree:
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (n * 4)
+        self.pos = [0] * (n * 4)
+    
+    def push_up(self, rt):
+        self.tree[rt] = max(self.tree[rt << 1], self.tree[rt << 1 | 1])
+        if self.tree[rt << 1] >= self.tree[rt << 1 | 1]:
+            self.pos[rt] = self.pos[rt << 1]
+        else:
+            self.pos[rt] = self.pos[rt << 1 | 1]
+    
+    def build(self, rt, l, r, arr):
+        if l == r:
+            self.tree[rt] = arr[l]
+            self.pos[rt] = l
+            return
+        m = (l + r) >> 1
+        self.build(rt << 1, l, m, arr)
+        self.build(rt << 1 | 1, m + 1, r, arr)
+        self.push_up(rt)
+    
+    def query(self, rt, l, r, L, R):
+        if L <= l and r <= R:
+            return [self.tree[rt] , self.pos[rt]]
+        m = (l + r) >> 1
+        mx , pos = 0 , 10**9
+        if L <= m:
+            mx_l , pos_l = self.query(rt << 1, l, m, L, R)
+            mx , pos = mx_l , pos_l
+        if R > m:
+            mx_r , pos_r = self.query(rt << 1 | 1, m + 1, r, L, R)
+            if mx_r > mx:
+                mx , pos = mx_r , pos_r
+        return [mx , pos]
+    # 单点更新
+    def update (self , rt , l , r , pos , val):
+        if l == r:
+            self.tree[rt] = val
+            return
+        m = (l + r) >> 1
+        if pos <= m:
+            self.update(rt << 1, l, m, pos, val)
+        else:
+            self.update(rt << 1 | 1, m + 1, r, pos, val)
+        self.push_up(rt)
+
+n, m = map(int, input().split())
+a = [0] + list(map(int, input().split()))
+tree = SegmentTree(m)
+tree.build(1, 1, m, a)
+res = []
+for i in range(n):
+    day , l , r = map(int, input().split())
+    mx , pos = tree.query(1, 1, m, l, r)
+    if mx < day:
+        res.append(-1)
+    else:
+        tree.update(1, 1, m, pos, -1)
+        res.append(pos)
+print(*res)
+```
+
+
+OJ会员可以通过点击题目上方《已通过》查看其他通过代码来学习。

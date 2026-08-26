@@ -1,0 +1,117 @@
+## 解题思路
+
+1. 设所有仓库库存量的全局最大值为 $M=\max(a_1,a_2,\dots,a_n)$，全局最小值为 $m=\min(a_1,a_2,\dots,a_n)$。
+
+2. 若直接选择整段 $[1,n]$ 作为一个区段，则收益为：
+
+   $$G(1,n)=(M-m)\times n$$
+
+3. 对任意一种合法划分，设某个区段为 $[L,R]$。该区段的最大值不超过全局最大值 $M$，最小值不小于全局最小值 $m$，因此：
+
+   $$\max_{L\le i\le R}a_i-\min_{L\le i\le R}a_i\le M-m$$
+
+   所以该区段收益满足：
+
+   $$G(L,R)\le (M-m)\times(R-L+1)$$
+
+4. 将所有区段收益相加，总收益不超过：
+
+   $$(M-m)\times\sum(R-L+1)=(M-m)\times n$$
+
+   而这一上界恰好可以由“整段不切”达到。
+
+因此，最优答案恒为：
+
+$$(M-m)\times n$$
+
+实现时只需遍历一次数组，求出库存量最大值和最小值。注意 $(M-m)\times n$ 最大可能达到 $(10^9-1)\times 3\times 10^5$，需要使用 64 位整数。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$，只需要一次遍历求最大值和最小值。
+- 空间复杂度：$O(1)$ 额外空间，不计输入数组。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def max_total_profit(a):
+    # 整段不切即可达到上界 (max(a) - min(a)) * n
+    return (max(a) - min(a)) * len(a)
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    if not data:
+        return
+    n = data[0]
+    a = data[1:1 + n]
+    print(max_total_profit(a))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line).append(' ');
+        }
+
+        StringTokenizer st = new StringTokenizer(sb.toString());
+        int n = Integer.parseInt(st.nextToken());
+
+        long minValue = Long.MAX_VALUE;
+        long maxValue = Long.MIN_VALUE;
+
+        for (int i = 0; i < n; i++) {
+            long x = Long.parseLong(st.nextToken());
+            minValue = Math.min(minValue, x);
+            maxValue = Math.max(maxValue, x);
+        }
+
+        long ans = (maxValue - minValue) * n;
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+
+    long long minValue = LLONG_MAX;
+    long long maxValue = LLONG_MIN;
+
+    for (int i = 0; i < n; i++) {
+        long long x;
+        cin >> x;
+        minValue = min(minValue, x);
+        maxValue = max(maxValue, x);
+    }
+
+    cout << (maxValue - minValue) * n << '\n';
+    return 0;
+}
+```

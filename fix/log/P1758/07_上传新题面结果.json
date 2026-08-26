@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1758",
+  "title": "连乘阶乘因子",
+  "docId": 857,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "数学",
+  "trial_videosol": ""
+}

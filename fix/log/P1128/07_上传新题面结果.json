@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1128",
+  "title": "标记比对计分",
+  "docId": 137,
+  "hidden": false,
+  "difficulty": 0,
+  "tag": [
+    "腾讯"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "trial_videosol": ""
+}

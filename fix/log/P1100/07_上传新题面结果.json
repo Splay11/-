@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1100",
+  "title": "最小差值重排",
+  "docId": 104,
+  "hidden": false,
+  "difficulty": 1,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "排序算法",
+  "trial_videosol": ""
+}

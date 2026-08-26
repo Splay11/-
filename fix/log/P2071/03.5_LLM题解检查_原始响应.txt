@@ -1,0 +1,136 @@
+## 解题思路
+
+我们需要从给定的 $m$ 对好友关系中选出两对，使得这两对涉及的 $4$ 名用户互不相同。直接枚举两对关系的组合时间复杂度为 $O(m^2)$，无法承受。考虑互补的角度：所有可能的选两对好友关系的方案总数为 $\binom{m}{2}$，减去其中存在“重叠用户”的方案数，即可得到满足条件的方案数。
+
+所谓“重叠用户”，是指所选的两对好友关系中包含相同的用户。由于好友关系均为无向边且无自环、无重边，一条关系对应两个不同用户。若两对关系有公共用户，则只能是共享某个用户 $i$，而与该用户相连的好友关系至少有两条。对于用户 $i$，设其度数为 $d_i$（即与其直接相连的好友关系数量），则从这 $d_i$ 条关系中任选两条，都会导致这两对关系共享用户 $i$，不满足“4 名用户全部互不相同”。根据容斥原理，恰好共享一个公共点的方案数为每个用户 $i$ 贡献的 $\binom{d_i}{2}$ 之和，且不同用户贡献的方案互不重叠（因为一个用户无法同时成为两个不同用户的共享点而导致重复计数，题干保证无重边，选出的两对关系若共享两点就会退化成同一条边被选两次，但这种情况在组合数中不会被计算，因为是从 $m$ 条不同边中选两条）。因此，有效方案数为：
+
+$$
+\text{Answer} = \binom{m}{2} - \sum_{i=1}^{n} \binom{d_i}{2}
+$$
+
+其中 $\binom{x}{2} = \frac{x(x-1)}{2}$（当 $x < 2$ 时值为 $0$）。
+
+具体步骤：
+1. 读入用户总数 $n$ 和好友关系总数 $m$。
+2. 初始化一个长度为 $n+1$ 的度数数组 `deg`，用于记录每个用户的好友数。
+3. 遍历 $m$ 条好友关系，对每条关系中的两个用户 $u, v$，将 `deg[u]` 和 `deg[v]` 分别加 $1$。
+4. 计算总组合数 `total = m * (m - 1) // 2`。
+5. 遍历所有用户 $i = 1 \sim n$，减去重叠部分：`total -= deg[i] * (deg[i] - 1) // 2`。
+6. 输出最终的 `total` 即为答案。
+
+该算法避免了显式存储所有边或邻接表，只需记录度数，计算简单高效。
+
+## 复杂度分析
+
+- 时间复杂度：读入 $m$ 条边并更新度数需要 $O(m)$，遍历 $n$ 个用户计算贡献需要 $O(n)$，总体时间复杂度为 $O(n + m)$。
+- 空间复杂度：仅需一个大小为 $n+1$ 的度数数组，故空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().split()
+    if not data:
+        return
+    it = iter(data)
+    n = int(next(it))
+    m = int(next(it))
+
+    deg = [0] * (n + 1)          # 度数数组，下标从 1 开始
+    for _ in range(m):
+        u = int(next(it))
+        v = int(next(it))
+        deg[u] += 1
+        deg[v] += 1
+
+    # 总选择方案 C(m, 2)
+    ans = m * (m - 1) // 2
+
+    # 减去存在公共用户的方案
+    for i in range(1, n + 1):
+        d = deg[i]
+        if d >= 2:
+            ans -= d * (d - 1) // 2
+
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] firstLine = br.readLine().split(" ");
+        int n = Integer.parseInt(firstLine[0]);
+        int m = Integer.parseInt(firstLine[1]);
+
+        int[] deg = new int[n + 1]; // 度数数组，下标从 1 开始
+
+        for (int i = 0; i < m; i++) {
+            String[] parts = br.readLine().split(" ");
+            int u = Integer.parseInt(parts[0]);
+            int v = Integer.parseInt(parts[1]);
+            deg[u]++;
+            deg[v]++;
+        }
+
+        long ans = (long) m * (m - 1) / 2;   // 总组合数 C(m,2)
+
+        for (int i = 1; i <= n; i++) {
+            int d = deg[i];
+            if (d >= 2) {
+                ans -= (long) d * (d - 1) / 2;
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+
+    vector<int> deg(n + 1, 0);  // 度数数组，下标从 1 开始
+    for (int i = 0; i < m; ++i) {
+        int u, v;
+        cin >> u >> v;
+        ++deg[u];
+        ++deg[v];
+    }
+
+    long long ans = 1LL * m * (m - 1) / 2;   // 总组合数 C(m,2)
+
+    for (int i = 1; i <= n; ++i) {
+        int d = deg[i];
+        if (d >= 2) {
+            ans -= 1LL * d * (d - 1) / 2;
+        }
+    }
+
+    cout << ans << '\n';
+    return 0;
+}
+```

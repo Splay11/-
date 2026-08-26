@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5202",
+  "title": "第2题-环形数据带的最长无重复状态码",
+  "docId": 4514,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "双指针"
+  ],
+  "alg_tag": "双指针",
+  "ai_alg_tags": "",
+  "videosol": "",
+  "trial_videosol": ""
+}

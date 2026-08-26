@@ -1,0 +1,12 @@
+{
+  "pid": "P2678",
+  "mode": 5,
+  "force": false,
+  "start_time": "2026-08-09 14:45:52",
+  "end_time": "2026-08-09 14:46:58",
+  "new_title": "调整关卡基础分",
+  "mode5_regenerate_solution": true,
+  "step35_modified": true,
+  "step8_upload_solution": true,
+  "overall_success": true
+}

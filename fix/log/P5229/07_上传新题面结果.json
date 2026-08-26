@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5229",
+  "title": "第2题-流水线总增益最大化",
+  "docId": 4556,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3599",
+  "title": "第3题-同桩换车",
+  "docId": 2942,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

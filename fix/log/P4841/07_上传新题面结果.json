@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4841",
+  "title": "第3题-最大剩余能量",
+  "docId": 4128,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "BFS"
+  ],
+  "alg_tag": "BFS",
+  "ai_alg_tags": "BFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

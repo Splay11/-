@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2161",
+  "title": "测点通道改名",
+  "docId": 1268,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

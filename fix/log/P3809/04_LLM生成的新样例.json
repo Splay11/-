@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1 1\n9\n1",
+      "output": "0",
+      "explanation": "只有一个读数且它被判定为故障。\n有效读数之和为 `0`。这是全部故障的边界情形。"
+    },
+    {
+      "input": "1 1\n10\n1",
+      "output": "0",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "1 1\n11\n1",
+      "output": "0",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

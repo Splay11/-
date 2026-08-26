@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4591",
+  "title": "宝石手链的颜色方案",
+  "docId": 3829,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

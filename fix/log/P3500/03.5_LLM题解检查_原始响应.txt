@@ -1,0 +1,157 @@
+## 解题思路
+
+题目要求通过若干次操作，将初始排列调整为目标排列 $[1,2,\dots,n]$，且每次操作后所有工位上的工件数量仍是一个排列。一次操作定义为选择两个不同工位 $i,j$，令 $a_i$ 增加 $1$，$a_j$ 减少 $1$。我们需要求出操作次数最少的方案并输出任意一组最优操作序列。
+
+**关键性质：**  
+可以证明，若某次操作中 $a_i$ 从 $v$ 变为 $v+1$，$a_j$ 从 $v+1$ 变为 $v$，则操作前后工件数量的多重集保持不变，仍构成排列。其他情况均无法同时满足“操作后仍是排列”的条件。因此，每一次合法的操作等价于**交换两个相邻数值 $v$ 和 $v+1$ 所在的工位**。
+
+设 $\text{pos}[v]$ 表示当前数值 $v$ 所在工位的编号。目标为 $\text{pos}[1] < \text{pos}[2] < \dots < \text{pos}[n]$。初始状态下，若存在 $v$ 使得 $\text{pos}[v] > \text{pos}[v+1]$，则 $(v, v+1)$ 构成一对逆序。交换 $v$ 与 $v+1$ 的位置恰好能消除这一对逆序，且不引入其他逆序。
+
+因此，问题转化为：通过交换相邻值的位置，将 $\text{pos}$ 数组变为严格递增。最少操作次数等于初始序列的逆序对数（即位置数组的逆序对数），并且可以通过类似冒泡排序的过程构造出操作方案。
+
+**构造方法：**  
+重复以下过程，直到没有可以交换的相邻值对：  
+对于 $v = 1, 2, \dots, n-1$，检查 $\text{pos}[v]$ 与 $\text{pos}[v+1]$。若 $\text{pos}[v] > \text{pos}[v+1]$，则选择工位 $i = \text{pos}[v]$ 和 $j = \text{pos}[v+1]$，执行一次操作（$a_i$ 加 $1$，$a_j$ 减 $1$），相当于将值 $v$ 与 $v+1$ 的位置交换，并记录 $(i, j)$。然后更新 $\text{pos}$ 信息，继续检查当前 $v$，直到 $\text{pos}[v] < \text{pos}[v+1]$。
+
+此过程等价于对 $\text{pos}[1..n]$ 进行冒泡排序，每一步削减一个逆序对，最终序列变为有序。因为每次操作只交换相邻值，且总操作次数等于逆序对数，达到理论下界。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n^2)$。对于 $n \le 1000$，冒泡排序的交换次数最坏为 $O(n^2)$，外层循环最多进行 $n-1$ 轮，内层扫描 $v=1..n-1$，总操作量可控。
+- 空间复杂度：$O(n)$。需要存储原序列、位置数组以及操作记录，空间与 $n$ 成正比。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    n = int(next(it))
+    a = [0] + [int(next(it)) for _ in range(n)]  # 1-based
+    pos = [0] * (n + 1)
+    for i in range(1, n + 1):
+        pos[a[i]] = i  # 数值v所在工位
+
+    ops = []  # 记录操作 (x, y)
+
+    changed = True
+    while changed:
+        changed = False
+        for v in range(1, n):
+            while pos[v] > pos[v + 1]:
+                i, j = pos[v], pos[v + 1]  # i工位上有v，j工位上有v+1
+                ops.append((i, j))
+                # 执行一次合法操作：工位i加1，工位j减1，相当于交换值v与v+1
+                a[i], a[j] = a[j], a[i]
+                pos[v], pos[v + 1] = j, i
+                changed = True
+
+    out = [str(len(ops))]
+    for x, y in ops:
+        out.append(f"{x} {y}")
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String s = br.readLine();
+        if (s == null || s.trim().isEmpty()) return;
+        int n = Integer.parseInt(s.trim());
+        int[] a = new int[n + 1];      // 1-based
+        int[] pos = new int[n + 1];    // pos[v] 表示数值v所在工位
+        String[] parts = br.readLine().trim().split("\\s+");
+        for (int i = 1; i <= n; i++) {
+            a[i] = Integer.parseInt(parts[i - 1]);
+            pos[a[i]] = i;
+        }
+
+        List<int[]> ops = new ArrayList<>(); // 记录操作 (x, y)
+
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (int v = 1; v <= n - 1; v++) {
+                while (pos[v] > pos[v + 1]) {
+                    int i = pos[v];     // 工位i上是值v
+                    int j = pos[v + 1]; // 工位j上是值v+1
+                    ops.add(new int[]{i, j});
+                    // 交换值v与v+1（等价于一次合法操作）
+                    int tmp = a[i];
+                    a[i] = a[j];
+                    a[j] = tmp;
+                    // 更新位置
+                    pos[v] = j;
+                    pos[v + 1] = i;
+                    changed = true;
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(ops.size()).append('\n');
+        for (int[] op : ops) {
+            sb.append(op[0]).append(' ').append(op[1]).append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    if (!(cin >> n)) return 0;
+    vector<int> a(n + 1), pos(n + 1); // 1-based
+    for (int i = 1; i <= n; ++i) {
+        cin >> a[i];
+        pos[a[i]] = i; // 数值v所在工位
+    }
+
+    vector<pair<int, int>> ops; // 记录操作 (x, y)
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        for (int v = 1; v <= n - 1; ++v) {
+            while (pos[v] > pos[v + 1]) {
+                int i = pos[v];     // 工位i上是v
+                int j = pos[v + 1]; // 工位j上是v+1
+                ops.emplace_back(i, j);
+                // 执行一次合法操作：i加1，j减1，等价于交换v与v+1
+                swap(a[i], a[j]);
+                pos[v] = j;
+                pos[v + 1] = i;
+                changed = true;
+            }
+        }
+    }
+
+    cout << ops.size() << '\n';
+    for (auto &op : ops) {
+        cout << op.first << ' ' << op.second << '\n';
+    }
+    return 0;
+}
+```

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2881",
+  "title": "第1题-频谱搬移",
+  "docId": 2515,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "双指针"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

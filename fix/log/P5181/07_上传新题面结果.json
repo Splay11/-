@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5181",
+  "title": "第2题-货架分段清仓",
+  "docId": 4486,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

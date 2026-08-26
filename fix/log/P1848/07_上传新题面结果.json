@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1848",
+  "title": "第1题-工位竞拍",
+  "docId": 948,
+  "hidden": false,
+  "difficulty": 0,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

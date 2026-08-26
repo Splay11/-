@@ -1,0 +1,213 @@
+## 解题思路
+
+设产品一的生产数量为 $x$，产品二的生产数量为 $y$。  
+根据题意，所有约束条件为：
+
+- 原材料 A 限制：$x \le a$
+- 原材料 B 限制：$y \le b$
+- 原材料 C 限制：$x + y \le c$
+- 处理单元限制：$x + 2y \le r$
+- 非负整数限制：$x \ge 0,\ y \ge 0$ 且为整数
+
+目标：最大化总利润 $P = d \cdot x + e \cdot y$
+
+由于 $d$ 和 $e$ 均非负，固定 $y$ 后，$x$ 显然应取满足所有条件的最大值：
+
+$$
+x_{\max}(y) = \min\bigl(a,\ c - y,\ r - 2y\bigr)
+$$
+
+因此原问题化为单变量优化问题，只需确定最优的 $y$：
+
+$$
+\max_{y}\ f(y) = e \cdot y + d \cdot \min\bigl(a,\ c - y,\ r - 2y\bigr)
+$$
+
+其中 $y$ 的取值范围是：
+
+$$
+0 \le y \le U,\quad U = \min\left(b,\ c,\ \left\lfloor \frac{r}{2} \right\rfloor\right)
+$$
+
+**关键观察**：函数 $\min(a,\ c-y,\ r-2y)$ 是一个分段一次函数。  
+分段点出现在三个量两两相等的位置：
+
+1. $a = c - y \ \Rightarrow\ y = c - a$
+2. $a = r - 2y \ \Rightarrow\ y = \dfrac{r - a}{2}$
+3. $c - y = r - 2y \ \Rightarrow\ y = r - c$
+
+再加上定义域边界 $0$ 和 $U$，最优解必然出现在这些分段点附近的整数点上。
+
+因此，对于每一组数据，我们只需：
+
+- 计算上界 $U$；
+- 收集关键点：$0,\ U,\ c-a,\ r-c,\ \lfloor\frac{r-a}{2}\rfloor$；
+- 在每个关键点及其附近若干个整数（如 $p-2$ 到 $p+2$）上计算 $f(y)$；
+- 在所有合法 $y$ 中取最大值即为答案。
+
+每组数据仅需常数次检查，非常高效。
+
+## 复杂度分析
+
+- 每组数据仅对常数个候选 $y$ 值（约 $5 \times 5$ 个）进行检查，每个检查的计算量为 $O(1)$。
+- 因此，单组数据时间复杂度 $O(1)$，总时间复杂度 $O(T)$。
+- 仅使用少量临时变量，空间复杂度 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve_one(a, b, c, d, e, r):
+    # y 表示产品二的数量，上界由原材料B、原材料C、处理单元共同限制
+    upper = min(b, c, r // 2)
+
+    # 计算某个 y 下能获得的总利润
+    def profit(y):
+        if y < 0 or y > upper:
+            return -1
+        # 固定 y 后，x 取能取到的最大值
+        x = min(a, c - y, r - 2 * y)
+        if x < 0:
+            return -1
+        return d * x + e * y
+
+    # 关键分界点候选
+    points = [
+        0,
+        upper,
+        c - a,
+        r - c,
+        (r - a) // 2
+    ]
+
+    ans = 0
+    # 检查每个关键点附近的整数
+    for p in points:
+        for y in range(p - 2, p + 3):
+            ans = max(ans, profit(y))
+
+    return ans
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    t = data[0]
+    idx = 1
+    out = []
+
+    for _ in range(t):
+        a = data[idx]; b = data[idx+1]; c = data[idx+2]
+        d = data[idx+3]; e = data[idx+4]; r = data[idx+5]
+        idx += 6
+        out.append(str(solve_one(a, b, c, d, e, r)))
+
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static long maxProfit(long a, long b, long c, long d, long e, long r) {
+        // y 表示产品二的数量，上界由原材料B、原材料C、处理单元共同限制
+        long upper = Math.min(b, Math.min(c, r / 2));
+        long ans = 0;
+
+        // 关键分界点
+        long[] points = new long[] {
+            0,
+            upper,
+            c - a,
+            r - c,
+            (r - a) / 2
+        };
+
+        for (long p : points) {
+            for (long y = p - 2; y <= p + 2; y++) {
+                if (y < 0 || y > upper) continue;
+                // 固定 y 后，x 取能取到的最大值
+                long x = Math.min(a, Math.min(c - y, r - 2 * y));
+                if (x < 0) continue;
+                long cur = d * x + e * y;
+                if (cur > ans) ans = cur;
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) throws IOException {
+        StreamTokenizer in = new StreamTokenizer(new BufferedInputStream(System.in));
+        in.nextToken();
+        int T = (int) in.nval;
+        StringBuilder sb = new StringBuilder();
+
+        while (T-- > 0) {
+            in.nextToken(); long a = (long) in.nval;
+            in.nextToken(); long b = (long) in.nval;
+            in.nextToken(); long c = (long) in.nval;
+            in.nextToken(); long d = (long) in.nval;
+            in.nextToken(); long e = (long) in.nval;
+            in.nextToken(); long r = (long) in.nval;
+            sb.append(maxProfit(a, b, c, d, e, r)).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+ll maxProfit(ll a, ll b, ll c, ll d, ll e, ll r) {
+    // y 表示产品二的数量，上界由原材料B、原材料C、处理单元共同限制
+    ll upper = min({b, c, r / 2});
+    ll ans = 0;
+
+    // 关键分界点
+    vector<ll> points = {
+        0,
+        upper,
+        c - a,
+        r - c,
+        (r - a) / 2
+    };
+
+    for (ll p : points) {
+        for (ll y = p - 2; y <= p + 2; ++y) {
+            if (y < 0 || y > upper) continue;
+            // 固定 y 后，x 取能取到的最大值
+            ll x = min({a, c - y, r - 2 * y});
+            if (x < 0) continue;
+            ll cur = d * x + e * y;
+            if (cur > ans) ans = cur;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        ll a, b, c, d, e, r;
+        cin >> a >> b >> c >> d >> e >> r;
+        cout << maxProfit(a, b, c, d, e, r) << '\n';
+    }
+    return 0;
+}
+```

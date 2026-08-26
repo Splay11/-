@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "aaaa",
+      "output": "1",
+      "explanation": "只有 `a` 且出现偶数次，$k=0$，整串可排成一个对称串，答案为 `1`。"
+    },
+    {
+      "input": "a",
+      "output": "1",
+      "explanation": "单字符本身就是对称串，$k=1$，答案为 `1`。"
+    }
+  ]
+}

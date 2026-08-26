@@ -1,0 +1,457 @@
+## 解题思路
+
+1. **理解问题与数据表示**  
+   - 将每位读者的借阅记录转换为一个 0‑1 向量：如果读者借阅过某本书，对应分量为 1，否则为 0。  
+   - 两读者之间的相似度定义为两个向量夹角的余弦值：  
+     \[
+     \text{sim}(i,j)=\frac{\mathbf{v}_i \cdot \mathbf{v}_j}{\|\mathbf{v}_i\|\,\|\mathbf{v}_j\|}
+     \]
+     其中 $\mathbf{v}_i$ 为读者 $i$ 的 0‑1 向量，$\|\mathbf{v}_i\|$ 为其欧氏范数（借阅数量的平方根）。
+
+2. **输入解析与书籍编码**  
+   - 输入为一行 Python 列表字符串，每个元素是 `[读者ID, [书籍ID列表]]`。  
+   - 收集所有出现过的书籍 ID，排序后映射到连续的整数下标 $0,1,\dots,M-1$，便于后续使用位向量（bitset）表示借阅情况。
+
+3. **构建位向量与预计算范数**  
+   - 为每位读者创建一个位向量（Python 使用大整数，Java 使用 `BitSet`，C++ 使用 `bitset`），根据该读者的借阅列表将对应位置 1。  
+   - 同时计算该读者的向量范数 $norm_i = \sqrt{\text{借阅数量}}$；若借阅数量为 0（理论不会出现），则 $norm_i=0$。
+
+4. **计算所有读者对的相似度并选择 Top‑3 邻居**  
+   - 使用两重循环遍历所有读者对 $(i,j)$（$i \neq j$）：  
+     - 通过位向量按位与（AND）操作，统计结果中 1 的个数，即为点积 $\mathbf{v}_i \cdot \mathbf{v}_j$。  
+     - 若 $norm_i = 0$ 或 $norm_j = 0$，相似度直接置 0；否则相似度 = $\dfrac{\text{点积}}{norm_i \cdot norm_j}$。  
+   - 对每位读者 $i$，保留除自身外相似度最高的 3 位读者作为邻居。若相似度相同，按读者出现顺序（或读者 ID）保持稳定，取前 3 个即可。
+
+5. **生成推荐书籍**  
+   - 对于每位读者 $i$，遍历其 3 位邻居的借阅列表：  
+     - 若某书籍未被读者 $i$ 借阅，则将其加入候选集，并记录**最大**邻居相似度（该邻居与读者 $i$ 的相似度）作为该候选书籍的推荐得分。  
+   - 从候选集中选出推荐得分最高的一本书；若得分相同，选择书籍 ID 最小的那一本。  
+   - 若候选集为空，推荐书籍记为 `None`，对应相似度输出为 `0.000`。
+
+6. **输出格式**  
+   - 按读者在输入中出现的顺序，每行输出一个列表 `[读者ID, 推荐书籍ID或None, 相似度保留三位小数]`。
+
+## 复杂度分析
+
+- **时间复杂度**：  
+  - 书籍编码与位向量构建：$O(N \cdot K + M\log M)$，其中 $N$ 为读者数，$M$ 为书籍种类数，$K$ 为平均借阅数量。  
+  - 计算所有读者对的点积：使用位向量后，点积可通过一次按位与和统计 1 的个数完成，复杂度为 $O\!\left(N^2 \cdot \frac{M}{\text{wordsize}}\right)$。当 $M \le 2000$ 且使用 64 位或 2000 位块时，实际常数很小。  
+  - 邻居筛选与推荐生成：每个读者遍历 3 个邻居的书籍，复杂度 $O(N \cdot K)$。  
+  - 整体时间复杂度由相似度计算主导，约为 $O\!\left(N^2 \cdot \frac{M}{64}\right)$，在 $N \le 10^3, M \le 2\times 10^3$ 时可高效运行。
+
+- **空间复杂度**：  
+  - 需要存储每位读者的位向量和借阅列表：$O\!\left(N \cdot \frac{M}{\text{wordsize}} + N \cdot K\right)$。  
+  - 加上辅助数组，总空间为 $O(NM/\text{wordsize})$，在给定数据范围内完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import math
+
+def main():
+    raw = eval(sys.stdin.read())
+    n = len(raw)
+    readers = [item[0] for item in raw]
+    books_by_reader = [item[1] for item in raw]
+
+    # 书籍ID映射
+    all_books = sorted(set(b for lst in books_by_reader for b in lst))
+    book_to_idx = {b: i for i, b in enumerate(all_books)}
+    m = len(all_books)
+
+    # 构建位向量和范数
+    masks = []
+    norms = []
+    for lst in books_by_reader:
+        mask = 0
+        for b in lst:
+            mask |= (1 << book_to_idx[b])
+        masks.append(mask)
+        norms.append(math.sqrt(len(lst)))
+
+    # 计算相似度并维护 top-3 邻居
+    # 邻居存为 (相似度, 邻居下标) 的列表
+    neighbors = []  # neighbors[i] 是 i 的三个邻居下标
+    for i in range(n):
+        cand = []
+        for j in range(n):
+            if i == j:
+                continue
+            # 计算点积 (使用 bit_count)
+            dot = (masks[i] & masks[j]).bit_count()
+            if norms[i] == 0 or norms[j] == 0:
+                sim = 0.0
+            else:
+                sim = dot / (norms[i] * norms[j])
+            cand.append((sim, j))
+        # 按相似度降序，若相同则按 j 升序，取前 3
+        cand.sort(key=lambda x: (-x[0], x[1]))
+        neighbors.append([j for _, j in cand[:3]])
+
+    # 生成推荐
+    for i in range(n):
+        seen = set(books_by_reader[i])
+        cand_score = {}
+        for nb_idx in neighbors[i]:
+            # 计算当前邻居与 i 的相似度
+            dot = (masks[i] & masks[nb_idx]).bit_count()
+            if norms[i] == 0 or norms[nb_idx] == 0:
+                sim = 0.0
+            else:
+                sim = dot / (norms[i] * norms[nb_idx])
+            for book in books_by_reader[nb_idx]:
+                if book not in seen:
+                    if book not in cand_score or sim > cand_score[book]:
+                        cand_score[book] = sim
+        if not cand_score:
+            rec = None
+            score = 0.0
+        else:
+            max_score = max(cand_score.values())
+            # 得分最高且书籍ID最小
+            best_books = [b for b, s in cand_score.items() if s == max_score]
+            rec = min(best_books)
+            score = max_score
+        print(f"[{readers[i]}, {rec}, {score:.3f}]")
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine().trim();
+        List<Object> parsed = parseList(line);
+        int n = parsed.size(); // 每个元素是 List: [读者ID, [书籍ID列表]]
+        int[] readers = new int[n];
+        List<int[]> bookLists = new ArrayList<>();
+        Set<Integer> allBooksSet = new HashSet<>();
+
+        for (int i = 0; i < n; i++) {
+            List<Object> entry = (List<Object>) parsed.get(i);
+            readers[i] = ((Number) entry.get(0)).intValue();
+            List<Object> bookListObj = (List<Object>) entry.get(1);
+            int[] books = new int[bookListObj.size()];
+            for (int j = 0; j < books.length; j++) {
+                books[j] = ((Number) bookListObj.get(j)).intValue();
+                allBooksSet.add(books[j]);
+            }
+            bookLists.add(books);
+        }
+
+        // 书籍ID映射
+        int[] allBooks = allBooksSet.stream().mapToInt(Integer::intValue).sorted().toArray();
+        Map<Integer, Integer> bookToIdx = new HashMap<>();
+        for (int i = 0; i < allBooks.length; i++) {
+            bookToIdx.put(allBooks[i], i);
+        }
+        int m = allBooks.length;
+
+        // 使用 BitSet 表示借阅向量，并计算范数
+        BitSet[] masks = new BitSet[n];
+        double[] norms = new double[n];
+        for (int i = 0; i < n; i++) {
+            masks[i] = new BitSet(m);
+            int[] blist = bookLists.get(i);
+            for (int b : blist) {
+                masks[i].set(bookToIdx.get(b));
+            }
+            norms[i] = Math.sqrt(blist.length);
+        }
+
+        // 找每个用户的3个最高相似度邻居（自身除外）
+        int[][] topNeighbors = new int[n][3]; // 下标
+        for (int i = 0; i < n; i++) {
+            // 候选 (相似度, 索引)
+            List<double[]> cand = new ArrayList<>();
+            for (int j = 0; j < n; j++) {
+                if (i == j) continue;
+                BitSet temp = (BitSet) masks[i].clone();
+                temp.and(masks[j]);
+                int dot = temp.cardinality();
+                double sim = 0.0;
+                if (norms[i] > 0 && norms[j] > 0) {
+                    sim = dot / (norms[i] * norms[j]);
+                }
+                cand.add(new double[]{sim, j});
+            }
+            cand.sort((a, b) -> {
+                if (Math.abs(a[0] - b[0]) > 1e-9) {
+                    return Double.compare(b[0], a[0]); // 降序
+                } else {
+                    return Integer.compare((int)a[1], (int)b[1]);
+                }
+            });
+            for (int k = 0; k < 3; k++) {
+                topNeighbors[i][k] = (int) cand.get(k)[1];
+            }
+        }
+
+        // 生成推荐
+        for (int i = 0; i < n; i++) {
+            Set<Integer> seen = new HashSet<>();
+            for (int b : bookLists.get(i)) {
+                seen.add(b);
+            }
+            // 候选书籍得分
+            Map<Integer, Double> candScore = new HashMap<>();
+            for (int nbIdx : topNeighbors[i]) {
+                // 计算该邻居与i的相似度
+                BitSet temp = (BitSet) masks[i].clone();
+                temp.and(masks[nbIdx]);
+                int dot = temp.cardinality();
+                double sim = 0.0;
+                if (norms[i] > 0 && norms[nbIdx] > 0) {
+                    sim = dot / (norms[i] * norms[nbIdx]);
+                }
+                for (int b : bookLists.get(nbIdx)) {
+                    if (!seen.contains(b)) {
+                        double old = candScore.getOrDefault(b, -1.0);
+                        if (sim > old) {
+                            candScore.put(b, sim);
+                        }
+                    }
+                }
+            }
+            if (candScore.isEmpty()) {
+                System.out.printf("[%d, None, 0.000]\n", readers[i]);
+            } else {
+                double maxScore = Collections.max(candScore.values());
+                int bestBook = Integer.MAX_VALUE;
+                for (Map.Entry<Integer, Double> e : candScore.entrySet()) {
+                    if (Math.abs(e.getValue() - maxScore) < 1e-9) {
+                        if (e.getKey() < bestBook) {
+                            bestBook = e.getKey();
+                        }
+                    }
+                }
+                System.out.printf("[%d, %d, %.3f]\n", readers[i], bestBook, maxScore);
+            }
+        }
+    }
+
+    // 简单的递归下降解析器，解析类似 Python list 的字符串
+    private static int pos;
+    private static String s;
+
+    private static List<Object> parseList(String str) {
+        s = str.trim();
+        pos = 0;
+        return parseValue();
+    }
+
+    private static List<Object> parseValue() {
+        skipWhitespace();
+        if (s.charAt(pos) == '[') {
+            pos++; // 跳过 '['
+            List<Object> list = new ArrayList<>();
+            skipWhitespace();
+            if (s.charAt(pos) == ']') {
+                pos++;
+                return list;
+            }
+            while (true) {
+                list.add(parseValue());
+                skipWhitespace();
+                if (s.charAt(pos) == ']') {
+                    pos++;
+                    break;
+                } else if (s.charAt(pos) == ',') {
+                    pos++;
+                }
+                skipWhitespace();
+            }
+            return list;
+        } else if (Character.isDigit(s.charAt(pos)) || s.charAt(pos) == '-') {
+            int start = pos;
+            while (pos < s.length() && (Character.isDigit(s.charAt(pos)) || s.charAt(pos) == '-')) pos++;
+            int num = Integer.parseInt(s.substring(start, pos));
+            return num;
+        } else {
+            throw new RuntimeException("Unexpected char: " + s.charAt(pos));
+        }
+    }
+
+    private static void skipWhitespace() {
+        while (pos < s.length() && Character.isWhitespace(s.charAt(pos))) pos++;
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <bitset>
+#include <unordered_map>
+#include <unordered_set>
+#include <sstream>
+#include <cctype>
+
+using namespace std;
+
+const int MAX_M = 2005;
+using BookBitset = bitset<MAX_M>;
+
+// 快速解析类似 Python list 的字符串，返回一个结构体
+struct Value {
+    enum Type { INT, LIST } type;
+    int intVal;
+    vector<Value> listVal;
+    Value(int v) : type(INT), intVal(v) {}
+    Value(vector<Value> v) : type(LIST), listVal(move(v)) {}
+};
+
+int pos;
+string s;
+
+void skipWS() {
+    while (pos < (int)s.size() && isspace(s[pos])) pos++;
+}
+
+Value parseValue() {
+    skipWS();
+    if (s[pos] == '[') {
+        pos++; // '['
+        vector<Value> arr;
+        skipWS();
+        if (s[pos] == ']') { pos++; return Value(arr); }
+        while (true) {
+            arr.push_back(parseValue());
+            skipWS();
+            if (s[pos] == ']') {
+                pos++; break;
+            } else if (s[pos] == ',') {
+                pos++;
+            }
+            skipWS();
+        }
+        return Value(arr);
+    } else {
+        int start = pos;
+        while (pos < (int)s.size() && (isdigit(s[pos]) || s[pos] == '-')) pos++;
+        int num = stoi(s.substr(start, pos - start));
+        return Value(num);
+    }
+}
+
+int main() {
+    string line;
+    getline(cin, line);
+    s = line;
+    pos = 0;
+    Value parsed = parseValue(); // 最外层列表
+    const auto& raw = parsed.listVal;
+    int n = raw.size();
+
+    vector<int> readers(n);
+    vector<vector<int>> bookLists(n);
+    unordered_set<int> allBooksSet;
+
+    for (int i = 0; i < n; ++i) {
+        const auto& entry = raw[i].listVal; // [读者ID, [书籍列表]]
+        readers[i] = entry[0].intVal;
+        const auto& blist = entry[1].listVal;
+        for (const auto& bv : blist) {
+            int b = bv.intVal;
+            bookLists[i].push_back(b);
+            allBooksSet.insert(b);
+        }
+    }
+
+    // 书籍映射
+    vector<int> allBooks(allBooksSet.begin(), allBooksSet.end());
+    sort(allBooks.begin(), allBooks.end());
+    unordered_map<int, int> bookToIdx;
+    int m = allBooks.size();
+    for (int i = 0; i < m; ++i) {
+        bookToIdx[allBooks[i]] = i;
+    }
+
+    // 构建位集合及范数
+    vector<BookBitset> masks(n);
+    vector<double> norms(n);
+    for (int i = 0; i < n; ++i) {
+        masks[i].reset();
+        for (int b : bookLists[i]) {
+            masks[i].set(bookToIdx[b]);
+        }
+        norms[i] = sqrt((double)bookLists[i].size());
+    }
+
+    // 寻找每个用户的3个最高相似度邻居
+    vector<vector<int>> topNeighbors(n, vector<int>(3));
+    for (int i = 0; i < n; ++i) {
+        vector<pair<double, int>> cand;
+        for (int j = 0; j < n; ++j) {
+            if (i == j) continue;
+            BookBitset temp = masks[i] & masks[j];
+            int dot = temp.count();
+            double sim = 0.0;
+            if (norms[i] > 0 && norms[j] > 0) {
+                sim = dot / (norms[i] * norms[j]);
+            }
+            cand.emplace_back(sim, j);
+        }
+        sort(cand.begin(), cand.end(), [](const auto& a, const auto& b) {
+            if (abs(a.first - b.first) > 1e-9) return a.first > b.first;
+            return a.second < b.second;
+        });
+        for (int k = 0; k < 3; ++k) {
+            topNeighbors[i][k] = cand[k].second;
+        }
+    }
+
+    // 生成推荐
+    cout << fixed;
+    for (int i = 0; i < n; ++i) {
+        unordered_set<int> seen(bookLists[i].begin(), bookLists[i].end());
+        unordered_map<int, double> candScore;
+        for (int nbIdx : topNeighbors[i]) {
+            BookBitset temp = masks[i] & masks[nbIdx];
+            int dot = temp.count();
+            double sim = 0.0;
+            if (norms[i] > 0 && norms[nbIdx] > 0) {
+                sim = dot / (norms[i] * norms[nbIdx]);
+            }
+            for (int b : bookLists[nbIdx]) {
+                if (!seen.count(b)) {
+                    auto it = candScore.find(b);
+                    if (it == candScore.end() || sim > it->second) {
+                        candScore[b] = sim;
+                    }
+                }
+            }
+        }
+        if (candScore.empty()) {
+            cout << "[" << readers[i] << ", None, 0.000]\n";
+        } else {
+            double maxScore = -1.0;
+            for (const auto& p : candScore) maxScore = max(maxScore, p.second);
+            int bestBook = INT_MAX;
+            for (const auto& p : candScore) {
+                if (abs(p.second - maxScore) < 1e-9) {
+                    if (p.first < bestBook) bestBook = p.first;
+                }
+            }
+            cout.precision(3);
+            cout << "[" << readers[i] << ", " << bestBook << ", " << maxScore << "]\n";
+        }
+    }
+    return 0;
+}
+```

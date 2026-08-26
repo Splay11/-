@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2956",
+  "title": "第3题-幸运连通集",
+  "docId": 2591,
+  "hidden": false,
+  "difficulty": 10,
+  "tag": [
+    "树形dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

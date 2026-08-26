@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3566",
+  "title": "第4题-近站距离和",
+  "docId": 2909,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "树形dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树形DP",
+  "videosol": "https://www.bilibili.com/video/BV1Vda8zuE21/?vd_source=0f2b5f5dae4beb99b68547471f7432e0",
+  "trial_videosol": ""
+}

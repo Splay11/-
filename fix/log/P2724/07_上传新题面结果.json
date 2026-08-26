@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2724",
+  "title": "第3题-最长的稳固口令段",
+  "docId": 2357,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "思维"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "字符串",
+  "videosol": "",
+  "trial_videosol": ""
+}

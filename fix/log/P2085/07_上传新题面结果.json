@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2085",
+  "title": "第1题-数字变频统计",
+  "docId": 1192,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

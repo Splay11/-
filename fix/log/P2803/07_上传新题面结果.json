@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2803",
+  "title": "第1题-流水线日志中的三段标准操作",
+  "docId": 2435,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

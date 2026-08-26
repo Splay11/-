@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4842",
+  "title": "第1题-镜面替换",
+  "docId": 4129,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

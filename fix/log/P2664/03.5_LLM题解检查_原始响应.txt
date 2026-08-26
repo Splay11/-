@@ -1,0 +1,225 @@
+## 解题思路
+
+本题要求在动态添加双向参见关系的笔记本页码中，支持查询指定页码的直接参见页码中编号第 $k$ 大的页码。关键信息是 $k \le 10$，且 $n, q \le 10^5$，因此需要每个操作尽量接近常数时间。
+
+解题思路如下：
+
+1. 为每个页码维护两个数据结构：
+   - 一个哈希集合（如 `set` / `unordered_set`），用于存储当前所有直接参见的页码，以快速判断重复关系。
+   - 一个有序列表（如 `vector` / `list`），按升序保存该页码直接参见页码中编号**最大**的至多 10 个页码。因为查询只关心第 $k$ 大（$k \le 10$），只需保留前 10 大即可。
+
+2. 对于 **添加标记** 操作（类型 1）：
+   - 首先检查两个页码 $u$ 和 $v$ 之间是否已经存在参见关系（利用哈希集合）。若已存在，跳过操作。
+   - 若不存在，则在 $u$ 和 $v$ 的哈希集合中相互添加对方。
+   - 更新各自的前 10 大列表：
+     * 若列表大小不足 10，直接加入新页码并排序。
+     * 若列表已满 10 个，且新页码编号大于当前列表中的最小值（升序列表的第一个元素），则将其加入后排序，并移除最小值，保持列表大小不超过 10。
+
+3. 对于 **查询参见** 操作（类型 2）：
+   - 取出 $u$ 对应的前 10 大列表，检查其长度 $sz$。若 $k > sz$，输出 $-1$。
+   - 否则，由于列表是升序排列，第 $k$ 大的页码对应列表下标为 $sz - k$ 的元素，直接输出即可。
+
+通过仅保留前 10 大的邻居，保证每次添加或查询都在极小常数时间内完成，满足 $n, q$ 均达 $10^5$ 的规模。
+
+## 复杂度分析
+
+- **时间复杂度**：每次添加操作需要对大小不超过 10 的列表排序，开销为 $O(10 \log 10) = O(1)$ 常数时间。总共 $q$ 次操作，故整体时间复杂度为 $O(n + q)$。
+- **空间复杂度**：每个页码的哈希集合存储其所有直接参见的页码，所有页码的边总数与操作次数同阶，为 $O(n+q)$；前 10 大列表每个页码存储不超过 10 个页码，总空间 $O(n)$。因此总空间复杂度为 $O(n + q)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    input = sys.stdin.readline
+    n, q = map(int, input().split())
+    
+    # neighbors[i] 存储页码 i 的所有直接参见页码，用于去重
+    neighbors = [set() for _ in range(n + 1)]
+    # top10[i] 按升序存储页码 i 的前10大参见页码
+    top10 = [[] for _ in range(n + 1)]
+    output = []
+    
+    for _ in range(q):
+        parts = list(map(int, input().split()))
+        if parts[0] == 1:
+            u, v = parts[1], parts[2]
+            # 若该参见关系已存在，则忽略
+            if v in neighbors[u]:
+                continue
+            neighbors[u].add(v)
+            neighbors[v].add(u)
+            
+            # 更新页码 u 的前10大列表
+            if len(top10[u]) < 10:
+                top10[u].append(v)
+                top10[u].sort()
+            elif v > top10[u][0]:
+                top10[u].append(v)
+                top10[u].sort()
+                if len(top10[u]) > 10:
+                    top10[u].pop(0)  # 移除最小值
+            
+            # 更新页码 v 的前10大列表
+            if len(top10[v]) < 10:
+                top10[v].append(u)
+                top10[v].sort()
+            elif u > top10[v][0]:
+                top10[v].append(u)
+                top10[v].sort()
+                if len(top10[v]) > 10:
+                    top10[v].pop(0)
+        else:
+            u, k = parts[1], parts[2]
+            sz = len(top10[u])
+            if k > sz:
+                output.append("-1")
+            else:
+                # 升序列表，第 k 大即为索引 sz - k 的元素
+                output.append(str(top10[u][sz - k]))
+    
+    sys.stdout.write("\n".join(output))
+
+if __name__ == '__main__':
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] first = br.readLine().split(" ");
+        int n = Integer.parseInt(first[0]);
+        int q = Integer.parseInt(first[1]);
+
+        // neighbors[i] 存储页码 i 的所有直接参见页码（用于去重）
+        HashSet<Integer>[] neighbors = new HashSet[n + 1];
+        // top10[i] 按升序存储页码 i 的前10大参见页码
+        ArrayList<Integer>[] top10 = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            neighbors[i] = new HashSet<>();
+            top10[i] = new ArrayList<>();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < q; i++) {
+            String[] parts = br.readLine().split(" ");
+            int type = Integer.parseInt(parts[0]);
+            if (type == 1) {
+                int u = Integer.parseInt(parts[1]);
+                int v = Integer.parseInt(parts[2]);
+                // 若参见关系已存在，跳过
+                if (neighbors[u].contains(v)) continue;
+                neighbors[u].add(v);
+                neighbors[v].add(u);
+                updateTop(top10[u], v);
+                updateTop(top10[v], u);
+            } else {
+                int u = Integer.parseInt(parts[1]);
+                int k = Integer.parseInt(parts[2]);
+                Collections.sort(top10[u]); // 保证升序
+                int sz = top10[u].size();
+                if (k > sz) {
+                    sb.append("-1\n");
+                } else {
+                    // 升序列表，第 k 大即为索引 sz - k 的元素
+                    sb.append(top10[u].get(sz - k)).append("\n");
+                }
+            }
+        }
+        System.out.print(sb.toString());
+    }
+
+    // 将新页码 val 插入到列表，保持列表大小不超过10且升序
+    private static void updateTop(ArrayList<Integer> list, int val) {
+        if (list.size() < 10) {
+            list.add(val);
+            Collections.sort(list);
+        } else {
+            Collections.sort(list);
+            if (val > list.get(0)) {
+                list.add(val);
+                Collections.sort(list);
+                list.remove(0); // 移除最小值
+            }
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_set>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, q;
+    cin >> n >> q;
+
+    // neighbors[i] 存储页码 i 的所有直接参见页码，用于去重
+    vector<unordered_set<int>> neighbors(n + 1);
+    // top10[i] 按升序存储页码 i 的前10大参见页码
+    vector<vector<int>> top10(n + 1);
+
+    while (q--) {
+        int type;
+        cin >> type;
+        if (type == 1) {
+            int u, v;
+            cin >> u >> v;
+            // 若参见关系已存在，忽略
+            if (neighbors[u].count(v)) continue;
+            neighbors[u].insert(v);
+            neighbors[v].insert(u);
+
+            // 更新页码 u 的前10大列表
+            if (top10[u].size() < 10) {
+                top10[u].push_back(v);
+                sort(top10[u].begin(), top10[u].end());
+            } else if (v > top10[u][0]) {
+                top10[u].push_back(v);
+                sort(top10[u].begin(), top10[u].end());
+                if (top10[u].size() > 10) top10[u].erase(top10[u].begin());
+            }
+
+            // 更新页码 v 的前10大列表
+            if (top10[v].size() < 10) {
+                top10[v].push_back(u);
+                sort(top10[v].begin(), top10[v].end());
+            } else if (u > top10[v][0]) {
+                top10[v].push_back(u);
+                sort(top10[v].begin(), top10[v].end());
+                if (top10[v].size() > 10) top10[v].erase(top10[v].begin());
+            }
+        } else {
+            int u, k;
+            cin >> u >> k;
+            int sz = top10[u].size();
+            if (k > sz) {
+                cout << -1 << "\n";
+            } else {
+                // 升序列表，第 k 大即为索引 sz - k 的元素
+                cout << top10[u][sz - k] << "\n";
+            }
+        }
+    }
+
+    return 0;
+}
+```

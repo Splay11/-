@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3704",
+  "title": "第2题-最长共享片段",
+  "docId": 3047,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

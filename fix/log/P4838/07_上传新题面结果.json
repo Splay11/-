@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4838",
+  "title": "第3题-第k小的区间加权成本",
+  "docId": 4125,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "二分算法"
+  ],
+  "alg_tag": "二分算法",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

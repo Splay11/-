@@ -1,0 +1,21 @@
+{
+  "pid": "P3502",
+  "mode": 0,
+  "force": true,
+  "start_time": "2026-08-10 12:09:03",
+  "end_time": "2026-08-10 12:12:02",
+  "new_title": "第3题-导电连通片的期望",
+  "steps": {
+    "step1_fetch_problem": true,
+    "step2_fetch_solution": true,
+    "step3_generate_statement": true,
+    "step35_check_solution": true,
+    "step35_modified": true,
+    "step4_generate_samples": true,
+    "step5_assemble": true,
+    "step6_upload_original_statement": true,
+    "step7_upload_new_problem": true,
+    "step8_upload_solution": true
+  },
+  "overall_success": true
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3605",
+  "title": "第1题-并联油箱",
+  "docId": 2948,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "哈希表"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "并查集",
+  "videosol": "",
+  "trial_videosol": ""
+}

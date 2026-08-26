@@ -1,0 +1,183 @@
+## 解题思路
+
+由于序列 $A$ 和 $B$ 都是 $1\sim n$ 的排列，每个数字在序列中的出现位置是唯一的。
+
+设数字 $x$ 在序列 $A$ 中的位置为 $\mathrm{posA}[x]$，在序列 $B$ 中的位置为 $\mathrm{posB}[x]$（下标均从 $1$ 开始）。
+
+若一个序列 $S$ 是 $A$ 和 $B$ 的共同子序列，则对于 $S$ 中的任意两个相邻元素，它们在 $A$ 中的出现位置必须严格递增，在 $B$ 中的出现位置也必须严格递增。
+
+题目要求字典序最大的共同子序列，贪心策略如下：
+
+1. 用 $i$ 和 $j$ 分别表示当前在 $A$ 和 $B$ 中可以选数的最小位置。初始时 $i=1,\ j=1$。
+2. 在每一步中，希望选择当前还能选的、数值最大的数字 $x$。
+   - 数字 $x$ 能被选中的条件是：它在 $A$ 中的位置 $\mathrm{posA}[x]\ge i$，且在 $B$ 中的位置 $\mathrm{posB}[x]\ge j$。
+3. 一旦选中数字 $x$，将其加入答案序列，并更新后续可选位置：
+   $$i = \mathrm{posA}[x] + 1,\quad j = \mathrm{posB}[x] + 1$$
+   表示之后选择的数字必须在 $x$ 之后出现。
+4. 由于每次都取当前可选的最大数字，且 $i,j$ 单调不减，一个数字一旦在当前时刻不可选，之后将永远无法再选。因此可以直接从 $n$ 到 $1$ 降序扫描每个数字，判断是否可选即可，一遍扫描后得到的就是字典序最大的共同子序列。
+
+该算法本质是：位置预处理 + 贪心 + 一次线性扫描。
+
+## 复杂度分析
+
+- 预处理两个位置数组需要 $O(n)$ 时间。
+- 降序扫描判断每个数字一次，也是 $O(n)$ 时间。
+- 额外使用了位置数组与答案数组，空间复杂度 $O(n)$。
+
+因此总时间复杂度 $O(n)$，空间复杂度 $O(n)$。对于 $n\le 2\times 10^5$ 完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+def solve(n, A, B):
+    # 记录每个数字在 A 和 B 中的位置（下标从 1 开始）
+    posA = [0] * (n + 1)
+    posB = [0] * (n + 1)
+
+    for i in range(n):
+        posA[A[i]] = i + 1
+        posB[B[i]] = i + 1
+
+    ans = []
+    i, j = 1, 1  # 当前在 A 和 B 中允许选择的最小位置
+
+    # 从大到小扫描，贪心选择当前还能选的最大数字
+    for x in range(n, 0, -1):
+        if posA[x] >= i and posB[x] >= j:
+            ans.append(x)
+            # 更新后续可选位置
+            i = posA[x] + 1
+            j = posB[x] + 1
+
+    return ans
+
+
+def main():
+    n = int(input())
+    A = list(map(int, input().split()))
+    B = list(map(int, input().split()))
+
+    ans = solve(n, A, B)
+
+    print(len(ans))
+    print(*ans)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static List<Integer> solve(int n, int[] A, int[] B) {
+        // 记录每个数字在 A 和 B 中的位置（下标从 1 开始）
+        int[] posA = new int[n + 1];
+        int[] posB = new int[n + 1];
+
+        for (int i = 0; i < n; i++) {
+            posA[A[i]] = i + 1;
+            posB[B[i]] = i + 1;
+        }
+
+        List<Integer> ans = new ArrayList<>();
+        int i = 1, j = 1; // 当前在 A 和 B 中允许选择的最小位置
+
+        // 从大到小扫描，贪心选择当前还能选的最大数字
+        for (int x = n; x >= 1; x--) {
+            if (posA[x] >= i && posB[x] >= j) {
+                ans.add(x);
+                // 更新后续可选位置
+                i = posA[x] + 1;
+                j = posB[x] + 1;
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int n = sc.nextInt();
+        int[] A = new int[n];
+        int[] B = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            A[i] = sc.nextInt();
+        }
+        for (int i = 0; i < n; i++) {
+            B[i] = sc.nextInt();
+        }
+
+        List<Integer> ans = solve(n, A, B);
+
+        System.out.println(ans.size());
+        for (int i = 0; i < ans.size(); i++) {
+            if (i > 0) System.out.print(" ");
+            System.out.print(ans.get(i));
+        }
+        System.out.println();
+
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> solve(int n, const vector<int>& A, const vector<int>& B) {
+    // 记录每个数字在 A 和 B 中的位置（下标从 1 开始）
+    vector<int> posA(n + 1), posB(n + 1);
+
+    for (int i = 0; i < n; i++) {
+        posA[A[i]] = i + 1;
+        posB[B[i]] = i + 1;
+    }
+
+    vector<int> ans;
+    int i = 1, j = 1; // 当前在 A 和 B 中允许选择的最小位置
+
+    // 从大到小扫描，贪心选择当前还能选的最大数字
+    for (int x = n; x >= 1; x--) {
+        if (posA[x] >= i && posB[x] >= j) {
+            ans.push_back(x);
+            // 更新后续可选位置
+            i = posA[x] + 1;
+            j = posB[x] + 1;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<int> A(n), B(n);
+    for (int i = 0; i < n; i++) cin >> A[i];
+    for (int i = 0; i < n; i++) cin >> B[i];
+
+    vector<int> ans = solve(n, A, B);
+
+    cout << ans.size() << "\n";
+    for (int i = 0; i < (int)ans.size(); i++) {
+        if (i) cout << " ";
+        cout << ans[i];
+    }
+    cout << "\n";
+
+    return 0;
+}
+```

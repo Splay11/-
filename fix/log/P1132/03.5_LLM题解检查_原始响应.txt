@@ -1,0 +1,154 @@
+## 解题思路
+
+1. **提取直线并去重**  
+   每条参考线给出两个端点，由于裁剪线只能与坐标轴成 $45^\circ$ 角，因此其斜率必定为 $1$ 或 $-1$。  
+   - 若斜率为 $1$，直线方程为 $y = x + b$，截距 $b = y - x$。  
+   - 若斜率为 $-1$，直线方程为 $y = -x + b$，截距 $b = y + x$。  
+   我们根据 $(x_2-x_1)(y_2-y_1)$ 的正负判定斜率符号，计算对应的截距，并分别存入两个集合（`set`），自动完成去重。最终得到斜率为 $1$ 的不同直线数 $cnt_1$ 和斜率为 $-1$ 的不同直线数 $cnt_2$。
+
+2. **统计内部交点**  
+   考虑一条斜率为 $-1$ 的直线 $y = -x + b_2$ 与一条斜率为 $1$ 的直线 $y = x + b_1$，它们的交点坐标为：
+   \[
+   x = \frac{b_2 - b_1}{2}, \qquad y = \frac{b_1 + b_2}{2}
+   \]
+   这些交点可能是整数或半整数。只有当交点严格位于画布内部，即满足 $0 < x < C$ 且 $0 < y < R$ 时，才会使区域的划分增加。遍历所有 $b_1$ 和 $b_2$ 的组合，统计满足条件的交点个数 $cnt_{in}$。
+
+3. **计算总区域数**  
+   我们首先只用同一斜率的直线切割矩形：
+   - 若只有 $cnt_1$ 条斜率为 $1$ 的直线，会将矩形分成 $cnt_1 + 1$ 个区域。  
+   再加入所有斜率为 $-1$ 的直线：
+   - 每加入一条斜率为 $-1$ 的直线，至少会将原有某个区域一分为二，区域数增加 $1$；如果该直线与已有的某条斜率为 $1$ 的直线交于矩形内部，则会再多增加一个区域。  
+   因此加入所有 $cnt_2$ 条线后，总共增加的区域数为 $cnt_2 + cnt_{in}$。  
+   综合可得：
+   \[
+   \text{答案} = (cnt_1 + 1) + cnt_2 + cnt_{in} = cnt_1 + cnt_2 + 1 + cnt_{in}
+   \]
+
+## 复杂度分析
+
+- **时间复杂度**：$O(M + cnt_1 \cdot cnt_2)$。  
+  读入并去重需要 $O(M)$ 时间；二重循环统计内部交点的次数为 $cnt_1 \times cnt_2$，在最坏情况下两者均接近 $M$，故整体为 $O(M^2)$，其中 $M \le 1000$，完全可接受。  
+- **空间复杂度**：$O(M)$，用于存储两种斜率的截距集合。
+
+## 代码实现
+
+### Python
+
+```python
+r, c = map(int, input().split())
+m = int(input())
+pos = set()  # 存储斜率为 1 直线的截距 b = y - x
+neg = set()  # 存储斜率为 -1 直线的截距 b = y + x
+
+for _ in range(m):
+    x1, y1, x2, y2 = map(int, input().split())
+    if (x2 - x1) * (y2 - y1) > 0:   # 斜率为 1
+        b = y1 - x1
+        pos.add(b)
+    else:                           # 斜率为 -1
+        b = y1 + x1
+        neg.add(b)
+
+cnt_pos = len(pos)
+cnt_neg = len(neg)
+cnt_cross = 0
+
+for b1 in pos:
+    for b2 in neg:
+        x = (b2 - b1) / 2.0
+        y = (b1 + b2) / 2.0
+        if 0 < x < c and 0 < y < r:
+            cnt_cross += 1
+
+ans = cnt_pos + cnt_neg + 1 + cnt_cross
+print(ans)
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int R = in.nextInt();   // 高度
+        int C = in.nextInt();   // 宽度
+        int M = in.nextInt();
+        
+        Set<Integer> pos = new HashSet<>();  // 截距 b = y - x （斜率 1）
+        Set<Integer> neg = new HashSet<>();  // 截距 b = y + x （斜率 -1）
+        
+        for (int i = 0; i < M; i++) {
+            int x1 = in.nextInt();
+            int y1 = in.nextInt();
+            int x2 = in.nextInt();
+            int y2 = in.nextInt();
+            // 判断斜率符号：斜率1时乘积为正，-1时乘积为负
+            if ((x2 - x1) * (y2 - y1) > 0) {
+                int b = y1 - x1;
+                pos.add(b);
+            } else {
+                int b = y1 + x1;
+                neg.add(b);
+            }
+        }
+        
+        int cntCross = 0;
+        for (int b1 : pos) {
+            for (int b2 : neg) {
+                double x = (b2 - b1) / 2.0;
+                double y = (b1 + b2) / 2.0;
+                if (x > 0 && x < C && y > 0 && y < R) {
+                    cntCross++;
+                }
+            }
+        }
+        
+        int ans = pos.size() + neg.size() + 1 + cntCross;
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    int R, C, M;
+    cin >> R >> C >> M;
+    set<int> pos; // 斜率为 1 直线的截距 b = y - x
+    set<int> neg; // 斜率为 -1 直线的截距 b = y + x
+
+    for (int i = 0; i < M; ++i) {
+        int x1, y1, x2, y2;
+        cin >> x1 >> y1 >> x2 >> y2;
+        if ((x2 - x1) * (y2 - y1) > 0) {
+            int b = y1 - x1;
+            pos.insert(b);
+        } else {
+            int b = y1 + x1;
+            neg.insert(b);
+        }
+    }
+
+    int cnt_cross = 0;
+    for (int b1 : pos) {
+        for (int b2 : neg) {
+            double x = (b2 - b1) / 2.0;
+            double y = (b1 + b2) / 2.0;
+            if (x > 0 && x < C && y > 0 && y < R) {
+                ++cnt_cross;
+            }
+        }
+    }
+
+    int ans = pos.size() + neg.size() + 1 + cnt_cross;
+    cout << ans << endl;
+    return 0;
+}
+```

@@ -1,0 +1,6 @@
+{
+  "title": "选牌最大积分",
+  "content": "有编号 $1\\ldots n$ 的牌，恰好选 $k$ 张。选中 $i$ 且未选 $i+1$ 得 $1$ 分（选 $n$ 必得分）。求最大积分。\n\n$1 \\le T \\le 10^5$，$1 \\le k \\le n \\le 10^{12}$。",
+  "input_description": "第一行 $T$。接下来 $T$ 行每行两个整数 $n,k$。",
+  "output_description": "每组一行一个整数。"
+}

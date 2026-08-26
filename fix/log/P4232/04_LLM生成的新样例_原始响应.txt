@@ -1,0 +1,21 @@
+```json
+{
+  "samples": [
+    {
+      "input": "{\"station1\": {\"wolf\": 10, \"rabbit\": 10}, \"station2\": {\"deer\": 100}}",
+      "output": "{\"station1\": {\"entropy\": 1.0}, \"station2\": {\"entropy\": 0.0}}",
+      "explanation": "对于 `station1`，总个体数 $S=20$，两个物种比例均为 $p=0.5$，熵 $H = -0.5 \\log_2 0.5 - 0.5 \\log_2 0.5 = 1.0$。对于 `station2`，仅有一个物种，比例 $p=1.0$，$H = -1.0 \\log_2 1.0 = 0.0$。"
+    },
+    {
+      "input": "{\"siteA\": {\"cat\": 1, \"dog\": 2, \"bird\": 3}}",
+      "output": "{\"siteA\": {\"entropy\": 1.459}}",
+      "explanation": "总个体数 $S=6$，各物种比例为 $p_1=1/6$，$p_2=2/6=1/3$，$p_3=3/6=1/2$。计算熵：$H = -\\frac{1}{6} \\log_2 \\frac{1}{6} - \\frac{1}{3} \\log_2 \\frac{1}{3} - \\frac{1}{2} \\log_2 \\frac{1}{2} \\approx 1.459$（四舍五入到三位小数）。"
+    },
+    {
+      "input": "{\"emptyStation\": {\"a\": 0, \"b\": 0}}",
+      "output": "{\"emptyStation\": {\"entropy\": 0.0}}",
+      "explanation": "总个体数 $S=0$，按照约定熵值直接定义为 $0$。"
+    }
+  ]
+}
+```

@@ -1,0 +1,176 @@
+## 解题思路
+
+对于第 $i$ 种包裹，共有 $a_i$ 个，要分给 $k$ 名快递员，并且要求任意两名快递员分得的该种包裹数量之差不超过 $1$。这使得每种包裹的分配方式是唯一确定的：
+
+1. 首先，每名快递员都至少获得 $\left\lfloor \frac{a_i}{k} \right\rfloor$ 个该种包裹。
+2. 剩余 $a_i \bmod k$ 个包裹，依次分给 $a_i \bmod k$ 名不同的快递员，每人多拿 $1$ 个。
+
+因此，对于任意一名选定的快递员，他从第 $i$ 种包裹中获得的个数只有两种可能：
+
+- **最少**：$\lfloor a_i/k \rfloor$（在剩余包裹分配中没有被选中时）；
+- **最多**：$\lceil a_i/k \rceil$（在剩余包裹分配中被选中时）。
+
+由于不同种类包裹的分配互相独立，该快递员可能获得的包裹总数的最小值，就是将每种包裹的最少获得量累加；可能获得的包裹总数的最大值，就是将每种包裹的最多获得量累加。即：
+
+- 最小值 $= \sum_{i=1}^{n} \lfloor a_i/k \rfloor$
+- 最大值 $= \sum_{i=1}^{n} \lceil a_i/k \rceil$
+
+在实现时，设 `q = a_i / k`，`r = a_i % k`，则：
+- 最小值累加 `q`；
+- 最大值累加 `q + (r > 0 ? 1 : 0)`。
+
+对每组数据遍历一次数组即可求出答案。
+
+## 复杂度分析
+
+- 时间复杂度：对于每组数据，需要遍历 $n$ 种包裹进行计算，单组时间复杂度为 $O(n)$。所有测试数据的 $n$ 总和不超过 $5 \times 10^5$，总时间复杂度 $O(\sum n)$，可以高效通过。
+- 空间复杂度：仅需几个变量进行累加，不计输入存储时空间复杂度为 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve_case(n, k, a):
+    mn = 0
+    mx = 0
+    for x in a:
+        q = x // k
+        r = x % k
+        mn += q
+        mx += q + (1 if r > 0 else 0)
+    return mn, mx
+
+def main():
+    data = list(map(int, sys.stdin.read().split()))
+    t = data[0]
+    idx = 1
+    out_lines = []
+    for _ in range(t):
+        n = data[idx]
+        k = data[idx + 1]
+        idx += 2
+        a = data[idx:idx + n]
+        idx += n
+        mn, mx = solve_case(n, k, a)
+        out_lines.append(f"{mn} {mx}")
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static long[] solveCase(int n, long k, long[] a) {
+        long mn = 0, mx = 0;
+        for (int i = 0; i < n; i++) {
+            long q = a[i] / k;
+            long r = a[i] % k;
+            mn += q;
+            mx += q + (r > 0 ? 1 : 0);
+        }
+        return new long[]{mn, mx};
+    }
+
+    public static void main(String[] args) throws IOException {
+        FastReader fr = new FastReader();
+        int T = fr.nextInt();
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            int n = fr.nextInt();
+            long k = fr.nextLong();
+            long[] a = new long[n];
+            for (int i = 0; i < n; i++) {
+                a[i] = fr.nextLong();
+            }
+            long[] res = solveCase(n, k, a);
+            sb.append(res[0]).append(" ").append(res[1]).append("\n");
+        }
+        System.out.print(sb);
+    }
+
+    static class FastReader {
+        private final BufferedInputStream in = new BufferedInputStream(System.in);
+        private final byte[] buf = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buf);
+                ptr = 0;
+                if (len <= 0) return -1;
+            }
+            return buf[ptr++];
+        }
+
+        int nextInt() throws IOException {
+            return (int) nextLong();
+        }
+
+        long nextLong() throws IOException {
+            int c;
+            do { c = read(); } while (c <= ' ');
+            long sign = 1;
+            if (c == '-') {
+                sign = -1;
+                c = read();
+            }
+            long val = 0;
+            while (c > ' ') {
+                val = val * 10 + (c - '0');
+                c = read();
+            }
+            return val * sign;
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+pair<long long, long long> solve_case(int n, long long k, const vector<long long>& a) {
+    long long mn = 0, mx = 0;
+    for (int i = 0; i < n; i++) {
+        long long q = a[i] / k;
+        long long r = a[i] % k;
+        mn += q;
+        mx += q + (r > 0 ? 1 : 0);
+    }
+    return {mn, mx};
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        long long k;
+        cin >> n >> k;
+        vector<long long> a(n);
+        for (int i = 0; i < n; i++) {
+            cin >> a[i];
+        }
+        auto [mn, mx] = solve_case(n, k, a);
+        cout << mn << ' ' << mx << '\n';
+    }
+
+    return 0;
+}
+```

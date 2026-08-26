@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4953",
+  "title": "幽灵字母",
+  "docId": 4287,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "其他",
+    "数学"
+  ],
+  "alg_tag": "数学",
+  "ai_alg_tags": "数学",
+  "videosol": "",
+  "trial_videosol": ""
+}

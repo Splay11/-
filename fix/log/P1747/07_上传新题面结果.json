@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1747",
+  "title": "互异区间",
+  "docId": 847,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "trial_videosol": ""
+}

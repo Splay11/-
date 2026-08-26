@@ -1,0 +1,105 @@
+## 解题思路
+
+将拼装过程反向思考：从目标编码 $\textit{token}$ 出发，每步删去一个字符，直到空串。
+
+长度为 $L$ 时：
+
+- 第 $1$ 次删除有 $L$ 个位置可选；
+- 第 $2$ 次有 $L-1$ 个位置；
+- 依此类推，共 $L!$ 种删除顺序。
+
+每种删除顺序唯一对应一种正向插入序列，故答案为 $L! \bmod (10^9+7)$。
+
+$\textit{token}$ 的具体内容不影响计数。所有测试的 $L$ 之和不超过 $2 \times 10^6$，可预处理阶乘后每组 $O(1)$ 输出。
+
+## 复杂度分析
+
+设所有组的 $L$ 之和为 $S$。
+
+- 时间复杂度：$O(S)$（预处理阶乘 $O(S)$，每组查询 $O(1)$）
+- 空间复杂度：$O(S)$
+
+## 代码实现
+
+### Python
+
+```python
+MOD = 10**9 + 7
+
+T = int(input())
+lens = []
+max_l = 0
+for _ in range(T):
+    L = int(input())
+    input()  # token，计数与内容无关
+    lens.append(L)
+    max_l = max(max_l, L)
+
+fact = [1] * (max_l + 1)
+for i in range(1, max_l + 1):
+    fact[i] = fact[i - 1] * i % MOD
+
+for L in lens:
+    print(fact[L])
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007L;
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine());
+        int[] lens = new int[T];
+        int maxL = 0;
+        for (int i = 0; i < T; i++) {
+            lens[i] = Integer.parseInt(br.readLine());
+            br.readLine(); // token
+            maxL = Math.max(maxL, lens[i]);
+        }
+        long[] fact = new long[maxL + 1];
+        fact[0] = 1;
+        for (int i = 1; i <= maxL; i++) {
+            fact[i] = fact[i - 1] * i % MOD;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int L : lens) sb.append(fact[L]).append('\n');
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    vector<int> lens(T);
+    int maxL = 0;
+    for (int i = 0; i < T; i++) {
+        cin >> lens[i];
+        string token;
+        cin >> token;
+        maxL = max(maxL, lens[i]);
+    }
+    vector<long long> fact(maxL + 1, 1);
+    for (int i = 1; i <= maxL; i++) {
+        fact[i] = fact[i - 1] * i % MOD;
+    }
+    for (int L : lens) cout << fact[L] << '\n';
+    return 0;
+}
+```

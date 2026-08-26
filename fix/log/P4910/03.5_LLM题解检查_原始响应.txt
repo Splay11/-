@@ -1,0 +1,131 @@
+## 解题思路
+
+1. 题目要求在一个音量序列 $v_1, v_2, \ldots, v_n$ 中，找出最长的连续子区间（平稳片段），使得区间内任意相邻两个采样点的音量差绝对值不超过 $K$，即对于区间 $[l, r]$ 中的每个 $i \in [l, r-1]$，均满足 $|v_{i+1} - v_i| \le K$。
+2. 由于“是否能将下一个采样点加入当前平稳片段”只取决于当前片段的最后一个值和下一个值，该问题具有无后效性，因此只需要从左到右进行一次线性扫描，无需动态规划或复杂数据结构。
+3. 具体做法：  
+   - 初始化当前平稳片段长度 $\text{cur} = 1$（片段至少包含一个采样点），全局最大长度 $\text{ans} = 1$。  
+   - 从第二个采样点开始遍历（$i = 1$ 到 $n-1$）：  
+        - 若 $|v_i - v_{i-1}| \le K$，说明可以延伸当前片段，令 $\text{cur} = \text{cur} + 1$；  
+        - 否则，相邻差值超出限制，片段必须从当前点重新开始，令 $\text{cur} = 1$。  
+        - 每次更新后，用 $\text{cur}$ 尝试刷新 $\text{ans}$。  
+4. 对每组数据执行上述 $O(n)$ 扫描，题目保证所有组数据的总采样点数 $\sum n \le 2 \times 10^5$，因此算法可以在时限内完成。
+
+## 复杂度分析
+
+- 时间复杂度：$O(\sum n)$，每组数据均执行一次线性扫描，总耗时与所有测试数据的 $n$ 之和成正比。
+- 空间复杂度：$O(n)$，需要存储当前测试组的所有音量值。若使用在线处理（边读边算），可以将额外空间优化到 $O(1)$，但为了代码清晰，保留数组存储。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    data = sys.stdin.buffer.read().split()
+    it = iter(data)
+    T = int(next(it))
+    out = []
+    for _ in range(T):
+        n = int(next(it))
+        K = int(next(it))
+        v = [int(next(it)) for _ in range(n)]
+        ans = 1
+        cur = 1
+        for i in range(1, n):
+            if abs(v[i] - v[i-1]) <= K:
+                cur += 1
+            else:
+                cur = 1
+            if cur > ans:
+                ans = cur
+        out.append(str(ans))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            long K = Long.parseLong(st.nextToken());
+            long[] v = new long[n];
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < n; i++) {
+                v[i] = Long.parseLong(st.nextToken());
+            }
+            int ans = 1;
+            int cur = 1;
+            for (int i = 1; i < n; i++) {
+                long diff = Math.abs(v[i] - v[i - 1]);
+                if (diff <= K) {
+                    cur++;
+                } else {
+                    cur = 1;
+                }
+                if (cur > ans) {
+                    ans = cur;
+                }
+            }
+            sb.append(ans).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+using int64 = long long;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        int64 K;
+        cin >> n >> K;
+        vector<int64> v(n);
+        for (int i = 0; i < n; ++i) {
+            cin >> v[i];
+        }
+
+        int ans = 1;
+        int cur = 1;
+        for (int i = 1; i < n; ++i) {
+            int64 diff = v[i] - v[i - 1];
+            if (diff < 0) diff = -diff;
+            if (diff <= K) {
+                ++cur;
+            } else {
+                cur = 1;
+            }
+            if (cur > ans) {
+                ans = cur;
+            }
+        }
+        cout << ans << '\n';
+    }
+    return 0;
+}
+```

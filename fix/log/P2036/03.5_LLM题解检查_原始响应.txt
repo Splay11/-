@@ -1,0 +1,116 @@
+## 解题思路
+本题的核心是判断能否通过设置三个周期分别为 $A,B,C$ 的无限等差序列的起始位置，使得三个序列的并集最终包含所有足够大的自然数（分钟）。换句话说，是否存在一种偏移方案，使得从某个时刻起，每一分钟都至少有一座钟敲响。
+
+经过分析，只有当 $A,B,C$ 的取值属于以下少数几种情况时才能满足要求：
+
+1. **存在周期为 1 的钟**  
+   周期为 1 意味着每分钟都会敲响，显然能够覆盖所有自然数分钟。  
+   条件：$A,B,C$ 中至少有一个等于 $1$。
+
+2. **存在两个周期为 2 的钟**  
+   若有两个钟的周期均为 $2$，可将它们的第一次敲钟时间分别设置为 $0$ 和 $1$，这样所有偶数分钟被第一个钟覆盖，所有奇数分钟被第二个钟覆盖，从而从时刻 $0$ 起就全覆盖。  
+   条件：$A,B,C$ 中至少有两个等于 $2$。
+
+3. **存在三个周期为 3 的钟**  
+   若有三个周期为 $3$ 的钟，可将第一次敲钟时间分别设为 $0,1,2$，它们分别覆盖模 $3$ 余 $0,1,2$ 的所有分钟，从而全覆盖。  
+   条件：$A,B,C$ 全部等于 $3$，即至少有三个周期为 $3$（本题总共只有三座钟，因此必须三座均为 $3$）。
+
+4. **存在两个周期为 4 的钟和一个周期为 2 的钟**  
+   两个周期为 $4$ 的钟可以分别设置为在第 $0$ 分钟和第 $2$ 分钟首次敲响，这样会覆盖所有模 $4$ 余 $0$ 和余 $2$ 的分钟；周期为 $2$ 的钟设置为在第 $1$ 分钟首次敲响，会覆盖所有模 $2$ 余 $1$ 的分钟，即所有奇数分钟（等价于模 $4$ 余 $1$ 和余 $3$ 的分钟）。三者并集覆盖所有整数分钟。  
+   条件：恰好有两个周期为 $4$ 且恰好有一个周期为 $2$。
+
+除了上述四种情况外，无论怎样设置起始时间，都无法使三个序列的并集覆盖所有足够大的自然数分钟（可以通过枚举小周期或剩余类分析验证）。因此，对于输入的每组 $A,B,C$，只需统计其中等于 $1,2,3,4$ 的个数，并按照上述条件判断即可。
+
+## 复杂度分析
+对于每组测试用例，只对三个整数进行常数次判断和计数，因此  
+- 时间复杂度：$O(1)$  
+- 空间复杂度：$O(1)$  
+
+总体处理 $t$ 组数据，总时间复杂度 $O(t)$，在 $t \le 10$ 的范围内完全可行。
+
+## 代码实现
+
+### Python
+```python
+t = int(input())
+for _ in range(t):
+    A, B, C = map(int, input().split())
+    cnt1 = 0
+    cnt2 = 0
+    cnt3 = 0
+    cnt4 = 0
+    for x in (A, B, C):
+        if x == 1:
+            cnt1 += 1
+        elif x == 2:
+            cnt2 += 1
+        elif x == 3:
+            cnt3 += 1
+        elif x == 4:
+            cnt4 += 1
+    # 判断是否满足任一种可全覆盖的情形
+    if cnt1 != 0 or cnt2 >= 2 or cnt3 >= 3 or (cnt4 == 2 and cnt2 == 1):
+        print("YES")
+    else:
+        print("NO")
+```
+
+### Java
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = sc.nextInt();
+        while (t-- > 0) {
+            int A = sc.nextInt();
+            int B = sc.nextInt();
+            int C = sc.nextInt();
+            int cnt1 = 0, cnt2 = 0, cnt3 = 0, cnt4 = 0;
+            int[] vals = {A, B, C};
+            for (int x : vals) {
+                if (x == 1) cnt1++;
+                else if (x == 2) cnt2++;
+                else if (x == 3) cnt3++;
+                else if (x == 4) cnt4++;
+            }
+            if (cnt1 != 0 || cnt2 >= 2 || cnt3 >= 3 || (cnt4 == 2 && cnt2 == 1)) {
+                System.out.println("YES");
+            } else {
+                System.out.println("NO");
+            }
+        }
+        sc.close();
+    }
+}
+```
+
+### C++
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int t;
+    cin >> t;
+    while (t--) {
+        int A, B, C;
+        cin >> A >> B >> C;
+        int cnt1 = 0, cnt2 = 0, cnt3 = 0, cnt4 = 0;
+        int arr[] = {A, B, C};
+        for (int i = 0; i < 3; ++i) {
+            int x = arr[i];
+            if (x == 1) cnt1++;
+            else if (x == 2) cnt2++;
+            else if (x == 3) cnt3++;
+            else if (x == 4) cnt4++;
+        }
+        if (cnt1 != 0 || cnt2 >= 2 || cnt3 >= 3 || (cnt4 == 2 && cnt2 == 1))
+            cout << "YES" << endl;
+        else
+            cout << "NO" << endl;
+    }
+    return 0;
+}
+```

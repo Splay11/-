@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1918",
+  "title": "最长平衡前缀",
+  "docId": 1021,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "B站"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "栈",
+  "trial_videosol": ""
+}

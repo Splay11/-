@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2962",
+  "title": "二进制序列校准",
+  "docId": 2597,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "前缀异或"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

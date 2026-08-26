@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4680",
+  "title": "等级乘积",
+  "docId": 3921,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "暴力枚举"
+  ],
+  "alg_tag": "暴力枚举",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

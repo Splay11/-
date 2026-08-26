@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P2164",
+  "title": "位掩码交替查询",
+  "docId": 1271,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "位运算",
+  "trial_videosol": ""
+}

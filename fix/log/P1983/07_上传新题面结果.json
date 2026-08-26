@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1983",
+  "title": "第3题-最优采集计划",
+  "docId": 1086,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

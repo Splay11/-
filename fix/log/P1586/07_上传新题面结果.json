@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1586",
+  "title": "第2题-单向巡游",
+  "docId": 609,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "BFS",
+  "trial_videosol": ""
+}

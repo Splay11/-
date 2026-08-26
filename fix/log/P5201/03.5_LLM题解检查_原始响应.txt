@@ -1,0 +1,212 @@
+## 解题思路
+
+1. 设 `level` 表示从左到右扫描字符串时的当前层数，`D` 表示整个字符串中所有字符的最大所在层数。
+2. 扫描字符串，并用数组 `d[i]` 记录第 `i` 个字符的所在层数：
+   - 遇到 `(` 时，先令 `level = level + 1`，该字符的所在层数为 `d[i] = level`；
+   - 遇到 `)` 时，该字符的所在层数为 `d[i] = level`，然后令 `level = level - 1`。
+   - 每次记录后，用 `d[i]` 更新最大层数 `D`。
+3. 根据题面结论：若一个字符在原字符串中的所在层数为 `d`，则它会在第 `D - d + 1` 轮被移除。
+4. 因此对每个位置计算答案：`ans[i] = D - d[i] + 1`。
+
+该方法只需要线性扫描字符串，不需要真正模拟每一轮移除过程。
+
+## 复杂度分析
+
+对于每组测试数据，需要两次线性扫描字符串：
+
+- 时间复杂度：$O(n)$。
+- 空间复杂度：$O(n)$。
+
+所有测试数据的字符串总长度不超过 $2 \times 10^5$，因此总时间复杂度为 $O(\sum n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 计算每个字符在第几轮被移除
+def get_rounds(s):
+    n = len(s)
+    depth = [0] * n
+
+    level = 0
+    max_depth = 0
+
+    # 第一次扫描：记录每个字符的所在层数，并统计最大层数
+    for i in range(n):
+        if s[i] == '(':
+            level += 1
+            depth[i] = level
+        else:
+            depth[i] = level
+            level -= 1
+
+        if depth[i] > max_depth:
+            max_depth = depth[i]
+
+    # 第二次扫描：根据最大层数计算移除轮次
+    for i in range(n):
+        depth[i] = max_depth - depth[i] + 1
+
+    return depth
+
+
+def main():
+    data = sys.stdin.read().split()
+    if not data:
+        return
+
+    t = int(data[0])
+    idx = 1
+    output = []
+
+    for _ in range(t):
+        n = int(data[idx])
+        s = data[idx + 1]
+        idx += 2
+
+        answer = get_rounds(s)
+        output.append(' '.join(map(str, answer)))
+
+    sys.stdout.write('\n'.join(output))
+
+
+if __name__ == '__main__':
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class Main {
+
+    // 计算每个字符在第几轮被移除
+    public static int[] getRounds(String s) {
+        int n = s.length();
+        int[] depth = new int[n];
+
+        int level = 0;
+        int maxDepth = 0;
+
+        // 第一次扫描：记录每个字符的所在层数，并统计最大层数
+        for (int i = 0; i < n; i++) {
+            if (s.charAt(i) == '(') {
+                level++;
+                depth[i] = level;
+            } else {
+                depth[i] = level;
+                level--;
+            }
+
+            if (depth[i] > maxDepth) {
+                maxDepth = depth[i];
+            }
+        }
+
+        // 第二次扫描：根据最大层数计算移除轮次
+        for (int i = 0; i < n; i++) {
+            depth[i] = maxDepth - depth[i] + 1;
+        }
+
+        return depth;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        int t = Integer.parseInt(reader.readLine().trim());
+        StringBuilder output = new StringBuilder();
+
+        for (int caseIndex = 0; caseIndex < t; caseIndex++) {
+            int n = Integer.parseInt(reader.readLine().trim());
+            String s = reader.readLine().trim();
+
+            int[] answer = getRounds(s);
+
+            for (int i = 0; i < n; i++) {
+                if (i > 0) {
+                    output.append(' ');
+                }
+                output.append(answer[i]);
+            }
+            output.append('\n');
+        }
+
+        System.out.print(output);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+// 计算每个字符在第几轮被移除
+vector<int> getRounds(const string& s) {
+    int n = (int)s.size();
+    vector<int> depth(n);
+
+    int level = 0;
+    int maxDepth = 0;
+
+    // 第一次扫描：记录每个字符的所在层数，并统计最大层数
+    for (int i = 0; i < n; i++) {
+        if (s[i] == '(') {
+            level++;
+            depth[i] = level;
+        } else {
+            depth[i] = level;
+            level--;
+        }
+
+        if (depth[i] > maxDepth) {
+            maxDepth = depth[i];
+        }
+    }
+
+    // 第二次扫描：根据最大层数计算移除轮次
+    for (int i = 0; i < n; i++) {
+        depth[i] = maxDepth - depth[i] + 1;
+    }
+
+    return depth;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n;
+        string s;
+        cin >> n >> s;
+
+        vector<int> answer = getRounds(s);
+
+        for (int i = 0; i < n; i++) {
+            if (i > 0) {
+                cout << ' ';
+            }
+            cout << answer[i];
+        }
+        cout << '\n';
+    }
+
+    return 0;
+}
+```

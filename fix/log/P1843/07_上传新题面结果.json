@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1843",
+  "title": "第2题-冷门货号",
+  "docId": 943,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "哈希表",
+  "videosol": "",
+  "trial_videosol": ""
+}

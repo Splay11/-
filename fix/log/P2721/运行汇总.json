@@ -1,0 +1,11 @@
+{
+  "pid": "P2721",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 16:21:31",
+  "end_time": "2026-08-19 16:21:32",
+  "new_title": "第3题-最远测站",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

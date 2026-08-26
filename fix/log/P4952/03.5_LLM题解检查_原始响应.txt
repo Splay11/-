@@ -1,0 +1,171 @@
+## 解题思路
+
+本题要求将一段给定的旋律序列划分为若干小节，每个小节可以由 1 个音符单独构成，也可以由相邻的两个音符构成，但当小节包含两个音符 $(f_{i-1}, f_i)$ 时，它们的音高差不能超过阈值 $D$，即必须满足 $f_i - f_{i-1} \le D$（因为输入已保证 $f_1 \le f_2 \le \dots \le f_m$，所以差值为非负）。
+
+这是一个经典的线性动态规划问题：
+
+- 定义 **$dp[i]$** 表示前 $i$ 个音符（$f_1 \dots f_i$）的合法划分方案数，答案即为 $dp[m]$。
+- 初始条件：
+  - $dp[0] = 1$：没有音符时，存在唯一的“空划分”方案。
+  - $dp[1] = 1$：只有一个音符时，只能将它单独划分为一个小节。
+- 对于 $i \ge 2$，考虑最后一个音符 $f_i$ 的划分方式：
+  - **单独成节**：$f_i$ 作为一个独立的小节，前面的 $i-1$ 个音符可任意合法划分，贡献方案数 $dp[i-1]$。
+  - **与 $f_{i-1}$ 组成一节**：若满足 $f_i - f_{i-1} \le D$，则可以将 $(f_{i-1}, f_i)$ 作为一个两音符小节，前面的 $i-2$ 个音符可任意合法划分，贡献方案数 $dp[i-2]$。
+- 因此状态转移方程为：
+  $$
+  dp[i] = dp[i-1] \quad \text{if } f_i - f_{i-1} > D
+  $$
+  $$
+  dp[i] = dp[i-1] + dp[i-2] \quad \text{if } f_i - f_{i-1} \le D
+  $$
+- 由于答案可能很大，所有加法运算均需对 $10^9+7$ 取模。
+
+观察发现，$dp[i]$ 仅依赖 $dp[i-1]$ 和 $dp[i-2]$，因此可以使用两个滚动变量 `dp0`（表示 $dp[i-2]$）和 `dp1`（表示 $dp[i-1]$）来递推，将空间复杂度优化到常数级。
+
+## 复杂度分析
+
+- **时间复杂度**：每组数据只需对音符数组遍历一次，组内时间复杂度为 $O(m)$。设所有测试数据的 $m$ 总和为 $\sum m$，题目保证 $\sum m \le 2 \times 10^5$，因此总时间复杂度为 $O(\sum m)$，可以顺利通过。
+- **空间复杂度**：动态规划使用滚动变量，仅需 $O(1)$ 额外空间；若不计输入数组，整体空间复杂度为 $O(1)$，若计入输入数组则为 $O(m)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10 ** 9 + 7
+
+
+def count_ways(m, D, f):
+    # dp0 代表 dp[i-2], dp1 代表 dp[i-1]
+    dp0 = 1          # dp[0] 的情况
+    if m == 0:
+        return dp0
+
+    dp1 = 1          # dp[1] 的情况
+    for i in range(1, m):
+        # 第 i 个音符单独成节，继承 dp[i-1]
+        cur = dp1
+        # 如果音高差不超过 D，则可以和前一音符组成一节
+        if f[i] - f[i - 1] <= D:
+            cur = (cur + dp0) % MOD
+        # 滚动更新
+        dp0, dp1 = dp1, cur
+
+    return dp1
+
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    q = int(data[0])
+    idx = 1
+    out_lines = []
+    for _ in range(q):
+        m = int(data[idx])
+        D = int(data[idx + 1])
+        idx += 2
+        f = [int(data[idx + i]) for i in range(m)]
+        idx += m
+        out_lines.append(str(count_ways(m, D, f)))
+    sys.stdout.write('\n'.join(out_lines))
+
+
+if __name__ == '__main__':
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007L;
+
+    static long countWays(int m, long D, long[] f) {
+        long dp0 = 1; // dp[0]
+        if (m == 0) return dp0;
+
+        long dp1 = 1; // dp[1]
+        for (int i = 1; i < m; i++) {
+            long cur = dp1;
+            if (f[i] - f[i - 1] <= D) {
+                cur = (cur + dp0) % MOD;
+            }
+            dp0 = dp1;
+            dp1 = cur;
+        }
+        return dp1;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder out = new StringBuilder();
+
+        int q = Integer.parseInt(br.readLine().trim());
+        for (int t = 0; t < q; t++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int m = Integer.parseInt(st.nextToken());
+            long D = Long.parseLong(st.nextToken());
+
+            long[] f = new long[m];
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < m; i++) {
+                f[i] = Long.parseLong(st.nextToken());
+            }
+
+            out.append(countWays(m, D, f)).append('\n');
+        }
+
+        System.out.print(out);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+
+long long countWays(int m, long long D, const vector<long long>& f) {
+    long long dp0 = 1; // dp[0]
+    if (m == 0) return dp0;
+
+    long long dp1 = 1; // dp[1]
+    for (int i = 1; i < m; ++i) {
+        long long cur = dp1;
+        if (f[i] - f[i - 1] <= D) {
+            cur = (cur + dp0) % MOD;
+        }
+        dp0 = dp1;
+        dp1 = cur;
+    }
+    return dp1;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int q;
+    cin >> q;
+    while (q--) {
+        int m;
+        long long D;
+        cin >> m >> D;
+
+        vector<long long> f(m);
+        for (int i = 0; i < m; ++i)
+            cin >> f[i];
+
+        cout << countWays(m, D, f) << '\n';
+    }
+
+    return 0;
+}
+```

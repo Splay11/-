@@ -1,0 +1,142 @@
+## 解题思路
+
+本题的核心是模拟一个栈（暂存箱）的操作过程，以恰好留下指定的目标包裹序列。由于暂存箱具有后进先出的特性，最终保留的包裹从底到顶的顺序恰好对应目标序列从左到右的顺序。为了保证操作合法，我们可以按照目标序列从底到顶的顺序（即输入顺序）依次“定格”每一个目标包裹。
+
+**算法步骤：**
+
+1. 维护一个变量 `next`，表示下一个即将从传送带取下的包裹编号，初始为 $1$。
+2. 遍历目标保留序列中的每一个包裹编号 $x$（代表希望保留在暂存箱中的包裹）：
+   - 只要 `next <= x`，说明当前队首包裹编号还没有超过目标 $x$，需要将 `next` 从传送带上取下并放入暂存箱，因此输出一条 `In` 指令。
+   - 此时检查刚刚放入的包裹 `next` 是否就是目标 $x$：
+     - 如果 `next != x`，说明该包裹并不是我们希望保留的，必须立即将其从暂存箱顶部丢弃，因此紧接着输出一条 `Out` 指令。
+     - 如果 `next == x`，则该包裹恰好是我们需要的目标，保留在暂存箱中，**不输出** `Out`。
+   - 无论是否为目标，都将 `next` 加 $1$，准备处理下一个传送带上的包裹。
+   - 重复上述过程，直到 `next > x` 为止。此时暂存箱顶部正好是 $x$，且其下方的包裹结构已被固定，不会被后续操作破坏。
+3. 处理完所有目标包裹后，生成的指令序列即为一个合法的操作方案。多余的包裹在过程中已被 `Out` 丢弃，无需额外处理。
+
+**正确性说明：**  
+依照目标序列从左到右（底到顶）处理，能够保证先保留的包裹沉在栈底，后保留的压在栈顶，最终栈内顺序与目标序列完全一致。每次针对目标 $x$ 的 `In` 过程中，非目标包裹都被立即丢弃，不会影响已固定的栈结构，因此操作合法且满足要求。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$。每个包裹的编号最多被处理一次，最多执行一次 `In` 和一次附属的 `Out` 判断，整个过程只线性扫描待处理包裹。
+- **空间复杂度**：$O(1)$。除存储输入的目标序列和输出指令序列外，仅使用了常数级别的辅助变量。若不计输出本身的空间，算法只使用常数额外空间。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    data = list(map(int, sys.stdin.read().strip().split()))
+    if not data:
+        return
+    n, m = data[0], data[1]
+    target = data[2:2 + m]
+
+    ops = []
+    nxt = 1  # 下一个即将从传送带上取下的包裹编号
+
+    for x in target:
+        # 不断将队首包裹放入暂存箱，直到当前包裹编号超过 x
+        while nxt <= x:
+            ops.append("In")
+            if nxt != x:
+                # 不是目标包裹，立刻从暂存箱顶部丢弃
+                ops.append("Out")
+            nxt += 1
+        # 此时栈顶为 x，保留不动，处理下一个目标
+
+    print(",".join(ops))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        List<Integer> all = new ArrayList<>();
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+            StringTokenizer st = new StringTokenizer(line);
+            while (st.hasMoreTokens()) {
+                all.add(Integer.parseInt(st.nextToken()));
+            }
+        }
+        if (all.size() < 2) return;
+        int n = all.get(0), m = all.get(1);
+        int[] target = new int[m];
+        for (int i = 0; i < m; i++) {
+            target[i] = all.get(2 + i);
+        }
+
+        StringBuilder ans = new StringBuilder();
+        int nxt = 1; // 下一个待取包裹编号
+        boolean first = true;
+
+        for (int x : target) {
+            while (nxt <= x) {
+                if (!first) {
+                    ans.append(",");
+                }
+                ans.append("In");
+                first = false;
+                if (nxt != x) {
+                    ans.append(",Out");
+                }
+                nxt++;
+            }
+            // 栈顶保留为 x
+        }
+        System.out.println(ans.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n, m;
+    if (!(cin >> n >> m)) return 0;
+    vector<int> target(m);
+    for (int i = 0; i < m; ++i) cin >> target[i];
+
+    vector<string> ops;
+    int nxt = 1; // 下一个要取下的包裹编号
+
+    for (int x : target) {
+        while (nxt <= x) {
+            ops.push_back("In");
+            if (nxt != x) {
+                ops.push_back("Out"); // 非目标包裹立即丢弃
+            }
+            ++nxt;
+        }
+        // 目标 x 保留在暂存箱顶部
+    }
+
+    for (size_t i = 0; i < ops.size(); ++i) {
+        if (i) cout << ",";
+        cout << ops[i];
+    }
+    cout << "\n";
+    return 0;
+}
+```

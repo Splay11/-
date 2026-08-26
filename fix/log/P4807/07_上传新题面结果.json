@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4807",
+  "title": "第3题-最佳收集策略",
+  "docId": 4075,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "数据结构",
+    "线段树"
+  ],
+  "alg_tag": "线段树",
+  "ai_alg_tags": "线段树",
+  "videosol": "",
+  "trial_videosol": ""
+}

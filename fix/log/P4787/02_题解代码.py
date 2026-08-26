@@ -1,0 +1,371 @@
+## 解题思路
+
+### 核心思路
+
+题目要求：
+
+1. 可以先将序列任意重排；
+2. 然后必须按从左到右的顺序，恰好使用 $n-1$ 次运算；
+3. 每一步运算只能是 $+$、$-$、$\times$、$\div$；
+4. 中间结果和最终结果都必须是整数；
+5. 除法是向零取整的整数除法。
+
+由于数据范围很小：
+
+* $1 \le n \le 6$
+* $1 \le a_i \le 13$
+
+因此可以直接暴力枚举所有可能情况。
+
+需要枚举的内容有两部分：
+
+1. 所有重排方案；
+2. 每两个数之间选择哪一种运算。
+
+如果固定一个排列 $(b_1,b_2,\dots,b_n)$，那么表达式一定是严格左结合的形式：
+
+$$
+(((b_1 \ op_1 \ b_2) \ op_2 \ b_3)\dots ) \ op_{n-1} \ b_n
+$$
+
+其中每个 $op_i$ 都有 $4$ 种选择。
+
+因此对于每组数据，只需：
+
+* 枚举所有排列；
+* 对于每个排列，枚举所有长度为 $n-1$ 的运算序列；
+* 按题意模拟计算最终结果；
+* 只要有一种结果为 $24$，输出 `Yes`，否则输出 `No`。
+
+
+
+### 实现方法
+
+设当前排列为 `perm`。
+
+从 `perm[0]` 开始作为当前值 `cur`，依次和 `perm[1]、perm[2]、...、perm[n-1]` 做运算。
+
+四种运算分别为：
+
+* 加法：`cur + x`
+* 减法：`cur - x`
+* 乘法：`cur * x`
+* 除法：`trunc(cur / x)`
+
+这里需要特别注意“向零取整”的实现。
+
+#### 1. Python 中如何实现向零取整除法
+
+Python 的 `//` 对负数是向下取整，不符合题意。
+
+例如：
+
+* `-7 // 3 = -3`
+* 但题目要求 `trunc(-7 / 3) = -2`
+
+因此需要手动实现：
+
+$$
+trunc(x/y)=
+\begin{cases}
+x // y, & x \ge 0 \
+-((-x)//y), & x < 0
+\end{cases}
+$$
+
+由于本题中除数始终是原序列中的正整数，所以只需这样处理即可。
+
+#### 2. 为什么暴力一定可行
+
+最大情况下：
+
+* 排列数：$6! = 720$
+* 运算方案数：$4^{5} = 1024$
+
+总状态数最多为：
+
+$$
+720 \times 1024 = 737280
+$$
+
+每种状态只需要顺序计算最多 $5$ 次运算，因此总计算量非常小，完全可以通过。
+
+
+
+## 复杂度分析
+
+### 时间复杂度
+
+对于每组数据：
+
+* 枚举所有排列：$n!$
+* 枚举所有运算序列：$4^{n-1}$
+* 每次计算表达式需要 $O(n)$
+
+因此总时间复杂度为：
+
+$$
+O(n! \cdot 4^{n-1} \cdot n)
+$$
+
+在 $n \le 6$ 时，复杂度完全可接受。
+
+### 空间复杂度
+
+主要为枚举过程中使用的少量变量，额外空间复杂度为：
+
+$$
+O(n)
+$$
+
+若使用库函数生成排列与运算序列，递归栈或辅助空间也仍然很小。
+
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from itertools import permutations, product
+
+
+# 实现向零取整的整数除法
+def trunc_div(x, y):
+    # 题目中 a_i 都是正整数，因此 y 一定大于 0
+    if x >= 0:
+        return x // y
+    else:
+        return -((-x) // y)
+
+
+# 判断当前测试用例是否能得到 24
+def can_make_24(nums):
+    n = len(nums)
+
+    # 枚举所有重排
+    for perm in permutations(nums):
+        # 枚举每一步选择的运算，0/1/2/3 分别表示 + - * /
+        for ops in product(range(4), repeat=n - 1):
+            cur = perm[0]
+
+            # 按严格左结合顺序依次计算
+            for i in range(n - 1):
+                x = perm[i + 1]
+                op = ops[i]
+
+                if op == 0:
+                    cur = cur + x
+                elif op == 1:
+                    cur = cur - x
+                elif op == 2:
+                    cur = cur * x
+                else:
+                    cur = trunc_div(cur, x)
+
+            # 若最终结果为 24，则存在可行方案
+            if cur == 24:
+                return True
+
+    return False
+
+
+def main():
+    input = sys.stdin.readline
+    T = int(input().strip())
+
+    for _ in range(T):
+        n = int(input().strip())
+        nums = list(map(int, input().split()))
+
+        if can_make_24(nums):
+            print("Yes")
+        else:
+            print("No")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 判断当前测试用例是否能得到 24
+    public static boolean canMake24(int[] nums) {
+        int n = nums.length;
+        boolean[] used = new boolean[n];
+        int[] perm = new int[n];
+
+        // 先枚举所有重排
+        return dfsPerm(nums, used, perm, 0);
+    }
+
+    // 深度优先搜索枚举排列
+    public static boolean dfsPerm(int[] nums, boolean[] used, int[] perm, int idx) {
+        int n = nums.length;
+
+        // 一个排列构造完成后，继续枚举所有运算方式
+        if (idx == n) {
+            return dfsOps(perm, 1, perm[0]);
+        }
+
+        for (int i = 0; i < n; i++) {
+            if (!used[i]) {
+                used[i] = true;
+                perm[idx] = nums[i];
+
+                if (dfsPerm(nums, used, perm, idx + 1)) {
+                    return true;
+                }
+
+                used[i] = false;
+            }
+        }
+
+        return false;
+    }
+
+    // 深度优先搜索枚举每一步的运算符
+    public static boolean dfsOps(int[] perm, int pos, int cur) {
+        int n = perm.length;
+
+        // 所有数字都用完后，判断是否得到 24
+        if (pos == n) {
+            return cur == 24;
+        }
+
+        int x = perm[pos];
+
+        // 依次尝试 +、-、*、/
+        if (dfsOps(perm, pos + 1, cur + x)) {
+            return true;
+        }
+        if (dfsOps(perm, pos + 1, cur - x)) {
+            return true;
+        }
+        if (dfsOps(perm, pos + 1, cur * x)) {
+            return true;
+        }
+        // Java 的整数除法本身就是向零取整
+        if (dfsOps(perm, pos + 1, cur / x)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int T = sc.nextInt();
+        while (T-- > 0) {
+            int n = sc.nextInt();
+            int[] nums = new int[n];
+
+            for (int i = 0; i < n; i++) {
+                nums[i] = sc.nextInt();
+            }
+
+            if (canMake24(nums)) {
+                System.out.println("Yes");
+            } else {
+                System.out.println("No");
+            }
+        }
+
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 深度优先搜索枚举每一步的运算符
+bool dfsOps(const vector<int>& perm, int pos, int cur) {
+    int n = perm.size();
+
+    // 所有数字都用完后，判断是否得到 24
+    if (pos == n) {
+        return cur == 24;
+    }
+
+    int x = perm[pos];
+
+    // 依次尝试 +、-、*、/
+    if (dfsOps(perm, pos + 1, cur + x)) return true;
+    if (dfsOps(perm, pos + 1, cur - x)) return true;
+    if (dfsOps(perm, pos + 1, cur * x)) return true;
+    // C++ 整数除法对 int 是向零取整
+    if (dfsOps(perm, pos + 1, cur / x)) return true;
+
+    return false;
+}
+
+// 深度优先搜索枚举排列
+bool dfsPerm(const vector<int>& nums, vector<bool>& used, vector<int>& perm, int idx) {
+    int n = nums.size();
+
+    // 一个排列构造完成后，继续枚举所有运算方式
+    if (idx == n) {
+        return dfsOps(perm, 1, perm[0]);
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (!used[i]) {
+            used[i] = true;
+            perm[idx] = nums[i];
+
+            if (dfsPerm(nums, used, perm, idx + 1)) {
+                return true;
+            }
+
+            used[i] = false;
+        }
+    }
+
+    return false;
+}
+
+// 判断当前测试用例是否能得到 24
+bool canMake24(const vector<int>& nums) {
+    int n = nums.size();
+    vector<bool> used(n, false);
+    vector<int> perm(n);
+
+    return dfsPerm(nums, used, perm, 0);
+}
+
+int main() {
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n;
+        cin >> n;
+        vector<int> nums(n);
+
+        for (int i = 0; i < n; i++) {
+            cin >> nums[i];
+        }
+
+        if (canMake24(nums)) {
+            cout << "Yes\n";
+        } else {
+            cout << "No\n";
+        }
+    }
+
+    return 0;
+}
+```

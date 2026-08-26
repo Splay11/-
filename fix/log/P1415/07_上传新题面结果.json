@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1415",
+  "title": "第1题-最短超标窗口",
+  "docId": 431,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "trial_videosol": ""
+}

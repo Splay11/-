@@ -1,0 +1,227 @@
+## 解题思路
+
+- 乘积为平方数意味着该乘积的每个质因子的指数之和都是偶数。
+- 我们可以将每个数 $a_i$ 进行质因数分解，只关心每个质因子指数的奇偶性（模 $2$ 余数）。指数为奇数记为 $1$，偶数记为 $0$，最终得到一个由 $0/1$ 组成的向量（或压缩成一个二进制掩码）。
+- 选择若干个数相乘，对应位置的指数奇偶性会进行异或（模 $2$ 加法）运算。若最终掩码为全 $0$，则乘积为平方数。
+- 因为 $n \le 20$，我们可以**枚举所有非空子集**（共 $2^n - 1$ 种），对每个子集计算掩码异或和，异或和为 $0$ 则方案数加一。
+- 具体步骤：
+  1. 预处理出 $100$ 以内的所有质数。
+  2. 对每个 $a_i$，依次用这些质数试除，统计每个质因子的指数奇偶性，压缩进一个整数掩码 mask[i]。
+  3. 用整数 $s$ 从 $1$ 枚举到 $2^n-1$ 遍历所有非空子集，计算子集中元素的掩码异或和。
+  4. 统计异或和为 $0$ 的子集个数，即为答案。
+
+## 复杂度分析
+
+- 质数预处理：上限 $100$，埃氏筛复杂度 $O(100 \log \log 100)$，可忽略。
+- 计算掩码：对每个数分解质因数，复杂度 $O(n \cdot \pi(100))$，$\pi(100)$ 为 $100$ 以内质数个数，很小。
+- 枚举子集：共 $2^n-1$ 个子集，每个子集需要 $O(n)$ 时间计算异或和，总复杂度 $O(n \cdot 2^n)$。当 $n=20$ 时，约为 $20 \times 10^6 = 2 \times 10^7$，可以接受。
+- 空间复杂度：存储质数列表 $O(\pi(100))$，存储掩码数组 $O(n)$，总体 $O(n)$。
+
+时间复杂度 $O(n \cdot 2^n)$，空间复杂度 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+# -*- coding: utf-8 -*-
+
+def get_primes():
+    """返回所有小于等于100的质数"""
+    primes = []
+    is_prime = [True] * 101
+    for i in range(2, 101):
+        if is_prime[i]:
+            primes.append(i)
+            for j in range(i * i, 101, i):
+                is_prime[j] = False
+    return primes
+
+def main():
+    n = int(input().strip())
+    a = list(map(int, input().split()))
+    
+    primes = get_primes()
+    p_count = len(primes)
+    
+    # 计算每个数的奇偶性掩码
+    masks = [0] * n
+    for i in range(n):
+        x = a[i]
+        cur_mask = 0
+        for j in range(p_count):
+            cnt = 0
+            while x % primes[j] == 0:
+                cnt += 1
+                x //= primes[j]
+            # 质因子指数为奇数，则将掩码对应位置1
+            if cnt % 2 == 1:
+                cur_mask |= (1 << j)
+        masks[i] = cur_mask
+    
+    ans = 0
+    total = 1 << n  # 2^n 个子集
+    # 枚举所有非空子集
+    for s in range(1, total):
+        xor_sum = 0
+        for i in range(n):
+            if s & (1 << i):
+                xor_sum ^= masks[i]
+        # 异或和为0则乘积为完全平方数（完美积）
+        if xor_sum == 0:
+            ans += 1
+    
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    // 获取所有小于等于100的质数
+    public static ArrayList<Integer> getPrimes() {
+        ArrayList<Integer> primes = new ArrayList<>();
+        boolean[] isPrime = new boolean[101];
+        Arrays.fill(isPrime, true);
+        for (int i = 2; i <= 100; i++) {
+            if (isPrime[i]) {
+                primes.add(i);
+                for (int j = i * i; j <= 100; j += i) {
+                    isPrime[j] = false;
+                }
+            }
+        }
+        return primes;
+    }
+    
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] a = new int[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = sc.nextInt();
+        }
+        
+        ArrayList<Integer> primes = getPrimes();
+        int pCount = primes.size();
+        int[] masks = new int[n];
+        
+        // 计算每个数的奇偶性掩码
+        for (int i = 0; i < n; i++) {
+            int x = a[i];
+            int curMask = 0;
+            for (int j = 0; j < pCount; j++) {
+                int p = primes.get(j);
+                int cnt = 0;
+                while (x % p == 0) {
+                    cnt++;
+                    x /= p;
+                }
+                // 指数为奇数则设置掩码对应位
+                if (cnt % 2 == 1) {
+                    curMask |= (1 << j);
+                }
+            }
+            masks[i] = curMask;
+        }
+        
+        long ans = 0;
+        int total = 1 << n;  // 2^n 个子集
+        // 枚举所有非空子集
+        for (int s = 1; s < total; s++) {
+            int xorSum = 0;
+            for (int i = 0; i < n; i++) {
+                if ((s & (1 << i)) != 0) {
+                    xorSum ^= masks[i];
+                }
+            }
+            // 异或和为0则乘积为完美积
+            if (xorSum == 0) {
+                ans++;
+            }
+        }
+        
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 获取所有小于等于100的质数
+vector<int> getPrimes() {
+    vector<int> primes;
+    bool isPrime[101] = {false};
+    for (int i = 2; i <= 100; i++) isPrime[i] = true;
+    for (int i = 2; i <= 100; i++) {
+        if (isPrime[i]) {
+            primes.push_back(i);
+            for (int j = i * i; j <= 100; j += i) {
+                isPrime[j] = false;
+            }
+        }
+    }
+    return primes;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+    
+    vector<int> primes = getPrimes();
+    int pCount = primes.size();
+    
+    // 计算每个数的奇偶性掩码
+    vector<int> mask(n, 0);
+    for (int i = 0; i < n; i++) {
+        int x = a[i];
+        int curMask = 0;
+        for (int j = 0; j < pCount; j++) {
+            int cnt = 0;
+            while (x % primes[j] == 0) {
+                cnt++;
+                x /= primes[j];
+            }
+            // 指数为奇数则掩码对应位置1
+            if (cnt % 2 == 1) {
+                curMask |= (1 << j);
+            }
+        }
+        mask[i] = curMask;
+    }
+    
+    long long ans = 0;
+    int total = 1 << n;  // 2^n 个子集
+    // 枚举所有非空子集
+    for (int s = 1; s < total; s++) {
+        int xorSum = 0;
+        for (int i = 0; i < n; i++) {
+            if (s & (1 << i)) {
+                xorSum ^= mask[i];
+            }
+        }
+        // 异或和为0则乘积为完美积
+        if (xorSum == 0) {
+            ans++;
+        }
+    }
+    
+    cout << ans << endl;
+    return 0;
+}
+```

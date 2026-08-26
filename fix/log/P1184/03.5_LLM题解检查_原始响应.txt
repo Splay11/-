@@ -1,0 +1,120 @@
+## 解题思路
+
+1. 由于反转操作可以针对任意仪器的任意二进制位独立进行，问题可转化为：对于每一个二进制位，需要将所有仪器在该位上的值变成相同。
+2. 对于第 $i$ 位，统计 $n$ 个读数中该位为 $1$ 的仪器数量 $\text{cnt}_1$ 和为 $0$ 的数量 $\text{cnt}_0$（显然 $\text{cnt}_0 = n - \text{cnt}_1$）。
+3. 要使所有仪器在该位相等，有两种选择：
+   - 将所有该位为 $0$ 的仪器反转成 $1$，需要 $\text{cnt}_0$ 次操作；
+   - 将所有该位为 $1$ 的仪器反转成 $0$，需要 $\text{cnt}_1$ 次操作。
+4. 该位的最小操作次数即为 $\min(\text{cnt}_0, \text{cnt}_1)$。
+5. 由于每一位的决策相互独立，总最少操作次数等于所有二进制位最小操作次数之和。
+6. 根据输入范围 $a_i \le 2^{31}-1$，只需考虑低 $31$ 位（$0$ ~ $30$ 位）。
+
+## 复杂度分析
+
+- **时间复杂度**：对于每个读数，需要遍历其 $31$ 个二进制位进行统计，共 $n$ 个读数，复杂度为 $O(31n) \approx O(n)$。
+- **空间复杂度**：只需记录每个二进制位上 $0$ 和 $1$ 的出现次数（或仅记录 $1$ 的次数），额外空间为 $O(32) = O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    n = int(data[0])
+    readings = list(map(int, data[1:1+n]))
+    
+    # 记录每一位上1的个数
+    bit_cnt = [0] * 31
+    for x in readings:
+        for i in range(31):
+            if (x >> i) & 1:
+                bit_cnt[i] += 1
+    
+    ans = 0
+    for i in range(31):
+        cnt1 = bit_cnt[i]
+        cnt0 = n - cnt1
+        ans += min(cnt0, cnt1)
+    
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] bitCnt = new int[31]; // 记录每个二进制位上1的个数
+        
+        for (int i = 0; i < n; i++) {
+            int x = sc.nextInt();
+            for (int j = 0; j < 31; j++) {
+                if (((x >> j) & 1) == 1) {
+                    bitCnt[j]++;
+                }
+            }
+        }
+        
+        long ans = 0; // 答案可能较大，使用long防止溢出（实际上不会超过31*n，但保险起见）
+        for (int i = 0; i < 31; i++) {
+            int cnt1 = bitCnt[i];
+            int cnt0 = n - cnt1;
+            ans += Math.min(cnt0, cnt1);
+        }
+        
+        System.out.println(ans);
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n;
+    cin >> n;
+    
+    // 统计每一位上1的个数，最多考虑31位（0~30）
+    vector<int> bit_cnt(31, 0);
+    for (int i = 0; i < n; ++i) {
+        int x;
+        cin >> x;
+        for (int j = 0; j < 31; ++j) {
+            if ((x >> j) & 1) {
+                bit_cnt[j]++;
+            }
+        }
+    }
+    
+    long long ans = 0;
+    for (int i = 0; i < 31; ++i) {
+        int cnt1 = bit_cnt[i];
+        int cnt0 = n - cnt1;
+        ans += min(cnt0, cnt1);
+    }
+    
+    cout << ans << endl;
+    return 0;
+}
+```

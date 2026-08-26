@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1123",
+  "title": "无重复标签序列",
+  "docId": 127,
+  "hidden": false,
+  "difficulty": 0,
+  "tag": [
+    "腾讯"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "trial_videosol": ""
+}

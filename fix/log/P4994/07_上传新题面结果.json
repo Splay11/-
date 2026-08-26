@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4994",
+  "title": "第2题-双次采集的最大收益",
+  "docId": 4340,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

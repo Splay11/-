@@ -1,0 +1,161 @@
+# 题解
+
+## 题面描述
+
+给定一个长度为 $n$ 的正整数数组 $a$。我们定义一个数 $x$ 的 **美丽值** 如下：
+
+- 如果将 $x$ 不停除以 $2$ 直到无法整除，此时得到的结果恰好为 $1$，则称 $x$ 是 **美丽数**，其美丽值为在过程中除以 $2$ 的次数。
+- 否则，$x$ 不是美丽数，其美丽值记为 $0$。
+
+题目要求计算数组 $a$ 中所有连续子数组（即区间）的和的美丽值之和。设某个子数组的和为 $S$，其贡献为 $f(S)$（若 $S=2^k$ 则 $f(S)=k$，否则 $f(S)=0$），要求求
+
+$\sum_{l=1}^{n}$$\sum_{r=l}^{n} f\Bigl(\sum_{i=l}^{r} a_i$$\Bigr)$
+
+## 思路分析
+
+1. **美丽值判定：**  
+   一个数 $x$ 满足“美丽”当且仅当 $x$ 为 $2$ 的幂，即 $x=2^k$。此时美丽值为 $k$（注意当 $x=1=2^0$ 时，美丽值为 $0$）。
+
+2. **连续子数组求和转化：**  
+   利用前缀和数组 $P$，其中 $P[0]=0$，$P[i]=\sum_{j=1}^{i}a_j$。任意子数组和可以写成  
+   $
+   S = P[r] - P[l-1].
+   $  
+   于是问题转化为：对于每个区间 $(l, r)$，如果 $P[r]-P[l-1]=2^k$（且 $k\ge 1$，因为 $k=0$贡献为 $0$），则贡献为 $k$。
+
+3. **双重枚举优化：**  
+   枚举右端点 $r$，利用哈希表记录之前所有前缀和出现的次数。对当前前缀和 $S=P[r]$，对于每个可能的指数 $k$（通常 $k$ 最大约 $50$ 足够），令  
+   $
+   target = S - 2^k,
+   $
+   则所有满足 $P[l-1] = target$ 的区间，其子数组和正好为 $2^k$，贡献为 $k$。累加所有贡献即可。
+
+4. **时间复杂度：**  
+   每个 $r$ 枚举最多 $50$ 个 $k$，整体复杂度为 $O(n\cdot 50)$，可以在 $n\le3×10^5$ 内通过。
+
+## C++
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+typedef long long ll;
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while(T--){
+        int n;
+        cin >> n;
+        vector<ll> a(n);
+        for (int i = 0; i < n; i++){
+            cin >> a[i];
+        }
+        // 哈希表统计前缀和出现次数
+        unordered_map<ll, ll> freq;
+        freq[0] = 1; // 前缀和为0出现一次
+        ll prefix = 0;
+        ll ans = 0;
+        for (int i = 0; i < n; i++){
+            prefix += a[i];
+            // 枚举可能的 k 值, 使得 2^k 不超过当前可能的和范围
+            for (int k = 1; k < 60; k++){
+                ll power = 1LL << k; // 计算 2^k
+                ll target = prefix - power;
+                if(freq.find(target) != freq.end()){
+                    // 累加答案, 美丽值为 k
+                    ans += (ll)k * freq[target];
+                }
+            }
+            // 更新当前前缀和的次数
+            freq[prefix]++;
+        }
+        cout << ans << "\n";
+    }
+    return 0;
+}
+```
+## Python 
+
+```python
+# Python 版本解法
+import sys
+
+def main():
+    import sys
+    input_data = sys.stdin.read().split()
+    t = int(input_data[0])
+    index = 1
+    res = []
+    for _ in range(t):
+        n = int(input_data[index])
+        index += 1
+        a = list(map(int, input_data[index:index+n]))
+        index += n
+        freq = {0: 1}  # 用字典统计前缀和出现次数
+        prefix = 0
+        ans = 0
+        # 遍历数组计算前缀和
+        for num in a:
+            prefix += num
+            # 枚举可能的 k 值, 计算 2^k
+            for k in range(1, 60):
+                power = 1 << k  # 计算 2^k
+                target = prefix - power
+                if target in freq:
+                    ans += k * freq[target]
+            freq[prefix] = freq.get(prefix, 0) + 1
+        res.append(str(ans))
+    sys.stdout.write("\n".join(res))
+    
+if __name__ == '__main__':
+    main()
+```
+## Java 
+
+```java
+import java.io.*;
+import java.util.*;
+
+// Java 版本解法
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // 使用 BufferedReader 和 PrintWriter 提高输入输出效率
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+        int T = Integer.parseInt(br.readLine().trim());
+        while(T-- > 0){
+            int n = Integer.parseInt(br.readLine().trim());
+            String[] parts = br.readLine().trim().split(" ");
+            long[] a = new long[n];
+            for(int i = 0; i < n; i++){
+                a[i] = Long.parseLong(parts[i]);
+            }
+            // 使用 HashMap 统计前缀和出现次数
+            HashMap<Long, Long> freq = new HashMap<>();
+            freq.put(0L, 1L); // 前缀和 0 出现一次
+            long prefix = 0;
+            long ans = 0;
+            // 遍历数组计算前缀和
+            for(int i = 0; i < n; i++){
+                prefix += a[i];
+                // 枚举可能的 k 值, 计算 2^k
+                for(int k = 1; k < 60; k++){
+                    long power = 1L << k; // 计算 2^k
+                    long target = prefix - power;
+                    if(freq.containsKey(target)){
+                        ans += k * freq.get(target);
+                    }
+                }
+                freq.put(prefix, freq.getOrDefault(prefix, 0L) + 1);
+            }
+            out.println(ans);
+        }
+        out.flush();
+        out.close();
+    }
+}
+```

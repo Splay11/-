@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1101",
+  "title": "第2题-灯带调控",
+  "docId": 105,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

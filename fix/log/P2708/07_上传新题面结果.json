@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2708",
+  "title": "第2题-宝石镶嵌的最优方案",
+  "docId": 2274,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

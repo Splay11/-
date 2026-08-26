@@ -1,0 +1,11 @@
+{
+  "pid": "P5206",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 15:34:44",
+  "end_time": "2026-08-19 15:34:45",
+  "new_title": "第3题-智能养护服务计费",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

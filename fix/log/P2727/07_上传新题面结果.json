@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2727",
+  "title": "第3题-扁平化管理",
+  "docId": 2356,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "DFS"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

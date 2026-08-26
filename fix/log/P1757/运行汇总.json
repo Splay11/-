@@ -1,0 +1,11 @@
+{
+  "pid": "P1757",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:44:14",
+  "end_time": "2026-08-19 19:44:14",
+  "new_title": "偶数段对半",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

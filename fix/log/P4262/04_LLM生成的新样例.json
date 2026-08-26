@@ -1,0 +1,9 @@
+{
+  "samples": [
+    {
+      "input": "ababab\nbabaa",
+      "output": "1",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "2 4 8",
+      "output": "2.32843",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "0 1 4",
+      "output": "4.00000",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "10 1 1",
+      "output": "0.10000",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4978",
+  "title": "第1题-体力与试炼",
+  "docId": 4321,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,222 @@
+## 解题思路
+
+设数字 $x$ 的十进制长度为 $n$，第 $i$ 位数字为 $d_i$。
+
+题目要求的是：
+
+* 等概率选一个数位，概率为 $\frac{1}{n}$
+* 再把这一位替换成 $0 \sim 9$ 中任意一个数字，概率为 $\frac{1}{10}$
+* 统计新数 $x'$ 严格大于原数 $x$ 的概率
+
+注意这里只改动一位，其他位都不变，因此比较 $x'$ 和 $x$ 时：
+
+* 前面所有位都一样
+* 只有被替换的这一位不同
+
+所以大小关系只由这一位决定：
+
+* 若替换后的数字 $y > d_i$，则 $x' > x$
+* 若 $y \le d_i$，则 $x' \le x$
+
+因此，选中第 $i$ 位后，能使新数更大的替换方案数就是：
+
+$$
+9 - d_i
+$$
+
+因为可选数字是 $0 \sim 9$，其中比 $d_i$ 大的数字有 $d_i+1 \sim 9$，共 $9-d_i$ 个。
+
+那么总成功方案数为：
+
+$$
+\sum (9-d_i)
+$$
+
+总等可能方案数为：
+
+$$
+n \times 10
+$$
+
+所以答案概率为：
+
+$$
+\frac{\sum (9-d_i)}{10n}
+$$
+
+题目要求输出：
+
+$$
+p \times q^{-1} \bmod M
+$$
+
+其中：
+
+* $p = \sum (9-d_i)$
+* $q = 10n$
+
+根据费马小定理，可用快速幂求逆元：
+
+$$
+q^{-1} = q^{M-2} \bmod M
+$$
+
+### 核心算法
+
+1. 把输入的 $x$ 当作字符串处理，避免超大整数溢出
+2. 遍历每一位，累加 $9-d_i$
+3. 计算分母 $10n \bmod M$
+4. 用快速幂求逆元
+5. 输出
+
+这样就把问题转化为了一次字符串遍历加一次快速幂。
+
+## 复杂度分析
+
+设 $x$ 的长度为 $n$。
+
+* 时间复杂度：$O(n + \log M)$
+* 空间复杂度：$O(1)$（不计输入字符串存储）
+
+其中 $n \le 10^5$，这样的复杂度完全可以通过。
+
+## 代码实现
+
+### Python
+
+```python
+def qpow(a, b, mod):
+    # 快速幂，计算 a^b % mod
+    res = 1
+    a %= mod
+    while b > 0:
+        if b & 1:
+            res = res * a % mod
+        a = a * a % mod
+        b >>= 1
+    return res
+
+
+def solve(x, mod):
+    # 统计分子 p = sum(9 - 当前位数字)
+    p = 0
+    for ch in x:
+        p += 9 - int(ch)
+    p %= mod
+
+    # 分母 q = 10 * n
+    q = (10 * len(x)) % mod
+
+    # 计算逆元 q^(mod-2) % mod
+    q_inv = qpow(q, mod - 2, mod)
+
+    # 返回 p / q 在模 mod 下的值
+    return p * q_inv % mod
+
+
+if __name__ == "__main__":
+    x, mod = input().split()
+    mod = int(mod)
+    print(solve(x, mod))
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 快速幂，计算 a^b % mod
+    public static long qpow(long a, long b, long mod) {
+        long res = 1;
+        a %= mod;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = res * a % mod;
+            }
+            a = a * a % mod;
+            b >>= 1;
+        }
+        return res;
+    }
+
+    // 计算答案
+    public static long solve(String x, long mod) {
+        long p = 0;
+
+        // 统计分子 p = sum(9 - 当前位数字)
+        for (int i = 0; i < x.length(); i++) {
+            int d = x.charAt(i) - '0';
+            p = (p + 9 - d) % mod;
+        }
+
+        // 分母 q = 10 * n
+        long q = (10L * x.length()) % mod;
+
+        // 逆元
+        long qInv = qpow(q, mod - 2, mod);
+
+        // 返回结果
+        return p * qInv % mod;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String x = sc.next();
+        long mod = sc.nextLong();
+        System.out.println(solve(x, mod));
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+// 快速幂，计算 a^b % mod
+long long qpow(long long a, long long b, long long mod) {
+    long long res = 1;
+    a %= mod;
+    while (b > 0) {
+        if (b & 1) {
+            res = res * a % mod;
+        }
+        a = a * a % mod;
+        b >>= 1;
+    }
+    return res;
+}
+
+// 计算答案
+long long solve(const string& x, long long mod) {
+    long long p = 0;
+
+    // 统计分子 p = sum(9 - 当前位数字)
+    for (char ch : x) {
+        int d = ch - '0';
+        p = (p + 9 - d) % mod;
+    }
+
+    // 分母 q = 10 * n
+    long long q = 10LL * x.size() % mod;
+
+    // 求逆元
+    long long qInv = qpow(q, mod - 2, mod);
+
+    // 返回结果
+    return p * qInv % mod;
+}
+
+int main() {
+    string x;
+    long long mod;
+    cin >> x >> mod;
+    cout << solve(x, mod) << '\n';
+    return 0;
+}
+```

@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1602",
+  "title": "第1题-镜中词",
+  "docId": 625,
+  "hidden": false,
+  "difficulty": 1,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "字符串",
+  "trial_videosol": ""
+}

@@ -1,0 +1,125 @@
+## 解题思路
+
+- 每个喷泉的覆盖范围为 $[c - r, \, c + r]$。问题转化为从 $n$ 个区间中选出尽可能多的区间，使得任意两个选出的区间**没有公共点**（不能重叠，端点也不能相接）。
+- 这等价于要求下一个区间的左端点**严格大于**上一个区间的右端点。
+- 经典贪心策略：
+  1. 将所有区间按照**右端点**从小到大排序。
+  2. 维护一个变量 `now` 表示当前已选中的最后一个区间的右端点（初始设为一个极小的值，例如 $-10^9$）。
+  3. 依次遍历排序后的区间，如果当前区间的左端点 `left` **严格大于** `now`，则选择该区间，答案计数加 $1$，并将 `now` 更新为当前区间的右端点；否则跳过。
+- 排序后贪心可以保证最终得到的区间数量最多。
+
+## 复杂度分析
+
+- 时间复杂度：排序 $O(n \log n)$，遍历 $O(n)$，总时间复杂度为 $O(n \log n)$。
+- 空间复杂度：存储所有区间需要 $O(n)$ 空间，其余变量为常数级，总空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+n = int(input())
+intervals = []
+
+for _ in range(n):
+    c, r = map(int, input().split())
+    left = c - r
+    right = c + r
+    intervals.append((left, right))
+
+# 按右端点升序排序
+intervals.sort(key=lambda x: x[1])
+
+ans = 0
+now = -10**9          # 当前已选区间的右端点，初始为极小值
+
+for left, right in intervals:
+    if left > now:    # 严格大于，避免端点相接
+        ans += 1
+        now = right
+
+print(ans)
+```
+
+### Java
+
+```java
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();
+        int[][] intervals = new int[n][2];
+
+        for (int i = 0; i < n; i++) {
+            int c = scanner.nextInt();
+            int r = scanner.nextInt();
+            intervals[i][0] = c - r;   // left
+            intervals[i][1] = c + r;   // right
+        }
+
+        // 按右端点升序排序
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[1], b[1]));
+
+        int ans = 0;
+        int now = -1000000000;   // 极小值，保证第一个区间能选
+
+        for (int[] interval : intervals) {
+            int left = interval[0];
+            int right = interval[1];
+            if (left > now) {    // 不能重叠也不能相接
+                ans++;
+                now = right;
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    vector<pair<int, int>> intervals(n);
+
+    for (int i = 0; i < n; i++) {
+        int c, r;
+        cin >> c >> r;
+        intervals[i].first = c - r;   // left
+        intervals[i].second = c + r;  // right
+    }
+
+    // 按右端点升序排序
+    sort(intervals.begin(), intervals.end(),
+         [](const pair<int, int>& a, const pair<int, int>& b) {
+             return a.second < b.second;
+         });
+
+    int ans = 0;
+    int now = -1000000000;   // 极小值
+
+    for (const auto& p : intervals) {
+        int left = p.first;
+        int right = p.second;
+        if (left > now) {    // 严格大于，避免端点相接
+            ans++;
+            now = right;
+        }
+    }
+
+    cout << ans << endl;
+    return 0;
+}
+```

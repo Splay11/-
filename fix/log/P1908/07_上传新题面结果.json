@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1908",
+  "title": "第2题-同级晶片熔合",
+  "docId": 1011,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "栈",
+  "videosol": "",
+  "trial_videosol": ""
+}

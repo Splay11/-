@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "5\n0 0\n1 2\n9 3\n4 10\n1000000000 1",
+      "output": "YES\nNO\nYES\nYES\nYES",
+      "explanation": "差值对 `3` 取模为 `0` 则可对等。\n\n$(0-0)\\bmod 3=`0`$，输出 `YES`。\n\n$(1-2)\\bmod 3 \\ne `0`$，输出 `NO`。\n\n$(9-3)\\bmod 3=`0`$，输出 `YES`。\n\n$(4-10)\\bmod 3=`0`$，输出 `YES`。\n\n$10^9 \\equiv 1\\pmod{3}$，故 $(10^9-1)\\bmod 3=`0`$，输出 `YES`。"
+    },
+    {
+      "input": "2\n3 0\n2 2",
+      "output": "YES\nYES",
+      "explanation": "$(3-0) \\bmod 3 = `0`$，可以操作至相等，输出 `YES`。\n\n双方已经相等，输出 `YES`。"
+    }
+  ]
+}

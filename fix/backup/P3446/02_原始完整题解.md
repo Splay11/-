@@ -1,0 +1,171 @@
+## 题解思路
+
+### 目标与操作
+
+我们要使最终数组 **没有任何元素落在区间** $[l,r]$ 内；允许四种操作：对任意一个元素 $\pm 1$，或从两端删除一个元素；数组必须保持非空。
+
+### 关键转化
+
+只能从两端删除 ⇒ **保留的部分必是一个非空连续子数组** $[i..j]$。
+对保留的每个元素 $a_k$：
+
+* 若 $a_k<l$ 或 $a_k>r$，无需改动，代价 $0$；
+* 若 $a_k\in[l,r]$，把它推到最近的区间外，代价
+
+  $b_k=\min\big(a_k-(l-1)$$,\ (r+1)-a_k\big)$$=\min(a_k-l+1,\,r-a_k+1).$
+
+设删除的个数为 $(i-1)$（左端）与 $(n-j)$（右端）。则总操作数：
+
+$\text{cost}(i,j)$$=(i-1)+(n-j)$$+\sum_{k=i}^{j} b_k.$
+
+令子段长度 $\text{len}=j-i+1$，可化简：
+
+$\text{cost}(i,j)$$=n-\text{len}+$$\sum_{k=i}^{j} b_k$$= n+\sum_{k=i}^{j} (b_k-1).$
+
+定义新数组 $c_k=b_k-1$。**问题等价为**：在所有非空子数组上，最小化 $\sum c_k$，答案为
+
+$$
+\boxed{\ \text{ans}=n+\min\text{(非空子段和)}\ }.
+$$
+
+### 动态规划（Kadane 最小子段和）
+
+用一维 DP 求最小子段和：
+
+* 令 $f_i$ 表示**以位置 $i$ 结尾**的最小子段和；
+* 转移：$f_i=\min(c_i,\ f_{i-1}+c_i)$；
+* 维护全局最小值 $\text{mn}=\min(\text{mn}, f_i)$。
+
+最终答案：$n+\text{mn}$。
+
+> 正确性：保留任意子数组 $[i..j]$ 的代价正是上式；DP 求到了所有非空子数组的最小和；数组必须非空由“非空子段”自然保证。
+> 边界：$c_k\ge -1$，故最小子段和 $\ge -n$，答案 $\ge 0$。
+
+### 复杂度
+
+* 每组：线性构造 $b,c$ 与一次 Kadane，时间 $O(n)$，空间 $O(1)$（若就地滚动）。
+* 全部测试的 $n$ 总和 $\le 2\times10^5$，可轻松通过。
+
+
+## 代码实现
+
+### Python
+
+```python
+# -*- coding: utf-8 -*-
+import sys
+
+def solve():
+    it = iter(sys.stdin.read().strip().split())
+    T = int(next(it))
+    out = []
+    for _ in range(T):
+        n = int(next(it)); l = int(next(it)); r = int(next(it))
+        a = [int(next(it)) for _ in range(n)]
+
+        mn = None  # 全局最小子段和
+        f = 0      # 以当前结尾的最小子段和
+        for x in a:
+            # 计算 b_k
+            if l <= x <= r:
+                b = min(x - l + 1, r - x + 1)
+            else:
+                b = 0
+            c = b - 1
+            # Kadane 最小子段和：f_i = min(c_i, f_{i-1} + c_i)
+            if f + c < c:
+                f = f + c
+            else:
+                f = c
+            if mn is None or f < mn:
+                mn = f
+        ans = n + mn
+        out.append(str(ans))
+    print("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sbAll = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sbAll.append(line).append(' ');
+        StringTokenizer st = new StringTokenizer(sbAll.toString());
+
+        int T = Integer.parseInt(st.nextToken());
+        StringBuilder out = new StringBuilder();
+
+        while (T-- > 0) {
+            int n = Integer.parseInt(st.nextToken());
+            int l = Integer.parseInt(st.nextToken());
+            int r = Integer.parseInt(st.nextToken());
+            int[] a = new int[n];
+            for (int i = 0; i < n; i++) a[i] = Integer.parseInt(st.nextToken());
+
+            long mn = Long.MAX_VALUE; // 全局最小子段和
+            long f = 0;               // 以当前结尾的最小子段和
+            for (int i = 0; i < n; i++) {
+                int x = a[i];
+                int b = 0;
+                if (l <= x && x <= r) {
+                    int t1 = x - l + 1;
+                    int t2 = r - x + 1;
+                    b = Math.min(t1, t2);
+                }
+                int c = b - 1;
+                long cand1 = (long)c;
+                long cand2 = f + c;
+                f = Math.min(cand1, cand2);
+                if (f < mn) mn = f;
+            }
+            long ans = n + mn;
+            out.append(ans).append('\n');
+        }
+        System.out.print(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T; 
+    if (!(cin >> T)) return 0;
+    while (T--) {
+        int n, l, r;
+        cin >> n >> l >> r;
+        vector<int> a(n);
+        for (int i = 0; i < n; ++i) cin >> a[i];
+
+        long long mn = (long long)4e18; // 全局最小子段和
+        long long f = 0;                 // 以当前结尾的最小子段和
+        for (int x : a) {
+            int b = 0;
+            if (l <= x && x <= r) {
+                b = min(x - l + 1, r - x + 1);
+            }
+            int c = b - 1;
+            f = min<long long>(c, f + c);
+            mn = min(mn, f);
+        }
+        long long ans = n + mn;
+        cout << ans << '\n';
+    }
+    return 0;
+}
+```

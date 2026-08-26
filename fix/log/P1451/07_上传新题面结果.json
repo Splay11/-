@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1451",
+  "title": "第3题-双谱去重",
+  "docId": 468,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "trial_videosol": ""
+}

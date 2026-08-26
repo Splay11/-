@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2788",
+  "title": "偶权连通划分",
+  "docId": 2420,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "数论",
+    "搜索"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "树",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,250 @@
+## 解题思路
+
+本题需要从多个数值型观测指标中选择一个，使得按该指标分组后，各组样本类别标签的加权平均混杂度最小。具体步骤如下：
+
+1. 记样本总数 $n$，观测指标个数 $m$（每条样本的前 $m$ 个值为指标，最后一个值为字符串标签）。
+2. 对于第 $j$ 个指标（$0 \le j < m$）：
+   - 按照该指标的取值将全部样本分组，取值相同的样本属于同一组，记分组集合为 $\mathcal{G}_j$。
+   - 对每一组 $G \in \mathcal{G}_j$，计算该组的类别混杂度：
+     $$H(G) = 1 - \sum_{c \in C} \left( \frac{|G_c|}{|G|} \right)^2$$
+     其中 $C$ 为所有类别标签的集合，$G_c$ 为 $G$ 中类别为 $c$ 的样本子集。
+   - 以各组样本数占总样本数的比例为权重，计算该指标的加权平均混杂度：
+     $$H_j = \sum_{G \in \mathcal{G}_j} \frac{|G|}{n} \, H(G)$$
+3. 在所有指标中选出 $H_j$ 最小的那个，输出其索引 $j$ 以及对应的 $H_j$（四舍五入保留一位小数）。若存在多个最小值，输出索引最小的一个。
+
+算法的核心是对每个指标进行一次遍历分组和类别计数，即可算出 $H_j$。
+
+## 复杂度分析
+
+- **时间复杂度**：对于每个指标，需要遍历所有样本进行分组，并在每组内统计类别频数。总复杂度为 $O(m \times n)$，其中 $m$ 为指标个数，$n$ 为样本总数。
+- **空间复杂度**：分组时需要存储每组的类别标签列表或计数，最坏情况下需要 $O(n)$ 的额外空间。
+
+## 代码实现
+
+### Python
+
+```python
+def best_feature(data):
+    n = len(data)
+    m = len(data[0]) - 1          # 指标个数
+    best_idx, best_h = 0, float('inf')
+    
+    for j in range(m):
+        # 按第 j 个指标的取值分组，存储各组的标签列表
+        groups = {}
+        for row in data:
+            val = row[j]
+            groups.setdefault(val, []).append(row[-1])
+        
+        h_j = 0.0
+        for labels in groups.values():
+            size = len(labels)
+            # 统计组内各个类别的频数
+            cnt = {}
+            for lb in labels:
+                cnt[lb] = cnt.get(lb, 0) + 1
+            # 计算 H(G)
+            score = 1.0
+            for c in cnt.values():
+                p = c / size
+                score -= p * p
+            h_j += (size / n) * score
+        
+        if h_j < best_h:
+            best_h = h_j
+            best_idx = j
+    
+    return best_idx, round(best_h, 1)
+
+data = eval(input())
+print(best_feature(data))
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String line = sc.nextLine().trim();
+        sc.close();
+
+        // 解析形如 [[1.2,2.3,'A'],[3.4,5.6,'B']] 的输入
+        List<List<Object>> data = new ArrayList<>();
+        // 去掉最外层的 "[" 和 "]"
+        line = line.substring(1, line.length() - 1).trim();
+        if (line.isEmpty()) {
+            System.out.println("(0, 0.0)");
+            return;
+        }
+        // 按 "], [" 分割每个样本
+        String[] samples = line.split("\\],\\s*\\[");
+        for (String sampleStr : samples) {
+            sampleStr = sampleStr.replaceAll("^\\[|\\]$", "").trim(); // 去掉首尾的方括号
+            String[] parts = sampleStr.split("\\s*,\\s*");
+            List<Object> row = new ArrayList<>();
+            for (int i = 0; i < parts.length - 1; i++) {
+                row.add(Double.parseDouble(parts[i])); // 数值指标
+            }
+            // 最后一项是字符串标签，去掉单引号
+            String label = parts[parts.length - 1].replaceAll("^'|'$", "");
+            row.add(label);
+            data.add(row);
+        }
+
+        int n = data.size();
+        int m = data.get(0).size() - 1;      // 指标个数
+        int bestIdx = 0;
+        double bestH = Double.MAX_VALUE;
+
+        for (int j = 0; j < m; j++) {
+            // 分组 Map<指标值, 标签列表>
+            Map<Double, List<String>> groups = new HashMap<>();
+            for (List<Object> row : data) {
+                double val = (Double) row.get(j);
+                String label = (String) row.get(row.size() - 1);
+                groups.computeIfAbsent(val, k -> new ArrayList<>()).add(label);
+            }
+
+            double hJ = 0.0;
+            for (List<String> labels : groups.values()) {
+                int size = labels.size();
+                Map<String, Integer> cnt = new HashMap<>();
+                for (String lb : labels) {
+                    cnt.put(lb, cnt.getOrDefault(lb, 0) + 1);
+                }
+                double score = 1.0;
+                for (int c : cnt.values()) {
+                    double p = (double) c / size;
+                    score -= p * p;
+                }
+                hJ += ((double) size / n) * score;
+            }
+
+            if (hJ < bestH) {
+                bestH = hJ;
+                bestIdx = j;
+            }
+        }
+
+        System.out.printf("(%d, %.1f)\n", bestIdx, bestH);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <sstream>
+#include <iomanip>
+#include <cstdlib>
+#include <regex>
+
+using namespace std;
+
+// 辅助函数：去除字符串首尾空白
+string trim(const string &s) {
+    size_t start = s.find_first_not_of(" \t\n\r");
+    if (start == string::npos) return "";
+    size_t end = s.find_last_not_of(" \t\n\r");
+    return s.substr(start, end - start + 1);
+}
+
+int main() {
+    string line;
+    getline(cin, line);
+    line = trim(line);
+    // 去除最外层 [[ 和 ]]
+    line = line.substr(2, line.size() - 4);
+    // 按 "], [" 分割每个样本
+    vector<string> sampleStrs;
+    size_t pos = 0;
+    string delimiter = "], [";
+    while ((pos = line.find(delimiter)) != string::npos) {
+        sampleStrs.push_back(line.substr(0, pos));
+        line.erase(0, pos + delimiter.length());
+    }
+    sampleStrs.push_back(line); // 最后一个样本
+
+    // 存储所有数据：外层vector存储样本，内层vector存储指标（double）和标签（string）
+    vector<vector<double>> values;
+    vector<string> labels;
+
+    for (const auto &s : sampleStrs) {
+        string tmp = trim(s);
+        // 去掉首尾可能残留的方括号
+        if (!tmp.empty() && tmp.front() == '[') tmp = tmp.substr(1);
+        if (!tmp.empty() && tmp.back() == ']') tmp.pop_back();
+        tmp = trim(tmp);
+
+        vector<string> parts;
+        size_t start = 0;
+        int depth = 0;
+        for (size_t i = 0; i <= tmp.size(); ++i) {
+            if (i == tmp.size() || (tmp[i] == ',' && depth == 0)) {
+                string token = trim(tmp.substr(start, i - start));
+                // 去掉引号
+                if (token.front() == '\'' && token.back() == '\'')
+                    token = token.substr(1, token.size() - 2);
+                parts.push_back(token);
+                start = i + 1;
+            } else if (tmp[i] == '\'') {
+                // 简单处理引号内的逗号
+                i = tmp.find('\'', i + 1);
+            }
+        }
+
+        // 前部分是数值，最后一项是标签
+        vector<double> nums;
+        for (size_t i = 0; i < parts.size() - 1; ++i) {
+            nums.push_back(stod(parts[i]));
+        }
+        values.push_back(nums);
+        labels.push_back(parts.back());
+    }
+
+    int n = values.size();
+    int m = values[0].size();  // 指标个数
+    int bestIdx = 0;
+    double bestH = 1e9;
+
+    for (int j = 0; j < m; ++j) {
+        // 按第 j 个指标分组，每组存储标签列表
+        unordered_map<double, vector<string>> groups;
+        for (int i = 0; i < n; ++i) {
+            double val = values[i][j];
+            groups[val].push_back(labels[i]);
+        }
+
+        double hJ = 0.0;
+        for (const auto &entry : groups) {
+            const auto &lbList = entry.second;
+            int size = lbList.size();
+            unordered_map<string, int> cnt;
+            for (const auto &lb : lbList) {
+                cnt[lb]++;
+            }
+            double score = 1.0;
+            for (const auto &kv : cnt) {
+                double p = (double)kv.second / size;
+                score -= p * p;
+            }
+            hJ += ((double)size / n) * score;
+        }
+
+        if (hJ < bestH) {
+            bestH = hJ;
+            bestIdx = j;
+        }
+    }
+
+    cout << "(" << bestIdx << ", " << fixed << setprecision(1) << bestH << ")" << endl;
+    return 0;
+}
+```

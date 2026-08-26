@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4845",
+  "title": "第4题-最长镜渊路径",
+  "docId": 4132,
+  "hidden": false,
+  "difficulty": 10,
+  "tag": [
+    "DFS"
+  ],
+  "alg_tag": "DFS",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

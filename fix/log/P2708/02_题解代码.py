@@ -1,0 +1,190 @@
+# 题解
+
+## 题面描述
+
+给定一个长度为 $n$ 的数组 $a$ 以及一个长度为 $n$ 的仅由字符 $'0'$ 和 $'1'$ 组成的字符串 $s$。每个位置 $i$ 对应一个操作符：
+- 若 $s_i = '1'$，则 $op(i)=1$；
+- 若 $s_i = '0'$，则 $op(i)=-1$。
+
+我们可以将数组切分为至多 $k$ 块（也就是最多有 $k-1$ 个切割点）。对于数组中每个位置 $i$，若其所在块的编号为 $j$（块的编号从 $1$ 开始），则该位置的贡献为
+$
+op(i) \times (a_i + j)
+$
+数组的总权值即所有位置贡献的和。要求我们选择合适的切分方法，使得数组的总权值最大。
+
+## 思路分析
+
+首先我们注意到，每个位置 $i$ 的贡献可以拆分为两部分：
+1. 与 $a_i$ 相关的部分：$op(i) \times a_i$
+2. 与块编号相关的部分：$op(i) \times j$
+
+由于不论如何切分，所有位置至少所在块编号为 $1$，所以对于第二部分，每个位置最少贡献 $op(i) \times 1$。令
+$\text{base}$ = $\sum_{i=1}^{n} op(i) $$\times (a_i + 1)$
+那么如果我们没有进行任何切分，总权值就等于 $\text{base}$。
+
+当我们在数组中插入一个切割点时，假设在位置 $i$（即切在 $i$ 与 $i+1$ 之间），那么 $i+1$ 及其之后的所有位置块编号都会增加 $1$。因此，这个切割点会为答案增加的额外贡献为：
+$
+\text{contrib}(i) = \sum_{j=i+1}^{n} op(j)
+$
+
+由于最多可以切出 $k$ 块，也就是最多可以插入 $k-1$ 个切割点，我们只需要从所有可能的切割点（位置 $1$ 到 $n-1$）中选取最多 $k-1$ 个，使得所有选中切割点的 $\text{contrib}$ 之和最大。并且注意，如果某个切割点的贡献为负，则我们不选取它。
+
+最终答案即为
+$\text{base}$ + $\sum_{\substack{\text{选中的切割点 } i  \text{贡献} > 0}}$ $\text{contrib}(i)$
+## C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+typedef long long ll;
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, k;
+    cin >> n >> k;
+    vector<ll> a(n);
+    for (int i = 0; i < n; i++){
+        cin >> a[i];
+    }
+    string s;
+    cin >> s;
+    
+    // 计算 op 数组, op[i] = 1 如果 s[i]=='1', 否则 -1
+    vector<int> op(n);
+    for (int i = 0; i < n; i++){
+        op[i] = (s[i] == '1') ? 1 : -1;
+    }
+    
+    // 计算 base = sum_{i=1}^{n} op(i) * (a_i + 1)
+    ll base = 0;
+    for (int i = 0; i < n; i++){
+        base += op[i] * (a[i] + 1);
+    }
+    
+    // 计算从后向前的后缀和, 用于每个可能切割点的贡献
+    vector<ll> suffix(n, 0);
+    suffix[n-1] = op[n-1];
+    for (int i = n - 2; i >= 0; i--){
+        suffix[i] = suffix[i+1] + op[i];
+    }
+    
+    // 对于切割点, 即在位置 i (0<=i<=n-2) 切分, 贡献为 suffix[i+1]
+    vector<ll> contributions;
+    for (int i = 0; i < n - 1; i++){
+        if(suffix[i+1] > 0) {
+            contributions.push_back(suffix[i+1]);
+        }
+    }
+    
+    // 将所有正贡献排序，选取最多 k-1 个贡献最大的
+    sort(contributions.begin(), contributions.end(), greater<ll>());
+    ll extra = 0;
+    int cuts = min((int)contributions.size(), k - 1);
+    for (int i = 0; i < cuts; i++){
+        extra += contributions[i];
+    }
+    
+    cout << base + extra << "\n";
+    return 0;
+}
+```
+## Python
+
+```python
+# 读取输入
+n, k = map(int, input().split())
+a = list(map(int, input().split()))
+s = input().strip()
+
+# 计算 op 数组，若 s[i]=='1' 则 op[i]=1，否则为 -1
+op = [1 if ch=='1' else -1 for ch in s]
+
+# 计算 base = sum(op[i]*(a[i]+1))
+base = sum(op[i]*(a[i]+1) for i in range(n))
+
+# 计算后缀和数组，用于计算每个可能切割点的贡献
+suffix = [0] * n
+suffix[n-1] = op[n-1]
+for i in range(n-2, -1, -1):
+    suffix[i] = suffix[i+1] + op[i]
+
+# 对于每个可能的切割点（位置 0 到 n-2），贡献为 suffix[i+1]
+contributions = []
+for i in range(n-1):
+    if suffix[i+1] > 0:
+        contributions.append(suffix[i+1])
+
+# 对贡献进行降序排序，选取最多 k-1 个
+contributions.sort(reverse=True)
+extra = sum(contributions[:max(0, k-1)])
+
+# 输出最终答案
+print(base + extra)
+```
+## Java
+
+```java
+import java.util.*;
+import java.io.*;
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // 使用 BufferedReader 提高输入效率
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] nk = br.readLine().trim().split(" ");
+        int n = Integer.parseInt(nk[0]);
+        int k = Integer.parseInt(nk[1]);
+        
+        // 读取数组 a
+        String[] aStr = br.readLine().trim().split(" ");
+        long[] a = new long[n];
+        for (int i = 0; i < n; i++){
+            a[i] = Long.parseLong(aStr[i]);
+        }
+        
+        // 读取字符串 s
+        String s = br.readLine().trim();
+        
+        // 计算 op 数组，若 s.charAt(i)=='1' 则 op[i]=1，否则为 -1
+        int[] op = new int[n];
+        for (int i = 0; i < n; i++){
+            op[i] = (s.charAt(i) == '1') ? 1 : -1;
+        }
+        
+        // 计算 base = sum(op[i]*(a[i]+1))
+        long base = 0;
+        for (int i = 0; i < n; i++){
+            base += op[i] * (a[i] + 1);
+        }
+        
+        // 计算后缀和数组 suffix，suffix[i] = op[i] + op[i+1] + ... + op[n-1]
+        long[] suffix = new long[n];
+        suffix[n-1] = op[n-1];
+        for (int i = n - 2; i >= 0; i--){
+            suffix[i] = suffix[i+1] + op[i];
+        }
+        
+        // 对每个可能的切割点（位置 0 到 n-2），贡献为 suffix[i+1]
+        ArrayList<Long> contributions = new ArrayList<>();
+        for (int i = 0; i < n - 1; i++){
+            if(suffix[i+1] > 0){
+                contributions.add(suffix[i+1]);
+            }
+        }
+        
+        // 将贡献降序排序，选取最多 k-1 个贡献最大的
+        Collections.sort(contributions, Collections.reverseOrder());
+        long extra = 0;
+        int cuts = Math.min(contributions.size(), k - 1);
+        for (int i = 0; i < cuts; i++){
+            extra += contributions.get(i);
+        }
+        
+        // 输出最终答案
+        System.out.println(base + extra);
+    }
+}
+```

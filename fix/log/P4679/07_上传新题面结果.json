@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4679",
+  "title": "第3题-最大平稳片段",
+  "docId": 3920,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "数据结构",
+    "并查集"
+  ],
+  "alg_tag": "并查集",
+  "ai_alg_tags": "并查集",
+  "videosol": "",
+  "trial_videosol": ""
+}

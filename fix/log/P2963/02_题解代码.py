@@ -1,0 +1,134 @@
+# 题解
+
+## 题面描述
+
+给定一个整数 $n$（$1\le n\le 10^5$），要求构造一个 $2\times n$ 的矩阵，使得：
+
+- 每一行都是 $[1,n]$ 的一个排列；
+- 对于任意两个相邻元素 $a_{i_1,j_1}$ 与 $a_{i_2,j_2}$（满足 $|i_1-i_2|+|j_1-j_2|=1$），都有 $\gcd(a_{i_1,j_1},a_{i_2,j_2})=1$。
+
+这样的矩阵称为“好矩阵”，保证答案总是存在。
+
+---
+
+## 思路
+
+我们需要保证矩阵中任意水平或垂直相邻的两个数互质。可以利用以下性质：
+
+- **连续两数互质**：对于任意整数 $k$，都有 $\gcd(k, k+1)=1$。
+- **首尾相接也互质**：由于 $\gcd(1,n)=1$ 当且仅当 $n=1$ 或 $n$ 与 $1$ 没有其他公约数，但 $1$ 与任意 $n$ 都互质。
+
+因此，我们可以构造：
+
+![image](/file/2/iGHYgdk0U-HfvWzwBQxje.png) 
+
+验证：
+
+1. **水平相邻**：
+   - 第一行中，相邻的 $k$ 与 $k+1$ 互质；
+   - 第二行同理；
+   - 在第二行末尾，$n$ 与 $1$ 也互质。
+2. **垂直相邻**：
+   - 对于列 $j$（$1\le j\le n-1$），第一行的 $j$ 为 $j$，第二行的 $j$ 为 $j+1$，二者互质；
+   - 对于第 $n$ 列，第一行是 $n$，第二行是 $1$，互质。
+
+该构造满足所有条件，且时间复杂度 $O(n)$，空间复杂度 $O(n)$。
+
+# 代码实现
+
+## C++ 
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    
+    // 特殊情况：n=1 时，矩阵唯一，1 与 1 互质
+    if (n == 1) {
+        cout << 1 << '\n';
+        cout << 1 << '\n';
+        return 0;
+    }
+
+    // 第一行：1, 2, ..., n
+    for (int i = 1; i <= n; ++i) {
+        cout << i;
+        if (i < n) cout << ' ';
+    }
+    cout << '\n';
+
+    // 第二行：2, 3, ..., n, 1
+    for (int i = 2; i <= n; ++i) {
+        cout << i << ' ';
+    }
+    cout << 1 << '\n';
+
+    return 0;
+}
+```
+## Python
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().strip()
+    n = int(data)
+
+    # 当 n=1 时，唯一解
+    if n == 1:
+        print(1)
+        print(1)
+        return
+
+    # 第一行：1 到 n
+    first_row = list(range(1, n+1))
+    # 第二行：2 到 n，再加上 1
+    second_row = list(range(2, n+1)) + [1]
+
+    # 输出结果
+    print(' '.join(map(str, first_row)))
+    print(' '.join(map(str, second_row)))
+
+if __name__ == '__main__':
+    main()
+```
+## Java
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        
+        // n=1 的情况
+        if (n == 1) {
+            System.out.println(1);
+            System.out.println(1);
+            return;
+        }
+
+        // 构造并输出第一行
+        StringBuilder sb1 = new StringBuilder();
+        for (int i = 1; i <= n; i++) {
+            sb1.append(i);
+            if (i < n) sb1.append(' ');
+        }
+        System.out.println(sb1);
+
+        // 构造并输出第二行
+        StringBuilder sb2 = new StringBuilder();
+        for (int i = 2; i <= n; i++) {
+            sb2.append(i).append(' ');
+        }
+        sb2.append(1);
+        System.out.println(sb2);
+    }
+}
+```

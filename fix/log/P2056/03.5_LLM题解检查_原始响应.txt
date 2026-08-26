@@ -1,0 +1,350 @@
+## 解题思路
+
+题目要求模拟包裹提取过程，需要高效支持以下操作：
+
+1. **区间查询**：在区间 $[l_i, r_i]$ 内，找到未被提取包裹中“最迟提取日”最大者，若有多个则取编号最小（最靠左）的。
+2. **单点修改**：当某个存储格的包裹被提取后，将该格的值置为无效（例如 $-1$），使得后续查询不会再选中它。
+
+因此，可以使用**线段树**来维护每个存储格的有效最迟提取日。
+
+### 线段树设计
+
+- 线段树的每个节点对应一段存储格区间 $[L, R]$，节点维护两个信息：
+  - `mx`：该区间内所有**尚未被提取**包裹的最迟提取日的最大值。
+  - `pos`：该最大值对应的最小编号（即最靠左的位置）。
+- 合并左右子节点时：
+  - 若左子树的 `mx` $\ge$ 右子树的 `mx`，则选择左子树的 `pos`；
+  - 否则选择右子树的 `pos`。
+  这样在最大值相等时，优先选择更小的编号，保证了题目要求的“最靠左”。
+- 初始建树：根据输入的 $e_1 \sim e_m$ 建立线段树，初始所有包裹均未被提取。
+- 单点更新：将指定位置的值更新为 $-1$，并向上更新节点信息，代表该包裹已被提取，不再参与后续竞争。
+
+### 处理每个员工
+
+对于第 $i$ 名员工，输入其到达日期 $day_i$ 以及查询区间 $[l_i, r_i]$：
+
+1. 在线段树上查询 $[l_i, r_i]$ 的最大值 `mx` 及其对应位置 `pos`。
+2. 若 `mx < day_i`，说明区间内所有未被提取的包裹的最迟提取日均小于当前日期，即全部已失效。该员工无法提取任何包裹，输出 $-1$。
+3. 否则，该员工可以提取。输出位置 `pos`，并调用单点更新将 `pos` 处的值修改为 $-1$，标记已被提取。
+
+## 复杂度分析
+
+- **时间复杂度**：  
+  线段树建树需要 $O(m)$ 时间；  
+  每名员工进行一次区间查询和至多一次单点更新，每次操作均为 $O(\log m)$；  
+  总时间复杂度 $O((n+m) \log m)$，在 $n,m \le 10^5$ 时可以高效运行。
+
+- **空间复杂度**：  
+  线段树需要大小为 $4m$ 的数组存储区间最大值和对应位置，空间复杂度 $O(m)$。
+
+## 代码实现
+
+### Python
+
+```python
+# 线段树：维护区间最大值及最大值对应的最小编号
+class SegmentTree:
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (n * 4)
+        self.pos = [0] * (n * 4)
+
+    def push_up(self, rt):
+        # 合并左右子树的信息
+        left = rt << 1
+        right = rt << 1 | 1
+        self.tree[rt] = max(self.tree[left], self.tree[right])
+        # 最大值相同时取编号更小（更靠左）的
+        if self.tree[left] >= self.tree[right]:
+            self.pos[rt] = self.pos[left]
+        else:
+            self.pos[rt] = self.pos[right]
+
+    def build(self, rt, l, r, arr):
+        if l == r:
+            self.tree[rt] = arr[l]
+            self.pos[rt] = l
+            return
+        m = (l + r) >> 1
+        self.build(rt << 1, l, m, arr)
+        self.build(rt << 1 | 1, m + 1, r, arr)
+        self.push_up(rt)
+
+    # 区间查询，返回 [最大值, 位置]
+    def query(self, rt, l, r, L, R):
+        if L <= l and r <= R:
+            return [self.tree[rt], self.pos[rt]]
+        m = (l + r) >> 1
+        mx, pos = -1, -1
+        if L <= m:
+            mx_l, pos_l = self.query(rt << 1, l, m, L, R)
+            mx, pos = mx_l, pos_l
+        if R > m:
+            mx_r, pos_r = self.query(rt << 1 | 1, m + 1, r, L, R)
+            if mx_r > mx:
+                mx, pos = mx_r, pos_r
+        return [mx, pos]
+
+    # 单点更新：将位置 pos 的值修改为 val
+    def update(self, rt, l, r, pos, val):
+        if l == r:
+            self.tree[rt] = val
+            return
+        m = (l + r) >> 1
+        if pos <= m:
+            self.update(rt << 1, l, m, pos, val)
+        else:
+            self.update(rt << 1 | 1, m + 1, r, pos, val)
+        self.push_up(rt)
+
+
+# 读入 n, m
+n, m = map(int, input().split())
+# 读入 m 个最迟提取日，前面补一个 0 使得下标从 1 开始
+a = [0] + list(map(int, input().split()))
+
+tree = SegmentTree(m)
+tree.build(1, 1, m, a)
+
+res = []
+for _ in range(n):
+    day, l, r = map(int, input().split())
+    mx, pos = tree.query(1, 1, m, l, r)
+    if mx < day:          # 区间内所有包裹均已失效
+        res.append(-1)
+    else:                 # 可以提取，更新该位置为 -1 表示已取走
+        tree.update(1, 1, m, pos, -1)
+        res.append(pos)
+
+print(*res)
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static class SegmentTree {
+        int n;
+        int[] tree;   // 区间最大值
+        int[] pos;    // 最大值对应的最小编号
+
+        SegmentTree(int n) {
+            this.n = n;
+            tree = new int[n * 4];
+            pos = new int[n * 4];
+        }
+
+        void pushUp(int rt) {
+            int left = rt << 1;
+            int right = rt << 1 | 1;
+            tree[rt] = Math.max(tree[left], tree[right]);
+            if (tree[left] >= tree[right]) {
+                pos[rt] = pos[left];
+            } else {
+                pos[rt] = pos[right];
+            }
+        }
+
+        void build(int rt, int l, int r, int[] arr) {
+            if (l == r) {
+                tree[rt] = arr[l];
+                pos[rt] = l;
+                return;
+            }
+            int m = (l + r) >> 1;
+            build(rt << 1, l, m, arr);
+            build(rt << 1 | 1, m + 1, r, arr);
+            pushUp(rt);
+        }
+
+        // 返回 [最大值, 位置]
+        int[] query(int rt, int l, int r, int L, int R) {
+            if (L <= l && r <= R) {
+                return new int[]{tree[rt], pos[rt]};
+            }
+            int m = (l + r) >> 1;
+            int mx = -1, p = -1;
+            if (L <= m) {
+                int[] leftRes = query(rt << 1, l, m, L, R);
+                mx = leftRes[0];
+                p = leftRes[1];
+            }
+            if (R > m) {
+                int[] rightRes = query(rt << 1 | 1, m + 1, r, L, R);
+                if (rightRes[0] > mx) {
+                    mx = rightRes[0];
+                    p = rightRes[1];
+                }
+            }
+            return new int[]{mx, p};
+        }
+
+        void update(int rt, int l, int r, int posIdx, int val) {
+            if (l == r) {
+                tree[rt] = val;
+                return;
+            }
+            int m = (l + r) >> 1;
+            if (posIdx <= m) {
+                update(rt << 1, l, m, posIdx, val);
+            } else {
+                update(rt << 1 | 1, m + 1, r, posIdx, val);
+            }
+            pushUp(rt);
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int n = Integer.parseInt(st.nextToken());
+        int m = Integer.parseInt(st.nextToken());
+
+        int[] a = new int[m + 1]; // 1-indexed
+        st = new StringTokenizer(br.readLine());
+        for (int i = 1; i <= m; i++) {
+            a[i] = Integer.parseInt(st.nextToken());
+        }
+
+        SegmentTree segTree = new SegmentTree(m);
+        segTree.build(1, 1, m, a);
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            st = new StringTokenizer(br.readLine());
+            int day = Integer.parseInt(st.nextToken());
+            int l = Integer.parseInt(st.nextToken());
+            int r = Integer.parseInt(st.nextToken());
+
+            int[] res = segTree.query(1, 1, m, l, r);
+            int mx = res[0], pos = res[1];
+            if (mx < day) {
+                sb.append(-1);
+            } else {
+                segTree.update(1, 1, m, pos, -1);
+                sb.append(pos);
+            }
+            if (i < n - 1) sb.append(" ");
+        }
+        System.out.println(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class SegmentTree {
+    vector<int> tree;  // 区间最大值
+    vector<int> pos;   // 最大值对应的最小编号
+    int n;
+public:
+    SegmentTree(int size) : n(size) {
+        tree.resize(size * 4, 0);
+        pos.resize(size * 4, 0);
+    }
+
+    void pushUp(int rt) {
+        int left = rt << 1;
+        int right = rt << 1 | 1;
+        tree[rt] = max(tree[left], tree[right]);
+        if (tree[left] >= tree[right]) {
+            pos[rt] = pos[left];
+        } else {
+            pos[rt] = pos[right];
+        }
+    }
+
+    void build(int rt, int l, int r, const vector<int>& arr) {
+        if (l == r) {
+            tree[rt] = arr[l];
+            pos[rt] = l;
+            return;
+        }
+        int m = (l + r) >> 1;
+        build(rt << 1, l, m, arr);
+        build(rt << 1 | 1, m + 1, r, arr);
+        pushUp(rt);
+    }
+
+    // 返回 pair<最大值, 位置>
+    pair<int, int> query(int rt, int l, int r, int L, int R) {
+        if (L <= l && r <= R) {
+            return {tree[rt], pos[rt]};
+        }
+        int m = (l + r) >> 1;
+        int mx = -1, p = -1;
+        if (L <= m) {
+            auto leftRes = query(rt << 1, l, m, L, R);
+            mx = leftRes.first;
+            p = leftRes.second;
+        }
+        if (R > m) {
+            auto rightRes = query(rt << 1 | 1, m + 1, r, L, R);
+            if (rightRes.first > mx) {
+                mx = rightRes.first;
+                p = rightRes.second;
+            }
+        }
+        return {mx, p};
+    }
+
+    void update(int rt, int l, int r, int idx, int val) {
+        if (l == r) {
+            tree[rt] = val;
+            return;
+        }
+        int m = (l + r) >> 1;
+        if (idx <= m) {
+            update(rt << 1, l, m, idx, val);
+        } else {
+            update(rt << 1 | 1, m + 1, r, idx, val);
+        }
+        pushUp(rt);
+    }
+};
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+    vector<int> a(m + 1, 0); // 1-indexed
+    for (int i = 1; i <= m; ++i) {
+        cin >> a[i];
+    }
+
+    SegmentTree seg(m);
+    seg.build(1, 1, m, a);
+
+    vector<int> ans;
+    ans.reserve(n);
+    for (int i = 0; i < n; ++i) {
+        int day, l, r;
+        cin >> day >> l >> r;
+        auto res = seg.query(1, 1, m, l, r);
+        int mx = res.first, p = res.second;
+        if (mx < day) {
+            ans.push_back(-1);
+        } else {
+            seg.update(1, 1, m, p, -1);
+            ans.push_back(p);
+        }
+    }
+
+    for (int i = 0; i < n; ++i) {
+        cout << ans[i];
+        if (i < n - 1) cout << " ";
+    }
+    cout << "\n";
+    return 0;
+}
+```

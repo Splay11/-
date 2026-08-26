@@ -1,0 +1,6 @@
+{
+  "title": "函数重载模拟",
+  "content": "模拟函数定义与调用。定义：`返回类型 函数名(类型 名,...)`；调用：`函数名(类型,...)`。重载只看函数名与参数类型列表。成功输出 `Yes.`；重复定义 `redefinition of xxx.`；无此函数名 `There is no function xxx.`；有名无匹配 `xxx was not declared in this scope.`。\n\n$1 \\le q \\le 100$，串长不超过 $100$。",
+  "input_description": "第一行 $q$。每次操作两行：第一行 $op$（`1` 定义，`2` 调用），第二行操作字符串。",
+  "output_description": "共 $q$ 行，每行一次反馈。"
+}

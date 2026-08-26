@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1756",
+  "title": "双格贴片覆盖",
+  "docId": 855,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

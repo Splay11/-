@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1005",
+  "title": "星际避碰",
+  "docId": 7,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "腾讯"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "排序算法",
+  "trial_videosol": ""
+}

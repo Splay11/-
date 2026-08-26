@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4800",
+  "title": "第2题-亲近度排名矩阵",
+  "docId": 4066,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "排序算法"
+  ],
+  "alg_tag": "排序算法",
+  "ai_alg_tags": "排序算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

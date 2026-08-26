@@ -1,0 +1,185 @@
+## 解题思路
+
+设答案为 $n$，其十进制数位长度为 $d$，那么题目条件就是：
+
+$ d \cdot n = x $
+
+因此对于每个输入的 $x$，我们只需要枚举可能的数位长度 $d$。
+
+由于 $1 \le n \le 10^{18}$，所以十进制数位长度只可能是 $1 \sim 18$。
+对每个 $d$：
+
+1. 判断 $x$ 是否能被 $d$ 整除
+2. 若能整除，则令 $n = x / d$
+3. 检查 $n$ 的十进制数位长度是否恰好等于 $d$
+
+如果满足，就输出这个 $n$；如果所有 $d$ 都不满足，输出 $-1$。
+
+这里用到的算法本质上是 枚举 + 模拟判断。
+因为可枚举的范围只有 $18$ 个，所以非常高效。
+
+实现时，判断一个数的十进制数位长度可以用以下方法：
+
+* 若 $n$ 满足 $10^{d-1} \le n < 10^d$，则它的数位长度为 $d$
+* 特别地，$d=1$ 时，只需判断 $1 \le n < 10$
+
+为了避免浮点误差，直接预处理整数幂 $10^0,10^1,\dots,10^{18}$ 即可。
+
+## 复杂度分析
+
+对于每组数据，只枚举 $1 \sim 18$ 共 $18$ 种情况。
+
+* 时间复杂度：$O(18)$，也就是 $O(1)$
+* 总时间复杂度：$O(T)$
+* 空间复杂度：$O(1)$
+
+在 $T \le 2 \times 10^5$ 的范围内完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 判断 n 的十进制数位长度是否等于 d
+def check(n, d, p10):
+    return p10[d - 1] <= n < p10[d]
+
+
+def solve(x, p10):
+    # 枚举可能的数位长度 d
+    for d in range(1, 19):
+        if x % d != 0:
+            continue
+        n = x // d
+        if 1 <= n <= 10**18 and check(n, d, p10):
+            return n
+    return -1
+
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+
+    t = int(data[0])
+
+    # 预处理 10 的幂
+    p10 = [1] * 19
+    for i in range(1, 19):
+        p10[i] = p10[i - 1] * 10
+
+    ans = []
+    for i in range(1, t + 1):
+        x = int(data[i])
+        ans.append(str(solve(x, p10)))
+
+    print('\n'.join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 判断 n 的十进制数位长度是否等于 d
+    public static boolean check(long n, int d, long[] p10) {
+        return p10[d - 1] <= n && n < p10[d];
+    }
+
+    // 题面要求实现的功能写在外部函数里
+    public static long solve(long x, long[] p10) {
+        // 枚举可能的数位长度 d
+        for (int d = 1; d <= 18; d++) {
+            if (x % d != 0) {
+                continue;
+            }
+            long n = x / d;
+            if (n >= 1 && n <= 1_000_000_000_000_000_000L && check(n, d, p10)) {
+                return n;
+            }
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int T = sc.nextInt();
+
+        // 预处理 10 的幂
+        long[] p10 = new long[19];
+        p10[0] = 1;
+        for (int i = 1; i <= 18; i++) {
+            p10[i] = p10[i - 1] * 10;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < T; i++) {
+            long x = sc.nextLong();
+            sb.append(solve(x, p10)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+using int64 = long long;
+
+// 判断 n 的十进制数位长度是否等于 d
+bool check(long long n, int d, const vector<long long>& p10) {
+    return p10[d - 1] <= n && n < p10[d];
+}
+
+// 题面要求实现的功能写在外部函数里
+long long solve(long long x, const vector<long long>& p10) {
+    // 枚举可能的数位长度 d
+    for (int d = 1; d <= 18; d++) {
+        if (x % d != 0) continue;
+        long long n = x / d;
+        if (n >= 1 && n <= 1000000000000000000LL && check(n, d, p10)) {
+            return n;
+        }
+    }
+    return -1;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    // 预处理 10 的幂
+    vector<long long> p10(19);
+    p10[0] = 1;
+    for (int i = 1; i <= 18; i++) {
+        p10[i] = p10[i - 1] * 10;
+    }
+
+    while (T--) {
+        long long x;
+        cin >> x;
+        cout << solve(x, p10) << '\n';
+    }
+
+    return 0;
+}
+```

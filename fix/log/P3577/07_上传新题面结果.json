@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3577",
+  "title": "第2题-传送带取样",
+  "docId": 2920,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "滑动窗口",
+    "双指针"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2805",
+  "title": "第3题-数字蜕变",
+  "docId": 2437,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

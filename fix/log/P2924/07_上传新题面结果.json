@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2924",
+  "title": "第3题-托盘轮转可排",
+  "docId": 2559,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "双指针"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "videosol": "",
+  "trial_videosol": ""
+}

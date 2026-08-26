@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2086",
+  "title": "第2题-优美区域计数",
+  "docId": 1193,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "暴力枚举"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

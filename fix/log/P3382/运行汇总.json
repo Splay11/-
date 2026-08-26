@@ -1,0 +1,21 @@
+{
+  "pid": "P3382",
+  "mode": 0,
+  "force": false,
+  "start_time": "2026-08-09 17:06:45",
+  "end_time": "2026-08-09 17:10:42",
+  "new_title": "第1题-能量转移后的前缀最大值",
+  "steps": {
+    "step1_fetch_problem": true,
+    "step2_fetch_solution": true,
+    "step3_generate_statement": true,
+    "step35_check_solution": true,
+    "step35_modified": true,
+    "step4_generate_samples": true,
+    "step5_assemble": true,
+    "step6_upload_original_statement": true,
+    "step7_upload_new_problem": true,
+    "step8_upload_solution": true
+  },
+  "overall_success": true
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2908",
+  "title": "第2题-最小的重排总消耗",
+  "docId": 2542,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "哈希表"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

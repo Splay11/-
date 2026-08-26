@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1845",
+  "title": "第1题-中位出列",
+  "docId": 945,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "videosol": "",
+  "trial_videosol": ""
+}

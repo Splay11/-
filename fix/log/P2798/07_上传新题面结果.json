@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2798",
+  "title": "第2题-乐句得分",
+  "docId": 2430,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

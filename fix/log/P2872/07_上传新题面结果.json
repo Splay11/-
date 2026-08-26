@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2872",
+  "title": "第1题-编码奇偶重排",
+  "docId": 2506,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "枚举"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

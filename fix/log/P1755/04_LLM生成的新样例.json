@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "1",
+      "output": "you",
+      "explanation": "只有第 `0` 个节拍，偶数下标对应片段 `you`。"
+    },
+    {
+      "input": "2",
+      "output": "youuoy",
+      "explanation": "第 `0` 拍为 `you`，第 `1` 拍为 `uoy`，拼接得到 `youuoy`。"
+    },
+    {
+      "input": "4",
+      "output": "youuoyyouuoy",
+      "explanation": "四个片段依次为 `you`、`uoy`、`you`、`uoy`，拼接后长度为 `12`。"
+    },
+    {
+      "input": "7",
+      "output": "youuoyyouuoyyouuoyyou",
+      "explanation": "七个片段按偶奇交替排列，最后一段下标为 `6`（偶数），因此以 `you` 结尾。"
+    }
+  ]
+}

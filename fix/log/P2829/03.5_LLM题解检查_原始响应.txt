@@ -1,0 +1,186 @@
+## 解题思路
+
+题目要求对给定字符串 $s$ 依据下标是否被 $d$ 整除分为两组，分别排序后放回原位，得到最终字符串。具体步骤为：
+
+1. **分组提取**：
+   - 遍历字符串 $s$，将下标能被 $d$ 整除的字符（即位于 $d, 2d, 3d, \dots$ 位置的字符）依次取出，存入列表 `A`。
+   - 将下标不能被 $d$ 整除的字符依次取出，存入列表 `B`。注意题中下标从 $1$ 开始。
+
+2. **分别排序**：
+   - 对列表 `A` 按字典序升序排列。
+   - 对列表 `B` 按字典序降序排列。
+
+3. **按原位放回**：
+   - 创建一个与 $s$ 等长的字符数组，初始化为原字符串。
+   - 将排序后的 `A` 中的字符，按原下标顺序放回 $d$ 的倍数位置：即最小的字符放回第一个 $d$ 的倍数位置，次小的放回第二个 $d$ 的倍数位置，以此类推。
+   - 同理，将排序后的 `B` 中的字符放回非 $d$ 倍数位置。
+
+4. **输出结果**：将字符数组拼接为字符串返回。
+
+整个过程可以保证 $d$ 倍数位置上的字符集合不变，非 $d$ 倍数位置上的字符集合也不变，只是各自内部重新排列。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n \log n)$。其中 $n$ 为字符串长度。分组提取需要一次遍历，复杂度 $O(n)$；对两组字符分别排序，最坏情况下两组字符数量之和为 $n$，排序总复杂度为 $O(n \log n)$；放回字符也需要一次遍历，复杂度 $O(n)$。整体时间复杂度由排序主导，为 $O(n \log n)$。
+- 空间复杂度：$O(n)$。需要额外存储两组字符列表以及结果字符数组，其大小均为 $O(n)$ 级别。
+
+## 代码实现
+
+### Python
+
+```python
+def solve(d: int, s: str) -> str:
+    n = len(s)
+    
+    # 提取下标为 d 的倍数的字符（下标从1开始）
+    d_chars = [s[i] for i in range(d - 1, n, d)]
+    # 提取下标不是 d 的倍数的字符
+    non_d_chars = [s[i] for i in range(n) if (i + 1) % d != 0]
+    
+    # 对 d 倍数位置字符进行升序排序
+    d_chars.sort()
+    # 对非 d 倍数位置字符进行降序排序
+    non_d_chars.sort(reverse=True)
+    
+    # 初始化结果列表
+    result = list(s)
+    
+    # 将排序后的 d 倍数位置字符放回
+    d_idx = 0
+    for i in range(d - 1, n, d):
+        result[i] = d_chars[d_idx]
+        d_idx += 1
+    
+    # 将排序后的非 d 倍数位置字符放回
+    non_d_idx = 0
+    for i in range(n):
+        if (i + 1) % d != 0:
+            result[i] = non_d_chars[non_d_idx]
+            non_d_idx += 1
+    
+    return ''.join(result)
+
+
+if __name__ == "__main__":
+    d = int(input().strip())
+    s = input().strip()
+    print(solve(d, s))
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static String solve(int d, String s) {
+        int n = s.length();
+        
+        // 提取下标为 d 的倍数的字符（下标从1开始）
+        List<Character> dChars = new ArrayList<>();
+        for (int i = d - 1; i < n; i += d) {
+            dChars.add(s.charAt(i));
+        }
+        
+        // 提取下标不是 d 的倍数的字符
+        List<Character> nonDChars = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if ((i + 1) % d != 0) {
+                nonDChars.add(s.charAt(i));
+            }
+        }
+        
+        // 对 d 倍数位置字符升序排序
+        Collections.sort(dChars);
+        // 对非 d 倍数位置字符降序排序
+        Collections.sort(nonDChars, Collections.reverseOrder());
+        
+        // 初始化结果字符数组
+        char[] result = s.toCharArray();
+        
+        // 将排序后的 d 倍数位置字符放回
+        int dIdx = 0;
+        for (int i = d - 1; i < n; i += d) {
+            result[i] = dChars.get(dIdx++);
+        }
+        
+        // 将排序后的非 d 倍数位置字符放回
+        int nonDIdx = 0;
+        for (int i = 0; i < n; i++) {
+            if ((i + 1) % d != 0) {
+                result[i] = nonDChars.get(nonDIdx++);
+            }
+        }
+        
+        return new String(result);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int d = sc.nextInt();
+        sc.nextLine();          // 读取第一行末尾的换行符
+        String s = sc.nextLine();
+        System.out.println(solve(d, s));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+using namespace std;
+
+string solve(int d, string s) {
+    int n = s.size();
+    
+    // 提取下标为 d 的倍数的字符（下标从1开始）
+    vector<char> dChars;
+    for (int i = d - 1; i < n; i += d) {
+        dChars.push_back(s[i]);
+    }
+    
+    // 提取下标不是 d 的倍数的字符
+    vector<char> nonDChars;
+    for (int i = 0; i < n; ++i) {
+        if ((i + 1) % d != 0) {
+            nonDChars.push_back(s[i]);
+        }
+    }
+    
+    // 对 d 倍数位置字符升序排序
+    sort(dChars.begin(), dChars.end());
+    // 对非 d 倍数位置字符降序排序
+    sort(nonDChars.rbegin(), nonDChars.rend());
+    
+    // 初始化结果字符串
+    vector<char> result(s.begin(), s.end());
+    
+    // 将排序后的 d 倍数位置字符放回
+    int dIdx = 0;
+    for (int i = d - 1; i < n; i += d) {
+        result[i] = dChars[dIdx++];
+    }
+    
+    // 将排序后的非 d 倍数位置字符放回
+    int nonDIdx = 0;
+    for (int i = 0; i < n; ++i) {
+        if ((i + 1) % d != 0) {
+            result[i] = nonDChars[nonDIdx++];
+        }
+    }
+    
+    return string(result.begin(), result.end());
+}
+
+int main() {
+    int d;
+    string s;
+    cin >> d >> s;
+    cout << solve(d, s) << endl;
+    return 0;
+}
+```

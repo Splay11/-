@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3574",
+  "title": "第2题-馆藏简介相似度系统",
+  "docId": 2917,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "余弦相似度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "字符串",
+  "videosol": "",
+  "trial_videosol": ""
+}

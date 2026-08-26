@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P3666",
+  "title": "第3题-最大指数窗",
+  "docId": 3009,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "数论",
+    "数据结构",
+    "单调队列"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "滑动窗口",
+  "videosol": "",
+  "trial_videosol": ""
+}

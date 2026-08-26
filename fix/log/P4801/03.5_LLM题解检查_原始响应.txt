@@ -1,0 +1,362 @@
+## 解题思路
+
+给定两个长度为 $n$ 的排列 $A$ 和 $B$，要求找出最长同步序列（即最长公共子序列）的长度，并在所有最长同步序列中输出字典序最大的一个。
+
+**关键观察与转化**
+
+- 因为 $A$ 和 $B$ 都是 $1\sim n$ 的排列，每个元素唯一出现，因此可以建立 **位置映射**：
+  - 对于数字 $x$，记 $\text{posB}[x]$ 表示 $x$ 在序列 $B$ 中的位置。
+- 将序列 $A$ 中的元素用其**在 $B$ 中的位置**替换，得到一个新的数组 $C$：
+  $$C_i = \text{posB}[A_i]$$
+- 此时，原问题“在 $A$ 和 $B$ 中寻找公共子序列”等价于：在数组 $C$ 中寻找**严格递增子序列**。所选出的递增子序列的下标对应的原数字，即为一个公共子序列。
+- 于是问题进一步转化为：
+  - 求 $C$ 的最长严格递增子序列（LIS）长度 $k$；
+  - 在所有长度为 $k$ 的递增子序列中，选择**对应数字序列字典序最大**的那一个。
+
+**动态规划求最长长度**
+
+- 设 $\text{dp}[x]$ 表示：若选择数字 $x$ 作为同步序列的第一个元素，由它开头所能形成的**最长合法长度**（包含自身）。
+- 为了在数组 $C$ 上实现，我们从右向左扫描 $A$（或 $C$），对于位置 $i$，求所有 $j>i$ 且 $C_j > C_i$ 的 $\text{dp}$ 最大值，转移为：
+  $$\text{dp}[A_i] = 1 + \max_{\substack{j>i \\ C_j > C_i}} \text{dp}[A_j]$$
+- 这可以使用**树状数组**在 $O(n\log n)$ 时间内完成：将值域反转，维护“后缀最大值”的前缀查询，从右向左更新即可。同时记录全局最大长度 $L$。
+
+**贪心恢复字典序最大的序列**
+
+- 将所有数字按照 $\text{dp}[x]$ 的值分组，属于第 $len$ 组的数字表示以它开头能够形成长度为 $len$ 的合法同步序列。
+- 从所需长度 $len=L$ 开始，逐层选择当前能选的最大数字：
+  - 假设上一步选中的数字为 $\text{last}$，它在 $A$ 和 $B$ 中的位置分别为 $\text{posA}[\text{last}]$ 和 $\text{posB}[\text{last}]$。
+  - 当前可选数字 $x$ 必须满足：
+    1. $\text{dp}[x] = len$
+    2. $\text{posA}[x] > \text{posA}[\text{last}]$
+    3. $\text{posB}[x] > \text{posB}[\text{last}]$
+  - 为了让最终序列字典序最大，在当前位应选择满足条件的**最大数字**。
+- 利用另一棵树状数组，在每层将符合 $\text{posA}$ 限制的候选插入，并按 $\text{posB}$ 维护最大值，再通过一次前缀查询选出最大数字。
+- 每个数字仅在其所属层处理一次，总复杂度仍为 $O(n\log n)$。
+
+## 复杂度分析
+
+- 时间复杂度：对每组数据，预处理、求 $\text{dp}$、贪心恢复均只需遍历数组并维护树状数组，单组复杂度 $O(n \log n)$。所有数据总长度 $\sum n \le 2\times 10^5$，总体时间复杂度 $O(\sum n \log n)$，在时限内可行。
+- 空间复杂度：需要存储原排列、位置映射、$\text{dp}$ 数组、分组数组、树状数组等，均为 $O(n)$ 级别。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+class BITMax:
+    """树状数组：维护前缀最大值"""
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (n + 2)
+
+    def update(self, x, val):
+        while x <= self.n:
+            if val > self.tree[x]:
+                self.tree[x] = val
+            x += x & -x
+
+    def query(self, x):
+        res = 0
+        while x > 0:
+            if self.tree[x] > res:
+                res = self.tree[x]
+            x -= x & -x
+        return res
+
+def solve_case(n, A, B):
+    # posA[x] 和 posB[x] 分别表示数字 x 在序列 A 和 B 中的位置
+    posA = [0] * (n + 1)
+    posB = [0] * (n + 1)
+    for i in range(n):
+        posA[A[i]] = i + 1
+        posB[B[i]] = i + 1
+
+    # C[i] = posB[A[i]]
+    C = [0] * n
+    for i in range(n):
+        C[i] = posB[A[i]]
+
+    # dp[x] 表示以数字 x 开始时最多能形成的同步序列长度
+    dp = [0] * (n + 1)
+    bit = BITMax(n)
+    max_len = 0
+
+    # 从右向左求最长后缀长度
+    for i in range(n - 1, -1, -1):
+        rev = n - C[i] + 1
+        best = bit.query(rev - 1)
+        cur = best + 1
+        dp[A[i]] = cur
+        bit.update(rev, cur)
+        if cur > max_len:
+            max_len = cur
+
+    # 按 dp 值分组
+    groups = [[] for _ in range(max_len + 1)]
+    for x in range(1, n + 1):
+        groups[dp[x]].append(x)
+
+    # 贪心逐位选取最大数字
+    ans = []
+    lastA = 0
+    lastB = 0
+
+    for need in range(max_len, 0, -1):
+        bit = BITMax(n)
+        # 将符合 posA 限制的候选数字加入树状数组
+        for x in groups[need]:
+            if posA[x] > lastA:
+                revB = n - posB[x] + 1
+                bit.update(revB, x)
+
+        # 选出满足 posB > lastB 的最大数字
+        limit = n - lastB
+        choose = bit.query(limit)
+        ans.append(choose)
+        lastA = posA[choose]
+        lastB = posB[choose]
+
+    return max_len, ans
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    t = data[0]
+    idx = 1
+    out_lines = []
+
+    for _ in range(t):
+        n = data[idx]; idx += 1
+        A = data[idx:idx + n]; idx += n
+        B = data[idx:idx + n]; idx += n
+        k, seq = solve_case(n, A, B)
+        out_lines.append(str(k))
+        out_lines.append(" ".join(map(str, seq)))
+
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 快速输入读取
+    static class FastScanner {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+        String next() throws IOException {
+            while (st == null || !st.hasMoreTokens())
+                st = new StringTokenizer(br.readLine());
+            return st.nextToken();
+        }
+        int nextInt() throws IOException { return Integer.parseInt(next()); }
+    }
+
+    // 树状数组维护前缀最大值
+    static class BITMax {
+        int n;
+        int[] tree;
+        BITMax(int n) {
+            this.n = n;
+            this.tree = new int[n + 2];
+        }
+        void update(int x, int val) {
+            while (x <= n) {
+                if (val > tree[x]) tree[x] = val;
+                x += x & -x;
+            }
+        }
+        int query(int x) {
+            int res = 0;
+            while (x > 0) {
+                if (tree[x] > res) res = tree[x];
+                x -= x & -x;
+            }
+            return res;
+        }
+    }
+
+    static class Result {
+        int len;
+        int[] seq;
+        Result(int len, int[] seq) { this.len = len; this.seq = seq; }
+    }
+
+    static Result solveCase(int n, int[] A, int[] B) {
+        int[] posA = new int[n + 1];
+        int[] posB = new int[n + 1];
+        for (int i = 1; i <= n; i++) posA[A[i]] = i;
+        for (int i = 1; i <= n; i++) posB[B[i]] = i;
+
+        int[] C = new int[n + 1];
+        for (int i = 1; i <= n; i++) C[i] = posB[A[i]];
+
+        int[] dp = new int[n + 1];
+        BITMax bit = new BITMax(n);
+        int maxLen = 0;
+
+        for (int i = n; i >= 1; i--) {
+            int rev = n - C[i] + 1;
+            int best = bit.query(rev - 1);
+            int cur = best + 1;
+            dp[A[i]] = cur;
+            bit.update(rev, cur);
+            if (cur > maxLen) maxLen = cur;
+        }
+
+        // 按 dp 值分组
+        ArrayList<Integer>[] groups = new ArrayList[maxLen + 1];
+        for (int i = 1; i <= maxLen; i++) groups[i] = new ArrayList<>();
+        for (int x = 1; x <= n; x++) groups[dp[x]].add(x);
+
+        // 贪心恢复
+        int[] ans = new int[maxLen];
+        int lastA = 0, lastB = 0;
+        for (int need = maxLen, idx = 0; need >= 1; need--, idx++) {
+            bit = new BITMax(n);
+            for (int x : groups[need]) {
+                if (posA[x] > lastA) {
+                    int revB = n - posB[x] + 1;
+                    bit.update(revB, x);
+                }
+            }
+            int limit = n - lastB;
+            int choose = bit.query(limit);
+            ans[idx] = choose;
+            lastA = posA[choose];
+            lastB = posB[choose];
+        }
+
+        return new Result(maxLen, ans);
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        StringBuilder sb = new StringBuilder();
+        int T = fs.nextInt();
+        while (T-- > 0) {
+            int n = fs.nextInt();
+            int[] A = new int[n + 1];
+            int[] B = new int[n + 1];
+            for (int i = 1; i <= n; i++) A[i] = fs.nextInt();
+            for (int i = 1; i <= n; i++) B[i] = fs.nextInt();
+            Result res = solveCase(n, A, B);
+            sb.append(res.len).append('\n');
+            for (int i = 0; i < res.seq.length; i++) {
+                if (i > 0) sb.append(' ');
+                sb.append(res.seq[i]);
+            }
+            sb.append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class BITMax {
+public:
+    int n;
+    vector<int> tree;
+    BITMax(int n) : n(n), tree(n + 2, 0) {}
+
+    void update(int x, int val) {
+        while (x <= n) {
+            if (val > tree[x]) tree[x] = val;
+            x += x & -x;
+        }
+    }
+
+    int query(int x) {
+        int res = 0;
+        while (x > 0) {
+            if (tree[x] > res) res = tree[x];
+            x -= x & -x;
+        }
+        return res;
+    }
+};
+
+pair<int, vector<int>> solveCase(int n, vector<int>& A, vector<int>& B) {
+    vector<int> posA(n + 1), posB(n + 1);
+    for (int i = 1; i <= n; i++) posA[A[i]] = i;
+    for (int i = 1; i <= n; i++) posB[B[i]] = i;
+
+    vector<int> C(n + 1);
+    for (int i = 1; i <= n; i++) C[i] = posB[A[i]];
+
+    vector<int> dp(n + 1, 0);
+    BITMax bit(n);
+    int maxLen = 0;
+
+    for (int i = n; i >= 1; i--) {
+        int rev = n - C[i] + 1;
+        int best = bit.query(rev - 1);
+        int cur = best + 1;
+        dp[A[i]] = cur;
+        bit.update(rev, cur);
+        if (cur > maxLen) maxLen = cur;
+    }
+
+    // 按 dp 值分组
+    vector<vector<int>> groups(maxLen + 1);
+    for (int x = 1; x <= n; x++) groups[dp[x]].push_back(x);
+
+    // 贪心恢复
+    vector<int> ans;
+    int lastA = 0, lastB = 0;
+    for (int need = maxLen; need >= 1; need--) {
+        BITMax curBit(n);
+        for (int x : groups[need]) {
+            if (posA[x] > lastA) {
+                int revB = n - posB[x] + 1;
+                curBit.update(revB, x);
+            }
+        }
+        int limit = n - lastB;
+        int choose = curBit.query(limit);
+        ans.push_back(choose);
+        lastA = posA[choose];
+        lastB = posB[choose];
+    }
+
+    return {maxLen, ans};
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        cin >> n;
+        vector<int> A(n + 1), B(n + 1);
+        for (int i = 1; i <= n; i++) cin >> A[i];
+        for (int i = 1; i <= n; i++) cin >> B[i];
+
+        auto [k, seq] = solveCase(n, A, B);
+        cout << k << '\n';
+        for (size_t i = 0; i < seq.size(); i++) {
+            if (i > 0) cout << ' ';
+            cout << seq[i];
+        }
+        cout << '\n';
+    }
+    return 0;
+}
+```

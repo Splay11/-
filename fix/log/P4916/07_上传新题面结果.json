@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4916",
+  "title": "第3题-最少生产批次",
+  "docId": 4230,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "3\nfile_path\nget_name\nx",
+      "output": "FilePath\nGetName\nX",
+      "explanation": "按下划线分词后把每段首字母大写：\n\n- `file_path` $\\rightarrow$ `FilePath`；\n- `get_name` $\\rightarrow$ `GetName`；\n- 单个字母 `x` $\\rightarrow$ `X`。"
+    },
+    {
+      "input": "1\nhello",
+      "output": "Hello",
+      "explanation": "没有下划线，只需把首字母改为大写，得到 `Hello`。"
+    },
+    {
+      "input": "2\na_b_c\nstart",
+      "output": "ABC\nStart",
+      "explanation": "`a_b_c` 三段都是单字母，转换后为 `ABC`；`start` 变为 `Start`。"
+    }
+  ]
+}

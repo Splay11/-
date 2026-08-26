@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2707",
+  "title": "稳定序列计数",
+  "docId": 2273,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "数论"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

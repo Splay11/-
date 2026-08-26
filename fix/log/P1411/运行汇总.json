@@ -1,0 +1,11 @@
+{
+  "pid": "P1411",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 18:42:22",
+  "end_time": "2026-08-19 18:42:22",
+  "new_title": "第3题-禁数互补对",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

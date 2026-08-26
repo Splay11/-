@@ -1,0 +1,18 @@
+{
+  "message": "problem update success",
+  "pid": "P2830",
+  "title": "第2题-信号波动",
+  "docId": 2462,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "图结构",
+    "拓扑排序",
+    "动态规划",
+    "dfs"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

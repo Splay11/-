@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "debca",
+      "output": "5",
+      "explanation": "密钥带为 `debca`，字符 `a` 在第 `5` 个槽位。"
+    },
+    {
+      "input": "ecdab",
+      "output": "4",
+      "explanation": "`a` 出现在第 `4` 个槽位。"
+    },
+    {
+      "input": "bedac",
+      "output": "4",
+      "explanation": "从左扫描，`a` 位于第 `4` 位。"
+    }
+  ]
+}

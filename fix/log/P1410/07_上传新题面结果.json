@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1410",
+  "title": "第2题-符号翻转校准",
+  "docId": 430,
+  "hidden": false,
+  "difficulty": 1,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

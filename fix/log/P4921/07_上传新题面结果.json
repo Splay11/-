@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4921",
+  "title": "第2题-吊销账号抬升掩码",
+  "docId": 4235,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "其他",
+    "位运算"
+  ],
+  "alg_tag": "位运算",
+  "ai_alg_tags": "位运算",
+  "videosol": "",
+  "trial_videosol": ""
+}

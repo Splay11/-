@@ -1,0 +1,449 @@
+## 解题思路
+
+本题要求在一棵树上切断至多 $k$ 条枝条，使得所有连通块的冠幅（即块内任意两点最短路径长度的最大值，也称直径）的最大值尽量小。这是一个典型的最小化最大值问题，可以使用**二分答案**来求解。
+
+- **对答案进行二分**：设当前猜想的答案为 $D$，检查是否能用不超过 $k$ 次切断，使得每个连通块的直径都不超过 $D$。若可行，尝试更小的 $D$；否则增大 $D$。
+- **计算直径上界**：用两次 DFS/栈遍历求出树的加权直径，作为二分查找的上界 $hi$，下界 $lo=0$。
+- **可行性检查（贪心 + 树形 DP，自底向上）**：
+  1. 任选分叉点 $1$ 作为根，预处理出每个节点的父节点 `parent`、与父节点相连的枝条长度 `pw`、子节点列表 `children` 以及后序遍历序列 `post`。
+  2. 设 `up[u]` 表示在以 $u$ 为根的当前连通块中，从 $u$ 向下延伸的最长路径长度。
+  3. 按后序遍历处理每个分叉点 $u$：
+     - 对每个子节点 $v$，计算 $t = up[v] + w(u,v)$。
+     - 若 $t > D$，则这条枝条必须切断，删除次数 `cuts` 加 $1$。
+     - 否则将 $t$ 收集到临时数组 $A$ 中。
+     - 为了保证经过 $u$ 的路径长度不超过 $D$，数组 $A$ 中任意两条路径长度之和不能超过 $D$。将 $A$ 排序，当 $|A| \ge 2$ 且最大两个元素之和 $> D$ 时，贪心地删除其中较大的元素（即切断对应枝条），`cuts` 加 $1$，直到满足条件。贪心删除最大值的正确性在于：尽早去掉更长的分支可以减少未来产生冲突的可能。
+     - 最后，若 $A$ 非空，将 `up[u]` 设为 $A$ 中剩下的最大值，否则设为 $0$。
+  4. 若整个过程中 `cuts > k`，则返回不可行；否则可行。
+- 二分结束后输出最小的可行答案。
+
+## 复杂度分析
+
+- **预处理**：两次 DFS 求直径 $O(n)$；建立父子关系与后序遍历 $O(n)$。
+- **二分查找**：上界至多为所有枝条长度之和，即 $O(n \cdot 10^9) \approx 2\times 10^{14}$，二分次数约 $O(\log(2\times10^{14})) \approx 48$。
+- **单次可行性检查**：遍历所有分叉点并处理子节点列表，每个节点内部需要对路径长度数组排序。由于所有子节点列表长度之和为 $n-1$，排序总开销 $O(\sum d_i \log d_i) \le O(n \log n)$。
+- **总时间复杂度**：$O(n \log n \log(\text{diameter}))$，即大约 $O(n \log^2 n)$，在 $n \le 2\times 10^5$ 时可以高效运行。
+- **空间复杂度**：$O(n)$，用于存储邻接表、父子关系、后序序列和辅助数组。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(1 << 25)
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    it = iter(data)
+    n = int(next(it))
+    k = int(next(it))
+
+    # 邻接表：g[u] = [(v, w), ...]
+    g = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u = int(next(it))
+        v = int(next(it))
+        w = int(next(it))
+        g[u].append((v, w))
+        g[v].append((u, w))
+
+    # 计算加权直径
+    def farthest(start):
+        dist = [-1] * (n + 1)
+        parent = [-1] * (n + 1)
+        st = [start]
+        dist[start] = 0
+        while st:
+            u = st.pop()
+            for v, w in g[u]:
+                if v == parent[u]:
+                    continue
+                parent[v] = u
+                dist[v] = dist[u] + w
+                st.append(v)
+        idx = 1
+        for i in range(1, n + 1):
+            if dist[i] > dist[idx]:
+                idx = i
+        return idx, dist[idx]
+
+    a, _ = farthest(1)
+    _, dia = farthest(a)
+
+    # 以分叉点1为根，建立父子关系与后序遍历
+    parent = [0] * (n + 1)
+    pw = [0] * (n + 1)           # 与父节点相连的枝条长度
+    children = [[] for _ in range(n + 1)]
+    post = []
+
+    st = [(1, 0)]                # (节点, 状态) 0:进入 1:退出
+    parent[1] = 0
+    pw[1] = 0
+    while st:
+        u, t = st.pop()
+        if t == 0:
+            st.append((u, 1))
+            for v, w in g[u]:
+                if v == parent[u]:
+                    continue
+                parent[v] = u
+                pw[v] = w
+                children[u].append(v)
+                st.append((v, 0))
+        else:
+            post.append(u)
+
+    up = [0] * (n + 1)
+
+    # 可行性检查
+    def feasible(D):
+        cuts = 0
+        for u in reversed(post):
+            A = []
+            for v in children[u]:
+                t = up[v] + pw[v]
+                if t > D:
+                    cuts += 1       # 枝条过长，必须切断
+                else:
+                    A.append(t)
+            A.sort()
+            # 保证经过 u 的两条最长路径之和不超过 D
+            while len(A) >= 2 and A[-1] + A[-2] > D:
+                A.pop()             # 删除较长的分支
+                cuts += 1
+            up[u] = A[-1] if A else 0
+            if cuts > k:
+                return False
+        return cuts <= k
+
+    lo, hi = 0, dia
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if feasible(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+
+    print(lo)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int n, k, idx;
+    static int[] head, to, next, parent;
+    static long[] w, pw, up;
+    static ArrayList<Integer>[] children;
+    static int[] post;
+    static int postPtr;
+
+    static void addEdge(int u, int v, long ww) {
+        to[idx] = v;
+        w[idx] = ww;
+        next[idx] = head[u];
+        head[u] = idx++;
+    }
+
+    // 计算从 start 出发能到达的最远节点
+    static int farthestNode(int start) {
+        long[] dist = new long[n + 1];
+        Arrays.fill(dist, -1);
+        int[] par = new int[n + 1];
+        Arrays.fill(par, -1);
+        int[] st = new int[n];
+        int top = 0;
+        st[top++] = start;
+        dist[start] = 0;
+        while (top > 0) {
+            int u = st[--top];
+            for (int e = head[u]; e != -1; e = next[e]) {
+                int v = to[e];
+                if (v == par[u]) continue;
+                par[v] = u;
+                dist[v] = dist[u] + w[e];
+                st[top++] = v;
+            }
+        }
+        int best = 1;
+        for (int i = 1; i <= n; i++) {
+            if (dist[i] > dist[best]) best = i;
+        }
+        return best;
+    }
+
+    // 计算从 start 出发能到达的最远距离
+    static long farthestDist(int start) {
+        long[] dist = new long[n + 1];
+        Arrays.fill(dist, -1);
+        int[] par = new int[n + 1];
+        Arrays.fill(par, -1);
+        int[] st = new int[n];
+        int top = 0;
+        st[top++] = start;
+        dist[start] = 0;
+        while (top > 0) {
+            int u = st[--top];
+            for (int e = head[u]; e != -1; e = next[e]) {
+                int v = to[e];
+                if (v == par[u]) continue;
+                par[v] = u;
+                dist[v] = dist[u] + w[e];
+                st[top++] = v;
+            }
+        }
+        long best = 0;
+        for (int i = 1; i <= n; i++) best = Math.max(best, dist[i]);
+        return best;
+    }
+
+    // 检查能否用不超过 k 次切断使所有连通块冠幅 <= D
+    static boolean feasible(long D) {
+        long cuts = 0;
+        for (int p = postPtr - 1; p >= 0; p--) {
+            int u = post[p];
+            int sz = children[u].size();
+            long[] arr = new long[sz];
+            int tsz = 0;
+            for (int v : children[u]) {
+                long t = up[v] + pw[v];
+                if (t > D) {
+                    cuts++;
+                } else {
+                    arr[tsz++] = t;
+                }
+            }
+            if (tsz > 1) {
+                Arrays.sort(arr, 0, tsz);
+                while (tsz >= 2 && arr[tsz - 1] + arr[tsz - 2] > D) {
+                    tsz--;      // 删除最长的分支
+                    cuts++;
+                }
+            }
+            up[u] = (tsz > 0 ? arr[tsz - 1] : 0L);
+            if (cuts > k) return false;
+        }
+        return cuts <= k;
+    }
+
+    public static void main(String[] args) throws Exception {
+        // 快速输入
+        FastScanner fs = new FastScanner(System.in);
+        n = fs.nextInt();
+        k = fs.nextInt();
+        int m = 2 * (n - 1);
+        head = new int[n + 1];
+        to = new int[m];
+        next = new int[m];
+        w = new long[m];
+        Arrays.fill(head, -1);
+        idx = 0;
+
+        for (int i = 0; i < n - 1; i++) {
+            int u = fs.nextInt(), v = fs.nextInt();
+            long ww = fs.nextInt();
+            addEdge(u, v, ww);
+            addEdge(v, u, ww);
+        }
+
+        // 直径
+        int a = farthestNode(1);
+        long dia = farthestDist(a);
+
+        // 以 1 为根建立父子关系与后序遍历
+        parent = new int[n + 1];
+        pw = new long[n + 1];
+        children = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) children[i] = new ArrayList<>();
+        post = new int[n];
+        postPtr = 0;
+
+        int[][] st = new int[2 * n][2];
+        int top = 0;
+        st[top][0] = 1;
+        st[top][1] = 0;
+        top++;
+        parent[1] = 0;
+        pw[1] = 0;
+        while (top > 0) {
+            int u = st[--top][0];
+            int state = st[top][1];     // 刚弹出的状态
+            if (state == 0) {
+                st[top][0] = u; st[top][1] = 1; top++;
+                for (int e = head[u]; e != -1; e = next[e]) {
+                    int v = to[e];
+                    if (v == parent[u]) continue;
+                    parent[v] = u;
+                    pw[v] = w[e];
+                    children[u].add(v);
+                    st[top][0] = v; st[top][1] = 0; top++;
+                }
+            } else {
+                post[postPtr++] = u;
+            }
+        }
+
+        up = new long[n + 1];
+
+        long lo = 0, hi = dia;
+        while (lo < hi) {
+            long mid = (lo + hi) >>> 1;
+            if (feasible(mid)) hi = mid;
+            else lo = mid + 1;
+        }
+        System.out.println(lo);
+    }
+
+    // 快速输入类
+    static class FastScanner {
+        BufferedInputStream in;
+        byte[] buffer = new byte[1 << 16];
+        int ptr = 0, len = 0;
+
+        FastScanner(InputStream is) { in = new BufferedInputStream(is); }
+
+        int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) return -1;
+            }
+            return buffer[ptr++] & 0xff;
+        }
+
+        int nextInt() throws IOException {
+            int c, s = 1, x = 0;
+            do { c = read(); } while (c <= ' ');
+            if (c == '-') { s = -1; c = read(); }
+            while (c >= '0' && c <= '9') {
+                x = x * 10 + (c - '0');
+                c = read();
+            }
+            return x * s;
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+struct Edge { int to; ll w; };
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n, k;
+    cin >> n >> k;
+    vector<vector<Edge>> g(n + 1);
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v; ll w;
+        cin >> u >> v >> w;
+        g[u].push_back({v, w});
+        g[v].push_back({u, w});
+    }
+
+    // 计算加权直径作为二分上界
+    auto farthest = [&](int start) -> pair<int, ll> {
+        vector<ll> dist(n + 1, -1);
+        vector<int> parent(n + 1, -1);
+        vector<int> st;
+        st.reserve(n);
+        st.push_back(start);
+        dist[start] = 0;
+        while (!st.empty()) {
+            int u = st.back(); st.pop_back();
+            for (auto &e : g[u]) {
+                int v = e.to;
+                if (v == parent[u]) continue;
+                parent[v] = u;
+                dist[v] = dist[u] + e.w;
+                st.push_back(v);
+            }
+        }
+        int idx = 1;
+        for (int i = 1; i <= n; ++i) if (dist[i] > dist[idx]) idx = i;
+        return {idx, dist[idx]};
+    };
+    int a = farthest(1).first;
+    ll dia = farthest(a).second;
+
+    // 以分叉点1为根，建立父子关系与后序遍历
+    vector<int> parent(n + 1, 0);
+    vector<ll> pw(n + 1, 0);       // 与父节点相连的枝条长度
+    vector<vector<int>> children(n + 1);
+    vector<int> post;
+    post.reserve(n);
+
+    {
+        vector<pair<int, int>> st; // (节点, 状态) 0:进入 1:退出
+        st.reserve(2 * n);
+        parent[1] = 0; pw[1] = 0;
+        st.push_back({1, 0});
+        while (!st.empty()) {
+            auto [u, t] = st.back(); st.pop_back();
+            if (t == 0) {
+                st.push_back({u, 1});
+                for (auto &e : g[u]) {
+                    int v = e.to;
+                    if (v == parent[u]) continue;
+                    parent[v] = u;
+                    pw[v] = e.w;
+                    children[u].push_back(v);
+                    st.push_back({v, 0});
+                }
+            } else {
+                post.push_back(u);
+            }
+        }
+    }
+
+    vector<ll> up(n + 1, 0);
+
+    // 可行性检查：最多切断 k 条枝条，使所有连通块直径 <= D
+    auto feasible = [&](ll D) -> bool {
+        ll cuts = 0;
+        for (int idx = (int)post.size() - 1; idx >= 0; --idx) {
+            int u = post[idx];
+            vector<ll> A;
+            A.reserve(children[u].size());
+            for (int v : children[u]) {
+                ll t = up[v] + pw[v];
+                if (t > D) {
+                    ++cuts;          // 枝条过长，必须切断
+                } else {
+                    A.push_back(t);
+                }
+            }
+            sort(A.begin(), A.end());
+            // 最大两条路径长度之和不超过 D
+            while ((int)A.size() >= 2 && A.back() + A[A.size() - 2] > D) {
+                A.pop_back();        // 删除较长的分支
+                ++cuts;
+            }
+            up[u] = A.empty() ? 0LL : A.back();
+            if (cuts > k) return false;
+        }
+        return cuts <= k;
+    };
+
+    ll lo = 0, hi = dia;
+    while (lo < hi) {
+        ll mid = (lo + hi) >> 1;
+        if (feasible(mid)) hi = mid;
+        else lo = mid + 1;
+    }
+    cout << lo << "\n";
+    return 0;
+}
+```

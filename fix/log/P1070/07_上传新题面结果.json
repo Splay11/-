@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1070",
+  "title": "第1题-均价之和",
+  "docId": 71,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

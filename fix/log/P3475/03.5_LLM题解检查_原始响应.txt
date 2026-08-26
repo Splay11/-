@@ -1,0 +1,189 @@
+## 解题思路
+
+本题要求对一条远古表达式字符串进行求值，表达式格式为 `L op R`，其中 `op` 是数字字符 `1`、`2`、`3` 或 `4`，`L` 和 `R` 均为仅由小写字母 `a`～`z` 组成的子串，且各自的长度在 1 到 4 之间。求值过程分为以下几步：
+
+1. **定位运算符**  
+   遍历字符串 `formula`，找到唯一的一个数字字符（`'1'`～`'4'`），记录其下标 `opPos`。该字符将左右两侧的字母序列分隔开。
+
+2. **字母序列转整数**  
+   - 对左侧子串 `formula[0..opPos-1]` 和右侧子串 `formula[opPos+1..]`，分别将每个小写字母映射为对应的数字：`'a'` → `0`，`'b'` → `1`，……，`'z'` → `25`。
+   - 将每个字母的数字按原本的顺序拼接成一个十进制字符串。例如 `"cb"` → `"21"`（因为 `c` 对应 2，`b` 对应 1）。
+   - 将该字符串按正常整数解析，得到左操作数 `left` 和右操作数 `right`。注意所有字母转换得到的数字均为非负整数，可能包含前导零，但拼接后按整数处理即可。
+
+3. **执行运算**  
+   根据运算符 `op` 执行对应的运算：
+   - `'1'`：加法 `left + right`  
+   - `'2'`：减法 `left - right`  
+   - `'3'`：乘法 `left * right`  
+   - `'4'`：整除（向下取整）。若 `right` 等于 0，表达式无效，直接返回 `-1`；否则计算 `left // right`（由于 `left` 和 `right` 均为非负整数，直接使用整数除法即可实现向下取整）。
+
+4. **处理负数结果**  
+   若运算结果为负数，取其绝对值；否则保持原值。最后返回该非负整数结果。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n)$，其中 $n$ 为字符串 `formula` 的长度。题目限定 $n \le 9$，遍历字符串、转换字母序列、以及整数运算均为常数时间。
+- **空间复杂度**：$O(1)$。仅使用有限的额外变量存储运算符位置、左右字符串、转换后的整数以及结果，空间消耗不随输入规模增长。
+
+## 代码实现
+
+### Python
+
+```python
+def calculate(formula: str) -> int:
+    # 1. 找到运算符的位置
+    op_pos = next(i for i, ch in enumerate(formula) if ch in '1234')
+    left_str = formula[:op_pos]
+    right_str = formula[op_pos + 1:]
+    op = formula[op_pos]
+
+    # 2. 将左右字母序列分别转换为整数
+    left = int("".join(str(ord(c) - ord('a')) for c in left_str))
+    right = int("".join(str(ord(c) - ord('a')) for c in right_str))
+
+    # 3. 根据运算符进行计算
+    if op == '1':
+        res = left + right
+    elif op == '2':
+        res = left - right
+    elif op == '3':
+        res = left * right
+    else:  # op == '4'，整除
+        if right == 0:
+            return -1          # 除数为 0，无效表达式
+        res = left // right    # 向下取整
+
+    # 4. 负数取绝对值
+    return res if res >= 0 else -res
+
+
+if __name__ == "__main__":
+    # 示例输入处理，实际题目中根据输入格式调整
+    s = input().strip()
+    print(calculate(s))
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    // 将仅含小写字母的字符串转换为拼接数字
+    private static long lettersToNum(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : s.toCharArray()) {
+            sb.append(c - 'a');      // 'a' -> 0, 'b' -> 1, ...
+        }
+        // 长度至少为 1，因此解析安全
+        return Long.parseLong(sb.toString());
+    }
+
+    public static int calculate(String formula) {
+        // 1. 找到运算符位置
+        int opPos = -1;
+        for (int i = 0; i < formula.length(); i++) {
+            char ch = formula.charAt(i);
+            if (ch >= '1' && ch <= '4') {
+                opPos = i;
+                break;
+            }
+        }
+
+        // 2. 提取左右子串并转换为整数
+        String leftStr = formula.substring(0, opPos);
+        String rightStr = formula.substring(opPos + 1);
+        char op = formula.charAt(opPos);
+
+        long left = lettersToNum(leftStr);
+        long right = lettersToNum(rightStr);
+
+        // 3. 执行运算
+        long res;
+        if (op == '1') {
+            res = left + right;
+        } else if (op == '2') {
+            res = left - right;
+        } else if (op == '3') {
+            res = left * right;
+        } else { // op == '4'，整除
+            if (right == 0) {
+                return -1;
+            }
+            res = left / right;      // 非负整数除法即为向下取整
+        }
+
+        // 4. 负数取绝对值
+        return (int) (res < 0 ? -res : res);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String formula = sc.nextLine().trim();  // 读入表达式
+        System.out.println(calculate(formula));
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+#include <cctype>   // isspace 相关，此处未使用但保留无妨
+using namespace std;
+
+// 将小写字母串转换为拼接后的整数
+long long lettersToNum(const string &s) {
+    string num;
+    for (char c : s) {
+        num += to_string(c - 'a');   // 'a' -> 0, 'b' -> 1, ...
+    }
+    return num.empty() ? 0 : stoll(num);
+}
+
+int calculate(const string &formula) {
+    // 1. 找到运算符的位置
+    int opPos = -1;
+    for (int i = 0; i < (int)formula.size(); ++i) {
+        if (formula[i] >= '1' && formula[i] <= '4') {
+            opPos = i;
+            break;
+        }
+    }
+
+    // 2. 提取左右子串并转换为整数
+    string leftStr = formula.substr(0, opPos);
+    string rightStr = formula.substr(opPos + 1);
+    char op = formula[opPos];
+
+    long long left = lettersToNum(leftStr);
+    long long right = lettersToNum(rightStr);
+
+    // 3. 根据运算符计算
+    long long res;
+    if (op == '1') {
+        res = left + right;
+    } else if (op == '2') {
+        res = left - right;
+    } else if (op == '3') {
+        res = left * right;
+    } else { // op == '4'，整除
+        if (right == 0) {
+            return -1;               // 无效表达式
+        }
+        res = left / right;          // 非负整数除法，向下取整
+    }
+
+    // 4. 负数取绝对值
+    return res < 0 ? -res : res;
+}
+
+int main() {
+    string formula;
+    getline(cin, formula);           // 读入整行作为表达式
+    cout << calculate(formula) << endl;
+    return 0;
+}
+```

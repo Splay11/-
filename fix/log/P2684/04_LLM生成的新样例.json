@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "abcde",
+      "output": "abd",
+      "explanation": "按行书写：\n\n- 第 `1` 行：`a`，行首 `a`；\n- 第 `2` 行：`bc`，行首 `b`；\n- 剩余 `de` 不足 `3` 个，写成第 `3` 行，行首 `d`。\n\n连接得 `abd`。"
+    },
+    {
+      "input": "codefun",
+      "output": "coen",
+      "explanation": "分组为 `c` | `od` | `efu` | 剩余 `n`。各行首字母依次为 `c`、`o`、`e`、`n`，答案为 `coen`。"
+    },
+    {
+      "input": "a",
+      "output": "a",
+      "explanation": "只有 `1` 个字符，恰好写成第 `1` 行，答案就是 `a`。"
+    },
+    {
+      "input": "qwertyuiop",
+      "output": "qwru",
+      "explanation": "分组为 `q` | `we` | `rty` | `uiop`。行首依次为 `q`、`w`、`r`、`u`，答案为 `qwru`。"
+    }
+  ]
+}

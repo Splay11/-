@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1460",
+  "title": "第3题-往返配送",
+  "docId": 479,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "饿了么"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "最短路算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

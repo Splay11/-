@@ -1,0 +1,21 @@
+{
+  "pid": "P2963",
+  "mode": 0,
+  "force": false,
+  "start_time": "2026-08-09 17:02:17",
+  "end_time": "2026-08-09 17:03:24",
+  "new_title": "第1题-构造互质邻接矩阵",
+  "steps": {
+    "step1_fetch_problem": true,
+    "step2_fetch_solution": true,
+    "step3_generate_statement": true,
+    "step35_check_solution": true,
+    "step35_modified": true,
+    "step4_generate_samples": true,
+    "step5_assemble": true,
+    "step6_upload_original_statement": true,
+    "step7_upload_new_problem": true,
+    "step8_upload_solution": true
+  },
+  "overall_success": true
+}

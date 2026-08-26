@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3703",
+  "title": "第1题-工序安排",
+  "docId": 3046,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "图结构",
+    "拓扑排序"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "拓扑排序",
+  "videosol": "",
+  "trial_videosol": ""
+}

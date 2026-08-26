@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1124",
+  "title": "类别约束下的最小偏差",
+  "docId": 128,
+  "hidden": false,
+  "difficulty": 0,
+  "tag": [
+    "腾讯"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

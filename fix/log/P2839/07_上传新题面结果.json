@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2839",
+  "title": "第2题-构造镜像序列",
+  "docId": 2472,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "双指针"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

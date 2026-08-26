@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4789",
+  "title": "第3题-最大冲突度",
+  "docId": 4055,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "前缀和"
+  ],
+  "alg_tag": "前缀和",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

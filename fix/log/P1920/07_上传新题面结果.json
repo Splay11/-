@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1920",
+  "title": "第1题-最短的重复序列",
+  "docId": 1023,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "字符串",
+  "trial_videosol": ""
+}

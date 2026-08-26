@@ -1,0 +1,61 @@
+## 解题思路与方法
+
+给定长度为 $N$ 的时间序列  
+$$X_0, X_1, \dots, X_{N-1}$$  
+我们要按照如下定义计算第 $h$ 滞后的自相关系数 $\rho(h)$：
+
+1. **序列均值**  
+   $$\mu = \frac1N\sum_{t=0}^{N-1}X_t.$$
+
+2. **方差（“平均平方偏差”）**  
+   $$\sigma^2 = \frac1N\sum_{t=0}^{N-1}(X_t-\mu)^2.$$
+
+3. **自相关系数**  
+   对于 $0 \le h < N$，  
+   ![image](/p/2580/file/QianJianTec1746947834897.png?type=additional_file =300x100)
+   注意这里分子是对 $t=0\dots N-h-1$ 的**累加和**，并不再做额外的“平均”。  
+   当 $h\ge N$ 时，按题意定义 $\rho(h)=0$。
+
+
+## 复杂度分析
+
+- **时间复杂度**：  
+  - 计算均值 $O(N)$  
+  - 计算方差 $O(N)$  
+  - 对每个 $h$ 累加 $\displaystyle\sum_{t=0}^{N-h-1}$ 需要 $O(N-h)$，总和  
+    $$\sum_{h=0}^{N-1}(N-h)=\frac{N(N+1)}2=O(N^2).$$  
+  因此总体 $O(N^2)$。
+
+- **空间复杂度**：  
+  需要存储输入数组和输出数组，各 $O(N)$。
+
+
+## 代码实现
+
+### Python 实现
+
+```python
+def autocorr(arr):
+    n = len(arr)
+    # 1. 计算均值
+    mu = sum(arr) / n
+    # 2. 计算方差（平均平方偏差）
+    var = sum((x - mu) ** 2 for x in arr) / n
+    res = []
+    # 3. 依次计算每个滞后
+    for h in range(n):
+        s = 0.0
+        # 累加 (X[t+h]-mu)*(X[t]-mu)
+        for t in range(n - h):
+            s += (arr[t + h] - mu) * (arr[t] - mu)
+        # 除以 var（若 var==0 则定义 rho=0 避免除零）
+        rho = s / var if var != 0 else 0.0
+        # 保留三位小数
+        res.append(round(rho, 1))
+    return res
+
+if __name__ == "__main__":
+    data = list(map(float, input().split()))
+    ac = autocorr(data)
+    print(ac)
+```

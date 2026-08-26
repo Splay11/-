@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4955",
+  "title": "第1题-点集聚簇与编号",
+  "docId": 4289,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

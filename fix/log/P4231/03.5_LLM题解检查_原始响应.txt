@@ -1,0 +1,149 @@
+## 解题思路
+
+1. 首先明确贡献值 $C(n)$ 的定义：正整数 $n$ 的正因子个数（包含 $1$ 和 $n$ 自身）。  
+2. 题目要求将 $x$ 拆成若干个大于 $1$ 的正整数 $p_1,p_2,\dots,p_k$ 的乘积，最大化 $\sum C(p_i)$。  
+3. 设 $dp[x]$ 表示 $x$ 能够获得的最大贡献值之和。  
+   - 若不拆分，直接取值 $C(x)$；  
+   - 若拆分，最少拆成两个因子 $a$ 和 $b$（$a>1, b>1$），且 $a\times b = x$，此时总贡献为 $dp[a]+dp[b]$。  
+   由于最优解总可以归纳为一系列二元拆分，因此只需考虑两因子情况。  
+4. 得到转移方程：  
+   $$dp[x] = \max\Big(C(x),\; \max_{\substack{d|x \\ 2\le d \le x/d}} \big(dp[d] + dp[x/d]\big)\Big)$$  
+5. 预处理阶段：  
+   - 用倍数法求出 $1\sim\text{MAXN}$ 中每个数的因子个数，记为 `divCnt[i] = C(i)`；  
+   - 对每个 $i$，将其所有倍数 $j$ 的因子数加 $1$，时间复杂度 $O(n\log n)$。  
+6. 动态规划计算 `dp`：  
+   - 初始化 `dp[i] = divCnt[i]`；  
+   - 对每个 $i$ 从 $2$ 到 $\text{MAXN}$，枚举 $d$ 从 $2$ 到 $\lfloor\sqrt i\rfloor$，若 $d\mid i$，则用 `dp[d] + dp[i/d]` 尝试更新 `dp[i]`。  
+7. 回答询问时直接输出 `dp[x]`。
+
+## 复杂度分析
+
+- 时间复杂度：  
+  - 预处理因子个数：$O(n\log n)$；  
+  - 动态规划：对每个 $x$ 枚举因子到 $\sqrt x$，总复杂度 $O(n\sqrt n)$，当 $n=2\times10^5$ 时约 $6\times10^7$ 次运算，可以接受。  
+- 空间复杂度：  
+  - 需要两个长度为 $\text{MAXN}+1$ 的数组 `divCnt` 与 `dp`，整体 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    input = sys.stdin.readline
+    MAXN = 200000
+
+    # divCnt[i] = C(i)，即 i 的正因子个数
+    divCnt = [0] * (MAXN + 1)
+    for i in range(1, MAXN + 1):
+        for j in range(i, MAXN + 1, i):
+            divCnt[j] += 1
+
+    # dp[i] 表示 i 能获得的最大贡献值之和
+    dp = [0] * (MAXN + 1)
+    for i in range(2, MAXN + 1):
+        dp[i] = divCnt[i]          # 不拆分的情况
+        d = 2
+        while d * d <= i:
+            if i % d == 0:
+                # 拆成 d 和 i//d 两个因子
+                if dp[d] + dp[i // d] > dp[i]:
+                    dp[i] = dp[d] + dp[i // d]
+            d += 1
+
+    T = int(input())
+    out_lines = []
+    for _ in range(T):
+        x = int(input())
+        out_lines.append(str(dp[x]))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    static final int MAXN = 200000;
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        // 预处理每个数的贡献值 C(i)
+        int[] divCnt = new int[MAXN + 1];
+        for (int i = 1; i <= MAXN; i++) {
+            for (int j = i; j <= MAXN; j += i) {
+                divCnt[j]++;
+            }
+        }
+
+        // dp[i] 表示 i 的最大贡献值之和
+        int[] dp = new int[MAXN + 1];
+        for (int i = 2; i <= MAXN; i++) {
+            dp[i] = divCnt[i]; // 不拆分
+            for (int d = 2; d * d <= i; d++) {
+                if (i % d == 0) {
+                    dp[i] = Math.max(dp[i], dp[d] + dp[i / d]);
+                }
+            }
+        }
+
+        int T = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            int x = Integer.parseInt(br.readLine());
+            sb.append(dp[x]).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int MAXN = 200000;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // divCnt[i] = C(i)，即 i 的正因子个数
+    vector<int> divCnt(MAXN + 1, 0);
+    for (int i = 1; i <= MAXN; ++i) {
+        for (int j = i; j <= MAXN; j += i) {
+            divCnt[j]++;
+        }
+    }
+
+    // dp[i] 表示 i 能获得的最大贡献值之和
+    vector<int> dp(MAXN + 1, 0);
+    for (int i = 2; i <= MAXN; ++i) {
+        dp[i] = divCnt[i];  // 不拆分
+        for (int d = 2; d * d <= i; ++d) {
+            if (i % d == 0) {
+                dp[i] = max(dp[i], dp[d] + dp[i / d]);
+            }
+        }
+    }
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int x;
+        cin >> x;
+        cout << dp[x] << '\n';
+    }
+    return 0;
+}
+```

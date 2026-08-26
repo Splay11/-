@@ -1,0 +1,336 @@
+## 解题思路
+
+本题可以拆分为三个依次解决的部分：
+
+1. **预处理节点特征类型**  
+   节点 \(i\) 的特征类型定义为 \(a_i\) 的不同质因子的个数。  
+   若对每个 \(a_i\) 暴力试除，时间复杂度 \(O(n\sqrt{a_i})\) 较为极限。  
+   利用线性筛预先处理出 \(1\) 到 \(10^7\) 内每个数的最小质因子 `minp[x]`，之后对每个 \(a_i\) 反复除以 `minp[a_i]` 并用集合统计不同质因子，即可在 \(O(\log a_i)\) 时间内完成特征类型计算。  
+   将计算出的特征类型直接存回数组 \(a\) 中，后续只关心特征类型是否相等。
+
+2. **标记关键边（第一次 DFS）**  
+   对于两个相邻节点 \(u, v\)（设 \(u\) 为父亲），若 \(a_u = a_v\)，则连接它们的边是一条**关键边**。  
+   我们使用一个布尔数组 `need[v]` 表示节点 \(v\) 与其父节点之间的边是否为关键边（根节点 \(1\) 没有父边，因此始终为 `false`）。  
+   从根开始 DFS 整棵树，若 `a[v] == a[u]` 则将 `need[v]` 置为 `true`。
+
+3. **贪心确定最少操作（第二次 DFS）**  
+   一次操作选择节点 \(x\)，会激活从根 \(1\) 到 \(x\) 路径上的所有边。  
+   目标是用最少的操作覆盖所有 `need = true` 的边。这是一个经典的树上路径覆盖问题，贪心策略自底向上进行：
+
+   - 从叶子向根返回一个信息：以当前节点为根的子树中，是否存在某条**未被覆盖**的关键边，而且它需要“向上”经过当前节点到父节点的边才能被覆盖。
+   - 对于节点 \(u\)，先递归处理所有子节点 \(v\)，并记录子节点是否传来**向上覆盖需求**（即子树中是否存在需要向上覆盖的边）。记 `child_need` 为所有子节点需求的逻辑或。
+   - 若 `need[u] == true`（\(u\) 到父节点的边是关键边）：
+     - 如果 `child_need == false`（子树没有向上延伸的需求），那么当前边必须由一次新操作覆盖，于是选择节点 \(u\) 进行一次操作，将 \(u\) 加入答案列表。
+     - 如果 `child_need == true`（子树有向上延伸的需求），则选择子树中某个后代产生的操作已经经过了 \(u\) 到父节点的边，该关键边自动被覆盖，无需新增操作。
+   - 最后，当前节点 \(u\) 向父节点传递的“向上覆盖需求”为 `child_need || need[u]`（如果子树有需求，或者这条父边本身就应当被覆盖）。
+   
+   对于根节点 \(1\)，它没有父边，因此只需要递归处理子节点并收集答案。
+
+   这样得到的答案列表是所有操作的终点节点，最后将它们按升序排序即可。若没有任何关键边需要覆盖，操作次数为 \(0\)，答案列表为空，输出中第二行不包含任何内容。
+
+## 复杂度分析
+
+- **时间复杂度**  
+  - 线性筛预处理 \(1\) 到 \(M = 10^7\) 的最小质因子：\(O(M)\)。  
+  - 计算每个节点的特征类型：每个数 \(a_i\) 每次除去一个质因子，操作次数为 \(O(\log a_i)\)，总计 \(O(n \log a_i)\)，最坏 \(O(n \log 10^7)\)。  
+  - 两次 DFS 遍历树：\(O(n)\)。  
+  - 最终排序答案列表：\(O(k \log k) \le O(n \log n)\)。  
+  综合时间复杂度为 \(O(M + n \log n)\)，其中 \(M = 10^7\)。
+
+- **空间复杂度**  
+  - 线性筛需要存储每个数的最小质因子，数组大小为 \(M + 1\)，空间 \(O(M)\)。  
+  - 邻接表存储树：\(O(n)\)。  
+  - 辅助数组 `a`、`need` 等：\(O(n)\)。  
+  总空间复杂度为 \(O(M + n)\)，在 \(M = 10^7\) 时约 40 MB，可以接受。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(300000)
+
+def solve():
+    input_data = sys.stdin.read().strip().split()
+    if not input_data:
+        return
+    it = iter(input_data)
+    n = int(next(it))
+    a = [0] * (n + 1)
+    for i in range(1, n + 1):
+        a[i] = int(next(it))
+    
+    # ---------- 线性筛预处理最小质因子 ----------
+    MAXV = 10000000
+    minp = [0] * (MAXV + 1)
+    primes = []
+    for i in range(2, MAXV + 1):
+        if minp[i] == 0:
+            minp[i] = i
+            primes.append(i)
+        for p in primes:
+            if p * i > MAXV:
+                break
+            minp[p * i] = p
+            if i % p == 0:
+                break
+
+    # ---------- 计算每个节点的特征类型（不同质因子个数）----------
+    for i in range(1, n + 1):
+        val = a[i]
+        s = set()
+        while val > 1:
+            p = minp[val]
+            s.add(p)
+            # 除去所有因子 p，原代码中直接除了一次，这里除尽更清晰
+            while val % p == 0:
+                val //= p
+        a[i] = len(s)
+
+    # ---------- 建图 ----------
+    g = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u = int(next(it))
+        v = int(next(it))
+        g[u].append(v)
+        g[v].append(u)
+
+    # need[u] 表示 u 到父节点的边是否为关键边（根节点始终为 False）
+    need = [False] * (n + 1)
+
+    # ---------- 第一次 DFS：标记关键边 ----------
+    def dfs1(u, fa):
+        for v in g[u]:
+            if v == fa:
+                continue
+            if a[v] == a[u]:
+                need[v] = True
+            dfs1(v, u)
+
+    dfs1(1, 0)
+
+    ans = []
+
+    # ---------- 第二次 DFS：贪心选择操作 ----------
+    def dfs2(u, fa):
+        child_need = False
+        for v in g[u]:
+            if v == fa:
+                continue
+            if dfs2(v, u):
+                child_need = True
+        if need[u] and not child_need:
+            ans.append(u)
+        # 返回当前子树是否存在需要向上覆盖的需求
+        return child_need or need[u]
+
+    dfs2(1, 0)
+
+    ans.sort()
+    # 输出
+    out_lines = [str(len(ans))]
+    if ans:
+        out_lines.append(' '.join(map(str, ans)))
+    sys.stdout.write('\n'.join(out_lines))
+
+if __name__ == '__main__':
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final int MAXV = 10000000;
+    static int[] minp = new int[MAXV + 1];
+    
+    static int n;
+    static int[] a;
+    static List<Integer>[] g;
+    static boolean[] need;
+    static List<Integer> ans = new ArrayList<>();
+    
+    public static void main(String[] args) throws IOException {
+        // 线性筛
+        List<Integer> primes = new ArrayList<>();
+        for (int i = 2; i <= MAXV; i++) {
+            if (minp[i] == 0) {
+                minp[i] = i;
+                primes.add(i);
+            }
+            for (int p : primes) {
+                if ((long) p * i > MAXV) break;
+                minp[p * i] = p;
+                if (i % p == 0) break;
+            }
+        }
+        
+        // 输入
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(br.readLine());
+        a = new int[n + 1];
+        String[] vals = br.readLine().split(" ");
+        for (int i = 1; i <= n; i++) {
+            a[i] = Integer.parseInt(vals[i - 1]);
+        }
+        
+        // 特征类型
+        for (int i = 1; i <= n; i++) {
+            int val = a[i];
+            Set<Integer> set = new HashSet<>();
+            while (val > 1) {
+                int p = minp[val];
+                set.add(p);
+                while (val % p == 0) val /= p;
+            }
+            a[i] = set.size();
+        }
+        
+        // 建图
+        g = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) g[i] = new ArrayList<>();
+        for (int i = 0; i < n - 1; i++) {
+            String[] uv = br.readLine().split(" ");
+            int u = Integer.parseInt(uv[0]), v = Integer.parseInt(uv[1]);
+            g[u].add(v);
+            g[v].add(u);
+        }
+        br.close();
+        
+        need = new boolean[n + 1];
+        dfs1(1, 0);
+        dfs2(1, 0);
+        
+        Collections.sort(ans);
+        StringBuilder sb = new StringBuilder();
+        sb.append(ans.size()).append('\n');
+        if (!ans.isEmpty()) {
+            for (int i = 0; i < ans.size(); i++) {
+                sb.append(ans.get(i));
+                if (i != ans.size() - 1) sb.append(' ');
+            }
+        }
+        // 如果 ans 为空，只输出第一行的 0 和换行，不附加其他内容
+        System.out.print(sb.toString());
+    }
+    
+    static void dfs1(int u, int fa) {
+        for (int v : g[u]) {
+            if (v == fa) continue;
+            if (a[v] == a[u]) need[v] = true;
+            dfs1(v, u);
+        }
+    }
+    
+    static boolean dfs2(int u, int fa) {
+        boolean childNeed = false;
+        for (int v : g[u]) {
+            if (v == fa) continue;
+            if (dfs2(v, u)) childNeed = true;
+        }
+        if (need[u] && !childNeed) {
+            ans.add(u);
+        }
+        return childNeed || need[u];
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAXV = 10000000;
+int minp[MAXV + 1];
+vector<int> primes;
+
+void linear_sieve() {
+    for (int i = 2; i <= MAXV; ++i) {
+        if (!minp[i]) {
+            minp[i] = i;
+            primes.push_back(i);
+        }
+        for (int p : primes) {
+            if (1LL * p * i > MAXV) break;
+            minp[p * i] = p;
+            if (i % p == 0) break;
+        }
+    }
+}
+
+int count_distinct_factors(int x) {
+    unordered_set<int> s;
+    while (x > 1) {
+        int p = minp[x];
+        s.insert(p);
+        while (x % p == 0) x /= p;
+    }
+    return s.size();
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    linear_sieve();
+    
+    int n;
+    cin >> n;
+    vector<int> a(n + 1);
+    for (int i = 1; i <= n; ++i) {
+        cin >> a[i];
+        a[i] = count_distinct_factors(a[i]);
+    }
+    
+    vector<vector<int>> g(n + 1);
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+    
+    vector<bool> need(n + 1, false);
+    // 第一次 DFS：标记关键边
+    function<void(int, int)> dfs1 = [&](int u, int fa) {
+        for (int v : g[u]) {
+            if (v == fa) continue;
+            if (a[v] == a[u]) need[v] = true;
+            dfs1(v, u);
+        }
+    };
+    dfs1(1, 0);
+    
+    vector<int> ans;
+    // 第二次 DFS：贪心选择操作
+    function<bool(int, int)> dfs2 = [&](int u, int fa) -> bool {
+        bool child_need = false;
+        for (int v : g[u]) {
+            if (v == fa) continue;
+            if (dfs2(v, u)) child_need = true;
+        }
+        if (need[u] && !child_need)
+            ans.push_back(u);
+        return child_need || need[u];
+    };
+    dfs2(1, 0);
+    
+    sort(ans.begin(), ans.end());
+    
+    cout << ans.size() << '\n';
+    if (!ans.empty()) {
+        for (size_t i = 0; i < ans.size(); ++i) {
+            cout << ans[i];
+            if (i + 1 < ans.size()) cout << ' ';
+        }
+        cout << '\n';
+    }
+    return 0;
+}
+```

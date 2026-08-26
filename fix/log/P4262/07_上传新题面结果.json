@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4262",
+  "title": "第1题-双向接缝",
+  "docId": 3340,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "字符串",
+    "KMP"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "KMP算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

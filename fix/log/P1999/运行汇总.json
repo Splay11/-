@@ -1,0 +1,11 @@
+{
+  "pid": "P1999",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:42:15",
+  "end_time": "2026-08-19 19:42:21",
+  "new_title": "冷链窗口限载",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

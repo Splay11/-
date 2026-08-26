@@ -1,0 +1,254 @@
+## 解题思路
+
+1. **最少操作次数分析**  
+   每次操作仅能将某台服务器的负载值增加 `1` 或减少 `1`，因此想让所有服务器的负载值变为相同，总操作次数等于  
+   $$\sum_{i=1}^{n} |L_i - X|$$
+   其中 \(X\) 为目标负载值。当 \(n\) 为奇数时，取 \(X\) 为所有 \(L_i\) 的中位数可使该和最小。记该中位数为 \(T\)。
+
+2. **最小代价策略**  
+   每次对服务器 \(i\) 进行增减操作，代价等于所选连通集合内所有服务器的代价系数之和。为了使总代价最小，对服务器 \(i\) 的每一次操作都应选择一个包含 \(i\) 且总代价系数之和最小的连通集合。  
+   记 \(\text{best}[i]\) 为包含服务器 \(i\) 的连通集合的最小代价系数之和。则保证最少操作次数下的最小总代价为  
+   $$\sum_{i=1}^{n} |L_i - T| \times \text{best}[i]$$
+
+3. **计算 \(\text{best}[i]\) —— 树形 DP 换根**  
+   - **定义**：对于每台服务器 \(u\)，定义 \(f[u]\) 为以 \(u\) 为根，**仅考虑其子树方向**（即 \(u\) 以及其子孙）时，包含 \(u\) 的最小连通块代价系数之和。  
+     递推：
+     $$f[u] = C_u + \sum_{v \in \text{child}(u)} \min(0, f[v])$$
+     含义：\(u\) 自身的代价系数必选，对于每个子节点 \(v\)，只有当包含 \(v\) 带来的增益为负（即贡献负的最小和）时才将其纳入连通块。
+   - **第一遍 DFS**：自底向上计算所有 \(f[u]\)。
+   - **第二遍 DFS（换根）**：令 \(\text{ans}[u]\) 为考虑整棵树时包含 \(u\) 的最小连通块代价系数之和。  
+     对于根节点 \(1\)，\(\text{ans}[1] = f[1]\)。  
+     对于子节点 \(v\)，假设其父节点为 \(u\)，则除去子树 \(v\) 后父方向的最小贡献为  
+     $$\text{without} = \text{ans}[u] - \min(0, f[v])$$
+     那么 \(\text{ans}[v] = C_v + \sum_{w \in \text{child}(v)} \min(0, f[w]) + \min(0, \text{without})\)，  
+     即子节点自身、子节点子树方向，再加上父方向上可能带来的负贡献。最终 \(\text{best}[i] = \text{ans}[i]\)。
+
+4. **汇总输出**  
+   - 排序 \(L\) 数组，取出中位数 \(T\)。  
+   - 执行两遍 DFS 计算出每个服务器的 \(\text{best}[i]\)。  
+   - 计算并输出总代价 \(\sum_{i=1}^{n} |L_i - T| \times \text{best}[i]\)。
+
+## 复杂度分析
+
+- **时间复杂度**：\(O(n \log n)\)。排序寻找中位数需要 \(O(n \log n)\)，两遍 DFS 各自复杂度为 \(O(n)\)。  
+- **空间复杂度**：\(O(n)\)。需要存储邻接表、\(L\)、\(C\)、\(f\)、\(\text{ans}\) 等辅助数组，均为 \(O(n)\)。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(10**7)
+
+def main():
+    data = sys.stdin.read().split()
+    it = iter(data)
+    n = int(next(it))
+    L = [0] * n
+    C = [0] * n
+    for i in range(n):
+        L[i] = int(next(it))
+    for i in range(n):
+        C[i] = int(next(it))
+    adj = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        u = int(next(it)) - 1
+        v = int(next(it)) - 1
+        adj[u].append(v)
+        adj[v].append(u)
+
+    # 中位数
+    sorted_L = sorted(L)
+    T = sorted_L[n // 2]
+
+    f = [0] * n
+    ans = [0] * n
+
+    # 向下 DFS 计算 f
+    def dfs1(u, p):
+        f[u] = C[u]
+        for v in adj[u]:
+            if v == p:
+                continue
+            dfs1(v, u)
+            f[u] += min(0, f[v])
+
+    # 换根 DFS 计算 ans
+    def dfs2(u, p):
+        if p == -1:
+            ans[u] = f[u]
+        for v in adj[u]:
+            if v == p:
+                continue
+            without_v = ans[u] - min(0, f[v])
+            res = C[v]
+            for w in adj[v]:
+                if w == u:
+                    continue
+                res += min(0, f[w])
+            res += min(0, without_v)
+            ans[v] = res
+            dfs2(v, u)
+
+    dfs1(0, -1)
+    dfs2(0, -1)
+
+    total = 0
+    for i in range(n):
+        total += abs(L[i] - T) * ans[i]
+    print(total)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int n;
+    static int[] L, C;
+    static List<Integer>[] adj;
+    static long[] f, ans;
+
+    static void dfs1(int u, int p) {
+        f[u] = C[u];
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            dfs1(v, u);
+            f[u] += Math.min(0, f[v]);
+        }
+    }
+
+    static void dfs2(int u, int p) {
+        if (p == -1) ans[u] = f[u];
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            long withoutV = ans[u] - Math.min(0, f[v]);
+            long res = C[v];
+            for (int w : adj[v]) {
+                if (w == u) continue;
+                res += Math.min(0, f[w]);
+            }
+            res += Math.min(0, withoutV);
+            ans[v] = res;
+            dfs2(v, u);
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(br.readLine().trim());
+        L = new int[n];
+        C = new int[n];
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < n; i++) L[i] = Integer.parseInt(st.nextToken());
+
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < n; i++) C[i] = Integer.parseInt(st.nextToken());
+
+        adj = new ArrayList[n];
+        for (int i = 0; i < n; i++) adj[i] = new ArrayList<>();
+        for (int i = 0; i < n - 1; i++) {
+            st = new StringTokenizer(br.readLine());
+            int u = Integer.parseInt(st.nextToken()) - 1;
+            int v = Integer.parseInt(st.nextToken()) - 1;
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+
+        int[] sortedL = Arrays.copyOf(L, n);
+        Arrays.sort(sortedL);
+        int T = sortedL[n / 2];
+
+        f = new long[n];
+        ans = new long[n];
+        dfs1(0, -1);
+        dfs2(0, -1);
+
+        long total = 0;
+        for (int i = 0; i < n; i++) {
+            total += (long) Math.abs(L[i] - T) * ans[i];
+        }
+        System.out.println(total);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int> L(n), C(n);
+    for (int i = 0; i < n; ++i) cin >> L[i];
+    for (int i = 0; i < n; ++i) cin >> C[i];
+
+    vector<vector<int>> adj(n);
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u; --v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    // 求中位数 T
+    vector<int> sortedL = L;
+    sort(sortedL.begin(), sortedL.end());
+    int T = sortedL[n / 2];
+
+    vector<ll> f(n), ans(n);
+
+    // 向下 DFS 计算 f
+    function<void(int,int)> dfs1 = [&](int u, int p) {
+        f[u] = C[u];
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            dfs1(v, u);
+            f[u] += min(0LL, f[v]);
+        }
+    };
+
+    // 换根 DFS 计算 ans
+    function<void(int,int)> dfs2 = [&](int u, int p) {
+        if (p == -1) ans[u] = f[u];
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            ll without_v = ans[u] - min(0LL, f[v]);
+            ll res = C[v];
+            for (int w : adj[v]) {
+                if (w == u) continue;
+                res += min(0LL, f[w]);
+            }
+            res += min(0LL, without_v);
+            ans[v] = res;
+            dfs2(v, u);
+        }
+    };
+
+    dfs1(0, -1);
+    dfs2(0, -1);
+
+    ll total = 0;
+    for (int i = 0; i < n; ++i) {
+        total += ll(abs(L[i] - T)) * ans[i];
+    }
+    cout << total;
+
+    return 0;
+}
+```

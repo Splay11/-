@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "4\n1\nZ\n2\nbC\n3\nXyZ\n4\nAbAb",
+      "output": "4 4",
+      "explanation": "`Z` 长度为 `1`，是斑马串；`bC` 为小写加大写，是斑马串；`XyZ` 与 `AbAb` 均已大小写交替。四个都是斑马串，因此可修斑马串也是 `4` 个。"
+    },
+    {
+      "input": "3\n2\nqq\n5\nqQqQq\n3\nmMm",
+      "output": "2 3",
+      "explanation": "`qq` 两个小写，翻转一处可变成斑马串，故只计入可修；`qQqQq` 已交替；`mMm` 已交替。"
+    }
+  ]
+}

@@ -1,0 +1,351 @@
+## 解题思路
+
+给定互不相同的正整数数组 `a1…an`，要把所有元素分到两个**非空**数组 `b` 与 `c` 中，使得：
+对 `b` 的任意非空子序列 `d` 与 `c` 的任意非空子序列 `e`，**d 中所有元素的乘积**都不是**e 中所有元素的乘积**的整数倍。
+
+### 关键观察
+
+若存在某个素数 `p`，使得 `c` 中的每个数都含有素因子 `p`，而 `b` 中的所有数都**不含**素因子 `p`，则任取 `d ⊆ b`、`e ⊆ c`：
+
+* `e` 的乘积一定含有素因子 `p`；
+* `d` 的乘积不含素因子 `p`；
+  因此 `d` 的乘积不可能是 `e` 的乘积的整数倍。
+  只要能找到这样的 `p` 并据此分组，就满足题意。
+
+### 构造策略（总能成功）
+
+1. 用最小素因子筛（SPF）在 `1e6` 范围内预处理质因数分解。
+2. 对每个数分解出**互异**素因子集合，统计每个素数 `p` 出现于多少个元素中（记 `cnt[p]`）。
+3. 若存在素数 `p` 使得 `0 < cnt[p] < n`：
+
+   * 令 `c = { 所有能被 p 整除的数 }`，`b = 其余`。
+   * 此时两组均非空，且满足上面的充分必要条件，直接输出。
+4. 否则，对所有出现过的素数 `p` 都有 `cnt[p] = n`，即**所有数拥有相同的素因子集合**（仅指数可能不同）。
+
+   * 取数组中的**最小值** `m` 单独放入 `b`，其余元素放入 `c`。
+   * 证明要点：对任意 `y ∈ c`，必存在某个素数在 `y` 中的指数严格大于在 `m` 中的指数（否则将有 `y | m` 且 `y < m`，与“`m` 为最小值”矛盾）。
+     于是对任何 `e ⊆ c`，其乘积在该素数上的指数 ≥ `y` 的指数 > `m` 的指数，故 `b` 的乘积（即 `m`）不可能是 `e` 的乘积的整数倍。
+   * 两组非空（`n ≥ 2`），性质成立。
+
+> 示例中的“奇偶分组”（把奇数放 `b`、偶数放 `c`）正是第 3 步在 `p=2` 时的特例。
+
+### 实现要点
+
+* 预筛 `spf[x]` 为 `x` 的最小素因子，分解时不断除以 `spf[x]` 并去重即可得到互异素因子集合。
+* 统计时仅对实际出现的素数计数，并把这些素数存入列表，便于用例结束时快速清理或遍历（避免 `O(1e6)` 的全量清空）。
+* 输出任一合法解即可：先输出 `b` 的长度与元素，再输出 `c` 的长度与元素。
+
+## 复杂度分析
+
+* 预处理 SPF：`O(MAX log log MAX)`，`MAX = 1e6`。
+* 单个数分解：均摊 `O(log a_i)`（按素因子个数计）。
+* 单个用例：`O(n log MAX)` 时间，`O(n + #primes)` 空间（存数组与本用例出现过的素数集合）。
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+# 预处理最小素因子 SPF
+MAXA = 10**6
+spf = list(range(MAXA + 1))
+for i in range(2, int(MAXA ** 0.5) + 1):
+    if spf[i] == i:
+        step = i
+        start = i * i
+        for x in range(start, MAXA + 1, step):
+            if spf[x] == x:
+                spf[x] = i
+
+def factor_distinct_primes(x):
+    """分解x的不同素因子，使用spf并去重"""
+    res = []
+    while x > 1:
+        p = spf[x]
+        res.append(p)
+        while x % p == 0:
+            x //= p
+    # 去重（spf保证递增）
+    uniq = []
+    last = -1
+    for v in res:
+        if v != last:
+            uniq.append(v)
+            last = v
+    return uniq
+
+def solve():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    it = iter(data)
+    T = next(it)
+    out_lines = []
+    for _ in range(T):
+        n = next(it)
+        arr = [next(it) for __ in range(n)]
+
+        # 统计每个素数出现次数
+        cnt = {}
+        primes_of = []   # 每个数的素因子集合
+        used_primes = [] # 本用例出现过的素数（用于遍历）
+        for v in arr:
+            ps = factor_distinct_primes(v)
+            primes_of.append(ps)
+            for p in ps:
+                if p not in cnt:
+                    cnt[p] = 0
+                    used_primes.append(p)
+                cnt[p] += 1
+
+        # 尝试找到 0 < cnt[p] < n 的素数
+        chosen = -1
+        for p in used_primes:
+            c = cnt[p]
+            if 0 < c < n:
+                chosen = p
+                break
+
+        b, c = [], []
+        if chosen != -1:
+            # c 为能被 chosen 整除的数，b 为其余
+            for v in arr:
+                if v % chosen == 0:
+                    c.append(v)
+                else:
+                    b.append(v)
+        else:
+            # 所有素数都整除所有数：选最小值入 b，其余入 c
+            mn = min(arr)
+            b = [mn]
+            c = [v for v in arr if v != mn]
+
+        # 输出
+        out_lines.append(str(len(b)))
+        out_lines.append(" ".join(map(str, b)) if b else "")
+        out_lines.append(str(len(c)))
+        out_lines.append(" ".join(map(str, c)) if c else "")
+
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+/* ACM 风格：主类名 Main，读入输出在 main，核心逻辑放外部函数 */
+public class Main {
+    static final int MAXA = 1000000;
+    static int[] spf = new int[MAXA + 1];
+
+    // 预处理最小素因子
+    static void sieve() {
+        for (int i = 0; i <= MAXA; i++) spf[i] = i;
+        for (int i = 2; i * i <= MAXA; i++) {
+            if (spf[i] == i) {
+                for (int x = i * i; x <= MAXA; x += i) {
+                    if (spf[x] == x) spf[x] = i;
+                }
+            }
+        }
+    }
+
+    // 分解为不同素因子（升序且去重）
+    static ArrayList<Integer> factorDistinctPrimes(int x) {
+        ArrayList<Integer> ps = new ArrayList<>();
+        while (x > 1) {
+            int p = spf[x];
+            ps.add(p);
+            while (x % p == 0) x /= p;
+        }
+        return ps; // 已去重
+    }
+
+    public static void main(String[] args) throws Exception {
+        sieve();
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder out = new StringBuilder();
+        StringTokenizer st;
+
+        st = new StringTokenizer(br.readLine());
+        int T = Integer.parseInt(st.nextToken());
+
+        while (T-- > 0) {
+            // 读 n
+            st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            // 读数组
+            int[] a = new int[n];
+            int idx = 0;
+            while (idx < n) {
+                st = new StringTokenizer(br.readLine());
+                while (st.hasMoreTokens() && idx < n) {
+                    a[idx++] = Integer.parseInt(st.nextToken());
+                }
+            }
+
+            // 统计每个素数出现次数
+            HashMap<Integer, Integer> cnt = new HashMap<>();
+            ArrayList<ArrayList<Integer>> primesOf = new ArrayList<>(n);
+            ArrayList<Integer> used = new ArrayList<>();
+            for (int v : a) {
+                ArrayList<Integer> ps = factorDistinctPrimes(v);
+                primesOf.add(ps);
+                for (int p : ps) {
+                    Integer c = cnt.get(p);
+                    if (c == null) {
+                        cnt.put(p, 1);
+                        used.add(p);
+                    } else {
+                        cnt.put(p, c + 1);
+                    }
+                }
+            }
+
+            int chosen = -1;
+            for (int p : used) {
+                int c = cnt.get(p);
+                if (0 < c && c < n) {
+                    chosen = p;
+                    break;
+                }
+            }
+
+            ArrayList<Integer> b = new ArrayList<>();
+            ArrayList<Integer> c = new ArrayList<>();
+            if (chosen != -1) {
+                for (int v : a) {
+                    if (v % chosen == 0) c.add(v);
+                    else b.add(v);
+                }
+            } else {
+                int mn = a[0];
+                for (int v : a) mn = Math.min(mn, v);
+                b.add(mn);
+                for (int v : a) if (v != mn) c.add(v);
+            }
+
+            // 输出：先 b，再 c
+            out.append(b.size()).append('\n');
+            for (int i = 0; i < b.size(); i++) {
+                if (i > 0) out.append(' ');
+                out.append(b.get(i));
+            }
+            out.append('\n');
+            out.append(c.size()).append('\n');
+            for (int i = 0; i < c.size(); i++) {
+                if (i > 0) out.append(' ');
+                out.append(c.get(i));
+            }
+            out.append('\n');
+        }
+
+        System.out.print(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+/* ACM 风格：主函数读入输出，外部函数实现核心逻辑 */
+const int MAXA = 1000000;
+int spf[MAXA + 1]; // 最小素因子
+
+// 预处理最小素因子
+void sieve() {
+    for (int i = 0; i <= MAXA; ++i) spf[i] = i;
+    for (int i = 2; i * i <= MAXA; ++i) {
+        if (spf[i] == i) {
+            for (int x = i * i; x <= MAXA; x += i) {
+                if (spf[x] == x) spf[x] = i;
+            }
+        }
+    }
+}
+
+// 分解不同素因子（已去重且升序）
+vector<int> factorDistinctPrimes(int x) {
+    vector<int> ps;
+    while (x > 1) {
+        int p = spf[x];
+        ps.push_back(p);
+        while (x % p == 0) x /= p;
+    }
+    return ps;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    sieve();
+
+    int T; 
+    if (!(cin >> T)) return 0;
+    while (T--) {
+        int n; cin >> n;
+        vector<int> a(n);
+        for (int i = 0; i < n; ++i) cin >> a[i];
+
+        unordered_map<int,int> cnt; cnt.reserve(n*2);
+        vector<vector<int>> primesOf(n);
+        vector<int> used;
+
+        // 统计素数出现次数
+        for (int i = 0; i < n; ++i) {
+            primesOf[i] = factorDistinctPrimes(a[i]);
+            for (int p : primesOf[i]) {
+                auto it = cnt.find(p);
+                if (it == cnt.end()) {
+                    cnt.emplace(p, 1);
+                    used.push_back(p);
+                } else {
+                    it->second++;
+                }
+            }
+        }
+
+        int chosen = -1;
+        for (int p : used) {
+            int c = cnt[p];
+            if (0 < c && c < n) { chosen = p; break; }
+        }
+
+        vector<int> b, c;
+        if (chosen != -1) {
+            for (int v : a) {
+                if (v % chosen == 0) c.push_back(v);
+                else b.push_back(v);
+            }
+        } else {
+            int mn = *min_element(a.begin(), a.end());
+            b.push_back(mn);
+            for (int v : a) if (v != mn) c.push_back(v);
+        }
+
+        // 输出：先 b 再 c
+        cout << (int)b.size() << "\n";
+        for (int i = 0; i < (int)b.size(); ++i) {
+            if (i) cout << ' ';
+            cout << b[i];
+        }
+        cout << "\n";
+        cout << (int)c.size() << "\n";
+        for (int i = 0; i < (int)c.size(); ++i) {
+            if (i) cout << ' ';
+            cout << c[i];
+        }
+        cout << "\n";
+    }
+    return 0;
+}
+```

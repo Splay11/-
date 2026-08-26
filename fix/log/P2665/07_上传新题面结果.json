@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2665",
+  "title": "第3题-环上共鸣",
+  "docId": 2182,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "其他",
+    "位运算"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "二分算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,483 @@
+## 解题思路
+
+本题中的绩效评优操作具有一个关键性质：每次赋予的新绩效分 $n+j$ 严格大于所有初始绩效分以及之前所有轮次中赋予的绩效分。因此，在每轮评优中，需要找出子树中“当前绩效分最小”的员工，可以转化为在子树对应的区间上进行最小值查询。
+
+主要算法思路如下：
+
+1. **树的 DFS 序**  
+   公司组织架构是一棵以 CEO（编号 1）为根的树。输入给出的是无向边，需要先从根节点 1 开始进行一次深度优先遍历，得到：
+   - `dfn[u]`：员工 $u$ 在 DFS 序中的位置（时间戳）。
+   - `out[u]`：员工 $u$ 的子树在 DFS 序中的结束位置。
+   - `order[t]`：DFS 序第 $t$ 个位置对应的员工编号。  
+   这样，员工 $x$ 及其所有直接或间接下属（即子树）在 DFS 序中恰好对应一个连续区间 $[\,dfn[x],\,out[x]\,]$。
+
+2. **线段树维护区间最小值**  
+   按照 DFS 序建一棵线段树，每个叶子节点维护一个二元组 $(\text{绩效分},\ \text{员工编号})$。初始时，员工 $i$ 的绩效分为 $i$，因此 `order[pos]` 对应的二元组为 $(pos, order[pos])$。线段树按“绩效分最小，绩效分相同时编号最小”的原则合并区间信息。
+
+3. **逐轮处理评优操作**  
+   对于第 $j$ 轮指定的员工 $x$：
+   - 在线段树上查询区间 $[\,dfn[x],\,out[x]\,]$ 的最小二元组，得到绩效分最小的员工 $u$。
+   - 将该员工 $u$ 的绩效分更新为 $n+j$，并在线段树上单点修改位置 $dfn[u]$ 的值为 $(n+j, u)$。
+   - 最后一轮结束后，每个员工都保留最后一次修改后的绩效分。
+
+4. **输出结果**  
+   所有 $m$ 轮操作完成后，按员工编号 $1 \sim n$ 的顺序输出各自的最终绩效分。
+
+## 复杂度分析
+
+设员工总数为 $n$，评优轮次为 $m$。
+
+- 建树并求 DFS 序：$O(n)$。
+- 建线段树：$O(n)$。
+- 每轮操作需要进行一次区间最小值查询和一次单点修改，线段树操作均为 $O(\log n)$，共 $m$ 轮，因此操作总复杂度 $O(m \log n)$。
+- 整体时间复杂度为 $O((n+m)\log n)$。
+- 空间复杂度为 $O(n)$，用于存储邻接表、DFS 序数组和线段树。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+sys.setrecursionlimit(1 << 25)
+
+INF = 10**18
+
+# 线段树：维护区间最小值 (绩效分, 员工编号)
+class SegmentTree:
+    def __init__(self, arr):
+        self.n = len(arr) - 1       # arr 从下标 1 开始
+        self.tree = [(INF, 0)] * (self.n * 4)
+        self.build(1, 1, self.n, arr)
+
+    def build(self, idx, l, r, arr):
+        if l == r:
+            self.tree[idx] = arr[l]
+            return
+        mid = (l + r) // 2
+        self.build(idx * 2, l, mid, arr)
+        self.build(idx * 2 + 1, mid + 1, r, arr)
+        self.tree[idx] = min(self.tree[idx * 2], self.tree[idx * 2 + 1])
+
+    def update(self, idx, l, r, pos, val):
+        if l == r:
+            self.tree[idx] = val
+            return
+        mid = (l + r) // 2
+        if pos <= mid:
+            self.update(idx * 2, l, mid, pos, val)
+        else:
+            self.update(idx * 2 + 1, mid + 1, r, pos, val)
+        self.tree[idx] = min(self.tree[idx * 2], self.tree[idx * 2 + 1])
+
+    def query(self, idx, l, r, ql, qr):
+        if ql <= l and r <= qr:
+            return self.tree[idx]
+        mid = (l + r) // 2
+        res = (INF, 0)
+        if ql <= mid:
+            res = min(res, self.query(idx * 2, l, mid, ql, qr))
+        if qr > mid:
+            res = min(res, self.query(idx * 2 + 1, mid + 1, r, ql, qr))
+        return res
+
+
+# 求 DFS 序，将子树映射为连续区间
+def dfs(u, parent, graph, dfn, out, order, timer):
+    timer[0] += 1
+    dfn[u] = timer[0]
+    order[timer[0]] = u
+    for v in graph[u]:
+        if v != parent:
+            dfs(v, u, graph, dfn, out, order, timer)
+    out[u] = timer[0]
+
+
+# 处理题目要求的功能
+def solve(n, m, edges, ops):
+    graph = [[] for _ in range(n + 1)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+
+    dfn = [0] * (n + 1)
+    out = [0] * (n + 1)
+    order = [0] * (n + 1)
+    timer = [0]
+
+    dfs(1, 0, graph, dfn, out, order, timer)
+
+    # 按 DFS 序建立初始数组
+    arr = [None] * (n + 1)
+    ans = [0] * (n + 1)
+    for pos in range(1, n + 1):
+        u = order[pos]
+        # 初始绩效分等于员工编号
+        arr[pos] = (u, u)
+        ans[u] = u
+
+    seg = SegmentTree(arr)
+
+    # 依次处理 m 轮评优
+    for j in range(1, m + 1):
+        x = ops[j - 1]
+        l, r = dfn[x], out[x]
+        _, u = seg.query(1, 1, n, l, r)    # 找出子树中绩效分最低的员工
+        new_val = n + j                    # 第 j 轮评优后的新绩效分
+        ans[u] = new_val
+        seg.update(1, 1, n, dfn[u], (new_val, u))
+
+    return ans[1:]
+
+
+def main():
+    input = sys.stdin.readline
+    n, m = map(int, input().split())
+    edges = [tuple(map(int, input().split())) for _ in range(n - 1)]
+    ops = [int(input()) for _ in range(m)]
+
+    res = solve(n, m, edges, ops)
+    print(*res)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static class FastScanner {
+        private final InputStream in = System.in;
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) return -1;
+            }
+            return buffer[ptr++];
+        }
+
+        int nextInt() throws IOException {
+            int c;
+            do {
+                c = read();
+            } while (c <= ' ');
+
+            int sign = 1;
+            if (c == '-') {
+                sign = -1;
+                c = read();
+            }
+
+            int val = 0;
+            while (c > ' ') {
+                val = val * 10 + c - '0';
+                c = read();
+            }
+            return val * sign;
+        }
+    }
+
+    static class Pair {
+        int val;
+        int node;
+
+        Pair(int val, int node) {
+            this.val = val;
+            this.node = node;
+        }
+    }
+
+    static class SegmentTree {
+        Pair[] tree;
+
+        SegmentTree(Pair[] arr, int n) {
+            tree = new Pair[n * 4];
+            build(1, 1, n, arr);
+        }
+
+        void build(int idx, int l, int r, Pair[] arr) {
+            if (l == r) {
+                tree[idx] = arr[l];
+                return;
+            }
+            int mid = (l + r) >> 1;
+            build(idx << 1, l, mid, arr);
+            build(idx << 1 | 1, mid + 1, r, arr);
+            tree[idx] = minPair(tree[idx << 1], tree[idx << 1 | 1]);
+        }
+
+        void update(int idx, int l, int r, int pos, Pair val) {
+            if (l == r) {
+                tree[idx] = val;
+                return;
+            }
+            int mid = (l + r) >> 1;
+            if (pos <= mid) {
+                update(idx << 1, l, mid, pos, val);
+            } else {
+                update(idx << 1 | 1, mid + 1, r, pos, val);
+            }
+            tree[idx] = minPair(tree[idx << 1], tree[idx << 1 | 1]);
+        }
+
+        Pair query(int idx, int l, int r, int ql, int qr) {
+            if (ql <= l && r <= qr) {
+                return tree[idx];
+            }
+            int mid = (l + r) >> 1;
+            Pair res = new Pair(Integer.MAX_VALUE, 0);
+            if (ql <= mid) {
+                res = minPair(res, query(idx << 1, l, mid, ql, qr));
+            }
+            if (qr > mid) {
+                res = minPair(res, query(idx << 1 | 1, mid + 1, r, ql, qr));
+            }
+            return res;
+        }
+
+        Pair minPair(Pair a, Pair b) {
+            if (a.val != b.val) {
+                return a.val < b.val ? a : b;
+            }
+            return a.node < b.node ? a : b;
+        }
+    }
+
+    static List<Integer>[] graph;
+    static int[] dfn, out, order;
+    static int timer = 0;
+
+    // 求 DFS 序，把子树映射成连续区间
+    static void dfs(int u, int parent) {
+        dfn[u] = ++timer;
+        order[timer] = u;
+        for (int v : graph[u]) {
+            if (v != parent) {
+                dfs(v, u);
+            }
+        }
+        out[u] = timer;
+    }
+
+    static int[] solve(int n, int m, int[][] edges, int[] ops) {
+        graph = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        for (int[] e : edges) {
+            int u = e[0], v = e[1];
+            graph[u].add(v);
+            graph[v].add(u);
+        }
+
+        dfn = new int[n + 1];
+        out = new int[n + 1];
+        order = new int[n + 1];
+        timer = 0;
+        dfs(1, 0);
+
+        Pair[] arr = new Pair[n + 1];
+        int[] ans = new int[n + 1];
+
+        // 按 DFS 序建立初始数组
+        for (int pos = 1; pos <= n; pos++) {
+            int u = order[pos];
+            arr[pos] = new Pair(u, u);   // 初始绩效分等于员工编号
+            ans[u] = u;
+        }
+
+        SegmentTree seg = new SegmentTree(arr, n);
+
+        // 依次处理 m 轮评优
+        for (int j = 1; j <= m; j++) {
+            int x = ops[j];
+            Pair p = seg.query(1, 1, n, dfn[x], out[x]);
+            int u = p.node;
+            int newVal = n + j;           // 第 j 轮评优后的新绩效分
+            ans[u] = newVal;
+            seg.update(1, 1, n, dfn[u], new Pair(newVal, u));
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        int n = fs.nextInt();
+        int m = fs.nextInt();
+
+        int[][] edges = new int[n - 1][2];
+        for (int i = 0; i < n - 1; i++) {
+            edges[i][0] = fs.nextInt();
+            edges[i][1] = fs.nextInt();
+        }
+
+        int[] ops = new int[m + 1];
+        for (int i = 1; i <= m; i++) {
+            ops[i] = fs.nextInt();
+        }
+
+        int[] res = solve(n, m, edges, ops);
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= n; i++) {
+            if (i > 1) sb.append(' ');
+            sb.append(res[i]);
+        }
+        System.out.println(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int val, id;
+    // 线段树里按绩效分最小比较，绩效分相同时编号小的优先
+    bool operator < (const Node& other) const {
+        if (val != other.val) return val < other.val;
+        return id < other.id;
+    }
+};
+
+class SegmentTree {
+public:
+    vector<Node> tree;
+
+    SegmentTree(const vector<Node>& arr, int n) {
+        tree.resize(n * 4 + 5);
+        build(1, 1, n, arr);
+    }
+
+    void build(int idx, int l, int r, const vector<Node>& arr) {
+        if (l == r) {
+            tree[idx] = arr[l];
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(idx << 1, l, mid, arr);
+        build(idx << 1 | 1, mid + 1, r, arr);
+        tree[idx] = min(tree[idx << 1], tree[idx << 1 | 1]);
+    }
+
+    void update(int idx, int l, int r, int pos, Node val) {
+        if (l == r) {
+            tree[idx] = val;
+            return;
+        }
+        int mid = (l + r) >> 1;
+        if (pos <= mid) update(idx << 1, l, mid, pos, val);
+        else update(idx << 1 | 1, mid + 1, r, pos, val);
+        tree[idx] = min(tree[idx << 1], tree[idx << 1 | 1]);
+    }
+
+    Node query(int idx, int l, int r, int ql, int qr) {
+        if (ql <= l && r <= qr) return tree[idx];
+        int mid = (l + r) >> 1;
+        Node res = {INT_MAX, 0};
+        if (ql <= mid) res = min(res, query(idx << 1, l, mid, ql, qr));
+        if (qr > mid) res = min(res, query(idx << 1 | 1, mid + 1, r, ql, qr));
+        return res;
+    }
+};
+
+vector<vector<int>> graph;
+vector<int> dfn, outPos, order;
+int timer = 0;
+
+// 求 DFS 序，将子树映射为连续区间
+void dfs(int u, int parent) {
+    dfn[u] = ++timer;
+    order[timer] = u;
+    for (int v : graph[u]) {
+        if (v != parent) {
+            dfs(v, u);
+        }
+    }
+    outPos[u] = timer;
+}
+
+// 处理题目要求的功能
+vector<int> solve(int n, int m, const vector<pair<int, int>>& edges, const vector<int>& ops) {
+    graph.assign(n + 1, vector<int>());
+    for (auto e : edges) {
+        int u = e.first, v = e.second;
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+
+    dfn.assign(n + 1, 0);
+    outPos.assign(n + 1, 0);
+    order.assign(n + 1, 0);
+    timer = 0;
+    dfs(1, 0);
+
+    vector<Node> arr(n + 1);
+    vector<int> ans(n + 1);
+
+    // 按 DFS 序建立初始数组
+    for (int pos = 1; pos <= n; pos++) {
+        int u = order[pos];
+        arr[pos] = {u, u};   // 初始绩效分等于员工编号
+        ans[u] = u;
+    }
+
+    SegmentTree seg(arr, n);
+
+    // 依次处理 m 轮评优
+    for (int j = 1; j <= m; j++) {
+        int x = ops[j - 1];
+        Node p = seg.query(1, 1, n, dfn[x], outPos[x]);
+        int u = p.id;
+        int newVal = n + j;   // 第 j 轮评优后的新绩效分
+        ans[u] = newVal;
+        seg.update(1, 1, n, dfn[u], {newVal, u});
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+
+    vector<pair<int, int>> edges;
+    for (int i = 0; i < n - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        edges.push_back({u, v});
+    }
+
+    vector<int> ops(m);
+    for (int i = 0; i < m; i++) {
+        cin >> ops[i];
+    }
+
+    vector<int> res = solve(n, m, edges, ops);
+
+    for (int i = 1; i <= n; i++) {
+        if (i > 1) cout << ' ';
+        cout << res[i];
+    }
+    cout << '\n';
+
+    return 0;
+}
+```

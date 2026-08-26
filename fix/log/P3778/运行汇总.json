@@ -1,0 +1,11 @@
+{
+  "pid": "P3778",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 15:35:01",
+  "end_time": "2026-08-19 15:35:02",
+  "new_title": "第2题-仪器机时上下界",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

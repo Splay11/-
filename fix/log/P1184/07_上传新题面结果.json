@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1184",
+  "title": "第2题-统一仪表读数",
+  "docId": 190,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

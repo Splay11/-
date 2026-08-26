@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1596",
+  "title": "第1题-共鸣宝石阵",
+  "docId": 619,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "哈希表",
+  "trial_videosol": ""
+}

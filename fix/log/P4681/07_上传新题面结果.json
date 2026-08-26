@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4681",
+  "title": "构造高波动序列",
+  "docId": 3922,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "其他",
+    "数学"
+  ],
+  "alg_tag": "数学",
+  "ai_alg_tags": "数学",
+  "videosol": "",
+  "trial_videosol": ""
+}

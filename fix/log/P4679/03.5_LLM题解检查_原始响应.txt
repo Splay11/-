@@ -1,0 +1,358 @@
+## 解题思路
+
+### 问题转化
+
+对于序列 $a_1, a_2, \dots, a_n$，定义相邻绝对差 $d_i = |a_i - a_{i+1}|$（$1 \le i < n$）。  
+一个连续子序列 $a_l, a_{l+1}, \dots, a_r$ 是 $k$-平稳的，当且仅当其内部所有相邻绝对差均不超过 $k$，即：
+
+$$
+\max_{l \le i < r} d_i \le k
+$$
+
+单个元素（$l=r$）自然满足条件，长度为 $1$。
+
+因此，原问题可以等价转化为一张**链式图**上的连通性问题：
+- 将每个位置 $i$ 看作一个节点；
+- 相邻节点 $i$ 和 $i+1$ 之间有一条边，边权为 $d_i$；
+- 对于一个给定的 $k$，只保留边权 $\le k$ 的边；
+- 此时图中的每一个连通块对应原序列中的一个 $k$-平稳连续子序列，连通块的大小即为该子序列的长度。
+
+于是，**对于每个 $k$，我们只需要支持“逐步加边”并实时维护图中最大连通块的大小**，该大小就是 $k$ 对应的答案。
+
+### 算法设计
+
+若对每个 $k$ 都重新扫描数组，效率很低（$O(n^2)$）。注意到当 $k$ 从小到大递增时，满足条件的边只会增加（边权 $\le k$ 的边越来越多）。因此可以采用**离线排序 + 并查集**的方式一次性求出所有 $k$ 的答案。
+
+具体步骤：
+1. 计算所有相邻差 $d_i = |a_i - a_{i+1}|$，将每条边记录为 $(d_i, i)$，表示连接位置 $i$ 与 $i+1$ 的边。
+2. 将所有边按照边权 $d_i$ 从小到大排序。
+3. 初始化并查集，每个位置自成一个大小为 $1$ 的集合，全局最大连通块大小初始为 $1$。
+4. 从 $k=1$ 到 $k=n$ 依次处理：
+   - 将当前所有边权 $\le k$ 的边加入图中（并查集合并对应的两个节点）；
+   - 每次合并后更新全局最大连通块大小；
+   - 当前全局最大连通块大小即为当 $k$ 为该值时的答案。
+
+由于所有边的插入是随着 $k$ 增加单调进行的，可以使用一个指针 `idx` 指向尚未加入的边，内层循环将符合条件的边全部合并即可。
+
+### 代码实现细节
+
+- 并查集内部维护 `parent` 数组、`size` 数组以及全局 `maxSize`。
+- 合并时采用“按大小合并”的启发式策略，总是将小集合的根挂到大集合的根上，并累加大小、更新 `maxSize`。
+- 路径压缩在查找根节点时进行，以保证接近常数级的操作效率。
+
+最终输出答案序列的第 $i$ 个数对应 $k=i$ 时的最长 $k$-平稳子序列长度。
+
+## 复杂度分析
+
+设每组数据长度为 $n$。
+
+- **时间复杂度**：  
+  计算相邻差 $O(n)$；对 $n-1$ 条边排序 $O(n \log n)$；并查集合并操作共 $O(n)$ 次，每次均摊复杂度接近 $O(1)$（含路径压缩与按大小合并）。  
+  总时间复杂度为 $O(n \log n)$。  
+  题目保证所有测试数据的 $n$ 之和不超过 $2\times 10^5$，完全可行。
+
+- **空间复杂度**：  
+  需要存储原数组、边数组、并查集的 `parent` 和 `size` 数组，均为 $O(n)$ 级别。  
+  因此总空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+class DSU:
+    def __init__(self, n):
+        self.parent = list(range(n + 1))
+        self.size = [1] * (n + 1)
+        self.max_size = 1
+
+    def find(self, x):
+        while self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
+
+    def union(self, x, y):
+        rx = self.find(x)
+        ry = self.find(y)
+        if rx == ry:
+            return
+        # 按大小合并，小集合挂到大集合上
+        if self.size[rx] < self.size[ry]:
+            rx, ry = ry, rx
+        self.parent[ry] = rx
+        self.size[rx] += self.size[ry]
+        if self.size[rx] > self.max_size:
+            self.max_size = self.size[rx]
+
+
+def solve_one_case(n, arr):
+    # 构造边 (边权, 左端点位置)
+    edges = []
+    for i in range(n - 1):
+        diff = abs(arr[i] - arr[i + 1])
+        edges.append((diff, i + 1))  # 连接 i+1 和 i+2
+
+    # 按边权从小到大排序
+    edges.sort()
+
+    dsu = DSU(n)
+    ans = [1] * (n + 1)   # ans[k] 存 k 对应的答案
+
+    idx = 0
+    m = len(edges)
+
+    # 枚举 k = 1 .. n
+    for k in range(1, n + 1):
+        # 将所有边权 <= k 的边加入
+        while idx < m and edges[idx][0] <= k:
+            pos = edges[idx][1]
+            dsu.union(pos, pos + 1)
+            idx += 1
+        ans[k] = dsu.max_size
+
+    return ans[1:]   # 去掉下标 0
+
+
+def main():
+    input = sys.stdin.readline
+    t = int(input().strip())
+    out_lines = []
+    for _ in range(t):
+        n = int(input().strip())
+        arr = list(map(int, input().split()))
+        res = solve_one_case(n, arr)
+        out_lines.append(" ".join(map(str, res)))
+    sys.stdout.write("\n".join(out_lines))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    static class Edge implements Comparable<Edge> {
+        int diff;
+        int pos;
+
+        Edge(int diff, int pos) {
+            this.diff = diff;
+            this.pos = pos;
+        }
+
+        @Override
+        public int compareTo(Edge other) {
+            return this.diff - other.diff;
+        }
+    }
+
+    static class DSU {
+        int[] parent;
+        int[] size;
+        int maxSize;
+
+        DSU(int n) {
+            parent = new int[n + 1];
+            size = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                parent[i] = i;
+                size[i] = 1;
+            }
+            maxSize = 1;
+        }
+
+        int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+
+        void union(int x, int y) {
+            int rx = find(x);
+            int ry = find(y);
+            if (rx == ry) return;
+
+            // 按大小合并
+            if (size[rx] < size[ry]) {
+                int tmp = rx;
+                rx = ry;
+                ry = tmp;
+            }
+            parent[ry] = rx;
+            size[rx] += size[ry];
+            if (size[rx] > maxSize) {
+                maxSize = size[rx];
+            }
+        }
+    }
+
+    static int[] solveOneCase(int n, int[] arr) {
+        Edge[] edges = new Edge[n - 1];
+        for (int i = 0; i < n - 1; i++) {
+            int diff = Math.abs(arr[i] - arr[i + 1]);
+            edges[i] = new Edge(diff, i + 1); // 连接 i+1 和 i+2
+        }
+
+        Arrays.sort(edges);
+
+        DSU dsu = new DSU(n);
+        int[] ans = new int[n + 1]; // ans[k] 存 k 对应的答案
+        int idx = 0;
+
+        for (int k = 1; k <= n; k++) {
+            while (idx < edges.length && edges[idx].diff <= k) {
+                int pos = edges[idx].pos;
+                dsu.union(pos, pos + 1);
+                idx++;
+            }
+            ans[k] = dsu.maxSize;
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        int t = Integer.parseInt(br.readLine().trim());
+        while (t-- > 0) {
+            int n = Integer.parseInt(br.readLine().trim());
+            int[] arr = new int[n];
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < n; i++) {
+                arr[i] = Integer.parseInt(st.nextToken());
+            }
+            int[] ans = solveOneCase(n, arr);
+            for (int k = 1; k <= n; k++) {
+                if (k > 1) sb.append(' ');
+                sb.append(ans[k]);
+            }
+            sb.append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+
+using namespace std;
+
+struct Edge {
+    int diff;
+    int pos;
+
+    bool operator<(const Edge& other) const {
+        return diff < other.diff;
+    }
+};
+
+class DSU {
+public:
+    vector<int> parent;
+    vector<int> sz;
+    int maxSize;
+
+    DSU(int n) {
+        parent.resize(n + 1);
+        sz.assign(n + 1, 1);
+        for (int i = 1; i <= n; i++) {
+            parent[i] = i;
+        }
+        maxSize = 1;
+    }
+
+    int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+
+    void unite(int x, int y) {
+        int rx = find(x);
+        int ry = find(y);
+        if (rx == ry) return;
+
+        // 按大小合并，小集合挂到大集合上
+        if (sz[rx] < sz[ry]) {
+            swap(rx, ry);
+        }
+        parent[ry] = rx;
+        sz[rx] += sz[ry];
+        if (sz[rx] > maxSize) {
+            maxSize = sz[rx];
+        }
+    }
+};
+
+vector<int> solveOneCase(int n, const vector<int>& arr) {
+    vector<Edge> edges;
+    for (int i = 0; i < n - 1; i++) {
+        int diff = abs(arr[i] - arr[i + 1]);
+        edges.push_back({diff, i + 1}); // 连接 i+1 和 i+2
+    }
+
+    sort(edges.begin(), edges.end());
+
+    DSU dsu(n);
+    vector<int> ans(n + 1);
+    int idx = 0;
+    int m = (int)edges.size();
+
+    for (int k = 1; k <= n; k++) {
+        while (idx < m && edges[idx].diff <= k) {
+            int pos = edges[idx].pos;
+            dsu.unite(pos, pos + 1);
+            idx++;
+        }
+        ans[k] = dsu.maxSize;
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+    while (t--) {
+        int n;
+        cin >> n;
+        vector<int> arr(n);
+        for (int i = 0; i < n; i++) {
+            cin >> arr[i];
+        }
+        vector<int> ans = solveOneCase(n, arr);
+        for (int k = 1; k <= n; k++) {
+            if (k > 1) cout << ' ';
+            cout << ans[k];
+        }
+        cout << '\n';
+    }
+
+    return 0;
+}
+```

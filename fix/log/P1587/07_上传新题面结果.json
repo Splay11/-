@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1587",
+  "title": "第3题-三次熔断",
+  "docId": 610,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "百度"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

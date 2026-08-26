@@ -1,0 +1,184 @@
+## 解题思路
+
+1. **转化操作的影响**
+   每一轮衰减操作中，除一个被选中的节点外，其余所有节点的能量值都减少 $k$。经过 $m$ 轮后，每个节点减少的总能量取决于它被选中的次数。设节点 $i$ 在 $m$ 轮中被选中的次数为 $t_i$，则该节点的最终能量值为：
+   $$
+   a_i^{\text{final}} = a_i - (m - t_i) \times k
+   $$
+   并且所有节点的选中次数之和满足 $\sum_{i=1}^{n} t_i = m$。
+
+2. **如何确定选中次数**
+   每一轮操作都会选择**当前能量值最低**的节点（若相同则选编号最小的）。在第 $s$ 轮开始时，节点 $i$ 若已被选中 $t_i$ 次，其当前能量值为 $a_i - (s - t_i) \times k$。由于公共减量 $s \times k$ 对全部节点相同，比较当前能量值等价于比较 $a_i + t_i \times k$。因此：
+   - 每轮选出的节点就是使 $a_i + t_i \times k$ 最小的节点（值相同时取编号更小者）。
+   - 选中该节点后，将其 $t_i$ 加 $1$，对应键值更新为 $a_i + (t_i+1) \times k$，进入下一轮。
+
+3. **使用优先队列模拟**
+   基于上述性质，用一个**小根堆**（优先队列）维护所有节点的键值 `key = a[i] + t[i] * k` 及其下标。初始时所有 $t_i = 0$，将全部节点压入堆中。每次从堆顶取出最小键值的节点，将其 `t[i]` 增加 $1$，更新键值后重新压入堆。重复 $m$ 次即可得到每个节点最终的 $t_i$。
+
+4. **计算结果**
+   遍历所有节点，按照公式 $a_i - (m - t_i) \times k$ 输出最终能量值。
+
+## 复杂度分析
+
+- **时间复杂度**：每个测试数据中，初始 $n$ 个节点入堆，进行 $m$ 次弹出/压入操作，每次堆操作复杂度为 $O(\log n)$。总时间复杂度 $O((n + m) \log n)$，由于所有测试数据的 $\sum n \le 2\times10^5$ 且 $\sum m \le 2\times10^5$，可以在时限内完成。
+- **空间复杂度**：需要存储初始能量值、选中次数数组以及优先队列，空间为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import heapq
+
+input = sys.stdin.readline
+
+T = int(input())
+for _ in range(T):
+    n, m, k = map(int, input().split())
+    a = list(map(int, input().split()))      # 初始能量值
+    t = [0] * n                               # 选中次数
+    # 小根堆存储 (key, idx, t)，初始 key = a[i]
+    pq = [(a[i], i, 0) for i in range(n)]
+    heapq.heapify(pq)
+
+    for _ in range(m):
+        key, idx, cnt = heapq.heappop(pq)
+        cnt += 1                              # 本节点被选中一次
+        t[idx] = cnt
+        new_key = a[idx] + cnt * k            # 更新键值
+        heapq.heappush(pq, (new_key, idx, cnt))
+
+    # 计算最终能量值：a[i] - (m - t[i]) * k
+    res = [str(a[i] - (m - t[i]) * k) for i in range(n)]
+    sys.stdout.write(" ".join(res) + "\n")
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static class Node {
+        long key; // key = a[i] + t[i] * k
+        int idx;
+        int t;
+
+        public Node(long key, int idx, int t) {
+            this.key = key;
+            this.idx = idx;
+            this.t = t;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+        int T = Integer.parseInt(br.readLine());
+
+        while (T-- > 0) {
+            String[] params = br.readLine().split(" ");
+            int n = Integer.parseInt(params[0]);
+            int m = Integer.parseInt(params[1]);
+            int k = Integer.parseInt(params[2]);
+
+            long[] a = new long[n];
+            String[] aStr = br.readLine().split(" ");
+            for (int i = 0; i < n; i++) {
+                a[i] = Long.parseLong(aStr[i]);
+            }
+
+            int[] tArr = new int[n]; // 选中次数
+
+            // 小根堆，先按 key 排序，key 相同时按下标升序
+            PriorityQueue<Node> pq = new PriorityQueue<>((o1, o2) -> {
+                if (o1.key == o2.key) return o1.idx - o2.idx;
+                return Long.compare(o1.key, o2.key);
+            });
+
+            for (int i = 0; i < n; i++) {
+                pq.offer(new Node(a[i], i, 0));
+            }
+
+            for (int op = 0; op < m; op++) {
+                Node cur = pq.poll();
+                cur.t++;
+                tArr[cur.idx] = cur.t;
+                cur.key = a[cur.idx] + (long) cur.t * k;
+                pq.offer(cur);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < n; i++) {
+                long res = a[i] - (long) (m - tArr[i]) * k;
+                sb.append(res).append(" ");
+            }
+            out.println(sb.toString().trim());
+        }
+        out.flush();
+        out.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+struct Node {
+    long long key; // key = a[i] + t[i] * k
+    int idx;
+    int t;
+};
+
+// 比较函数：key 小的优先，key 相同时下标小的优先
+struct cmp {
+    bool operator()(const Node &a, const Node &b) const {
+        if (a.key == b.key) return a.idx > b.idx;
+        return a.key > b.key;
+    }
+};
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n, m, k;
+        cin >> n >> m >> k;
+        vector<long long> a(n);
+        for (int i = 0; i < n; ++i) {
+            cin >> a[i];
+        }
+
+        vector<int> t(n, 0); // 选中次数
+        priority_queue<Node, vector<Node>, cmp> pq;
+        for (int i = 0; i < n; ++i) {
+            pq.push({a[i], i, 0});
+        }
+
+        for (int op = 0; op < m; ++op) {
+            Node cur = pq.top();
+            pq.pop();
+            cur.t++;
+            t[cur.idx] = cur.t;
+            cur.key = a[cur.idx] + 1LL * cur.t * k;
+            pq.push(cur);
+        }
+
+        for (int i = 0; i < n; ++i) {
+            long long res = a[i] - 1LL * (m - t[i]) * k;
+            cout << res << " \n"[i == n - 1];
+        }
+    }
+    return 0;
+}
+```

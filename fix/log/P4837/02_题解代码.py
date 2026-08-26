@@ -1,0 +1,262 @@
+## 解题思路
+
+每次操作从当前列表取两个特征值做按位与并追加，新值可继续参与运算。
+
+因此最终可达的数值，恰为原初值中非空子集的按位与结果，即形如：
+
+$$
+feat_{i_1} \& feat_{i_2} \& \cdots \& feat_{i_k},\quad k \ge 1
+$$
+
+问题转化为：统计 $0\sim 1023$ 中有多少个掩码 $mask$ 可作为某个非空子集的按位与。
+
+**可达判定**
+
+若某子集按位与为 $mask$，则子集中每个 $feat_i$ 必须包含 $mask$ 的所有 $1$ 位，即 $(feat_i \& mask) = mask$。
+
+将所有满足条件的初值再做一次按位与，若结果仍为 $mask$，则 $mask$ 可达。
+
+**超集 DP**
+
+设 $g[mask]$ 为所有超集初值的按位与，$exist[mask]$ 表示是否存在这样的初值。
+
+从高到低枚举位，将超集信息合并到子掩码，最后统计满足 $exist[mask] \land g[mask]=mask$ 的 $mask$ 个数。
+
+## 复杂度分析
+
+值域 $V=1024$，位数 $B=10$。
+
+- 初始化：$O(m)$；
+- 超集 DP：$O(VB)$；
+- 统计答案：$O(V)$。
+
+单组总时间 $O(m + VB)$，空间 $O(V)$。所有测试中 $\sum m \le 2 \times 10^5$，可通过。
+
+## 代码实现
+
+### Python
+
+```python
+def count_distinct_masks(feat):
+    # feat_i <= 1023，只需枚举 0..1023
+    MAX_MASK = 1023
+    SIZE = 1024
+
+    # g[mask]：所有包含 mask 的超集特征值的按位与结果
+    g = [MAX_MASK] * SIZE
+
+    # exist[mask]：是否存在原初值恰好为 mask
+    exist = [False] * SIZE
+
+    for x in feat:
+        g[x] = x
+        exist[x] = True
+
+    # 超集 DP：合并更大掩码的按位与信息
+    for bit in range(10):
+        for mask in range(SIZE):
+            if (mask & (1 << bit)) == 0:
+                super_mask = mask | (1 << bit)
+                if exist[super_mask]:
+                    g[mask] &= g[super_mask]
+                    exist[mask] = True
+
+    ans = 0
+    for mask in range(SIZE):
+        # 可达当且仅当存在超集且其按位与恰好为 mask
+        if exist[mask] and g[mask] == mask:
+            ans += 1
+
+    return ans
+
+
+def main():
+    tc = int(input())
+    for _ in range(tc):
+        m = int(input())
+        feat = list(map(int, input().split()))
+        print(count_distinct_masks(feat))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedInputStream;
+import java.io.IOException;
+
+public class Main {
+    static final int MAX_MASK = 1023;
+    static final int SIZE = 1024;
+
+    static int countDistinctMasks(int[] feat) {
+        // g[mask]：所有包含 mask 的超集特征值的按位与结果
+        int[] g = new int[SIZE];
+
+        // exist[mask]：是否存在原初值恰好为 mask
+        boolean[] exist = new boolean[SIZE];
+
+        for (int i = 0; i < SIZE; i++) {
+            g[i] = MAX_MASK;
+        }
+
+        for (int x : feat) {
+            g[x] = x;
+            exist[x] = true;
+        }
+
+        // 超集 DP：合并更大掩码的按位与信息
+        for (int bit = 0; bit < 10; bit++) {
+            for (int mask = 0; mask < SIZE; mask++) {
+                if ((mask & (1 << bit)) == 0) {
+                    int superMask = mask | (1 << bit);
+                    if (exist[superMask]) {
+                        g[mask] &= g[superMask];
+                        exist[mask] = true;
+                    }
+                }
+            }
+        }
+
+        int ans = 0;
+        for (int mask = 0; mask < SIZE; mask++) {
+            // 可达当且仅当存在超集且其按位与恰好为 mask
+            if (exist[mask] && g[mask] == mask) {
+                ans++;
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+
+        int tc = fs.nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        for (int caseId = 0; caseId < tc; caseId++) {
+            int m = fs.nextInt();
+            int[] feat = new int[m];
+
+            for (int i = 0; i < m; i++) {
+                feat[i] = fs.nextInt();
+            }
+
+            sb.append(countDistinctMasks(feat)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+
+class FastScanner {
+    private final BufferedInputStream in = new BufferedInputStream(System.in);
+    private final byte[] buffer = new byte[1 << 16];
+    private int ptr = 0;
+    private int len = 0;
+
+    private int read() throws IOException {
+        if (ptr >= len) {
+            len = in.read(buffer);
+            ptr = 0;
+            if (len <= 0) {
+                return -1;
+            }
+        }
+        return buffer[ptr++];
+    }
+
+    int nextInt() throws IOException {
+        int c;
+        do {
+            c = read();
+        } while (c <= ' ');
+
+        int sign = 1;
+        if (c == '-') {
+            sign = -1;
+            c = read();
+        }
+
+        int val = 0;
+        while (c > ' ') {
+            val = val * 10 + (c - '0');
+            c = read();
+        }
+
+        return val * sign;
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAX_MASK = 1023;
+const int SIZE = 1024;
+
+int countDistinctMasks(vector<int>& feat) {
+    // g[mask]：所有包含 mask 的超集特征值的按位与结果
+    vector<int> g(SIZE, MAX_MASK);
+
+    // exist[mask]：是否存在原初值恰好为 mask
+    vector<bool> exist(SIZE, false);
+
+    for (int x : feat) {
+        g[x] = x;
+        exist[x] = true;
+    }
+
+    // 超集 DP：合并更大掩码的按位与信息
+    for (int bit = 0; bit < 10; bit++) {
+        for (int mask = 0; mask < SIZE; mask++) {
+            if ((mask & (1 << bit)) == 0) {
+                int superMask = mask | (1 << bit);
+                if (exist[superMask]) {
+                    g[mask] &= g[superMask];
+                    exist[mask] = true;
+                }
+            }
+        }
+    }
+
+    int ans = 0;
+    for (int mask = 0; mask < SIZE; mask++) {
+        // 可达当且仅当存在超集且其按位与恰好为 mask
+        if (exist[mask] && g[mask] == mask) {
+            ans++;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int tc;
+    cin >> tc;
+
+    while (tc--) {
+        int m;
+        cin >> m;
+
+        vector<int> feat(m);
+        for (int i = 0; i < m; i++) {
+            cin >> feat[i];
+        }
+
+        cout << countDistinctMasks(feat) << '\n';
+    }
+
+    return 0;
+}
+```

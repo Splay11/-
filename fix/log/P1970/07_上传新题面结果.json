@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1970",
+  "title": "倍环挪移",
+  "docId": 1073,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "B站"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "trial_videosol": ""
+}

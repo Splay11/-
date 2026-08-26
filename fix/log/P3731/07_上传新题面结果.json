@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3731",
+  "title": "第2题-量程定点回放",
+  "docId": 3074,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "其他",
+    "二分查找"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

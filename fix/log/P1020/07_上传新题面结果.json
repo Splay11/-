@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1020",
+  "title": "第1题-等积裁板",
+  "docId": 21,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "递归",
+  "trial_videosol": ""
+}

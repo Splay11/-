@@ -1,0 +1,107 @@
+## 思路:OEIS大法
+
+1.组合数学分析做法不太会
+
+2.考虑暴力求n = 1 , 2 ,3 , 4 , 5 的结果为:1,8 , 40,160,560
+
+3.将序列丢入[oeis](https://oeis.org/search?q=2%2C40%2C160%2C560&language=english&go=Search) (存储所有数列通项公式的数据库), 可以得到结果:$C_{n+2}^{3} * 2^{n-1}$
+
+4.第一次接触取模操作的uu可以看看[这篇文章](https://blog.codefun2020.com/common/%E5%8F%96%E6%A8%A1%E7%9A%84%E5%BF%85%E5%A4%87%E7%9F%A5%E8%AF%86.html)
+
+## 代码
+
+### Python
+```py
+mod = 10**9 + 7
+def ksm (a, b, mod):
+    res = 1
+    while b:
+        if b & 1:
+            res = res * a % mod
+        a = a * a % mod
+        b >>= 1
+    return res
+t = int(input())
+for _ in range(t):
+    n = int(input())
+    fz = n * (n + 1) % mod * (n + 2) % mod
+    fm = 6
+    inv_fm = ksm(fm, mod - 2, mod)
+    comb = fz * inv_fm % mod
+    p2 = ksm(2, n - 1, mod)
+    print(comb * p2 % mod)
+
+```
+
+### java
+```java
+import java.util.Scanner;
+
+public class Main {
+    static final int MOD = 1000000007;
+
+    public static long ksm(long a, long b, long mod) {
+        long res = 1;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = res * a % mod;
+            }
+            a = a * a % mod;
+            b >>= 1;
+        }
+        return res;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int t = scanner.nextInt();
+        for (int i = 0; i < t; i++) {
+            int n = scanner.nextInt();
+            long fz = (long) n * (n + 1) % MOD * (n + 2) % MOD;
+            long fm = 6;
+            long inv_fm = ksm(fm, MOD - 2, MOD);
+            long comb = fz * inv_fm % MOD;
+            long p2 = ksm(2, n - 1, MOD);
+            System.out.println(comb * p2 % MOD);
+        }
+        scanner.close();
+    }
+}
+```
+### cpp
+```cpp
+#include <iostream>
+using namespace std;
+
+const int MOD = 1000000007;
+
+long long ksm(long long a, long long b, long long mod) {
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1) {
+            res = res * a % mod;
+        }
+        a = a * a % mod;
+        b >>= 1;
+    }
+    return res;
+}
+
+int main() {
+    int t;
+    cin >> t;
+    while (t--) {
+        int n;
+        cin >> n;
+        long long fz = (1LL * n * (n + 1) % MOD * (n + 2) % MOD);
+        long long fm = 6;
+        long long inv_fm = ksm(fm, MOD - 2, MOD);
+        long long comb = fz * inv_fm % MOD;
+        long long p2 = ksm(2, n - 1, MOD);
+        cout << (comb * p2 % MOD) << endl;
+    }
+    return 0;
+}
+```
+
+OJ会员可以通过点击题目上方《已通过》查看其他通过代码来学习。

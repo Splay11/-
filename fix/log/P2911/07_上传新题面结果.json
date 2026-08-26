@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2911",
+  "title": "第2题-栈桥巡检",
+  "docId": 2545,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "DFS"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

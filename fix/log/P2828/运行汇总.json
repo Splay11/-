@@ -1,0 +1,12 @@
+{
+  "pid": "P2828",
+  "mode": 5,
+  "force": false,
+  "start_time": "2026-08-09 14:52:00",
+  "end_time": "2026-08-09 14:52:30",
+  "new_title": "魔力排序",
+  "mode5_regenerate_solution": true,
+  "step35_modified": true,
+  "step8_upload_solution": true,
+  "overall_success": true
+}

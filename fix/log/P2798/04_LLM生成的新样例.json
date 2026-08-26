@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "5\neleme\n1 2 3",
+      "output": "3",
+      "explanation": "字符串为 `eleme`。可以匹配整段 `eleme` 得 $z=3$ 分；也可以先匹配 `ele` 再匹配 `me`，得 $x+y=1+2=3$ 分。最高分为 `3`。"
+    },
+    {
+      "input": "2\nme\n1 10 1",
+      "output": "10",
+      "explanation": "整个字符串恰好为 `me`，匹配该模式得 $y=10$ 分。"
+    },
+    {
+      "input": "1\ne\n1 1 1",
+      "output": "0",
+      "explanation": "单个字符 `'e'` 无法匹配 `ele`、`me` 或 `eleme`，得分为 `0`。"
+    },
+    {
+      "input": "6\neleele\n4 1 10",
+      "output": "8",
+      "explanation": "字符串 `eleele` 可拆成两段 `ele`，各得 $x=4$ 分，总分 `8`。其中不含 `me` 或 `eleme`。"
+    }
+  ]
+}

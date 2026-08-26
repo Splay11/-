@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2944",
+  "title": "第1题-断裂圆环的最大交替得分",
+  "docId": 2579,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "枚举"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

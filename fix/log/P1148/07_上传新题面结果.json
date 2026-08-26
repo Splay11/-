@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1148",
+  "title": "第2题-富因子子段计数",
+  "docId": 157,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "双指针",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1811",
+  "title": "多阶段并行加工",
+  "docId": 904,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "trial_videosol": ""
+}

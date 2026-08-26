@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5205",
+  "title": "第2题-环形监测站的最长检测码和",
+  "docId": 4517,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "双指针"
+  ],
+  "alg_tag": "双指针",
+  "ai_alg_tags": "双指针",
+  "videosol": "",
+  "trial_videosol": ""
+}

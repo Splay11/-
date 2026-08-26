@@ -1,0 +1,147 @@
+## 解题思路
+
+本问题要求通过一次统一调整（选择一个位置 $pos$ 和一个数字 $d$，将所有产品序列号的第 $pos$ 位改为 $d$），使得不同序列号的种类数尽可能少。
+
+假设我们将所有序列号的第 $pos$ 位全部改为同一个数字 $d$。修改后，所有产品在该位置上的字符都相同，因此两个序列号是否相同**仅取决于它们在其余 $5$ 个位置上的数字是否完全一致**。具体来说：
+
+1. 固定修改位置 $pos$ 后，最终不同序列号的种类数，等于将所有原序列号删除第 $pos$ 位后所得的 $5$ 位字符串的不同个数。
+2. 选择哪个数字 $d$ 并不会影响结果，因为第 $pos$ 位最终完全一致，区分序列号的唯一依据就是剩下的 $5$ 位。
+
+因此，我们可以将问题转化为：
+
+- 枚举要修改的位置 $pos$（$1\sim 6$，编程时用下标 $0\sim 5$ 表示）。
+- 对每个序列号，删去第 $pos$ 位，得到一个长度为 $5$ 的新字符串。
+- 使用哈希集合统计这些新字符串的种类数。
+- 取所有位置中种类数的最小值作为答案。
+
+## 复杂度分析
+
+设一组数据中有 $n$ 个产品。
+
+- 需要枚举 $6$ 个位置，每个位置遍历所有 $n$ 个序列号，生成并插入哈希集合，单次操作均摊 $O(1)$。
+- 总时间复杂度为 $O(6n) = O(n)$。
+- 哈希集合最多存储 $n$ 个长度为 $5$ 的字符串，空间复杂度为 $O(n)$。
+
+所有测试数据的 $n$ 之和不超过 $2\times 10^5$，因此总复杂度完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve_case(serials):
+    # ans 初始化为产品总数，逐步取更小值
+    ans = len(serials)
+
+    # 枚举要修改的位置 pos (0 到 5)
+    for pos in range(6):
+        seen = set()
+        # 删除第 pos 位后统计不同的 5 位字符串
+        for s in serials:
+            new_s = s[:pos] + s[pos+1:]
+            seen.add(new_s)
+        ans = min(ans, len(seen))
+
+    return ans
+
+def main():
+    input = sys.stdin.readline
+    T = int(input().strip())
+    out = []
+    for _ in range(T):
+        n = int(input().strip())
+        serials = input().strip().split()
+        out.append(str(solve_case(serials)))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.HashSet;
+
+public class Main {
+    public static int solveCase(String[] serials) {
+        int n = serials.length;
+        int ans = n;
+        // 枚举要修改的位置 (0 到 5)
+        for (int pos = 0; pos < 6; pos++) {
+            HashSet<String> set = new HashSet<>();
+            // 删除第 pos 位后统计不同的 5 位字符串
+            for (String s : serials) {
+                String newStr = s.substring(0, pos) + s.substring(pos + 1);
+                set.add(newStr);
+            }
+            ans = Math.min(ans, set.size());
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+
+        for (int tc = 0; tc < T; tc++) {
+            int n = Integer.parseInt(br.readLine().trim());
+            String[] serials = br.readLine().trim().split(" ");
+            sb.append(solveCase(serials)).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <algorithm>
+using namespace std;
+
+int solveCase(const vector<string>& serials) {
+    int n = (int)serials.size();
+    int ans = n;
+    // 枚举要修改的位置 (0 到 5)
+    for (int pos = 0; pos < 6; pos++) {
+        unordered_set<string> st;
+        // 删除第 pos 位后统计不同的 5 位字符串
+        for (const string& s : serials) {
+            string new_s = s.substr(0, pos) + s.substr(pos + 1);
+            st.insert(new_s);
+        }
+        ans = min(ans, (int)st.size());
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        cin >> n;
+        vector<string> serials(n);
+        for (int i = 0; i < n; i++) {
+            cin >> serials[i];
+        }
+        cout << solveCase(serials) << '\n';
+    }
+    return 0;
+}
+```

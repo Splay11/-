@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "3\naiBdu\nBduai\nbdaui",
+      "output": "Yes\nYes\nNo",
+      "explanation": "第一串 `aiBdu` 与第二串 `Bduai` 都恰好含有字符 `B`、`a`、`i`、`d`、`u` 各一次，重排后可得 `Baidu`，输出 `Yes`。\n第三串 `bdaui` 中 `B` 变成了小写 `b`，与标准口令大小写不一致，输出 `No`。"
+    },
+    {
+      "input": "1\nBaidu",
+      "output": "Yes",
+      "explanation": "字符串本身就是 `Baidu`，无需重排，输出 `Yes`。"
+    },
+    {
+      "input": "2\nBai\nBaiduu",
+      "output": "No\nNo",
+      "explanation": "第一串长度为 `3`，字符个数不足。\n第二串多了一个 `u`，多重集合与 `Baidu` 不同。\n两组均输出 `No`。"
+    }
+  ]
+}

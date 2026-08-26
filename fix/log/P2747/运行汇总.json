@@ -1,0 +1,11 @@
+{
+  "pid": "P2747",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:43:21",
+  "end_time": "2026-08-19 19:43:22",
+  "new_title": "第2题-邻条纠错",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

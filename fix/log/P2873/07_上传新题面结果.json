@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2873",
+  "title": "第2题-彩虹阶梯",
+  "docId": 2507,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "哈希表"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "哈希表",
+  "videosol": "",
+  "trial_videosol": ""
+}

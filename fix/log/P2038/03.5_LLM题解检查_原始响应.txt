@@ -1,0 +1,155 @@
+## 解题思路
+
+1. 由于每次操作可以将任意一本书改成任意已有分类，最优策略一定是选定一个目标分类，把一段区间上的所有书都变成这个分类。
+2. 对于每一种分类 $c$，记录它在书架上出现的所有位置（下标从 $0$ 开始）。数组 $pos$ 表示分类 $c$ 的所有出现位置，并且是升序的。
+3. 若要得到一段全部为 $c$ 的连续书段，我们可以保留这些位置上的书，并将它们之间空缺位置的书修改为 $c$。设滑动窗口 $[l, r]$ 对应 $pos$ 中的一段位置，将这段位置之间（不包括两端）的空缺书籍全部修改为 $c$ 所需要的操作次数为：
+   $$ cnt = \sum_{i=l+1}^{r} \big(pos[i] - pos[i-1] - 1\big) $$
+4. 当 $cnt \le k$ 时，该窗口内通过修改可以得到的连续 $c$ 书段的长度为：
+   $$ length = pos[r] - pos[l] + 1 + (k - cnt) $$
+   其中 $pos[r] - pos[l] + 1$ 是窗口覆盖的原书范围，剩余操作次数 $k-cnt$ 可以用来向两侧继续扩展。最终长度需要对 $n$ 取 $\min$，因为总长度不能超过书架的总书本数。
+5. 对于每一个分类，使用双指针维护滑动窗口：
+   - 右指针 $r$ 从 $0$ 开始向右移动，累加相邻空缺数到 $cnt$。
+   - 当 $cnt > k$ 时，不断右移左指针 $l$，并从 $cnt$ 中减去 $pos[l+1] - pos[l] - 1$，直到 $cnt \le k$。
+   - 用当前窗口更新答案。
+6. 因为窗口移动只与 $pos$ 数组长度有关，而所有分类的 $pos$ 长度之和为 $n$，算法整体是线性的。初始答案至少为 $k$（可以任意挑选一段长度不超过 $k$ 的区间全部修改）。
+
+## 复杂度分析
+
+- 时间复杂度：对每个分类独立处理，所有分类的出现位置总数等于 $n$，滑动窗口对每个分类的遍历是线性的，因此总时间复杂度为 $O(n)$。
+- 空间复杂度：需要存储每种分类的出现位置列表，最坏情况下需要 $O(n)$ 的额外空间。
+
+## 代码实现
+
+### Python
+
+```python
+def max_length_for_color(pos, k, n):
+    l = 0          # 窗口左指针
+    cnt = 0        # 当前窗口内需要填补的空缺数
+    res = 0
+    for r in range(len(pos)):
+        if r != 0:
+            cnt += pos[r] - pos[r - 1] - 1  # 累加相邻位置之间的空缺
+        # 如果操作次数超出限制，收缩左边界
+        while cnt > k:
+            cnt -= pos[l + 1] - pos[l] - 1
+            l += 1
+        # 当前窗口能得到的连续长度 = 窗口跨度 + 剩余操作次数
+        cur = pos[r] - pos[l] + 1 + (k - cnt)
+        res = max(res, cur)
+    return min(res, n)   # 长度不能超过总书本数
+
+n, m, k = map(int, input().split())
+a = list(map(int, input().split()))
+
+# 记录每种分类的出现位置（下标从0开始）
+pos_list = [[] for _ in range(m + 1)]
+for i, val in enumerate(a):
+    pos_list[val].append(i)
+
+ans = k   # 最差情况：直接修改任意连续的 k 本书
+for positions in pos_list:
+    if positions:
+        ans = max(ans, max_length_for_color(positions, k, n))
+
+print(ans)
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    // 计算分类 c 在给定位置列表下能获得的最长连续书段长度
+    public static int maxLen(List<Integer> pos, int k, int n) {
+        int l = 0, cnt = 0, res = 0;
+        for (int r = 0; r < pos.size(); r++) {
+            if (r > 0) {
+                cnt += pos.get(r) - pos.get(r - 1) - 1;
+            }
+            while (cnt > k) {
+                cnt -= pos.get(l + 1) - pos.get(l) - 1;
+                l++;
+            }
+            int cur = pos.get(r) - pos.get(l) + 1 + (k - cnt);
+            res = Math.max(res, cur);
+        }
+        return Math.min(res, n);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        int k = sc.nextInt();
+
+        List<List<Integer>> idx = new ArrayList<>();
+        for (int i = 0; i <= m; i++) {
+            idx.add(new ArrayList<>());
+        }
+        for (int i = 0; i < n; i++) {
+            int val = sc.nextInt();
+            idx.get(val).add(i);
+        }
+
+        int ans = k;
+        for (List<Integer> positions : idx) {
+            if (!positions.isEmpty()) {
+                ans = Math.max(ans, maxLen(positions, k, n));
+            }
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+// 计算给定位置列表下，最多使用k次操作能得到的最长连续段长度
+int maxLen(const vector<int>& pos, int k, int n) {
+    int l = 0, cnt = 0, res = 0;
+    for (int r = 0; r < (int)pos.size(); ++r) {
+        if (r > 0) {
+            cnt += pos[r] - pos[r - 1] - 1;   // 相邻两本书之间的空缺数
+        }
+        while (cnt > k) {
+            cnt -= pos[l + 1] - pos[l] - 1;   // 左指针右移，去掉一个空缺段
+            ++l;
+        }
+        int cur = pos[r] - pos[l] + 1 + (k - cnt);
+        res = max(res, cur);
+    }
+    return min(res, n);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m, k;
+    cin >> n >> m >> k;
+
+    vector<vector<int>> positions(m + 1);
+    for (int i = 0; i < n; ++i) {
+        int val;
+        cin >> val;
+        positions[val].push_back(i);
+    }
+
+    int ans = k;   // 至少可以修改任意连续k本
+    for (const auto& pos : positions) {
+        if (!pos.empty()) {
+            ans = max(ans, maxLen(pos, k, n));
+        }
+    }
+    cout << ans << '\n';
+    return 0;
+}
+```

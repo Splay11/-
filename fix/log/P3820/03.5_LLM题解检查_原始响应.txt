@@ -1,0 +1,223 @@
+## 解题思路
+
+树是一种二分图。对于一棵包含 $n$ 个路由器的树状网络，我们可以任选一个结点（例如 $1$ 号路由器）作为根，通过 BFS/DFS 将所有路由器按层数的奇偶性分为两个集合：偶层集合 $A$ 与奇层集合 $B$。由二分图的性质，集合内部的路由器之间没有光纤直接相连，只有 $A$ 与 $B$ 之间才可能相连。因此，只要让 $A$ 中的路由器全部使用频道 $1$、$B$ 中的路由器全部使用频道 $2$（或者反过来），就能保证相邻路由器频道不同。
+
+题目给出频道编号上限 $K \ge 2$，显然使用频道 $1$ 和 $2$ 是合法的。**为什么不需要使用更大的编号？** 假设在满足相邻限制的前提下，某个路由器使用了编号 $x > 2$，那么将其改为 $1$ 或 $2$ 中与相邻结点不同的那一个，总和不会增加反而可能减少。反复应用该操作，最终可得到一个所有编号均取自 $\{1, 2\}$ 且总和更小的解。因此最优解必然只使用频道 $1$ 和 $2$。
+
+对于上述二分图划分，只有两种可行的赋值方式：
+- $A$ 取 $1$，$B$ 取 $2$：总和为 $|A| \times 1 + |B| \times 2 = n + |B|$；
+- $A$ 取 $2$，$B$ 取 $1$：总和为 $|A| \times 2 + |B| \times 1 = n + |A|$。
+
+为了最小化总和，应当让编号 $1$ 分配给规模较大的那个集合。即最小总和为：
+$$
+ans = n + \min(|A|, |B|).
+$$
+
+**算法步骤**：
+1. 根据输入建立无向邻接表。
+2. 从 $1$ 号路由器开始进行 BFS（或 DFS），用数组 `parity` 记录每个结点层数的奇偶性（偶层记为 $0$，奇层记为 $1$），并统计偶层结点数 $cnt_0$ 和奇层结点数 $cnt_1$。
+3. 计算并输出 $n + \min(cnt_0, cnt_1)$。
+
+## 复杂度分析
+
+- **时间复杂度**：每个结点和每条边均被访问一次，单组数据复杂度 $O(n)$。所有测试数据 $\sum n \le 2\times 10^5$，总复杂度 $O(\sum n)$，可以高效通过。
+- **空间复杂度**：邻接表、队列以及标记数组所需空间均为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from collections import deque
+
+def solve_one(n, edges):
+    # 建立邻接表
+    g = [[] for _ in range(n + 1)]
+    for u, v in edges:
+        g[u].append(v)
+        g[v].append(u)
+
+    # BFS 分层计数
+    vis = [False] * (n + 1)
+    parity = [0] * (n + 1)   # 0 表示偶层，1 表示奇层
+    cnt0, cnt1 = 0, 0
+
+    q = deque()
+    q.append(1)
+    vis[1] = True
+    parity[1] = 0
+    cnt0 += 1
+
+    while q:
+        u = q.popleft()
+        for v in g[u]:
+            if not vis[v]:
+                vis[v] = True
+                parity[v] = parity[u] ^ 1   # 奇偶翻转
+                if parity[v] == 0:
+                    cnt0 += 1
+                else:
+                    cnt1 += 1
+                q.append(v)
+
+    return n + min(cnt0, cnt1)
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    it = iter(data)
+    T = next(it)
+    out_lines = []
+    for _ in range(T):
+        n = next(it)
+        K = next(it)          # K ≥ 2，结论仅与 n 和二分图划分有关，无需额外使用
+        edges = []
+        for _ in range(n - 1):
+            u = next(it)
+            v = next(it)
+            edges.append((u, v))
+        out_lines.append(str(solve_one(n, edges)))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static long solveOne(int n, List<int[]> edges) {
+        // 建立邻接表
+        ArrayList<Integer>[] g = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            g[i] = new ArrayList<>();
+        }
+        for (int[] e : edges) {
+            int u = e[0], v = e[1];
+            g[u].add(v);
+            g[v].add(u);
+        }
+
+        // BFS 分层计数
+        boolean[] vis = new boolean[n + 1];
+        int[] parity = new int[n + 1];  // 0 偶层，1 奇层
+        long cnt0 = 0, cnt1 = 0;
+
+        Deque<Integer> q = new ArrayDeque<>();
+        q.add(1);
+        vis[1] = true;
+        parity[1] = 0;
+        cnt0++;
+
+        while (!q.isEmpty()) {
+            int u = q.pollFirst();
+            for (int v : g[u]) {
+                if (!vis[v]) {
+                    vis[v] = true;
+                    parity[v] = parity[u] ^ 1;
+                    if (parity[v] == 0) cnt0++;
+                    else cnt1++;
+                    q.addLast(v);
+                }
+            }
+        }
+        return n + Math.min(cnt0, cnt1);
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder out = new StringBuilder();
+        String line = br.readLine();
+        int T = Integer.parseInt(line.trim());
+        for (int tc = 0; tc < T; tc++) {
+            // 读取 n K，跳过可能的空行
+            do { line = br.readLine(); } while (line != null && line.trim().isEmpty());
+            String[] p = line.trim().split("\\s+");
+            int n = Integer.parseInt(p[0]);
+            long K = Long.parseLong(p[1]);  // K >= 2，不影响答案
+            List<int[]> edges = new ArrayList<>();
+            for (int i = 0; i < n - 1; i++) {
+                line = br.readLine();
+                while (line != null && line.trim().isEmpty()) {
+                    line = br.readLine();
+                }
+                String[] uv = line.trim().split("\\s+");
+                int u = Integer.parseInt(uv[0]);
+                int v = Integer.parseInt(uv[1]);
+                edges.add(new int[]{u, v});
+            }
+            long ans = solveOne(n, edges);
+            out.append(ans).append('\n');
+        }
+        System.out.print(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+long long solve_one(int n, const vector<pair<int,int>>& edges) {
+    // 建立邻接表
+    vector<vector<int>> g(n + 1);
+    for (auto &e : edges) {
+        int u = e.first, v = e.second;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+
+    // BFS 分层计数
+    vector<char> vis(n + 1, 0);
+    vector<int> parity(n + 1, 0);  // 0 偶层，1 奇层
+    long long cnt0 = 0, cnt1 = 0;
+
+    queue<int> q;
+    q.push(1);
+    vis[1] = 1;
+    parity[1] = 0;
+    cnt0++;
+
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : g[u]) {
+            if (!vis[v]) {
+                vis[v] = 1;
+                parity[v] = parity[u] ^ 1;
+                if (parity[v] == 0) cnt0++;
+                else cnt1++;
+                q.push(v);
+            }
+        }
+    }
+    return n + min(cnt0, cnt1);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    if (!(cin >> T)) return 0;
+    while (T--) {
+        int n;
+        long long K;         // K >= 2，不影响答案
+        cin >> n >> K;
+        vector<pair<int,int>> edges;
+        edges.reserve(n - 1);
+        for (int i = 0; i < n - 1; ++i) {
+            int u, v;
+            cin >> u >> v;
+            edges.emplace_back(u, v);
+        }
+        cout << solve_one(n, edges) << "\n";
+    }
+    return 0;
+}
+```

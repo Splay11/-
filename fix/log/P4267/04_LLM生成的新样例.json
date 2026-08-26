@@ -1,0 +1,9 @@
+{
+  "samples": [
+    {
+      "input": "1\n3 6 13",
+      "output": "0",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "2 2\nyo\nux",
+      "output": "1",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "3 3\nabc\ndef\nghi",
+      "output": "0",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "2 3\nyou\nouy",
+      "output": "2",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+## 解题思路
+
+为了最小化总校验开销 $S = \sum_{1 \le i < j \le n} (a_i \oplus a_j)$，可以利用异或运算按位独立的性质。对于二进制下的第 $t$ 位（权重 $2^t$），设该位为 $1$ 的编号个数为 $c_t$，则这一位对 $S$ 的贡献为 $c_t \times (n - c_t) \times 2^t$。为了最小化该贡献，希望每一位的 $c_t$ 尽可能接近 $0$ 或 $n$，即所有编号在该位上尽量保持一致。尤其对于高位而言，一旦出现 $0$ 与 $1$ 混杂，代价会很大。
+
+基于以上分析，一种最优策略是：
+
+1. 找到最小的 $2$ 的幂 $p = 2^k$，使得 $p \ge n$。
+2. 令分配的 $n$ 个编号为 $a_i = p + (i - 1)$，其中 $i = 1, 2, \dots, n$。
+   - 此时所有编号的二进制第 $k$ 位（即 $p$ 所对应的位）都为 $1$，更高位全为 $0$，因此这些高位对 $S$ 的贡献为零。
+   - 低于第 $k$ 位的部分，其结构与 $0, 1, \dots, n-1$ 完全相同，该部分产生的贡献等于对这 $n$ 个连续自然数两两异或的结果。而其他拆分方式会引入跨半区的高位代价，显式不会更优。
+
+因此，输出 $p, p+1, \dots, p+n-1$ 即可得到最小的总校验开销。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$。计算 $p$ 仅需 $O(\log n)$ 次循环，生成并输出 $n$ 个数需要 $O(n)$ 时间。
+- 空间复杂度：$O(1)$。除了存储输入和输出外，仅使用了常数个变量。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    n = int(data[0])
+
+    # 计算最小的 >= n 的 2 的幂
+    p = 1
+    while p < n:
+        p <<= 1
+
+    # 生成 p, p+1, ..., p+n-1
+    ans = [str(p + i) for i in range(n)]
+    print(" ".join(ans))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringJoiner;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine();
+        int n = Integer.parseInt(line.trim());
+
+        // 计算最小的 >= n 的 2 的幂
+        int p = 1;
+        while (p < n) {
+            p <<= 1;
+        }
+
+        // 输出 p, p+1, ..., p+n-1
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            if (i > 0) sb.append(' ');
+            sb.append(p + i);
+        }
+        System.out.println(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    long long n;
+    cin >> n;
+
+    // 计算最小的 >= n 的 2 的幂
+    long long p = 1;
+    while (p < n) {
+        p <<= 1;
+    }
+
+    // 输出 p, p+1, ..., p+n-1
+    for (long long i = 0; i < n; ++i) {
+        if (i) cout << ' ';
+        cout << (p + i);
+    }
+    cout << '\n';
+    return 0;
+}
+```

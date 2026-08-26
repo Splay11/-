@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4263",
+  "title": "第2题-连续段瓶颈",
+  "docId": 3341,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "单调栈"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "单调栈",
+  "videosol": "",
+  "trial_videosol": ""
+}

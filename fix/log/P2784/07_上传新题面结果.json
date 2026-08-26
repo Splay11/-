@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2784",
+  "title": "第2题-星云数据的编码",
+  "docId": 2416,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "二进制",
+    "大整数"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "字符串",
+  "videosol": "",
+  "trial_videosol": ""
+}

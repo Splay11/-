@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P5215",
+  "title": "第1题-仓库巡检总收益",
+  "docId": 4533,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "",
+  "videosol": "",
+  "trial_videosol": ""
+}

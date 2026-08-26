@@ -1,0 +1,11 @@
+{
+  "pid": "P1758",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:44:15",
+  "end_time": "2026-08-19 19:44:15",
+  "new_title": "连乘阶乘因子",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

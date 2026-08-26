@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "1",
+      "output": "1",
+      "explanation": "$n=1$ 时只有一层，记号串就是 `1`，输出一行 `1`。这是最小规模边界。"
+    },
+    {
+      "input": "2",
+      "output": "22\n2",
+      "explanation": "按题意模拟计算得到。"
+    },
+    {
+      "input": "3",
+      "output": "333\n33\n3",
+      "explanation": "按题意模拟计算得到。"
+    }
+  ]
+}

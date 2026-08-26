@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4914",
+  "title": "第1题-最长质量稳定段",
+  "docId": 4228,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "模拟",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2717",
+  "title": "第2题-回到原点的机会",
+  "docId": 2346,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "哈希"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "https://www.bilibili.com/video/BV15XX6Y5EqT/?vd_source=0f2b5f5dae4beb99b68547471f7432e0",
+  "trial_videosol": ""
+}

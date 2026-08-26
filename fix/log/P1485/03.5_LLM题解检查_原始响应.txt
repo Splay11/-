@@ -1,0 +1,119 @@
+## 解题思路
+
+本题要求统计原序列的所有**提取序列**（保持相对顺序的子序列）中，长度为 $k$ 且恰好包含 $1$ 到 $k$ 各一次（顺序任意）的**完整序列**个数，答案对 $10^9+7$ 取模。
+
+核心观察：  
+- 对于一个长度为 $k$ 的完整序列，我们需要从原序列中为 $1,2,\dots,k$ 每个数恰好选取一个出现位置。  
+- 选取各数的位置后，将这些位置按原序列下标升序排列，就唯一确定了一个提取序列，并且该序列一定是一个包含 $1$ 到 $k$ 的排列（即完整序列）。  
+- 反之，任意一个合法提取序列也唯一对应一组选择：每个数 $i$ 选了自己在原序列中的一个出现位置。  
+- 因此，长度为 $k$ 的完整序列总数就等于 **每个数 $i$ 的出现次数之积**：  
+  \[
+  \text{count}(k) = \prod_{i=1}^{k} cnt[i]
+  \]
+
+具体算法步骤：
+1. 使用哈希表统计序列中每个整数的出现次数 $cnt[x]$。
+2. 初始化 $cur = 1$，$ans = 0$。
+3. 从 $k=1$ 开始递增枚举：
+   - 若 $cnt[k] = 0$（即原序列中不存在 $k$），则更大的 $k$ 也不可能形成完整序列，终止循环。
+   - 否则，$cur = (cur \times cnt[k]) \bmod MOD$，表示当前长度 $k$ 的完整序列个数。
+   - 将 $cur$ 累加到答案：$ans = (ans + cur) \bmod MOD$。
+4. 最终输出 $ans$。
+
+该算法本质上是在线计算前缀乘积并累加，遇到缺失的数字立刻停止。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$。  
+  统计频率需要遍历一次数组；枚举 $k$ 时最多枚举到 $n$，每一步是 $O(1)$ 操作（假设哈希表查找为 $O(1)$）。整体为 $O(n)$。
+
+- 空间复杂度：$O(n)$。  
+  哈希表最多存储 $n$ 个不同元素及其出现次数。
+
+## 代码实现
+
+### Python
+
+```python
+n = int(input())
+MOD = 10**9 + 7
+cnt = {}
+for x in input().split():
+    v = int(x)
+    cnt[v] = cnt.get(v, 0) + 1
+
+ans = 0
+cur = 1
+for i in range(1, n + 1):
+    if i not in cnt:
+        break
+    cur = (cur * cnt[i]) % MOD
+    ans = (ans + cur) % MOD
+
+print(ans)
+```
+
+### Java
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        final int MOD = 1_000_000_007;
+        Map<Integer, Integer> cnt = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            int x = sc.nextInt();
+            cnt.put(x, cnt.getOrDefault(x, 0) + 1);
+        }
+
+        long ans = 0;
+        long cur = 1;
+        for (int i = 1; i <= n; i++) {
+            if (!cnt.containsKey(i)) {
+                break;
+            }
+            cur = (cur * cnt.get(i)) % MOD;
+            ans = (ans + cur) % MOD;
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n;
+    cin >> n;
+    const int MOD = 1e9 + 7;
+    unordered_map<int, int> cnt;
+    for (int i = 0; i < n; ++i) {
+        int x;
+        cin >> x;
+        cnt[x]++;
+    }
+
+    long long ans = 0, cur = 1;
+    for (int i = 1; i <= n; ++i) {
+        if (cnt.find(i) == cnt.end()) {
+            break;
+        }
+        cur = (cur * cnt[i]) % MOD;
+        ans = (ans + cur) % MOD;
+    }
+    cout << ans << '\n';
+    return 0;
+}
+```

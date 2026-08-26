@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2882",
+  "title": "第2题-流水号积分",
+  "docId": 2516,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

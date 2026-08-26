@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P4586",
+  "title": "第4题-展位掩码结算",
+  "docId": 3824,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "其他",
+    "位运算"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "位运算",
+  "videosol": "",
+  "trial_videosol": ""
+}

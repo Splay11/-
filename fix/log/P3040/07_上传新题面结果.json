@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P3040",
+  "title": "宝石圆环的智取",
+  "docId": 1674,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "HWOD-E卷"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

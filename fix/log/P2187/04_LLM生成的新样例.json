@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "a",
+      "output": "a",
+      "explanation": "边界情况：灯牌上只有 `1` 盏小灯，字母为 `a`。只进行 `1` 次操作，把当前第 `1` 个位置的字母接到末尾，序列不变，结果仍为 `a`。"
+    },
+    {
+      "input": "ab",
+      "output": "ba",
+      "explanation": "初始序列为 `ab`，长度 $n=2$。\n\n第 `1` 次操作取走当前第 `1` 个位置的 `a`，接到末尾，得到 `ba`。\n\n第 `2` 次操作取走当前第 `2` 个位置的 `a`，接到末尾，序列仍为 `ba`。\n\n最终结果为 `ba`。"
+    },
+    {
+      "input": "qwer",
+      "output": "wreq",
+      "explanation": "初始序列为 `qwer`，长度 $n=4$。操作过程为：\n\n`qwer` $\\rightarrow$ `werq` $\\rightarrow$ `wrqe` $\\rightarrow$ `wreq` $\\rightarrow$ `wreq`。\n\n第 `1` 次取走 `q` 接到末尾；第 `2` 次取走当前第 `2` 位的 `e`；第 `3` 次取走当前第 `3` 位的 `q`；第 `4` 次取走当前第 `4` 位的 `q`，序列不再变化。最终结果为 `wreq`。"
+    },
+    {
+      "input": "hello",
+      "output": "elhol",
+      "explanation": "初始序列为 `hello`，长度 $n=5$。操作过程为：\n\n`hello` $\\rightarrow$ `elloh` $\\rightarrow$ `elohl` $\\rightarrow$ `elhlo` $\\rightarrow$ `elhol` $\\rightarrow$ `elhol`。\n\n最终结果为 `elhol`。"
+    }
+  ]
+}

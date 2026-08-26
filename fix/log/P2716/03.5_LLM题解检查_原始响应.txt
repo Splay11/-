@@ -1,0 +1,145 @@
+## 解题思路
+
+本题的核心在于利用匹配长度限制 $L$ 较小（$L \le 10$）的特点，通过预处理将每次查询转化为常数次集合查找，从而高效回答所有询问。
+
+具体算法分以下两步：
+
+1. **预处理参考字符串 $R$**  
+   遍历 $R$，提取所有长度为 $L$ 的连续子串，并将它们存入一个哈希集合（如哈希表）。由于 $L$ 很小，这一步可以快速完成。
+
+2. **处理每次询问**  
+   对于查询串 $Q$：  
+   - 若 $|Q| < L$，则无法截取长度为 $L$ 的前缀或后缀，直接输出 `NO`。  
+   - 否则，截取 $Q$ 的前 $L$ 个字符 `head = Q[0:L]` 和后 $L$ 个字符 `tail = Q[|Q|-L : |Q|]`。  
+   - 只要 `head` 或 `tail` 在预处理得到的集合中出现过，就说明至少有一个满足条件，输出 `YES`；否则输出 `NO`。
+
+因为任何长度至少为 $L$ 的前缀都以前 $L$ 个字符开头，任何长度至少为 $L$ 的后缀都以后 $L$ 个字符结尾，所以上述判断等价于题目要求。该方法利用集合的 $O(1)$ 平均查找时间，大幅降低了查询复杂度。
+
+## 复杂度分析
+
+- **时间复杂度**：预处理需要遍历 $R$ 并截取子串，复杂度为 $O(|R| \cdot L)$（实际上每次截取子串的时间与 $L$ 相关，但 $L\le 10$ 可视为常数）。回答 $m$ 次询问时，每次查询需截取两个子串并进行集合查找，所有查询串的总长度为 $S = \sum |Q|$，因此询问段复杂度为 $O(S)$。总体时间复杂度为 $O(|R| + S)$，其中 $S \le 10^5, |R| \le 10^5$。
+
+- **空间复杂度**：集合中最多存储 $|R| - L + 1$ 个长度为 $L$ 的子串，每个子串占 $O(L)$ 空间，而 $L$ 为常数，故空间复杂度可视为 $O(|R|)$。输入的所有 $Q$ 也需存储，但总长度 $S \le 10^5$，所以整体空间复杂度为 $O(|R| + S)$，在实际范围内完全可接受。
+
+## 代码实现
+
+### Python
+
+```python
+def main():
+    import sys
+    data = sys.stdin.read().split()
+    if not data:
+        return
+    R = data[0]
+    m = int(data[1])
+    L = int(data[2])
+    
+    # 预处理：将 R 中所有长度为 L 的子串加入集合
+    substr_set = set()
+    for i in range(len(R) - L + 1):
+        substr_set.add(R[i:i+L])
+    
+    idx = 3
+    out = []
+    for _ in range(m):
+        Q = data[idx]
+        idx += 1
+        if len(Q) < L:
+            out.append("NO")
+        else:
+            head = Q[:L]
+            tail = Q[-L:]
+            if head in substr_set or tail in substr_set:
+                out.append("YES")
+            else:
+                out.append("NO")
+    
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String R = br.readLine().trim();
+        String[] secondLine = br.readLine().trim().split(" ");
+        int m = Integer.parseInt(secondLine[0]);
+        int L = Integer.parseInt(secondLine[1]);
+        
+        // 预处理：将 R 中所有长度为 L 的子串存入 HashSet
+        Set<String> set = new HashSet<>();
+        for (int i = 0; i <= R.length() - L; i++) {
+            set.add(R.substring(i, i + L));
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < m; i++) {
+            String Q = br.readLine().trim();
+            if (Q.length() < L) {
+                sb.append("NO\n");
+            } else {
+                String head = Q.substring(0, L);
+                String tail = Q.substring(Q.length() - L);
+                if (set.contains(head) || set.contains(tail)) {
+                    sb.append("YES\n");
+                } else {
+                    sb.append("NO\n");
+                }
+            }
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <string>
+#include <unordered_set>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    string R;
+    cin >> R;
+    int m, L;
+    cin >> m >> L;
+    
+    // 预处理：将 R 中所有长度为 L 的子串存入集合
+    unordered_set<string> substrSet;
+    for (int i = 0; i + L <= (int)R.size(); ++i) {
+        substrSet.insert(R.substr(i, L));
+    }
+    
+    string Q;
+    while (m--) {
+        cin >> Q;
+        if ((int)Q.size() < L) {
+            cout << "NO\n";
+        } else {
+            string head = Q.substr(0, L);
+            string tail = Q.substr(Q.size() - L, L);
+            if (substrSet.count(head) || substrSet.count(tail)) {
+                cout << "YES\n";
+            } else {
+                cout << "NO\n";
+            }
+        }
+    }
+    
+    return 0;
+}
+```

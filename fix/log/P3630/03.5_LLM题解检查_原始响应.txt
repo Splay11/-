@@ -1,0 +1,309 @@
+## 解题思路
+
+本题要求模拟一个数字消除游戏的全过程。面板为 $H$ 行 $5$ 列，每个格子中有一个 $1$ 到 $9$ 之间的整数。当某一行的水平方向上出现至少三个连续相同数字时，这些数字会被同时消除。消除后上方的数字会掉落填补空位，并重复检测消除，直到无法再消除为止。需要输出所有被消除数字的总和。
+
+模拟过程分为若干轮，每轮包含三个步骤：
+
+1. **标记阶段（找出所有待消除数字）**  
+   - 为了避免“先消除影响后消除”的干扰，我们使用一个与面板大小相同的布尔数组 `to_eliminate[H][5]`，初始均为 `false`。  
+   - 遍历面板的每一行 `r` 和每一列 `c`（$c \le 2$），若 `grid[r][c]` 非零且与 `grid[r][c+1]`、`grid[r][c+2]` 相等，则说明该行为一段可消除序列的起点。此时继续向右扫描，将该行中所有与 `grid[r][c]` 相等的连续数字在 `to_eliminate` 中标记为 `true`。  
+   - 扫描完毕后，`to_eliminate` 中就记录了本轮所有需要消除的位置。
+
+2. **消除与计分阶段**  
+   - 使用一个布尔变量 `eliminated_in_round` 记录本轮是否发生了任何消除。  
+   - 遍历面板所有单元格，若 `to_eliminate[r][c]` 为 `true`，则说明该位置数字在本轮被消除：  
+     - 将其值累加到本轮得分 `round_score` 中；  
+     - 将该格置为 $0$（表示空位）；  
+     - 置 `eliminated_in_round = true`。  
+   - 将本轮得分累加进总分 `total_score`。若本轮无任何消除，模拟结束，跳出主循环。
+
+3. **下落阶段**  
+   - 消除产生的空位需要由上方的数字填补，对每一列独立处理。  
+   - 对列 `j`（$0 \le j < 5$），使用双指针法原地完成下落：  
+     - `write_row` 指针从该列底部（$H-1$ 行）开始；  
+     - `read_row` 指针从底部向上扫描，当遇到非零数字时，将其复制到 `write_row` 所指位置，并将 `write_row` 上移一位（`write_row--`）；  
+     - 扫描结束后，`write_row` 之上的所有行均充填 $0$。  
+   - 下落完成后，进入下一轮模拟。
+
+重复上述步骤直至稳定，最终输出累计总分 `total_score`。
+
+## 复杂度分析
+
+- 面板尺寸为 $H \times 5$，其中 $H \le 10$。  
+- 每一轮标记、消除、下落都需要遍历整个面板，单轮时间复杂度为 $O(H \times 5) = O(H)$。  
+- 最坏情况下每轮只能消除一个数字，总消除次数最多为 $H \times 5$，因此总轮数不超过 $O(H)$。  
+- 对于 $T$ 组测试数据，总体时间复杂度为 $O(T \times H^2)$。  
+- 空间复杂度主要源于存储面板和标记数组，均为 $O(H \times 5) = O(H)$，可视为常数空间。
+
+## 代码实现
+
+### Python
+
+```python
+def solve():
+    """处理单个测试用例"""
+    try:
+        H_str = input()
+        if not H_str:
+            return
+        H = int(H_str)
+        grid = []
+        for _ in range(H):
+            grid.append(list(map(int, input().split())))
+    except (IOError, ValueError):
+        return
+
+    if H == 0:
+        print(0)
+        return
+
+    total_score = 0
+
+    while True:
+        to_eliminate = [[False] * 5 for _ in range(H)]
+        eliminated_in_round = False
+
+        # 1. 标记阶段：寻找所有水平连续至少3个相同数字
+        for r in range(H):
+            for c in range(5 - 2):
+                if grid[r][c] != 0 and grid[r][c] == grid[r][c + 1] == grid[r][c + 2]:
+                    val = grid[r][c]
+                    k = c
+                    while k < 5 and grid[r][k] == val:
+                        to_eliminate[r][k] = True
+                        k += 1
+
+        # 2. 消除与计分
+        round_score = 0
+        for r in range(H):
+            for c in range(5):
+                if to_eliminate[r][c]:
+                    eliminated_in_round = True
+                    round_score += grid[r][c]
+                    grid[r][c] = 0
+
+        total_score += round_score
+
+        # 如果没有消除发生，结束模拟
+        if not eliminated_in_round:
+            break
+
+        # 3. 下落阶段：对每一列将非零数字向下移动
+        for c in range(5):
+            non_zeros = [grid[r][c] for r in range(H) if grid[r][c] != 0]
+            zeros_needed = H - len(non_zeros)
+            new_col = [0] * zeros_needed + non_zeros
+            for r in range(H):
+                grid[r][c] = new_col[r]
+
+    print(total_score)
+
+
+def main():
+    try:
+        T_str = input()
+        T = int(T_str) if T_str else 0
+        for _ in range(T):
+            solve()
+    except (IOError, ValueError):
+        return
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        while (T-- > 0) {
+            solve(br);
+        }
+    }
+
+    private static void solve(BufferedReader br) throws IOException {
+        String hLine = br.readLine();
+        if (hLine == null || hLine.trim().isEmpty()) {
+            return;
+        }
+        int H = Integer.parseInt(hLine.trim());
+
+        if (H == 0) {
+            System.out.println(0);
+            return;
+        }
+
+        int[][] grid = new int[H][5];
+        for (int i = 0; i < H; i++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < 5; j++) {
+                grid[i][j] = Integer.parseInt(st.nextToken());
+            }
+        }
+
+        long totalScore = 0;
+
+        while (true) {
+            boolean eliminatedInRound = false;
+            boolean[][] toEliminate = new boolean[H][5]; // 默认值为 false
+
+            // 1. 标记阶段：找出水平方向至少连续三个相同数字
+            for (int i = 0; i < H; i++) {
+                for (int j = 0; j <= 5 - 3; j++) {
+                    if (grid[i][j] != 0 && grid[i][j] == grid[i][j + 1] && grid[i][j] == grid[i][j + 2]) {
+                        int val = grid[i][j];
+                        int k = j;
+                        while (k < 5 && grid[i][k] == val) {
+                            toEliminate[i][k] = true;
+                            k++;
+                        }
+                    }
+                }
+            }
+
+            // 2. 消除与计分
+            long roundScore = 0;
+            for (int i = 0; i < H; i++) {
+                for (int j = 0; j < 5; j++) {
+                    if (toEliminate[i][j]) {
+                        eliminatedInRound = true;
+                        roundScore += grid[i][j];
+                        grid[i][j] = 0; // 空位用0表示
+                    }
+                }
+            }
+
+            totalScore += roundScore;
+
+            // 如果本轮无消除，结束模拟
+            if (!eliminatedInRound) {
+                break;
+            }
+
+            // 3. 下落阶段：对每一列进行重力下落
+            for (int j = 0; j < 5; j++) {
+                int writeRow = H - 1;
+                for (int readRow = H - 1; readRow >= 0; readRow--) {
+                    if (grid[readRow][j] != 0) {
+                        grid[writeRow][j] = grid[readRow][j];
+                        writeRow--;
+                    }
+                }
+                // 填充顶部空位
+                while (writeRow >= 0) {
+                    grid[writeRow][j] = 0;
+                    writeRow--;
+                }
+            }
+        }
+
+        System.out.println(totalScore);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+void solve() {
+    int H;
+    cin >> H;
+    if (H == 0) {
+        cout << 0 << endl;
+        return;
+    }
+
+    vector<vector<int>> grid(H, vector<int>(5));
+    for (int i = 0; i < H; ++i) {
+        for (int j = 0; j < 5; ++j) {
+            cin >> grid[i][j];
+        }
+    }
+
+    long long total_score = 0;
+
+    while (true) {
+        bool eliminated_in_round = false;
+        vector<vector<bool>> to_eliminate(H, vector<bool>(5, false));
+
+        // 1. 标记阶段：找出水平方向至少连续三个相同数字
+        for (int i = 0; i < H; ++i) {
+            for (int j = 0; j <= 5 - 3; ++j) {
+                if (grid[i][j] != 0 && grid[i][j] == grid[i][j + 1] && grid[i][j] == grid[i][j + 2]) {
+                    int current_val = grid[i][j];
+                    int k = j;
+                    while (k < 5 && grid[i][k] == current_val) {
+                        to_eliminate[i][k] = true;
+                        k++;
+                    }
+                }
+            }
+        }
+
+        // 2. 消除与计分
+        long long round_score = 0;
+        for (int i = 0; i < H; ++i) {
+            for (int j = 0; j < 5; ++j) {
+                if (to_eliminate[i][j]) {
+                    eliminated_in_round = true;
+                    round_score += grid[i][j];
+                    grid[i][j] = 0; // 空位用0表示
+                }
+            }
+        }
+
+        total_score += round_score;
+
+        // 如果本轮未发生消除，模拟结束
+        if (!eliminated_in_round) {
+            break;
+        }
+
+        // 3. 下落阶段：逐列模拟重力
+        for (int j = 0; j < 5; ++j) {
+            int write_row = H - 1;
+            for (int read_row = H - 1; read_row >= 0; --read_row) {
+                if (grid[read_row][j] != 0) {
+                    grid[write_row][j] = grid[read_row][j];
+                    write_row--;
+                }
+            }
+            // 将顶部空位补0
+            while (write_row >= 0) {
+                grid[write_row][j] = 0;
+                write_row--;
+            }
+        }
+    }
+
+    cout << total_score << endl;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+
+    return 0;
+}
+```

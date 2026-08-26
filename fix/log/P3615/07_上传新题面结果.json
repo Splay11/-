@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3615",
+  "title": "第1题-安全密码设计",
+  "docId": 2958,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

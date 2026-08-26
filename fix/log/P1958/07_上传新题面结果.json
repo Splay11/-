@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1958",
+  "title": "第2题-最小宝石种类数",
+  "docId": 1061,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "构造",
+  "trial_videosol": ""
+}

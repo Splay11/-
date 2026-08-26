@@ -1,0 +1,250 @@
+## 题解
+
+## 题面描述
+
+给定一个由$ n $个整数组成的数组$ \{a_1,a_2,\dots,a_n\} $。小苯对数组中各个区间的乘积很感兴趣，并提出了$ q $个询问：对于每个询问给定一个长度$ len $，要求计算数组中所有长度为$ len $的区间的乘积之和，定义区间$ (l,r) $的乘积为
+$f(l,r)$=$a_l\times a_{l+1}\times\cdots\times a_r$
+但有个特殊要求：如果某个区间的乘积$ f(l,r)>10^9 $，则直接将其视为$0$（不计入总和）。
+
+---
+
+## 思路分析
+
+
+
+由于$ n $和$ q $的总和均可达到$ 3\times10^5 $，故必须设计一个预处理算法，将所有可能的区间长度$ len $的答案预先求出，然后对每个询问直接输出对应结果。  
+注意到如果一个区间的乘积超过$10^9$就不计入和，因此只有乘积不大的区间需要累加。
+
+我们可以将原数组按照值为$0$的元素划分为若干个区间，因为任何包含$0$的区间乘积为$0$（且不会超界），不必单独处理。对于每个非$0$的区间，我们分两种情况讨论：
+
+1. **全部为$1$的区间**  
+   由于所有元素都是$1$，任意区间乘积都为$1$，且不会超过$10^9$。设该区间长度为$ L $，则该区间中长度为$ len $的子区间个数为$ L-len+1 $，它们对答案的贡献即为$ L-len+1 $。
+
+2. **非全部为$1$的区间**  
+   此时区间中至少存在一个大于$1$的数，乘积会随区间长度指数增长，故对于每个起点我们可以用二分查找或双指针确定从该起点开始最大的区间长度$ L' $使得乘积不超过$10^9$。  
+   具体做法为：  
+   - 令局部数组记为$ seg $，长度为$ L $，预先构造前缀乘积数组$ P $（令$ P[0]=1 $，对$ 1\le k\le L $有$ P[k]=\min(P[k-1]\times seg[k-1],\,10^9+1) $，若超过$10^9$则记为$10^9+1$，表示已经超界）。  
+   - 对于每个起点$ i $（$ 0\le i<L $），利用二分查找确定最大的$ r $（$ i+1\le r\le L $），满足  
+     $$ P[r]\le10^9\times P[i]\,. $$
+     这样起点$ i $合法的区间个数为$ r-i $。而对于长度为$ l $（$ 1\le l\le r-i $）的区间，其乘积为  
+     $$ \frac{P[i+l]}{P[i]}\,. $$
+     将这些乘积累加到对应的答案$ ans[l] $中即可。
+
+对于整个数组，我们对每个非$0$区间分别累加答案，最后对每个询问直接输出预处理好的$ ans[len] $。  
+注意：包含$0$的区间其乘积为$0$，不用累加。
+
+由于对于非全部为$1$的区间，由于数组中存在大于$1$的元素，其合法的子区间长度往往很短（乘积会很快超过$10^9$），故内层循环不会过慢；而对于全$1$的区间，我们采用公式直接计算，从而避免$ O(L^2) $的遍历。
+
+## C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const ll LIMIT = 1000000000;
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while(T--){
+        int n, q;
+        cin >> n >> q;
+        vector<ll> a(n);
+        for (int i = 0; i < n; i++) {
+            cin >> a[i];
+        }
+        // ans[len] 表示所有区间长度为 len 的答案（1-indexed）
+        vector<ll> ans(n+1, 0);
+        
+        int i = 0;
+        while(i < n){
+            if(a[i] == 0){
+                // 包含 0 的区间乘积为 0，直接跳过
+                i++;
+                continue;
+            }
+            // 处理非0段
+            int j = i;
+            while(j < n && a[j] != 0) j++;
+            int lenSeg = j - i;
+            vector<ll> seg(a.begin()+i, a.begin()+j);
+            // 判断是否全为 1
+            bool allOnes = true;
+            for(auto &num : seg){
+                if(num != 1){
+                    allOnes = false;
+                    break;
+                }
+            }
+            if(allOnes){
+                // 对于全 1 的段，长度为 L 的段中，长度为 len 的子区间个数为 (L - len + 1)，乘积均为 1
+                for (int L = 1; L <= lenSeg; L++){
+                    ans[L] += (ll)(lenSeg - L + 1);
+                }
+            } else {
+                // 对于非全 1 的段，对每个起点单独累乘，直到乘积超过 LIMIT
+                for (int start = 0; start < lenSeg; start++){
+                    ll prod = 1;
+                    for (int end = start; end < lenSeg; end++){
+                        // 计算子区间 [start, end]
+                        // 注意：乘积可能超界，超过 LIMIT 则直接跳出循环
+                        if(prod > LIMIT / seg[end]){
+                            // 若乘积超过 LIMIT，则后续子区间均无效
+                            break;
+                        }
+                        prod *= seg[end];
+                        if(prod > LIMIT) break; // 虽然乘积仍在计算中，但超过 LIMIT 后视为 0
+                        int len = end - start + 1;
+                        ans[len] += prod;
+                    }
+                }
+            }
+            i = j;
+        }
+        // 输出询问答案
+        for (int k = 0; k < q; k++){
+            int len;
+            cin >> len;
+            cout << ans[len] << "\n";
+        }
+    }
+    return 0;
+}
+
+```
+## Python
+
+```python
+# -*- coding: utf-8 -*-
+import sys
+
+LIMIT = 10**9
+
+def main():
+    input = sys.stdin.readline
+    T = int(input())
+    for _ in range(T):
+        n, q = map(int, input().split())
+        a = list(map(int, input().split()))
+        ans = [0]*(n+1)  # ans[len] 表示所有长度为 len 的区间答案，1-indexed
+
+        i = 0
+        while i < n:
+            if a[i] == 0:
+                # 包含 0 的区间乘积为 0，跳过
+                i += 1
+                continue
+            j = i
+            while j < n and a[j] != 0:
+                j += 1
+            lenSeg = j - i
+            seg = a[i:j]
+            # 判断是否全为 1
+            if all(x == 1 for x in seg):
+                # 全 1 段，贡献直接为 (L - len + 1)
+                for L in range(1, lenSeg+1):
+                    ans[L] += (lenSeg - L + 1)
+            else:
+                # 非全 1 段，对每个起点单独累乘，直到乘积超过 LIMIT
+                for start in range(lenSeg):
+                    prod = 1
+                    for end in range(start, lenSeg):
+                        # 判断乘积是否会超过 LIMIT
+                        if prod > LIMIT // seg[end]:
+                            break
+                        prod *= seg[end]
+                        if prod > LIMIT:
+                            break
+                        length = end - start + 1
+                        ans[length] += prod
+            i = j
+        
+        out = []
+        for _ in range(q):
+            L = int(input())
+            out.append(str(ans[L]))
+        sys.stdout.write("\n".join(out) + "\n")
+
+if __name__ == '__main__':
+    main()
+
+```
+## Java
+
+```java
+import java.io.*;
+import java.util.*;
+public class Main {
+    static final long LIMIT = 1000000000L;
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter out = new PrintWriter(new BufferedOutputStream(System.out));
+        int T = Integer.parseInt(br.readLine());
+        while(T-- > 0){
+            String[] parts = br.readLine().split(" ");
+            int n = Integer.parseInt(parts[0]);
+            int q = Integer.parseInt(parts[1]);
+            String[] arrStr = br.readLine().split(" ");
+            long[] a = new long[n];
+            for(int i = 0; i < n; i++){
+                a[i] = Long.parseLong(arrStr[i]);
+            }
+            // ans[len] 表示所有长度为 len 的区间答案，1-indexed
+            long[] ans = new long[n+1];
+            int i = 0;
+            while(i < n){
+                if(a[i] == 0){
+                    // 包含 0 的区间乘积为 0，直接跳过
+                    i++;
+                    continue;
+                }
+                int j = i;
+                while(j < n && a[j] != 0) j++;
+                int lenSeg = j - i;
+                long[] seg = new long[lenSeg];
+                for(int k = 0; k < lenSeg; k++){
+                    seg[k] = a[i+k];
+                }
+                boolean allOnes = true;
+                for(long num : seg){
+                    if(num != 1){
+                        allOnes = false;
+                        break;
+                    }
+                }
+                if(allOnes){
+                    // 全 1 段，直接计算贡献
+                    for(int L = 1; L <= lenSeg; L++){
+                        ans[L] += (lenSeg - L + 1);
+                    }
+                } else {
+                    // 非全 1 段，从每个起点单独累乘，直到乘积超过 LIMIT
+                    for(int start = 0; start < lenSeg; start++){
+                        long prod = 1;
+                        for(int end = start; end < lenSeg; end++){
+                            if(prod > LIMIT / seg[end]){
+                                break;
+                            }
+                            prod *= seg[end];
+                            if(prod > LIMIT) break;
+                            int len = end - start + 1;
+                            ans[len] += prod;
+                        }
+                    }
+                }
+                i = j;
+            }
+            for(int k = 0; k < q; k++){
+                int L = Integer.parseInt(br.readLine());
+                out.println(ans[L]);
+            }
+        }
+        out.flush();
+        out.close();
+    }
+}
+
+```

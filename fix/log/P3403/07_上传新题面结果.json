@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3403",
+  "title": "第1题-最小扰动段",
+  "docId": 2745,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

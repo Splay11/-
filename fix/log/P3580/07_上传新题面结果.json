@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3580",
+  "title": "第2题-交替铺货后的奇偶",
+  "docId": 2923,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "模拟"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "https://www.bilibili.com/video/BV1HpaYzbEXM/",
+  "trial_videosol": ""
+}

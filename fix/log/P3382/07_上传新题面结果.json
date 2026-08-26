@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3382",
+  "title": "能量转移后的前缀最大值",
+  "docId": 2724,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "https://www.bilibili.com/video/BV1L8YvzxELP/?spm_id_from=333.1387.list.card_archive.click&vd_source=0f2b5f5dae4beb99b68547471f7432e0",
+  "trial_videosol": ""
+}

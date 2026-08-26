@@ -1,0 +1,276 @@
+## 解题思路
+
+1. **区间加权成本的等价形式**  
+   对于区间 $[l, r]$，题目定义的加权成本为  
+   $$cost(l, r) = \sum_{i=l}^{r} \sum_{j=l}^{i} a_j$$
+   可以改写成每个处理时间的贡献形式：$a_i$ 在区间 $[l, r]$ 中被累加的次数等于 $(r - i + 1)$，因此  
+   $$cost(l, r) = (r - l + 1) \cdot a_l + (r - l) \cdot a_{l+1} + \cdots + 1 \cdot a_r$$
+   后续的算法都将基于这一等价表达式进行。
+
+2. **二分答案转化为判定问题**  
+   要求所有区间中第 $k$ 小的成本值，可以使用二分答案。  
+   设当前二分值为 $x$，定义判定函数 `count_leq(x)`：统计满足 $cost(l, r) \le x$ 的区间个数。  
+   - 若 `count_leq(x) >= k`，说明第 $k$ 小的成本一定 $\le x$，将右边界缩小；  
+   - 否则说明第 $k$ 小的成本 $> x$，将左边界增大。  
+   二分下界取 $0$（所有 $a_i = 0$ 时最小成本为 $0$），上界可以取整个流水线区间 $[1, n]$ 的成本，即 $\sum_{i=1}^{n} \sum_{j=1}^{i} a_j$。
+
+3. **双指针 / 滑动窗口在线性时间内完成判定**  
+   由于 $a_i \ge 0$，固定左端点 $l$ 时，$cost(l, r)$ 随 $r$ 的增加而单调不减。  
+   对于给定的 $x$，可以使用滑动窗口在线性时间内统计所有满足条件的区间：
+   - 维护窗口 $[l, r)$（$r$ 为开区间），以及两个变量：  
+     `window_sum`：当前窗口内处理时间之和，即 $\sum_{i=l}^{r-1} a_i$；  
+     `cur_cost`：当前窗口的加权成本，即 $cost(l, r-1)$。
+   - 对于每一个左端点 $l$：  
+     * **右扩**：尝试加入 $a_r$。计算  
+       `new_sum = window_sum + a_r`  
+       `new_cost = cur_cost + new_sum`  
+       若 `new_cost <= x`，则更新 `window_sum = new_sum`、`cur_cost = new_cost`，并令 $r \gets r+1$；否则停止右扩。  
+     * 此时，以 $l$ 为左端点、右端点可取 $[l, r-1]$ 的区间均满足 $cost \le x$，共 $r - l$ 个，累加到计数中。  
+     * **左移**：将左端点从 $l$ 移向 $l+1$ 前，需要从窗口中去掉 $a_l$：  
+       - 若 $r > l$，更新 `cur_cost -= (r - l) * a_l`，`window_sum -= a_l`；  
+       - 若 $r = l$（窗口为空），则直接令 $r = l + 1$。  
+   整个过程每个指针均单调右移，单次 `count_leq(x)` 的时间复杂度为 $O(n)$。
+
+4. **得到最终答案**  
+   二分结束后，下界 `low` 即为所求的第 $k$ 小成本值。每组数据独立求解并输出。
+
+## 复杂度分析
+
+- **时间复杂度**：单次判定函数 `count_leq(x)` 使用双指针，复杂度 $O(n)$；二分答案值域范围约 $O(\log V)$，其中 $V$ 为答案上界，最大可达 $O(n^2 \cdot \max a_i)$，实际操作次数很小。总体复杂度为 $O(n \log V)$。所有测试数据中 $n$ 的总和不超过 $5 \times 10^5$，可以在时限内完成。
+- **空间复杂度**：需要存储每个工位的处理时间数组 $a$，占用 $O(n)$ 额外空间；双指针窗口仅使用常数个变量，空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+def count_leq(a, limit):
+    n = len(a)
+    r = 0               # 窗口[l, r) 的右端点
+    window_sum = 0      # 当前窗口内处理时间之和
+    cur_cost = 0        # 当前窗口的加权成本
+    cnt = 0
+
+    for l in range(n):
+        # 尽可能向右扩展，使 cost(l, r) <= limit
+        while r < n:
+            new_sum = window_sum + a[r]
+            new_cost = cur_cost + new_sum
+            if new_cost > limit:
+                break
+            window_sum = new_sum
+            cur_cost = new_cost
+            r += 1
+
+        # 以 l 为左端点，右端点可取 [l, r-1]
+        cnt += r - l
+
+        # 左端点右移
+        if r > l:
+            cur_cost -= (r - l) * a[l]
+            window_sum -= a[l]
+        else:
+            r = l + 1
+
+    return cnt
+
+
+def kth_smallest_cost(a, k):
+    n = len(a)
+    # 计算整个区间的加权成本作为二分上界
+    running = 0
+    high = 0
+    for x in a:
+        running += x
+        high += running
+
+    low = 0
+    while low < high:
+        mid = (low + high) // 2
+        if count_leq(a, mid) >= k:
+            high = mid
+        else:
+            low = mid + 1
+    return low
+
+
+def main():
+    import sys
+    input = sys.stdin.read
+    data = input().split()
+    it = iter(data)
+    t = int(next(it))
+    out_lines = []
+    for _ in range(t):
+        n = int(next(it))
+        k = int(next(it))
+        a = [int(next(it)) for _ in range(n)]
+        out_lines.append(str(kth_smallest_cost(a, k)))
+    sys.stdout.write("\n".join(out_lines))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.StringTokenizer;
+
+public class Main {
+    static long countLeq(long[] a, long limit) {
+        int n = a.length;
+        int r = 0;            // 窗口 [l, r)
+        long windowSum = 0;   // 窗口内处理时间之和
+        long curCost = 0;     // 当前窗口的加权成本
+        long cnt = 0;
+
+        for (int l = 0; l < n; l++) {
+            // 右扩
+            while (r < n) {
+                long newSum = windowSum + a[r];
+                long newCost = curCost + newSum;
+                if (newCost > limit) {
+                    break;
+                }
+                windowSum = newSum;
+                curCost = newCost;
+                r++;
+            }
+
+            cnt += r - l;
+
+            // 左缩
+            if (r > l) {
+                curCost -= (long) (r - l) * a[l];
+                windowSum -= a[l];
+            } else {
+                r = l + 1;
+            }
+        }
+        return cnt;
+    }
+
+    static long kthSmallestCost(long[] a, long k) {
+        int n = a.length;
+        // 上界：整个区间的加权成本
+        long running = 0;
+        long high = 0;
+        for (long x : a) {
+            running += x;
+            high += running;
+        }
+
+        long low = 0;
+        while (low < high) {
+            long mid = low + (high - low) / 2;
+            if (countLeq(a, mid) >= k) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return low;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        int t = Integer.parseInt(br.readLine());
+
+        while (t-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            long k = Long.parseLong(st.nextToken());
+            long[] a = new long[n];
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < n; i++) {
+                a[i] = Long.parseLong(st.nextToken());
+            }
+            sb.append(kthSmallestCost(a, k)).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+long long countLeq(const vector<long long>& a, long long limit) {
+    int n = a.size();
+    int r = 0;               // 窗口 [l, r)
+    long long windowSum = 0; // 窗口内处理时间之和
+    long long curCost = 0;   // 当前窗口的加权成本
+    long long cnt = 0;
+
+    for (int l = 0; l < n; ++l) {
+        // 右扩
+        while (r < n) {
+            long long newSum = windowSum + a[r];
+            long long newCost = curCost + newSum;
+            if (newCost > limit) break;
+            windowSum = newSum;
+            curCost = newCost;
+            ++r;
+        }
+
+        cnt += r - l;
+
+        // 左缩
+        if (r > l) {
+            curCost -= 1LL * (r - l) * a[l];
+            windowSum -= a[l];
+        } else {
+            r = l + 1;
+        }
+    }
+    return cnt;
+}
+
+long long kthSmallestCost(const vector<long long>& a, long long k) {
+    int n = a.size();
+    // 上界：整个区间的加权成本
+    long long running = 0;
+    long long high = 0;
+    for (long long x : a) {
+        running += x;
+        high += running;
+    }
+
+    long long low = 0;
+    while (low < high) {
+        long long mid = low + (high - low) / 2;
+        if (countLeq(a, mid) >= k) {
+            high = mid;
+        } else {
+            low = mid + 1;
+        }
+    }
+    return low;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+    while (t--) {
+        int n;
+        long long k;
+        cin >> n >> k;
+        vector<long long> a(n);
+        for (int i = 0; i < n; ++i) {
+            cin >> a[i];
+        }
+        cout << kthSmallestCost(a, k) << '\n';
+    }
+    return 0;
+}
+```

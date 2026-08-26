@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2828",
+  "title": "魔力排序",
+  "docId": 2460,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "树状数组"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

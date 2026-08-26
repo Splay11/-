@@ -1,0 +1,293 @@
+## 解题思路
+
+1. **问题转化**  
+   公司层级结构是一棵深度为 $n$ 的完全二叉树，节点编号规则为：根节点编号 $1$，节点 $i$ 的左子节点为 $2i$，右子节点为 $2i+1$。  
+   每次通知某个成员 $a_i$ 后，以 $a_i$ 为根的整棵子树都会被标记为“已通知”。  
+   我们需要在每次操作后，快速统计整棵树中已经被通知的节点总数。
+
+2. **利用 DFS 序将子树转化为连续区间**  
+   对完全二叉树进行先序遍历（根 → 左 → 右），每个节点都有一个唯一的 DFS 序（从 $0$ 开始编号）。  
+   先序遍历的性质保证了：一棵子树内所有节点的 DFS 序构成一个**连续区间**。  
+   - 区间左端点为该子树根节点的 DFS 序；  
+   - 区间右端点为从根节点出发，一直向右子节点走到底的那个节点的 DFS 序。  
+
+   因此，每次操作相当于在 DFS 序上覆盖一段连续区间 $[L, R]$。
+
+3. **计算节点 DFS 序与子树大小**  
+   由于 $n \le 40$，树的总节点数可达 $2^{40}-1$，不能显式建树，但可以利用完全二叉树的编号位运算来求解。
+   - **子树大小** `numChildren(n, x)`：计算以 $x$ 为根的子树包含的节点数。先求出 $x$ 所处的深度 `dep`（根深度为 $0$），则子树大小为 $2^{\,n-dep} - 1$。
+   - **DFS 序** `calcDfn(n, x)`：从节点 $x$ 向上走到根，沿途计算排名。若当前节点是父节点的右子节点，则累加上左兄弟子树的全部节点数；每向上走一步，排名至少增加 $1$（父节点位于兄弟子树之后）。最终得到 $x$ 在先序遍历中的位置（从 $0$ 开始）。
+
+4. **使用 ODT（珂朵莉树）维护已被覆盖的区间**  
+   维护一个有序集合（如 `TreeMap`/`std::map`/有序列表），存储当前所有值为 $1$（已通知）的连续区间，这些区间互不相交。  
+   另用一个全局变量 `ans` 记录当前已通知的节点总数。  
+   对于每次操作：
+   - 计算子树区间 $[L, R]$：  
+     * 令 $s = a_i$，通过 `calcDfn(n, s)` 得到 $L$；  
+     * 从 $s$ 出发，反复执行 $s \leftarrow s \times 2 + 1$ 直到超出范围，得到子树最右下节点 $x$，再计算 $R = \text{calcDfn}(n, x)$。
+   - 在 ODT 中找到与 $[L, R]$ 有交集的所有区间，累加其中未被覆盖的部分长度到 `ans`。
+   - 将这些旧区间从集合中删除，插入一个覆盖整个 $[L, R]$ 且值为 $1$ 的新区间。
+   - 输出 `ans`。
+
+5. **Python 实现简化为区间列表合并**  
+   由于 $q \le 10^4$，可以直接维护一个按左端点排序的已覆盖区间列表。  
+   每次得到新区间 $[L, R]$ 后，用二分查找找出与之相交的所有已有区间，合并它们并计算新增覆盖长度，更新列表和答案。该做法足够高效。
+
+## 复杂度分析
+
+- **时间复杂度**：  
+  每次操作需要常数次计算 DFS 序（ $O(\log N)$ 时间，$N = 2^n$ ），并在有序结构中查询/更新区间。  
+  使用平衡树（`TreeMap`/`std::map`）时，单次操作均摊 $O(\log M)$，$M$ 为现有区间数，且 $M \le 2q$。  
+  使用列表二分 + 合并时，单次操作在最坏情况下为 $O(M)$，但 $M$ 很小。  
+  总体复杂度为 $O(q \log q)$ 或 $O(q^2)$，对 $q \le 10^4$ 完全可接受。
+
+- **空间复杂度**：  
+  需要存储 ODT 中的区间，区间数不超过 $2q$，因此空间复杂度为 $O(q)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import bisect
+
+def num_children(n, x):
+    dep = 0
+    while x > 1:
+        x //= 2
+        dep += 1
+    return (1 << (n - dep)) - 1
+
+def calc_dfs(n, x):
+    ans = 0
+    while x > 1:
+        ans += 1
+        if x % 2 == 1:
+            ans += num_children(n, x - 1)
+        x //= 2
+    return ans
+
+def solve():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    n = int(next(it))
+    q = int(next(it))
+    intervals = []          # 存已覆盖区间，格式 (L, R)
+    total = 0
+    out = []
+    limit = 1 << n          # 2^n
+    
+    for _ in range(q):
+        a = int(next(it))
+        # 找出子树最右下节点
+        right = a
+        while (right * 2 + 1) < limit:
+            right = right * 2 + 1
+        L = calc_dfs(n, a)
+        R = calc_dfs(n, right)
+        
+        # 二分查找与 [L, R] 相交的已有区间
+        i = bisect.bisect_left(intervals, (L, -1))
+        if i > 0 and intervals[i-1][1] >= L:
+            i -= 1
+        
+        merged = []
+        total_old = 0
+        while i < len(intervals) and intervals[i][0] <= R:
+            l, r = intervals[i]
+            if r >= L:          # 有交集
+                merged.append(i)
+                total_old += (r - l + 1)
+            i += 1
+        
+        if merged:
+            new_l = min(intervals[merged[0]][0], L)
+            new_r = max(intervals[merged[-1]][1], R)
+            first, last = merged[0], merged[-1]
+            intervals[first:last+1] = [(new_l, new_r)]
+        else:
+            new_l, new_r = L, R
+            ins_pos = bisect.bisect_left(intervals, (L,))
+            intervals[ins_pos:ins_pos] = [(L, R)]
+        
+        added = (new_r - new_l + 1) - total_old
+        total += added
+        out.append(str(total))
+    
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int q = sc.nextInt();
+        TreeMap<Long, long[]> odt = new TreeMap<>();
+        long ans = 0;
+        odt.put(0L, new long[]{ (1L << n) - 1, 0L });  // 初始整个区间未通知
+        
+        for (int t = 0; t < q; t++) {
+            long x = sc.nextLong();
+            long start = x;
+            // 找子树最右下节点
+            while (x * 2 + 1 < (1L << n)) {
+                x = x * 2 + 1;
+            }
+            long L = calDfn(n, start);
+            long R = calDfn(n, x);
+            
+            split(odt, L);
+            split(odt, R + 1);
+            
+            // 统计 [L, R] 中尚未通知的节点数
+            NavigableMap<Long, long[]> sub = odt.subMap(L, true, R, true);
+            Iterator<Map.Entry<Long, long[]>> it = sub.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Long, long[]> entry = it.next();
+                if (entry.getValue()[1] == 0) {
+                    ans += entry.getValue()[0] - entry.getKey() + 1;
+                }
+            }
+            // 清空该区间，插入新的已通知区间
+            sub.clear();
+            odt.put(L, new long[]{ R, 1L });
+            
+            System.out.println(ans);
+        }
+    }
+    
+    private static void split(TreeMap<Long, long[]> odt, long x) {
+        Map.Entry<Long, long[]> entry = odt.floorEntry(x);
+        if (entry == null || entry.getKey() > x) return;
+        long L = entry.getKey();
+        long R = entry.getValue()[0];
+        long val = entry.getValue()[1];
+        if (L == x) return;          // 刚好在左端点，无需拆分
+        if (R < x) return;           // x 超出右端点
+        // 拆分成 [L, x-1] 和 [x, R]
+        odt.put(L, new long[]{ x - 1, val });
+        odt.put(x, new long[]{ R, val });
+    }
+    
+    private static long calDfn(int n, long x) {
+        long ans = 0;
+        while (x > 1) {
+            ans++;
+            if (x % 2 == 1) {
+                ans += numChildren(n, x - 1);
+            }
+            x /= 2;
+        }
+        return ans;
+    }
+    
+    private static long numChildren(int n, long x) {
+        int dep = 0;
+        while (x > 1) {
+            x /= 2;
+            dep++;
+        }
+        return (1L << (n - dep)) - 1;
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+
+// 计算以 x 为根的子树节点数
+ll numChildren(int n, ll x) {
+    int dep = 0;
+    while (x > 1) {
+        x /= 2;
+        dep++;
+    }
+    return (1LL << (n - dep)) - 1;
+}
+
+// 计算节点 x 在先序遍历中的 DFS 序（从 0 开始）
+ll calcDfn(int n, ll x) {
+    ll ans = 0;
+    while (x > 1) {
+        ans++;
+        if (x % 2 == 1) {
+            ans += numChildren(n, x - 1);
+        }
+        x /= 2;
+    }
+    return ans;
+}
+
+// ODT 分裂操作：将包含 x 的区间分成 [L, x-1] 和 [x, R]
+void split(map<ll, pair<ll, int>>& odt, ll x) {
+    auto it = odt.upper_bound(x);
+    if (it == odt.begin()) return;
+    --it;
+    ll L = it->first;
+    ll R = it->second.first;
+    int val = it->second.second;
+    if (R < x || L == x) return; // 无需拆分
+    odt.erase(it);
+    odt[L] = { x - 1, val };
+    odt[x] = { R, val };
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n, q;
+    cin >> n >> q;
+    
+    map<ll, pair<ll, int>> odt;  // 左端点 -> {右端点, 值}，值 0 未通知，1 已通知
+    ll ans = 0;
+    odt[0] = { (1LL << n) - 1, 0 };
+    
+    for (int i = 0; i < q; i++) {
+        ll a;
+        cin >> a;
+        ll right = a;
+        while ((right * 2 + 1) < (1LL << n)) {
+            right = right * 2 + 1;
+        }
+        ll L = calcDfn(n, a);
+        ll R = calcDfn(n, right);
+        
+        split(odt, L);
+        split(odt, R + 1);
+        
+        // 统计并删除 [L, R] 中未通知的区间
+        auto it = odt.lower_bound(L);
+        while (it != odt.end() && it->first <= R) {
+            ll l = it->first;
+            ll r = it->second.first;
+            int val = it->second.second;
+            if (val == 0) {
+                ans += (r - l + 1);
+            }
+            it = odt.erase(it);
+        }
+        // 插入已通知区间
+        odt[L] = { R, 1 };
+        cout << ans << "\n";
+    }
+    
+    return 0;
+}
+```

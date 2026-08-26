@@ -1,0 +1,6 @@
+{
+  "title": "归一化评分拟合",
+  "content": "风控实验室要给一批信贷样本拟合线性评分器。训练数据给出特征矩阵 $X$ 与标签 $\\mathbf{y}$，测试数据只给出特征。实验室规定必须用手写的归一化梯度下降更新权重，且实现时只允许使用 $numpy$。\n\n目标函数为\n\n$f(\\mathbf{w})=\\dfrac{1}{2}\\|X\\mathbf{w}-\\mathbf{y}\\|_{2}^{2}+\\lambda\\|\\mathbf{w}\\|_{2}^{2}$。\n\n梯度为 $\\nabla f=X^{\\top}(X\\mathbf{w}-\\mathbf{y})+2\\lambda\\mathbf{w}$。先把梯度归一化为单位 $L2$ 向量\n\n$\\hat{\\mathbf{g}}=\\dfrac{\\nabla f}{\\max(\\|\\nabla f\\|_{2},\\varepsilon)}$，\n\n其中 $\\varepsilon=10^{-10}$。若 $\\|\\nabla f\\|_{2}<\\varepsilon$，或梯度中出现非有限值，则跳过本步更新但仍计入迭代次数。\n\n学习率 $\\eta_t=\\dfrac{\\eta_0}{\\sqrt{t}}$，$t=1,2,\\ldots,T$。更新为 $\\mathbf{w}_{t+1}=\\mathbf{w}_t-\\eta_t\\hat{\\mathbf{g}}$。\n\n固定参数：$\\eta_0=0.2$，$\\lambda=0.01$，迭代步数 $T=60$。权重初值 $\\mathbf{w}_0$ 为全 `0` 向量。\n\n得到 $\\mathbf{w}_T$ 后，对测试矩阵 $X_{\\mathrm{test}}$ 计算 $\\hat{y}=X_{\\mathrm{test}}\\mathbf{w}_T$，再取符号：结果 $\\ge 0$ 记为 `1`，否则记为 `0`。\n\n约束：训练样本数 $n$ 不超过 `60`，测试样本数 $m$ 不超过 `15`，特征维 $d$ 不超过 `6`。所有值为实数且不含缺失。",
+  "input_description": "标准输入仅一行 JSON 对象，包含三个键：`train_X` 为 $n \\times d$ 的二维实数数组，`train_y` 为长度 $n$ 的实数数组，`test_X` 为 $m \\times d$ 的二维实数数组。保证 $n \\le 60$，$m \\le 15$，$d \\le 6$。",
+  "output_description": "输出一行 JSON 对象，包含键 `weights` 与 `test_pred`：`weights` 是长度 $d$ 的数组，每个分量用四舍五入保留 `6` 位小数；`test_pred` 是长度 $m$ 的数组，元素仅为 `0` 或 `1`。"
+}

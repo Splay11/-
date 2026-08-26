@@ -1,0 +1,6 @@
+{
+  "title": "奇数步网格博弈",
+  "content": "$n\\times m$ 网格，棋子从 $(1,1)$ 出发，每次向上或向右移动奇数格且不越界。先手必胜输出 `Yes` 否则 `No`。双方最优。\n\n$1 \\le t \\le 10^4$，$1 \\le n,m < 10^3$。",
+  "input_description": "第一行 $t$。接下来 $t$ 行每行 $n,m$。",
+  "output_description": "每组一行 `Yes` 或 `No`。"
+}

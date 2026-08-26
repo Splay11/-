@@ -1,0 +1,192 @@
+### 题解
+
+### 题面描述
+
+我们有以下输入：
+- 一个整数 $n$，表示数组的长度。
+- 三个长度为 $n$ 的数组 $a$, $b$, $c$。
+
+我们需要通过最多一次交换操作（交换数组 $a$ 中的两个元素的位置），使得定义的 $s$ 值最大化。$s$ 的计算公式为：
+
+
+$s$ = ($b_1$ - $a_1$)*$c_1$ + ($b_2$ - $a_2$)*$c_2$ +......+ ($b_n$ - $a_n$)*$c_n$
+
+
+### 初步思考
+
+1. **理解 $s$ 的计算方式**：
+   - 每个元素 $(b_i - a_i) \cdot c_i$ 对 $s$ 有贡献。
+   - 我们的目标是通过交换 $a$ 中的两个元素，使得 $s$ 最大化。
+
+2. **交换的影响**：
+   - 交换 $a$ 中的两个元素 $a_i$ 和 $a_j$，会影响 $(b_i - a_i) \cdot c_i$ 和 $(b_j - a_j) \cdot c_j$ 这两个项。
+   - 我们需要找到一对 $(i, j)$，使得交换后 $s$ 的增加量最大。
+
+3. **计算交换的增益**：
+   - 交换前的 $s$ 为：
+     $s_{original}$ = $\sum_{k=1}^n (b_k - a_k) \cdot c_k$
+   - 交换 $a_i$ 和 $a_j$ 后，新的 $s$ 为：
+     
+     $s_{new}$ = $s_{original}$ - ($b_i$ - $a_i$)*$c_i$ - ($b_j$ - $a_j$)*$c_j$ + ($b_i$ - $a_j$)*$c_i$ + ($b_j$ - $a_i$)* $c_j$
+     
+   - 因此，交换的增益为：
+     $$
+     \text{gain} = (a_i - a_j)(c_i - c_j)
+     $$
+4. **寻找最大增益**：
+   - 我们需要找到一对 $(i, j)$，使得 $(a_i - a_j)(c_i - c_j)$ 最大。
+   - 这意味着我们需要找到 $a$ 和 $c$ 中差异最大的组合。
+
+### 算法设计
+
+1. **计算原始 $s$ 值**：
+   - 首先计算不进行任何交换时的 $s$ 值。
+
+2. **寻找最佳交换对**：
+   - 遍历所有可能的 $(i, j)$ 对，计算 $(a_i - a_j)(c_i - c_j)$，找到最大值。
+   - 由于 $n$ 可以达到 $10^5$，直接双重循环会超时，需要优化。
+
+3. **优化寻找过程**：
+   观察到$c_i$很小，因此我们可以直接枚举$c_i$来实现
+
+## cpp
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    vector<int> a(n), b(n), c(n);
+    
+    for (int i = 0; i < n; ++i) cin >> a[i];
+    for (int i = 0; i < n; ++i) cin >> b[i];
+    for (int i = 0; i < n; ++i) cin >> c[i];
+    
+    // 计算不交换时的s值
+    long long s_original = 0;
+    for (int i = 0; i < n; ++i) {
+        s_original += (b[i] - a[i]) * c[i];
+    }
+    
+    // 按c[i]分组，记录每组中a[i]的最大值和最小值
+    vector<int> max_a(1001, -1001); // c[i]的范围是1到1000
+    vector<int> min_a(1001, 1001);
+    for (int i = 0; i < n; ++i) {
+        int ci = c[i];
+        max_a[ci] = max(max_a[ci], a[i]);
+        min_a[ci] = min(min_a[ci], a[i]);
+    }
+    
+    // 枚举所有可能的(c[i], c[j])组合
+    long long max_delta = -1e9;
+    for (int ci = 1; ci <= 1000; ++ci) {
+        for (int cj = ci; cj <= 1000; ++cj) {
+            int d=cj-ci;
+            long long delta = max_a[cj]*d+min_a[ci]*(-d);
+            if (delta > max_delta) {
+                max_delta = delta;
+            }
+        }
+    }
+    
+    // 输出结果
+    cout << s_original + max_delta << endl;
+    
+    return 0;
+}
+```
+## python
+```python
+def main():
+    import sys
+    input = sys.stdin.read
+    data = input().split()
+    
+    n = int(data[0])
+    a = list(map(int, data[1:n+1]))
+    b = list(map(int, data[n+1:2*n+1]))
+    c = list(map(int, data[2*n+1:3*n+1]))
+    
+    # 计算不交换时的s值
+    s_original = 0
+    for i in range(n):
+        s_original += (b[i] - a[i]) * c[i]
+    
+    # 按c[i]分组，记录每组中a[i]的最大值和最小值
+    max_a = [-1001] * 1001  # c[i]的范围是1到1000
+    min_a = [1001] * 1001
+    for i in range(n):
+        ci = c[i]
+        max_a[ci] = max(max_a[ci], a[i])
+        min_a[ci] = min(min_a[ci], a[i])
+    
+    # 枚举所有可能的(c[i], c[j])组合
+    max_delta = -1e9
+    for ci in range(1, 1001):
+        for cj in range(ci, 1001):
+            d = cj - ci
+            delta = max_a[cj] * d + min_a[ci] * (-d)
+            if delta > max_delta:
+                max_delta = delta
+    
+    # 输出结果
+    print(s_original + max_delta)
+
+if __name__ == "__main__":
+    main()
+```
+## java
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] a = new int[n];
+        int[] b = new int[n];
+        int[] c = new int[n];
+        
+        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
+        for (int i = 0; i < n; i++) b[i] = sc.nextInt();
+        for (int i = 0; i < n; i++) c[i] = sc.nextInt();
+        
+        // 计算不交换时的s值
+        long s_original = 0;
+        for (int i = 0; i < n; i++) {
+            s_original += (b[i] - a[i]) * c[i];
+        }
+        
+        // 按c[i]分组，记录每组中a[i]的最大值和最小值
+        int[] max_a = new int[1001];  // c[i]的范围是1到1000
+        int[] min_a = new int[1001];
+        for (int i = 1; i <= 1000; i++) {
+            max_a[i] = -1001;
+            min_a[i] = 1001;
+        }
+        for (int i = 0; i < n; i++) {
+            int ci = c[i];
+            max_a[ci] = Math.max(max_a[ci], a[i]);
+            min_a[ci] = Math.min(min_a[ci], a[i]);
+        }
+        
+        // 枚举所有可能的(c[i], c[j])组合
+        long max_delta = (long) -1e9;
+        for (int ci = 1; ci <= 1000; ci++) {
+            for (int cj = ci; cj <= 1000; cj++) {
+                int d = cj - ci;
+                long delta = max_a[cj] * d + min_a[ci] * (-d);
+                if (delta > max_delta) {
+                    max_delta = delta;
+                }
+            }
+        }
+        
+        // 输出结果
+        System.out.println(s_original + max_delta);
+    }
+}
+```

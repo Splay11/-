@@ -1,0 +1,186 @@
+## 解题思路
+
+本题需要计算一个实数序列在平移后与原序列的关联程度，定义为平移关联系数 $R_k$。给定长度为 $n$ 的序列 $a_0, a_1, \dots, a_{n-1}$，按以下步骤计算：
+
+1. **计算均值**  
+   序列的均值为所有元素的算术平均：
+   $$\mu = \frac{1}{n}\sum_{i=0}^{n-1} a_i$$
+
+2. **计算方差**  
+   方差 $V$ 定义为各元素与均值偏差平方的平均值：
+   $$V = \frac{1}{n}\sum_{i=0}^{n-1} (a_i - \mu)^2$$
+   若 $V = 0$，说明序列中所有元素完全相同，此时所有偏移的关联系数均为 $0$。
+
+3. **计算各偏移的关联系数**  
+   对于每个偏移量 $k$（$0 \le k < n$）：
+   - 计算未归一化的关联和 $S_k$：
+     $$S_k = \sum_{i=0}^{n-k-1} (a_{i+k} - \mu)(a_i - \mu)$$
+   - 平移关联系数 $R_k$ 为：
+     $$R_k = \begin{cases}
+        \dfrac{S_k}{V}, & V \neq 0 \\
+        0, & V = 0
+        \end{cases}$$
+   - 将每个 $R_k$ 保留一位小数，存入结果列表。
+
+4. **输出**  
+   将结果列表以 Python 列表的格式输出，每个元素均为保留一位小数的浮点数。
+
+根据定义，$k \ge n$ 时 $R_k = 0$，题目只要求输出 $k=0,1,\dots,n-1$ 的结果，因此只需计算前 $n$ 个系数。
+
+## 复杂度分析
+
+- **时间复杂度**：  
+  计算均值 $O(n)$，计算方差 $O(n)$，对每一个 $k$ 计算 $S_k$ 的复杂度为 $O(n-k)$，因此总复杂度为  
+  $$\sum_{k=0}^{n-1} (n-k) = \frac{n(n+1)}{2} = O(n^2)$$
+  
+- **空间复杂度**：  
+  需要存储输入序列和输出结果，各占 $O(n)$ 空间，总体 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+def main():
+    # 读取一行浮点数，转换为列表
+    data = list(map(float, input().split()))
+    n = len(data)
+
+    # 计算均值
+    mu = sum(data) / n
+
+    # 计算方差 V
+    var = sum((x - mu) ** 2 for x in data) / n
+
+    res = []
+    # 对每个偏移 k 计算 R_k
+    for k in range(n):
+        s = 0.0
+        for i in range(n - k):
+            s += (data[i + k] - mu) * (data[i] - mu)
+        if var != 0:
+            r = s / var
+        else:
+            r = 0.0
+        # 保留一位小数
+        res.append(round(r, 1))
+
+    # 以 Python 列表格式输出
+    print(res)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String line = sc.nextLine().trim();
+        String[] parts = line.split(" ");
+        int n = parts.length;
+        double[] a = new double[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = Double.parseDouble(parts[i]);
+        }
+
+        // 计算均值
+        double sum = 0.0;
+        for (double x : a) sum += x;
+        double mu = sum / n;
+
+        // 计算方差 V
+        double var = 0.0;
+        for (double x : a) {
+            double diff = x - mu;
+            var += diff * diff;
+        }
+        var /= n;
+
+        // 计算结果
+        double[] res = new double[n];
+        for (int k = 0; k < n; k++) {
+            double s = 0.0;
+            for (int i = 0; i < n - k; i++) {
+                s += (a[i + k] - mu) * (a[i] - mu);
+            }
+            if (var != 0) {
+                res[k] = s / var;
+            } else {
+                res[k] = 0.0;
+            }
+        }
+
+        // 输出 Python 列表格式，保留一位小数
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < n; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(String.format("%.1f", res[i]));
+        }
+        sb.append("]");
+        System.out.println(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#include <sstream>
+using namespace std;
+
+int main() {
+    // 读取一行所有浮点数
+    vector<double> a;
+    double val;
+    while (cin >> val) {
+        a.push_back(val);
+    }
+    int n = a.size();
+
+    // 计算均值
+    double sum = 0.0;
+    for (double x : a) sum += x;
+    double mu = sum / n;
+
+    // 计算方差 V
+    double var = 0.0;
+    for (double x : a) {
+        double diff = x - mu;
+        var += diff * diff;
+    }
+    var /= n;
+
+    // 计算平移关联指数
+    vector<double> res(n);
+    for (int k = 0; k < n; ++k) {
+        double s = 0.0;
+        for (int i = 0; i < n - k; ++i) {
+            s += (a[i + k] - mu) * (a[i] - mu);
+        }
+        if (var != 0) {
+            res[k] = s / var;
+        } else {
+            res[k] = 0.0;
+        }
+    }
+
+    // 按格式输出
+    printf("[");
+    for (int i = 0; i < n; ++i) {
+        if (i > 0) printf(", ");
+        printf("%.1f", res[i]);
+    }
+    printf("]\n");
+
+    return 0;
+}
+```

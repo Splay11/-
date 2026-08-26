@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1909",
+  "title": "第3题-阈值扩张采集",
+  "docId": 1012,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

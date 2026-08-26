@@ -1,0 +1,11 @@
+{
+  "pid": "P5170",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 15:34:51",
+  "end_time": "2026-08-19 15:35:03",
+  "new_title": "闸机走廊",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

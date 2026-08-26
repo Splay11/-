@@ -1,0 +1,14 @@
+{
+  "samples": [
+    {
+      "input": "3\n5\n0 1 0 2 1\n4\n0 0 0 0\n1\n0",
+      "output": "aabab\nabcd\na",
+      "explanation": "第一组从左到右贪心取字母：位置依次放 `a,a,b,a,b`，得到 `aabab`。\n\n第二组四个位置都要求当前次数为 `0`，依次取尚未用过的字母，得到 `abcd`。\n\n第三组只有一个位置且 $a_1=`0`$，输出 `a`。"
+    },
+    {
+      "input": "1\n3\n0 1 2",
+      "output": "aaa",
+      "explanation": "三次都落在同一字母 `a` 上，构造出 `aaa`。"
+    }
+  ]
+}

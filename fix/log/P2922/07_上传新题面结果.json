@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2922",
+  "title": "第1题-坐席领先时刻",
+  "docId": 2557,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "字符串"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

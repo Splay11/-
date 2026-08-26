@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4844",
+  "title": "第3题-最大化异或对总和",
+  "docId": 4131,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "贪心算法"
+  ],
+  "alg_tag": "贪心算法",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

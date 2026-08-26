@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P2779",
+  "title": "第3题-彩灯树的和谐枝干",
+  "docId": 2411,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "dfs",
+    "bfs",
+    "回文串"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

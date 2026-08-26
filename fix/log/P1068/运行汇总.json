@@ -1,0 +1,11 @@
+{
+  "pid": "P1068",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 19:44:19",
+  "end_time": "2026-08-19 19:44:19",
+  "new_title": "泊位预热提速",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}

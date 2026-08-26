@@ -1,0 +1,385 @@
+## 解题思路
+
+本题要求从原始瓷砖排列得到恰好长度为 $m$ 的排列，每次操作是选择一段长度至少为 $2$ 的连续同色瓷砖进行“融合”：将它们替换成一块长度为 $1$ 的混合砖，花费代价为 $w_k$（$k$ 为融合段的原长度）。目标是在最终长度等于 $m$ 的前提下最小化总代价。
+
+把问题转换成“字符删除”的视角：  
+- 一次对长度为 $k$（$k\ge 2$）的同色段进行融合，会使总长度减少 $k-1$，代价为 $w_k$。  
+- 因此，从长度 $n$ 变成 $m$，总共需要减少的字符数为 $d = n - m$。如果 $d < 0$ 或无法恰好减少 $d$ 个字符，则无解。
+
+关键观察：  
+- 融合操作只能在**连续相同颜色的极长段**（称为“同色连续段”）内部发生，不能跨段。  
+- 所以可以先把原字符串拆成若干个同色连续段，分别计算每个段内“减少 $x$ 个字符的最小代价”，再用分组背包合并，凑出总共减少 $d$ 个字符的最小代价。
+
+### 单段内的动态规划
+
+对于一个长度为 $L$ 的同色连续段，定义 $f[i][j]$ 表示考虑该段的前 $i$ 块瓷砖，**恰好**减少 $j$ 个字符时的最小代价。转移分两类：
+
+1. 不融合第 $i+1$ 块瓷砖（它保持原样）：  
+   $$f[i+1][j] = \min(f[i+1][j],\; f[i][j])$$
+
+2. 从第 $i+1$ 块开始，融合一段长度为 $k$（$k \ge 2$ 且 $i+k \le L$）的连续同色瓷砖：  
+   减少的字符数为 $k-1$，代价增加 $w_k$，转移到 $f[i+k][j+k-1]$：  
+   $$f[i+k][j+k-1] = \min(f[i+k][j+k-1],\; f[i][j] + w_k)$$
+
+最后 $f[L][x]$ 就是该段减少恰好 $x$ 个字符的最小代价，$x$ 的取值范围是 $0 \sim L-1$。
+
+### 多段合并（分组背包）
+
+得到每个同色连续段对应的代价数组 `costRun[x]`（$0 \le x \le L-1$）后，做一次分组背包：
+
+- 设 $dp[t]$ 表示处理完前若干段后，总共减少 $t$ 个字符的最小代价。  
+- 初始 $dp[0] = 0$，其它为 $+\infty$。  
+- 对每一段，枚举当前已减少的字符数 $old$，再枚举本段减少的字符数 $dec$，更新：
+  $$dp'[old+dec] = \min(dp'[old+dec],\; dp[old] + costRun[dec])$$
+
+最终答案为 $dp[d]$（若为无穷大则输出 $-1$）。
+
+## 复杂度分析
+
+- 时间复杂度：  
+  单个长度为 $L$ 的同色连续段 DP 状态数 $O(L^2)$，转移 $O(L)$，单段复杂度 $O(L^3)$ 级；所有段长度之和为 $n$，因此总复杂度为 $O(n^3)$。分组背包部分为 $O(n \cdot d)$，其中 $d = n-m \le n$。  
+  由于 $n \le 500$ 且所有测试数据 $n$ 之和不超过 $1000$，该复杂度完全可以接受。
+
+- 空间复杂度：  
+  单段 DP 表大小为 $O(L^2)$；分组背包数组长度为 $O(n)$。因此总空间复杂度为 $O(n^2)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+INF = 10 ** 18
+
+# 计算一个长度为L的同色连续段中，减少x个字符的最小代价
+def calc_run_cost(L, w):
+    # f[i][j]：前i块瓷砖，恰好减少j个字符的最小代价
+    f = [[INF] * L for _ in range(L + 1)]
+    f[0][0] = 0
+
+    for i in range(L):
+        for j in range(L):
+            if f[i][j] == INF:
+                continue
+
+            # 不融合第i+1块瓷砖
+            if f[i + 1][j] > f[i][j]:
+                f[i + 1][j] = f[i][j]
+
+            # 从第i+1块开始融合一段长度为k的连续同色段
+            for k in range(2, L - i + 1):
+                nj = j + (k - 1)
+                cost = f[i][j] + w[k]
+                if f[i + k][nj] > cost:
+                    f[i + k][nj] = cost
+
+    res = [INF] * L
+    for j in range(L):
+        res[j] = f[L][j]
+    return res
+
+
+def solve_case(n, m, s, arr):
+    need = n - m
+    if need < 0:
+        return -1
+
+    # 代价数组 w[k] 表示融合长度为k的段所需代价，k从1开始
+    w = [0] * (n + 1)
+    for i in range(1, n + 1):
+        w[i] = arr[i - 1]
+
+    # 拆分成极长同色连续段
+    runs = []
+    cnt = 1
+    for i in range(1, n):
+        if s[i] == s[i - 1]:
+            cnt += 1
+        else:
+            runs.append(cnt)
+            cnt = 1
+    runs.append(cnt)
+
+    # 分组背包
+    dp = [INF] * (need + 1)
+    dp[0] = 0
+
+    for L in runs:
+        cost_run = calc_run_cost(L, w)
+        ndp = [INF] * (need + 1)
+
+        for old in range(need + 1):
+            if dp[old] == INF:
+                continue
+            max_dec = min(L - 1, need - old)
+            for dec in range(max_dec + 1):
+                if cost_run[dec] == INF:
+                    continue
+                val = dp[old] + cost_run[dec]
+                if ndp[old + dec] > val:
+                    ndp[old + dec] = val
+
+        dp = ndp
+
+    return -1 if dp[need] == INF else dp[need]
+
+
+def main():
+    input = sys.stdin.readline
+    T = int(input().strip())
+    out_lines = []
+
+    for _ in range(T):
+        n, m = map(int, input().split())
+        s = input().strip()
+        arr = list(map(int, input().split()))
+        out_lines.append(str(solve_case(n, m, s, arr)))
+
+    sys.stdout.write("\n".join(out_lines))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+
+public class Main {
+    static final long INF = (long) 4e18;
+
+    // 计算一个长度为L的同色连续段中，减少x个字符的最小代价
+    static long[] calcRunCost(int L, long[] w) {
+        long[][] f = new long[L + 1][L];
+        for (int i = 0; i <= L; i++) {
+            for (int j = 0; j < L; j++) {
+                f[i][j] = INF;
+            }
+        }
+        f[0][0] = 0;
+
+        for (int i = 0; i < L; i++) {
+            for (int j = 0; j < L; j++) {
+                if (f[i][j] == INF) {
+                    continue;
+                }
+
+                // 不融合第i+1块瓷砖
+                if (f[i + 1][j] > f[i][j]) {
+                    f[i + 1][j] = f[i][j];
+                }
+
+                // 从第i+1块开始融合长度为k的一段
+                for (int k = 2; k <= L - i; k++) {
+                    int nj = j + k - 1;
+                    long cost = f[i][j] + w[k];
+                    if (f[i + k][nj] > cost) {
+                        f[i + k][nj] = cost;
+                    }
+                }
+            }
+        }
+
+        long[] res = new long[L];
+        for (int j = 0; j < L; j++) {
+            res[j] = f[L][j];
+        }
+        return res;
+    }
+
+    static long solveCase(int n, int m, String s, long[] w) {
+        int need = n - m;
+        if (need < 0) return -1;
+
+        // 拆分成极长同色连续段
+        int[] runs = new int[n];
+        int runCnt = 0;
+        int cnt = 1;
+        for (int i = 1; i < n; i++) {
+            if (s.charAt(i) == s.charAt(i - 1)) {
+                cnt++;
+            } else {
+                runs[runCnt++] = cnt;
+                cnt = 1;
+            }
+        }
+        runs[runCnt++] = cnt;
+
+        // 分组背包
+        long[] dp = new long[need + 1];
+        for (int i = 0; i <= need; i++) {
+            dp[i] = INF;
+        }
+        dp[0] = 0;
+
+        for (int idx = 0; idx < runCnt; idx++) {
+            int L = runs[idx];
+            long[] costRun = calcRunCost(L, w);
+            long[] ndp = new long[need + 1];
+            for (int i = 0; i <= need; i++) {
+                ndp[i] = INF;
+            }
+
+            for (int old = 0; old <= need; old++) {
+                if (dp[old] == INF) continue;
+                int maxDec = Math.min(L - 1, need - old);
+                for (int dec = 0; dec <= maxDec; dec++) {
+                    if (costRun[dec] == INF) continue;
+                    long val = dp[old] + costRun[dec];
+                    if (ndp[old + dec] > val) {
+                        ndp[old + dec] = val;
+                    }
+                }
+            }
+            dp = ndp;
+        }
+
+        return dp[need] == INF ? -1 : dp[need];
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastReader fr = new FastReader();
+        StringBuilder sb = new StringBuilder();
+        int T = fr.nextInt();
+        while (T-- > 0) {
+            int n = fr.nextInt();
+            int m = fr.nextInt();
+            String s = fr.next();
+            long[] w = new long[n + 1];
+            for (int i = 1; i <= n; i++) {
+                w[i] = fr.nextLong();
+            }
+            long ans = solveCase(n, m, s, w);
+            sb.append(ans).append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+
+    static class FastReader {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreElements()) {
+                st = new StringTokenizer(br.readLine());
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+
+        long nextLong() throws IOException {
+            return Long.parseLong(next());
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long INF = (long long)4e18;
+
+// 计算一个长度为L的同色连续段中，减少x个字符的最小代价
+vector<long long> calcRunCost(int L, const vector<long long>& w) {
+    // f[i][j]：前i块瓷砖，恰好减少j个字符的最小代价
+    vector<vector<long long>> f(L + 1, vector<long long>(L, INF));
+    f[0][0] = 0;
+
+    for (int i = 0; i < L; i++) {
+        for (int j = 0; j < L; j++) {
+            if (f[i][j] == INF) continue;
+
+            // 不融合第i+1块瓷砖
+            f[i + 1][j] = min(f[i + 1][j], f[i][j]);
+
+            // 从第i+1块开始融合长度为k的一段
+            for (int k = 2; k <= L - i; k++) {
+                int nj = j + k - 1;
+                f[i + k][nj] = min(f[i + k][nj], f[i][j] + w[k]);
+            }
+        }
+    }
+
+    vector<long long> res(L, INF);
+    for (int j = 0; j < L; j++) {
+        res[j] = f[L][j];
+    }
+    return res;
+}
+
+long long solveCase(int n, int m, const string& s, const vector<long long>& w) {
+    int need = n - m;
+    if (need < 0) return -1;
+
+    // 拆分成极长同色连续段
+    vector<int> runs;
+    int cnt = 1;
+    for (int i = 1; i < n; i++) {
+        if (s[i] == s[i - 1]) {
+            cnt++;
+        } else {
+            runs.push_back(cnt);
+            cnt = 1;
+        }
+    }
+    runs.push_back(cnt);
+
+    // 分组背包
+    vector<long long> dp(need + 1, INF);
+    dp[0] = 0;
+
+    for (int L : runs) {
+        vector<long long> costRun = calcRunCost(L, w);
+        vector<long long> ndp(need + 1, INF);
+
+        for (int old = 0; old <= need; old++) {
+            if (dp[old] == INF) continue;
+            int maxDec = min(L - 1, need - old);
+            for (int dec = 0; dec <= maxDec; dec++) {
+                if (costRun[dec] == INF) continue;
+                ndp[old + dec] = min(ndp[old + dec], dp[old] + costRun[dec]);
+            }
+        }
+
+        dp = ndp;
+    }
+
+    return dp[need] == INF ? -1 : dp[need];
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n, m;
+        cin >> n >> m;
+        string s;
+        cin >> s;
+
+        vector<long long> w(n + 1);
+        for (int i = 1; i <= n; i++) {
+            cin >> w[i];
+        }
+
+        cout << solveCase(n, m, s, w) << '\n';
+    }
+
+    return 0;
+}
+```

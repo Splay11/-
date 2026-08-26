@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2945",
+  "title": "平移关联指数",
+  "docId": 2580,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数学"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

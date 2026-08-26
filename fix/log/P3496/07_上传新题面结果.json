@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3496",
+  "title": "第3题-连续占用",
+  "docId": 2839,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

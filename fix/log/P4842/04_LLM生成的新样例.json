@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "1\nabc",
+      "output": "abc",
+      "explanation": "字符串 `abc` 中所有字母都在 `'a'` 到 `'m'` 之间，替换为镜面字母后会变大。为了字典序最小，不进行任何操作，输出原字符串 `abc`。"
+    },
+    {
+      "input": "1\nbanana",
+      "output": "bamana",
+      "explanation": "从左到右寻找第一个替换后能变小的字母，即第一个满足 $s_i \\\\ge$ `'n'` 的字母。\n\n字符串 `banana` 中第 `3` 个字母 `'n'` 满足条件，将其替换为镜面字母 `'m'`。紧接着的字母 `'a'` 满足 $s_i \\\\le$ `'m'`，替换后会变大，因此停止操作。最终得到 `bamana`。"
+    },
+    {
+      "input": "1\nzyx",
+      "output": "abc",
+      "explanation": "字符串 `zyx` 的所有字母均满足 $s_i \\\\ge$ `'n'`。从左往右连续替换：`'z'` 变为 `'a'`，`'y'` 变为 `'b'`，`'x'` 变为 `'c'`，得到 `abc`，为可能的最小字典序。"
+    },
+    {
+      "input": "1\nhello",
+      "output": "helll",
+      "explanation": "第一个满足 $s_i \\\\ge$ `'n'` 的位置是字符串 `hello` 的第 `5` 个字母 `'o'`，将其替换为 `'l'`。前面的字母均 $\\\\le$ `'m'`，保持不变，结果为 `helll`。"
+    }
+  ]
+}

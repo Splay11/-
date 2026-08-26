@@ -1,0 +1,45 @@
+## 思路：桶装计数
+
+观察$max - min = 1$,三元组中 **必定有两个元素相等**  ,形如
+
+1.$x-1,x,x$
+
+2.$x-1,x-1,x$
+
+那么我们可以使用一个桶(哈希表)$d$先统计每个数出现的次数。然后枚举每一个值$x$. 
+
+第一种情况的贡献: $C(d[x] , 2) * d[x-1]$ 
+
+第二种情况的贡献: $C(d[x-1] , 2) * d[x]$
+
+ 累加起来即可.答案是$n^3$ 级别的，记得开$long\ long$ 
+
+## 代码
+
+### C++
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+unordered_map<int , ll> d;
+int main() {
+    int n;
+    cin >> n;
+    ll ans = 0;
+    // 读入 + 桶计数
+    for (int i = 1 ; i <= n ; i++){
+        int x;
+        cin >> x;
+        d[x]++;
+    }
+    // 公式参考上面
+    for (auto g : d){
+        int x = g.first;
+        ans += (d[x] - 1) * d[x] / 2 * d[x - 1];
+        ans += (d[x - 1] - 1) * d[x - 1] / 2 * d[x];
+    }
+    cout << ans << endl;
+	return 0;
+}
+```

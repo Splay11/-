@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2925",
+  "title": "第4题-管网剪枝保值",
+  "docId": 2560,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "树形dp"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

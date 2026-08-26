@@ -1,0 +1,139 @@
+## 解题思路
+
+* 题意：给长度为 `n` 的数字串 `s`（只含 `'0'`\~`'9'`），给定一个偶数 `k`。若某个长度为 `k` 的子串的前 `k/2` 个数字之和等于后 `k/2` 个数字之和，则该子串为“幸运子串”。统计所有幸运子串个数。
+* 算法：**前缀和 + 滑动窗口**
+  将字符转为数字，建立前缀和数组 `pre[i]` 表示前 `i` 个数字之和。任意窗口 `[l, l+k-1]`：
+
+  * 前半和 `sum1 = pre[l+k/2] - pre[l]`
+  * 后半和 `sum2 = pre[l+k] - pre[l+k/2]`
+  * 若 `sum1 == sum2`，答案加一。
+    依次枚举起点 `l = 0..n-k` 即可。
+* 核心实现：一次构建前缀和，O(1) 时间求每个窗口两半的和，单次测试整体 O(n)。
+
+## 复杂度分析
+
+* 时间复杂度：对每组数据为 `O(n)`（构建前缀和 `O(n)`，枚举窗口 `O(n)`；题目保证所有测试的 `n` 之和 ≤ 1e6）。
+* 空间复杂度：`O(n)`（前缀和数组）。
+
+## 代码实现
+
+### Python
+
+```python
+# -*- coding: utf-8 -*-
+import sys
+
+def count_lucky(n, k, s):
+    # 将字符转为对应的数字
+    a = [ord(c) - 48 for c in s]
+    # 前缀和，pre[0] = 0
+    pre = [0] * (n + 1)
+    for i in range(n):
+        pre[i + 1] = pre[i] + a[i]
+    # 枚举每个长度为 k 的窗口
+    half = k // 2
+    ans = 0
+    for l in range(0, n - k + 1):
+        sum1 = pre[l + half] - pre[l]
+        sum2 = pre[l + k] - pre[l + half]
+        if sum1 == sum2:
+            ans += 1
+    return ans
+
+def main():
+    data = sys.stdin.read().strip().split()
+    t = int(data[0])
+    idx = 1
+    out_lines = []
+    for _ in range(t):
+        n = int(data[idx]); k = int(data[idx + 1]); idx += 2
+        s = data[idx].strip(); idx += 1
+        out_lines.append(str(count_lucky(n, k, s)))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+// 注意：ACM 风格，类名为 Main
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 功能函数：统计幸运子串数量
+    static int countLucky(int n, int k, String s) {
+        int[] pre = new int[n + 1]; // 前缀和
+        for (int i = 0; i < n; i++) {
+            pre[i + 1] = pre[i] + (s.charAt(i) - '0');
+        }
+        int half = k / 2;
+        int ans = 0;
+        for (int l = 0; l + k <= n; l++) {
+            int sum1 = pre[l + half] - pre[l];        // 前半部分和
+            int sum2 = pre[l + k] - pre[l + half];    // 后半部分和
+            if (sum1 == sum2) ans++;
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        // 依据数据量，使用 BufferedReader + StringTokenizer 读取
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+        st = new StringTokenizer(br.readLine());
+        int t = Integer.parseInt(st.nextToken());
+        StringBuilder sb = new StringBuilder();
+        for (int cas = 0; cas < t; cas++) {
+            // 读取 n, k
+            st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            int k = Integer.parseInt(st.nextToken());
+            // 读取字符串 s
+            String s = br.readLine().trim();
+            sb.append(countLucky(n, k, s)).append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+// ACM 风格：主函数读入与输出，功能写在外部函数
+#include <bits/stdc++.h>
+using namespace std;
+
+// 统计幸运子串数量的函数
+long long countLucky(const string& s, int k) {
+    int n = (int)s.size();
+    vector<int> pre(n + 1, 0);               // 前缀和
+    for (int i = 0; i < n; ++i) pre[i + 1] = pre[i] + (s[i] - '0');
+    int half = k / 2;
+    long long ans = 0;
+    for (int l = 0; l + k <= n; ++l) {
+        int sum1 = pre[l + half] - pre[l];        // 前半部分和
+        int sum2 = pre[l + k] - pre[l + half];    // 后半部分和
+        if (sum1 == sum2) ++ans;
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t; 
+    if (!(cin >> t)) return 0;
+    while (t--) {
+        int n, k; 
+        cin >> n >> k;
+        string s; 
+        cin >> s;            // 只含数字字符
+        cout << countLucky(s, k) << "\n";
+    }
+    return 0;
+}
+```

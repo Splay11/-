@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3372",
+  "title": "第3题-光缆收益",
+  "docId": 2714,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "图结构"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "最小生成树",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,318 @@
+## 解题思路
+
+本题需要为每一个可能的目标孤岛数量 $k$ 求出最大总收益。  
+正向考虑“拆除光缆、分裂孤岛”比较复杂，我们采用**逆向思维**：
+
+- 不可拆除的光缆必须保留，可以直接将它们联通，得到一个初始的孤岛网络。
+- 可拆除的光缆如果不拆除，就相当于被“保留”下来，会合并两个孤岛；如果拆除，就能获得其收益，同时网络可能更分散（孤岛数量更多）。
+- 我们要在孤岛数量不超过 $k$ 的限制下最大化拆除收益，等价于：在必须通过保留若干可拆除光缆使孤岛数量降至 $k$ 时，让这些被保留的可拆除光缆的收益之和**尽可能小**，从而删除掉的可拆除光缆总收益 = 全部可拆除光缆总收益 $-$ 保留部分的最小收益和。
+
+基于以上分析，问题转化为**在保证连通性的前提下，选出权值和最小的若干条可拆除光缆来减少孤岛数量**，这可以通过**最小生成树**的思路解决。
+
+### 具体步骤
+
+1. **处理不可拆除光缆**  
+   使用并查集将标记为 $c=0$ 的光缆全部连接起来，得到初始孤岛数量 $C_0$。同时累加所有可拆除光缆（$c=1$）的收益值，记为 $\text{sum\_removable}$。
+
+2. **对可拆除光缆按收益升序排序**  
+   我们希望保留的收益越小越好，因此按收益 $w$ 从小到大依次考察每一条可拆除光缆。
+
+3. **贪心保留可拆除光缆**  
+   遍历排序后的可拆除光缆，如果某条光缆的两个端点当前不在同一孤岛，则保留它（即在最终的拆除计划中不拆除它），利用并查集合并这两个孤岛，孤岛数量减少 $1$，同时记录**保留的收益累计值** $\text{sum\_retained}$。  
+   用数组 $\text{min\_retained}$ 记录：当多保留了 $t$ 条可拆除光缆（即孤岛数减少 $t$ 次）时，所需保留的最小收益和。显然 $\text{min\_retained}[0] = 0$，每成功合并一次，就把当前的 $\text{sum\_retained}$ 记录为 $\text{min\_retained}[t]$。  
+   当孤岛数量减少到 $1$ 时，已经保留了尽可能多且收益最小的可拆除光缆，可以提前结束遍历。
+
+4. **回答每个 $k$ 的答案**  
+   对于每一个 $k = 1, 2, \dots, n$：
+   - 若 $k \ge C_0$，说明允许的孤岛数量不少于初始孤岛数，此时可以拆除全部可拆除光缆，收益为 $\text{sum\_removable}$。
+   - 若 $k < C_0$，则需要通过保留 $t = C_0 - k$ 条可拆除光缆，将孤岛数量从 $C_0$ 减少到 $k$。此时能获得的最大拆除收益为  
+     $\text{sum\_removable} - \text{min\_retained}[t]$。
+   
+   最终输出一行 $n$ 个整数。
+
+## 复杂度分析
+
+- **时间复杂度**  
+  并查集初始化 $O(n)$；  
+  将所有可拆除光缆按收益排序需要 $O(m \log m)$；  
+  并查集每次查找和合并的均摊复杂度为 $O(\alpha(n))$，近似常数；  
+  因此总时间复杂度为 $O(m \log m)$，可以处理 $n, m \le 10^5$ 的规模。
+
+- **空间复杂度**  
+  并查集的父节点与秩数组需要 $O(n)$ 空间；  
+  存放可拆除光缆的数组需要 $O(m)$ 空间；  
+  记录保留收益的数组 $\text{min\_retained}$ 长度不超过 $C_0 \le n$；  
+  总空间复杂度为 $O(n + m)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+class UnionFind:
+    def __init__(self, size):
+        self.parent = list(range(size + 1))
+        self.rank = [0] * (size + 1)
+        self.count = size  # 当前孤岛数量
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        rx = self.find(x)
+        ry = self.find(y)
+        if rx == ry:
+            return False
+        if self.rank[rx] < self.rank[ry]:
+            self.parent[rx] = ry
+        else:
+            self.parent[ry] = rx
+            if self.rank[rx] == self.rank[ry]:
+                self.rank[rx] += 1
+        self.count -= 1
+        return True
+
+def main():
+    data = sys.stdin.read().split()
+    it = iter(data)
+    n = int(next(it))
+    m = int(next(it))
+
+    uf = UnionFind(n)
+    sum_removable = 0
+    removable_edges = []
+
+    for _ in range(m):
+        u = int(next(it))
+        v = int(next(it))
+        w = int(next(it))
+        c = int(next(it))
+        if c == 0:          # 不可拆除光缆，必须保留
+            uf.union(u, v)
+        else:               # 可拆除光缆
+            removable_edges.append((u, v, w))
+            sum_removable += w
+
+    C0 = uf.count           # 初始孤岛数量
+
+    # 收益值从小到大排序
+    removable_edges.sort(key=lambda x: x[2])
+
+    min_retained = [0]      # min_retained[t] 表示保留 t 条后已保留的最小收益和
+    sum_retained = 0
+
+    for u, v, w in removable_edges:
+        if uf.find(u) != uf.find(v):
+            uf.union(u, v)
+            sum_retained += w
+            min_retained.append(sum_retained)
+            if len(min_retained) - 1 == C0 - 1:  # 已经合并到只剩1个孤岛
+                break
+
+    # 输出答案
+    ans = []
+    for k in range(1, n + 1):
+        if k >= C0:
+            ans.append(str(sum_removable))
+        else:
+            need = C0 - k
+            ans.append(str(sum_removable - min_retained[need]))
+    print(' '.join(ans))
+
+if __name__ == '__main__':
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+public class Main {
+    static class UnionFind {
+        int[] parent, rank;
+        int count;
+
+        UnionFind(int n) {
+            parent = new int[n + 1];
+            rank = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                parent[i] = i;
+            }
+            count = n;
+        }
+
+        int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+
+        boolean union(int a, int b) {
+            int ra = find(a);
+            int rb = find(b);
+            if (ra == rb) return false;
+            if (rank[ra] < rank[rb]) {
+                parent[ra] = rb;
+            } else {
+                parent[rb] = ra;
+                if (rank[ra] == rank[rb]) rank[ra]++;
+            }
+            count--;
+            return true;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+
+        UnionFind uf = new UnionFind(n);
+        long sumRemovable = 0;
+        List<int[]> removableEdges = new ArrayList<>();
+
+        for (int i = 0; i < m; i++) {
+            int u = sc.nextInt();
+            int v = sc.nextInt();
+            int w = sc.nextInt();
+            int c = sc.nextInt();
+            if (c == 0) {
+                uf.union(u, v);
+            } else {
+                removableEdges.add(new int[]{u, v, w});
+                sumRemovable += w;
+            }
+        }
+
+        int C0 = uf.count;
+
+        // 按收益升序排序
+        removableEdges.sort(Comparator.comparingInt(e -> e[2]));
+
+        ArrayList<Long> minRetained = new ArrayList<>();
+        minRetained.add(0L);
+        long sumRetained = 0;
+
+        for (int[] edge : removableEdges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            if (uf.find(u) != uf.find(v)) {
+                uf.union(u, v);
+                sumRetained += w;
+                minRetained.add(sumRetained);
+                if (minRetained.size() - 1 == C0 - 1) break;
+            }
+        }
+
+        for (int k = 1; k <= n; k++) {
+            if (k >= C0) {
+                System.out.print(sumRemovable + " ");
+            } else {
+                int need = C0 - k;
+                System.out.print((sumRemovable - minRetained.get(need)) + " ");
+            }
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <tuple>
+
+using namespace std;
+
+class UnionFind {
+public:
+    vector<int> parent, rank;
+    int count;
+
+    UnionFind(int n) {
+        parent.resize(n + 1);
+        rank.resize(n + 1, 0);
+        for (int i = 1; i <= n; i++) parent[i] = i;
+        count = n;
+    }
+
+    int find(int x) {
+        if (parent[x] != x)
+            parent[x] = find(parent[x]);
+        return parent[x];
+    }
+
+    bool unite(int a, int b) {
+        int ra = find(a), rb = find(b);
+        if (ra == rb) return false;
+        if (rank[ra] < rank[rb])
+            parent[ra] = rb;
+        else {
+            parent[rb] = ra;
+            if (rank[ra] == rank[rb]) rank[ra]++;
+        }
+        count--;
+        return true;
+    }
+};
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+
+    UnionFind uf(n);
+    long long sumRemovable = 0;
+    vector<tuple<int, int, int>> removableEdges; // u, v, w
+
+    for (int i = 0; i < m; i++) {
+        int u, v, w, c;
+        cin >> u >> v >> w >> c;
+        if (c == 0) {
+            uf.unite(u, v);
+        } else {
+            removableEdges.emplace_back(u, v, w);
+            sumRemovable += w;
+        }
+    }
+
+    int C0 = uf.count;
+
+    sort(removableEdges.begin(), removableEdges.end(),
+         [](const tuple<int, int, int>& a, const tuple<int, int, int>& b) {
+             return get<2>(a) < get<2>(b);
+         });
+
+    vector<long long> minRetained = {0};
+    long long sumRetained = 0;
+
+    for (auto& edge : removableEdges) {
+        int u = get<0>(edge), v = get<1>(edge), w = get<2>(edge);
+        if (uf.find(u) != uf.find(v)) {
+            uf.unite(u, v);
+            sumRetained += w;
+            minRetained.push_back(sumRetained);
+            if ((int)minRetained.size() - 1 == C0 - 1) break;
+        }
+    }
+
+    for (int k = 1; k <= n; k++) {
+        if (k >= C0) {
+            cout << sumRemovable << " ";
+        } else {
+            int need = C0 - k;
+            cout << sumRemovable - minRetained[need] << " ";
+        }
+    }
+    return 0;
+}
+```

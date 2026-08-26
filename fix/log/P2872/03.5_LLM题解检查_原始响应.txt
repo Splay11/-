@@ -1,0 +1,148 @@
+## 解题思路
+
+1. 观察题目允许的操作：当两个字符在计算机内部的编码值（ASCII 码）之差的绝对值为偶数时，可以交换它们的位置。  
+   - 两个整数之差的绝对值为偶数，说明这两个整数除以 2 的余数相同，即它们同为奇数或同为偶数。  
+   - 因此，ASCII 码为偶数的字符之间可以任意交换，ASCII 码为奇数的字符之间也可以任意交换，但奇偶性不同的字符之间永远无法被交换。
+
+2. 由此，原串中的字符可以根据其 ASCII 码的奇偶性被划分为两个独立组，每一组内部的字符经过若干次操作后可以达到该组字符所能排列出的任意顺序。为了使整体字符串的字典序最小，我们应该将每一组内的字符按升序（即字典序从小到大）排序。
+
+3. 构造最终字符串时，遍历原字符串的每个位置，检查该位置原本字符的 ASCII 码奇偶性：
+   - 若原本字符属于偶数组，则从预先排好序的偶数字符列表中取出当前最小的字符放入该位置；
+   - 若原本字符属于奇数组，则从预先排好序的奇数字符列表中取出当前最小的字符放入该位置。
+   这样，在保证无法跨组交换的前提下，每个位置都尽量放入了可能的最小字符，从而得到全局字典序最小的字符串。
+
+4. 实现细节：
+   - 使用两个列表分别收集原串中 ASCII 码为偶数和奇数的字符。
+   - 对这两个列表分别排序。
+   - 用两个指针分别指向两个排序列表的起始位置，按原串顺序填充答案串，每取一个字符对应指针后移。
+
+## 复杂度分析
+
+- **时间复杂度**：$O(n \log n)$  
+  需要遍历一次字符串分离奇偶字符 $O(n)$，然后对两个子列表排序，每个列表长度之和为 $n$，排序总复杂度为 $O(n \log n)$，最后再遍历一次构造结果 $O(n)$。总体由排序主导，为 $O(n \log n)$。
+
+- **空间复杂度**：$O(n)$  
+  需要两个列表存储分离出的字符，加上最终结果字符串，所有辅助空间的总大小与输入规模 $n$ 成正比。
+
+## 代码实现
+
+### Python
+
+```python
+def solve() -> None:
+    n = int(input().strip())          # 长度，实际可根据输入串获取
+    s = input().strip()
+
+    # 按 ASCII 码奇偶性分离字符
+    even_chars = [c for c in s if ord(c) % 2 == 0]
+    odd_chars  = [c for c in s if ord(c) % 2 == 1]
+
+    # 两组内各自从小到大排序
+    even_chars.sort()
+    odd_chars.sort()
+
+    # 重构字典序最小的字符串
+    p_even = p_odd = 0
+    res = []
+    for ch in s:
+        if ord(ch) % 2 == 0:          # 原位置是偶数字符
+            res.append(even_chars[p_even])
+            p_even += 1
+        else:                         # 原位置是奇数字符
+            res.append(odd_chars[p_odd])
+            p_odd += 1
+
+    print(''.join(res))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine());          // 字符串长度
+        String s = br.readLine();
+
+        List<Character> evenChars = new ArrayList<>();
+        List<Character> oddChars = new ArrayList<>();
+
+        // 按照 ASCII 码奇偶性分类
+        for (char c : s.toCharArray()) {
+            if (c % 2 == 0) {
+                evenChars.add(c);
+            } else {
+                oddChars.add(c);
+            }
+        }
+
+        // 各组内部升序排序
+        Collections.sort(evenChars);
+        Collections.sort(oddChars);
+
+        // 双指针合并结果
+        int pEven = 0, pOdd = 0;
+        StringBuilder sb = new StringBuilder(n);
+        for (char c : s.toCharArray()) {
+            if (c % 2 == 0) {
+                sb.append(evenChars.get(pEven++));
+            } else {
+                sb.append(oddChars.get(pOdd++));
+            }
+        }
+
+        System.out.println(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    string s;
+    cin >> n >> s;
+
+    vector<char> evenChars, oddChars;
+    // 按 ASCII 码奇偶性分离字符
+    for (char c : s) {
+        if ((c % 2) == 0) {
+            evenChars.push_back(c);
+        } else {
+            oddChars.push_back(c);
+        }
+    }
+
+    // 各组内部排序
+    sort(evenChars.begin(), evenChars.end());
+    sort(oddChars.begin(), oddChars.end());
+
+    // 双指针重构答案
+    int pEven = 0, pOdd = 0;
+    string result;
+    result.reserve(n);
+    for (char c : s) {
+        if ((c % 2) == 0) {
+            result.push_back(evenChars[pEven++]);
+        } else {
+            result.push_back(oddChars[pOdd++]);
+        }
+    }
+
+    cout << result << "\n";
+    return 0;
+}
+```

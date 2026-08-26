@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1824",
+  "title": "第1题-最大流派编号",
+  "docId": 924,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

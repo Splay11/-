@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3405",
+  "title": "第3题-星能试炼",
+  "docId": 2747,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

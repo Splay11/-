@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3418",
+  "title": "第1题-观测站精简",
+  "docId": 2760,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "数据结构",
+    "栈"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

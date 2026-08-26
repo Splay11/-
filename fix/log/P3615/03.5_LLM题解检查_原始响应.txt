@@ -1,0 +1,197 @@
+## 解题思路
+
+本题的目标是计算长度为 $n$ 的二进制序列中，不存在连续 $k$ 个 $1$ 的序列个数，并对 $10^9+7$ 取模。数据范围中 $k$ 可以很大，但 $n$ 只有 $10^3$，且所有测试数据的 $n$ 之和不超过 $10^3$。
+
+**核心观察**：若 $k-1 \ge n$，则任意序列中连续 $1$ 的个数最多为 $n$，必然小于 $k$，此时所有 $2^n$ 个序列均合法，直接输出 $2^n \bmod (10^9+7)$。
+
+**动态规划**  
+定义 $dp[i]$ 表示长度为 $i$ 的合法密码数量。考虑如何从前面的状态转移：
+
+- **边界条件**：  
+  空串 $dp[0] = 1$。当 $1 \le i \le k-1$ 时，任何长度不足 $k$ 的序列均不可能出现 $k$ 个连续 $1$，因此 $dp[i] = 2^i$。
+
+- **递推关系**（$i \ge k$）：  
+  枚举末尾连续 $1$ 的个数 $t$，其中 $0 \le t \le k-1$：  
+  - 若 $t = 0$（末尾为 $0$），前 $i-1$ 位可任意合法，贡献 $dp[i-1]$；  
+  - 若 $1 \le t \le k-1$，末尾 $t$ 位为 $1$，第 $i-t$ 位必须为 $0$，前 $i-t-1$ 位任意合法，贡献 $dp[i-t-1]$。
+
+  综合得到：
+  $$ dp[i] = \sum_{t=1}^{k} dp[i-t] \quad (i \ge k) $$
+  即 $dp[i]$ 等于前面连续 $k$ 项 $dp[i-1], dp[i-2], \dots, dp[i-k]$ 之和。
+
+**滑动窗口优化**  
+直接按上式求和会得到 $O(nk)$ 的时间复杂度，但这里可以利用滑动窗口将和动态维护。  
+维护窗口和 $W = \sum_{j=0}^{k-1} dp[j]$（当 $i < k$ 时即为初始窗口），递推时：
+$$
+\begin{aligned}
+dp[i] &= W, \\
+W &= (W + dp[i] - dp[i-k]) \bmod M \quad (M = 10^9+7)
+\end{aligned}
+$$
+这样每步转移只需 $O(1)$，总复杂度 $O(n)$。
+
+**最终答案**即为 $dp[n] \bmod M$。
+
+## 复杂度分析
+
+- **时间复杂度**：对于每组数据，特判 $k > n$ 时为 $O(\log n)$（快速幂）或直接用 $O(\log n)$ 指数计算；否则 DP 过程为 $O(n)$。所有测试数据的 $n$ 之和不超过 $10^3$，因此总体时间复杂度为 $O(\sum n) \le O(10^3)$，完全可以接受。
+- **空间复杂度**：需要长度为 $n+1$ 的 DP 数组，单组空间为 $O(n)$，总空间 $O(\max n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10**9 + 7
+
+def solve():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    T = int(next(it))
+    out = []
+    for _ in range(T):
+        n = int(next(it))
+        k = int(next(it))
+        # 若最大允许的连续1长度 >= n，任意序列均合法
+        if k - 1 >= n:
+            out.append(str(pow(2, n, MOD)))
+            continue
+        L = k - 1
+        dp = [0] * (n + 1)
+        dp[0] = 1
+        pw = 1
+        for i in range(1, L + 1):
+            pw = (pw * 2) % MOD
+            dp[i] = pw
+        # 窗口和：dp[0] .. dp[k-1]
+        W = sum(dp[:k]) % MOD
+        for i in range(k, n + 1):
+            dp[i] = W
+            W = (W + dp[i] - dp[i - k]) % MOD
+        out.append(str(dp[n] % MOD))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1_000_000_007L;
+
+    static long modpow(long a, long e) {
+        long r = 1;
+        a %= MOD;
+        while (e > 0) {
+            if ((e & 1) == 1) r = (r * a) % MOD;
+            a = (a * a) % MOD;
+            e >>= 1;
+        }
+        return r;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        int T = Integer.parseInt(br.readLine().trim());
+        for (int tc = 0; tc < T; tc++) {
+            String line;
+            // 跳过可能的空行
+            while ((line = br.readLine()) != null && line.trim().isEmpty());
+            if (line == null) break;
+            StringTokenizer st = new StringTokenizer(line);
+            int n = Integer.parseInt(st.nextToken());
+            int k = Integer.parseInt(st.nextToken());
+            // 若最大允许的连续1长度 >= n，任意序列均合法
+            if (k - 1 >= n) {
+                sb.append(modpow(2, n)).append('\n');
+                continue;
+            }
+            int L = k - 1;
+            long[] dp = new long[n + 1];
+            dp[0] = 1;
+            long pw = 1;
+            for (int i = 1; i <= L; i++) {
+                pw = (pw * 2) % MOD;
+                dp[i] = pw;
+            }
+            long W = 0;
+            for (int i = 0; i < k; i++) {
+                W = (W + dp[i]) % MOD;
+            }
+            for (int i = k; i <= n; i++) {
+                dp[i] = W;
+                W = (W + dp[i] - dp[i - k]) % MOD;
+                if (W < 0) W += MOD;
+            }
+            sb.append(dp[n] % MOD).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+const ll MOD = 1'000'000'007LL;
+
+ll modpow(ll a, ll e) {
+    ll res = 1;
+    a %= MOD;
+    while (e) {
+        if (e & 1) res = res * a % MOD;
+        a = a * a % MOD;
+        e >>= 1;
+    }
+    return res;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        int n, k;
+        cin >> n >> k;
+        // 若最大允许的连续1长度 >= n，任意序列均合法
+        if (k - 1 >= n) {
+            cout << modpow(2, n) << '\n';
+            continue;
+        }
+        int L = k - 1;
+        vector<ll> dp(n + 1, 0);
+        dp[0] = 1;
+        ll pw = 1;
+        for (int i = 1; i <= L; ++i) {
+            pw = pw * 2 % MOD;
+            dp[i] = pw;
+        }
+        ll W = 0;
+        for (int i = 0; i < k; ++i) {
+            W = (W + dp[i]) % MOD;
+        }
+        for (int i = k; i <= n; ++i) {
+            dp[i] = W;
+            W = (W + dp[i] - dp[i - k]) % MOD;
+            if (W < 0) W += MOD;
+        }
+        cout << dp[n] % MOD << '\n';
+    }
+    return 0;
+}
+```

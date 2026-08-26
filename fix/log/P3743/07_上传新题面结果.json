@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3743",
+  "title": "第1题-战场围歼",
+  "docId": 3086,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "BFS"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "BFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

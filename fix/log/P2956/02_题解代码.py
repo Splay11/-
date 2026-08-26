@@ -1,0 +1,297 @@
+# 题解
+
+## 题目描述
+
+给定一棵节点数为 $n$ 的树，节点编号为 $1, 2, \dots, n$，每个节点的权值为 $a_i$。我们定义一个连通块为“好连通块”，当且仅当该连通块中所有节点的权值的乘积的末尾**至少有一个零**。也就是说，乘积中包含因子 $2$ 和 $5$ 各至少一个。
+
+求树上所有“好连通块”的个数，结果对 $10^9 + 7$ 取模。
+
+### 连通块定义
+
+对于树上的任意一个点集 $S$，如果点集中的任意两点 $u, v$ 满足“从 $u$ 到 $v$ 的简单路径上的所有点都在 $S$ 中”，则称 $S$ 是一个连通块。单个节点也算一个连通块。
+
+---
+
+## 思路
+
+### 1. **状态表示**
+每个节点的权值可以被分解成因子 $2$ 和 $5$。我们通过计算每个节点中 $2$ 和 $5$ 的因子数量，来判断该节点在乘积中是否会导致尾数为零。
+
+- 若一个数可被 $2$ 整除，则该节点贡献一个因子 $2$。
+- 若一个数可被 $5$ 整除，则该节点贡献一个因子 $5$。
+
+因此，我们可以用一个二进制状态来表示每个节点的因子信息：
+- `00`: 既不包含因子 $2$ 也不包含因子 $5$；
+- `01`: 只包含因子 $5$；
+- `10`: 只包含因子 $2$；
+- `11`: 同时包含因子 $2$ 和 $5$。
+
+### 2. **动态规划**
+在树的每个节点上，我们使用一个动态规划数组 `dp[u][state]` 来记录以节点 $u$ 为根的子树中，所有连通块的状态信息，其中 `state` 表示该连通块包含的因子状态。`dp[u][state]` 记录了所有从根节点 $u$ 出发的连通块，其状态为 `state` 的数量。
+
+### 3. **DFS遍历树**
+通过深度优先搜索（DFS）遍历树，处理每一个节点及其子树：
+- 在第一次访问节点时，计算节点的因子状态并初始化 `dp[u]`。
+- 在回溯时，将当前节点的子树状态与其父节点的状态合并，更新动态规划表。
+- 最终我们需要统计所有包含因子 $2$ 和 $5$ 的连通块的数量，即 `dp[u][3]`。
+
+### 4. **重心分解与状态传递**
+我们采用栈模拟DFS，避免递归深度过深的限制。在每次递归时，将当前节点的状态与其子树状态进行合并。
+
+### 5. **时间复杂度**
+此算法的时间复杂度为 $O(n)$，其中 $n$ 是树的节点数。每个节点的状态更新操作只会执行常数次，整个算法可以在 $O(n)$ 时间内完成。
+
+---
+
+## C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MOD = 1e9 + 7;
+const int MAXN = 1e5 + 5;
+
+vector<int> adj[MAXN];
+array<long long, 4> dp[MAXN];
+int a[MAXN];
+
+// 计算num中f因子的个数
+int get_factor(int num, int f) {
+    int cnt = 0;
+    while (num % f == 0) {
+        cnt++;
+        num /= f;
+    }
+    return cnt;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int n;
+    cin >> n;
+    // 输入每个节点的权值
+    for (int i = 1; i <= n; ++i)
+        cin >> a[i];
+    
+    // 输入树的边
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    stack<tuple<int, int, bool>> st;
+    st.push({1, -1, false});
+    long long ans = 0;
+
+    // 栈模拟DFS
+    while (!st.empty()) {
+        auto [u, p, vis] = st.top();
+        st.pop();
+
+        if (!vis) {
+            // 计算当前节点的因子状态
+            int cnt2 = get_factor(a[u], 2);
+            int cnt5 = get_factor(a[u], 5);
+            bool has2 = cnt2 >= 1;
+            bool has5 = cnt5 >= 1;
+            int state = (has2 << 1) | has5;
+            dp[u].fill(0);
+            dp[u][state] = 1;
+
+            // 先标记当前节点处理完，再进入子节点
+            st.push({u, p, true});
+            for (int v : adj[u]) {
+                if (v != p) {
+                    st.push({v, u, false});
+                }
+            }
+        } else {
+            // 回溯时合并子树的dp状态
+            for (int v : adj[u]) {
+                if (v != p) {
+                    array<long long, 4> tmp = {0};
+                    for (int i = 0; i < 4; ++i) {
+                        for (int j = 0; j < 4; ++j) {
+                            int k = i | j;
+                            tmp[k] = (tmp[k] + dp[u][i] * dp[v][j]) % MOD;
+                        }
+                    }
+                    for (int k = 0; k < 4; ++k) {
+                        dp[u][k] = (dp[u][k] + tmp[k]) % MOD;
+                    }
+                }
+            }
+            // 统计好连通块的数量
+            ans = (ans + dp[u][3]) % MOD;
+        }
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
+```
+## Python
+
+```python
+import sys
+from collections import deque
+sys.setrecursionlimit(10**7)
+MOD = 10**9 + 7
+
+def get_factor(num, f):
+    cnt = 0
+    while num % f == 0:
+        cnt += 1
+        num //= f
+    return cnt
+
+def main():
+    data = sys.stdin.read().split()
+    it = iter(data)
+    n = int(next(it))
+    a = [0] * (n + 1)
+    for i in range(1, n + 1):
+        a[i] = int(next(it))
+    adj = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u = int(next(it)); v = int(next(it))
+        adj[u].append(v)
+        adj[v].append(u)
+
+    dp = [[0] * 4 for _ in range(n + 1)]
+    ans = 0
+    # stack elements: (node, parent, visited_flag)
+    stack = [(1, -1, False)]
+
+    while stack:
+        u, p, vis = stack.pop()
+        if not vis:
+            # compute current node state
+            cnt2 = get_factor(a[u], 2)
+            cnt5 = get_factor(a[u], 5)
+            has2 = 1 if cnt2 >= 1 else 0
+            has5 = 1 if cnt5 >= 1 else 0
+            state = (has2 << 1) | has5
+            # reset dp[u]
+            dp[u] = [0] * 4
+            dp[u][state] = 1
+            # push for post-order
+            stack.append((u, p, True))
+            # push children
+            for v in adj[u]:
+                if v == p:
+                    continue
+                stack.append((v, u, False))
+        else:
+            # merge children's dp
+            for v in adj[u]:
+                if v == p:
+                    continue
+                tmp = [0] * 4
+                for i in range(4):
+                    if dp[u][i] == 0:
+                        continue
+                    for j in range(4):
+                        if dp[v][j] == 0:
+                            continue
+                        k = i | j
+                        tmp[k] = (tmp[k] + dp[u][i] * dp[v][j]) % MOD
+                for k in range(4):
+                    dp[u][k] = (dp[u][k] + tmp[k]) % MOD
+            # add to answer
+            ans = (ans + dp[u][3]) % MOD
+
+    print(ans)
+
+if __name__ == '__main__':
+    main()
+```
+## Java 
+
+```java
+import java.util.*;
+
+public class Main {
+    static final int MOD = 1000000007;
+    static final int MAXN = 100005;
+    static List<Integer>[] adj = new ArrayList[MAXN];
+    static long[][] dp = new long[MAXN][4];
+    static int[] a = new int[MAXN];
+
+    // 计算num中f因子的个数
+    static int getFactor(int num, int f) {
+        int cnt = 0;
+        while (num % f == 0) {
+            cnt++;
+            num /= f;
+        }
+        return cnt;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        
+        for (int i = 1; i <= n; i++) {
+            a[i] = sc.nextInt();
+            adj[i] = new ArrayList<>();
+        }
+
+        for (int i = 0; i < n - 1; i++) {
+            int u = sc.nextInt();
+            int v = sc.nextInt();
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+
+        // 栈模拟DFS
+        Stack<int[]> stack = new Stack<>();
+        stack.push(new int[] { 1, -1, 0 });  // 初始节点为1，父节点为-1，未访问
+        long ans = 0;
+
+        while (!stack.isEmpty()) {
+            int[] node = stack.pop();
+            int u = node[0], p = node[1], vis = node[2];
+
+            if (vis == 0) {
+                int cnt2 = getFactor(a[u], 2);
+                int cnt5 = getFactor(a[u], 5);
+                boolean has2 = cnt2 >= 1;
+                boolean has5 = cnt5 >= 1;
+                int state = (has2 ? 2 : 0) | (has5 ? 1 : 0);
+                Arrays.fill(dp[u], 0);
+                dp[u][state] = 1;
+
+                stack.push(new int[] { u, p, 1 });
+                for (int v : adj[u]) {
+                    if (v != p) {
+                        stack.push(new int[] { v, u, 0 });
+                    }
+                }
+            } else {
+                for (int v : adj[u]) {
+                    if (v != p) {
+                        long[] tmp = new long[4];
+                        for (int i = 0; i < 4; i++) {
+                            for (int j = 0; j < 4; j++) {
+                                int k = i | j;
+                                tmp[k] = (tmp[k] + dp[u][i] * dp[v][j]) % MOD;
+                            }
+                        }
+                        for (int k = 0; k < 4; k++) {
+                            dp[u][k] = (dp[u][k] + tmp[k]) % MOD;
+                        }
+                    }
+                }
+                ans = (ans + dp[u][3]) % MOD;
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+```

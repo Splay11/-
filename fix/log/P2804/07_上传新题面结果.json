@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2804",
+  "title": "第2题-密钥片段可靠度之和",
+  "docId": 2436,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "字符串"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

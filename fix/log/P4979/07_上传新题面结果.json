@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4979",
+  "title": "序列映射配对计数",
+  "docId": 4322,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "哈希表"
+  ],
+  "alg_tag": "哈希表",
+  "ai_alg_tags": "哈希表",
+  "videosol": "",
+  "trial_videosol": ""
+}

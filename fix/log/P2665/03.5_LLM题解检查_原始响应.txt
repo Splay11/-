@@ -1,0 +1,265 @@
+## 解题思路
+
+1. **分析操作的性质**  
+   在环上进行共鸣操作时，每一轮每个节点的新值等于自身与右邻居原值的按位或。经过 $t$ 轮之后，节点 $i$ 的能量值 $a_i^{(t)}$ 会变成初始数组中从 $i$ 开始、连续 $t+1$ 个节点的按位或（下标在模 $n$ 意义下循环）。  
+   形式化地：  
+   $$a_i^{(t)} = a_i \mid a_{i+1} \mid \dots \mid a_{(i+t) \bmod n}$$
+
+2. **问题转化**  
+   要求最少共鸣轮数使得所有节点能量值 $\ge k$，等价于为每一个节点 $i$ 找到一个最小的连续长度 $L_i$（$1\le L_i\le n$），使得以 $i$ 为起点的 $L_i$ 个初始节点的按位或 $\ge k$。  
+   那么节点 $i$ 所需的轮数为 $L_i-1$，全局答案即为 $\max_{i=1}^{n}(L_i-1)$。  
+   若某些节点初始值已经 $\ge k$，则其 $L_i=1$，轮数 $0$，不影响最大值。
+
+3. **环形处理**  
+   为了便于处理环上的连续区间，将初始能量值数组 $a$ 复制一份接在后面，构成长度为 $2n$ 的数组 $b$（$b[i]=a_{i\bmod n}$）。  
+   这样节点 $i$ 对应的长度为 $L$ 的连续段就可以直接用 $b[i \dots i+L-1]$ 表示。
+
+4. **快速查询区间按位或**  
+   使用**稀疏表（Sparse Table）**预处理数组 $b$，可以 $O(1)$ 回答任意区间的按位或结果。  
+   - 构建：`st[0][i] = b[i]`，`st[j][i] = st[j-1][i] | st[j-1][i + (1 << (j-1))]`。
+   - 查询区间 $[l, r]$：令 $k = \lfloor \log_2 (r-l+1) \rfloor$，返回 `st[k][l] | st[k][r - (1<<k) + 1]`。
+
+5. **二分查找最小长度**  
+   对每个起点 $i$（$0 \le i < n$），在 $[1, n]$ 上二分最小的长度 $L$，满足 `query(i, i+L-1) >= k`。题目保证有解，二分必然收敛。  
+   更新答案为 $\max(ans, L-1)$。
+
+6. **边界与特殊情况**  
+   - 阈值 $k = 0$：任意能量值都 $\ge 0$，答案恒为 $0$。
+   - 单个节点 $n=1$：$L$ 只能为 $1$，若 $a_1 \ge k$ 则答案 $0$，否则答案 $0$？但数据保证有解，故 $a_1 \ge k$ 恒成立。
+
+## 复杂度分析
+
+- **时间复杂度**：  
+  构建稀疏表 $O(n \log n)$；  
+  对 $n$ 个起点分别进行二分查找，每次查询 $O(1)$，二分 $O(\log n)$，总计 $O(n \log n)$。  
+  整体时间复杂度 $O(n \log n)$，在多组数据下 $\sum n \le 3\times 10^5$，完全可以接受。
+
+- **空间复杂度**：  
+  双倍数组与稀疏表均占用 $O(n \log n)$ 额外空间。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def build_sparse_table(arr):
+    n = len(arr)
+    max_level = n.bit_length()
+    st = [[0] * n for _ in range(max_level)]
+    for i in range(n):
+        st[0][i] = arr[i]
+    j = 1
+    while (1 << j) <= n:
+        step = 1 << (j - 1)
+        for i in range(n - (1 << j) + 1):
+            st[j][i] = st[j-1][i] | st[j-1][i + step]
+        j += 1
+    return st
+
+def precompute_log(n):
+    log_table = [0] * (n + 1)
+    for i in range(2, n + 1):
+        log_table[i] = log_table[i // 2] + 1
+    return log_table
+
+def query_or(st, log_table, l, r):
+    length = r - l + 1
+    k = log_table[length]
+    return st[k][l] | st[k][r - (1 << k) + 1]
+
+def main():
+    data = sys.stdin.read().split()
+    if not data:
+        return
+    it = iter(data)
+    T = int(next(it))
+    out_lines = []
+    for _ in range(T):
+        n = int(next(it))
+        k = int(next(it))
+        a = [int(next(it)) for _ in range(n)]
+        double_a = a + a
+        st = build_sparse_table(double_a)
+        log_table = precompute_log(2 * n)
+        max_rounds = 0
+        for i in range(n):
+            lo, hi = 1, n
+            best_len = n
+            while lo <= hi:
+                mid = (lo + hi) // 2
+                cur_or = query_or(st, log_table, i, i + mid - 1)
+                if cur_or >= k:
+                    best_len = mid
+                    hi = mid - 1
+                else:
+                    lo = mid + 1
+            rounds = best_len - 1
+            if rounds > max_rounds:
+                max_rounds = rounds
+        out_lines.append(str(max_rounds))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int[][] buildSparseTable(int[] a) {
+        int n = a.length;
+        int maxLevel = 32 - Integer.numberOfLeadingZeros(n);
+        int[][] st = new int[maxLevel][n];
+        for (int i = 0; i < n; i++) {
+            st[0][i] = a[i];
+        }
+        for (int j = 1; j < maxLevel; j++) {
+            int step = 1 << (j - 1);
+            for (int i = 0; i + (1 << j) <= n; i++) {
+                st[j][i] = st[j - 1][i] | st[j - 1][i + step];
+            }
+        }
+        return st;
+    }
+
+    static int[] precomputeLog(int n) {
+        int[] logTable = new int[n + 1];
+        for (int i = 2; i <= n; i++) {
+            logTable[i] = logTable[i / 2] + 1;
+        }
+        return logTable;
+    }
+
+    static int queryOr(int[][] st, int[] logTable, int l, int r) {
+        int len = r - l + 1;
+        int k = logTable[len];
+        return st[k][l] | st[k][r - (1 << k) + 1];
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        while (T-- > 0) {
+            StringTokenizer stk = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(stk.nextToken());
+            int k = Integer.parseInt(stk.nextToken());
+            int[] a = new int[n];
+            stk = new StringTokenizer(br.readLine());
+            for (int i = 0; i < n; i++) {
+                a[i] = Integer.parseInt(stk.nextToken());
+            }
+
+            int[] doubleA = new int[2 * n];
+            System.arraycopy(a, 0, doubleA, 0, n);
+            System.arraycopy(a, 0, doubleA, n, n);
+
+            int[][] st = buildSparseTable(doubleA);
+            int[] logTable = precomputeLog(2 * n);
+
+            int maxRounds = 0;
+            for (int i = 0; i < n; i++) {
+                int lo = 1, hi = n;
+                int bestLen = n;
+                while (lo <= hi) {
+                    int mid = (lo + hi) / 2;
+                    int cur = queryOr(st, logTable, i, i + mid - 1);
+                    if (cur >= k) {
+                        bestLen = mid;
+                        hi = mid - 1;
+                    } else {
+                        lo = mid + 1;
+                    }
+                }
+                maxRounds = Math.max(maxRounds, bestLen - 1);
+            }
+            sb.append(maxRounds).append('\n');
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// 构建稀疏表，用于快速查询区间按位或
+vector<vector<int>> build_sparse_table(const vector<int>& a) {
+    int n = a.size();
+    int max_level = (n == 0 ? 0 : 32 - __builtin_clz(n));
+    vector<vector<int>> st(max_level, vector<int>(n));
+    for (int i = 0; i < n; ++i) st[0][i] = a[i];
+    for (int j = 1; j < max_level; ++j) {
+        int step = 1 << (j - 1);
+        for (int i = 0; i + (1 << j) <= n; ++i) {
+            st[j][i] = st[j-1][i] | st[j-1][i + step];
+        }
+    }
+    return st;
+}
+
+// 预计算 log 表
+vector<int> precompute_log(int n) {
+    vector<int> log_table(n + 1);
+    for (int i = 2; i <= n; ++i) {
+        log_table[i] = log_table[i / 2] + 1;
+    }
+    return log_table;
+}
+
+// 查询区间 [l, r] 的按位或
+int query_or(const vector<vector<int>>& st, const vector<int>& log_table, int l, int r) {
+    int len = r - l + 1;
+    int k = log_table[len];
+    return st[k][l] | st[k][r - (1 << k) + 1];
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int T;
+    cin >> T;
+    while (T--) {
+        int n, k;
+        cin >> n >> k;
+        vector<int> a(n);
+        for (int i = 0; i < n; ++i) cin >> a[i];
+        
+        // 构造双倍数组处理环
+        vector<int> double_a = a;
+        double_a.insert(double_a.end(), a.begin(), a.end());
+        
+        auto st = build_sparse_table(double_a);
+        auto log_table = precompute_log(double_a.size());
+        
+        int max_rounds = 0;
+        for (int i = 0; i < n; ++i) {
+            int lo = 1, hi = n;
+            int best_len = n;      // 最小满足长度
+            while (lo <= hi) {
+                int mid = (lo + hi) / 2;
+                int cur = query_or(st, log_table, i, i + mid - 1);
+                if (cur >= k) {
+                    best_len = mid;
+                    hi = mid - 1;
+                } else {
+                    lo = mid + 1;
+                }
+            }
+            max_rounds = max(max_rounds, best_len - 1);
+        }
+        cout << max_rounds << '\n';
+    }
+    return 0;
+}
+```

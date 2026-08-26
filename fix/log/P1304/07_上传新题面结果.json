@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1304",
+  "title": "折半功率对齐",
+  "docId": 316,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

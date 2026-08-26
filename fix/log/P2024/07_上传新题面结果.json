@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P2024",
+  "title": "第3题-集群规模",
+  "docId": 1140,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "饿了么"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "并查集",
+  "trial_videosol": ""
+}

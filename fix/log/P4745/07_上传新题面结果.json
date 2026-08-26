@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4745",
+  "title": "第3题-均衡库存",
+  "docId": 4005,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

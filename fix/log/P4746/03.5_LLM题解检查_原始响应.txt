@@ -1,0 +1,242 @@
+## 解题思路
+
+题目要求模拟多次“宝石变色”法术：有 $n$ 颗宝石，初始颜色由一个长度为 $n$ 的小写字母串给出；接下来依次施加 $q$ 次法术，每次给出两个字母 $x$ 和 $y$，效果是将**当前所有**颜色为 $x$ 的宝石变成颜色 $y$。需要输出所有法术结束后每颗宝石的最终颜色。
+
+如果每次法术都真的去扫描整个长度为 $n$ 的宝石序列，单次最坏需要 $O(n)$ 时间，总复杂度将达到 $O(nq)$，在 $n,q\le 4\times 10^5$ 时无法通过。
+
+由于颜色仅由 $26$ 个小写字母构成，我们可以利用**映射关系**来避免反复扫描原序列：
+
+1. 维护一个映射数组 `mp`，其中 `mp[c]` 表示**初始颜色**为 `c` 的宝石，经过当前所有已施展的法术之后，最终会变成什么颜色。
+2. 初始时，没有任何法术作用，因此对于任意颜色 `c`，均有 `mp[c] = c`。
+3. 对于每一次法术 `(x, y)`，表示“所有当前颜色为 $x$ 的宝石要变成 $y$”。因为我们维护的是“初始颜色最终会变成什么”，真正需要修改的是：**所有当前映射为 $x$ 的初始颜色**，之后都应该映射为 $y$。  
+   因此我们只需扫描全部 $26$ 个字母 `i`，如果 `mp[i] == x`，就将它改为 `y`。  
+   这一步只消耗 $O(26)$ 时间。
+4. 处理完所有 $q$ 次法术后，`mp` 数组就给出了每个初始颜色对应的最终颜色。
+5. 最后遍历初始宝石序列，将每颗宝石的初始颜色 $c$ 替换为 `mp[c]`，得到答案。
+
+算法核心思想在于：**始终在原始颜色与最终颜色之间维护映射，而不是在真实序列上做修改**，只在最后一步统一转换。
+
+## 复杂度分析
+
+- 每次法术只需扫描 $26$ 个字母，$q$ 次法术共耗时 $O(26q)$。
+- 最后生成答案需要遍历长度为 $n$ 的字符串，耗时 $O(n)$。
+- 因此总时间复杂度为 $O(26q + n)$，即 $O(n+q)$（因为 $26$ 是常数）。
+- 空间复杂度：需要存储长度为 $26$ 的映射数组，以及存储答案字符串，为 $O(n + 26) = O(n)$。
+
+所有复杂度均满足 $n,q$ 总和不超过 $4\times 10^5$ 的要求。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+def transform_string(s, ops):
+    # mp[i] 表示初始颜色 chr(ord('a') + i) 最终会变成的颜色
+    mp = [chr(ord('a') + i) for i in range(26)]
+
+    # 依次处理每个法术
+    for x, y in ops:
+        # 所有当前映射为 x 的初始颜色，之后都映射为 y
+        for i in range(26):
+            if mp[i] == x:
+                mp[i] = y
+
+    # 根据最终映射生成宝石序列
+    res = []
+    for ch in s:
+        res.append(mp[ord(ch) - ord('a')])
+    return ''.join(res)
+
+
+def main():
+    input = sys.stdin.readline
+    t = int(input())
+    ans = []
+
+    for _ in range(t):
+        n, q = map(int, input().split())
+        s = input().strip()
+        ops = []
+        for _ in range(q):
+            x, y = input().split()
+            ops.append((x, y))
+        ans.append(transform_string(s, ops))
+
+    sys.stdout.write('\n'.join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedInputStream;
+import java.io.IOException;
+
+public class Main {
+
+    public static String transformString(String s, char[] xs, char[] ys, int q) {
+        // mp[i] 表示初始颜色 (char)('a' + i) 最终会变成的颜色
+        char[] mp = new char[26];
+        for (int i = 0; i < 26; i++) {
+            mp[i] = (char) ('a' + i);
+        }
+
+        // 依次处理每个法术
+        for (int k = 0; k < q; k++) {
+            char x = xs[k];
+            char y = ys[k];
+            // 所有当前映射为 x 的初始颜色都改为 y
+            for (int i = 0; i < 26; i++) {
+                if (mp[i] == x) {
+                    mp[i] = y;
+                }
+            }
+        }
+
+        // 根据最终映射生成宝石序列
+        char[] res = s.toCharArray();
+        for (int i = 0; i < res.length; i++) {
+            res[i] = mp[res[i] - 'a'];
+        }
+        return new String(res);
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        StringBuilder out = new StringBuilder();
+
+        int t = fs.nextInt();
+        while (t-- > 0) {
+            int n = fs.nextInt();
+            int q = fs.nextInt();
+            String s = fs.next();
+
+            char[] xs = new char[q];
+            char[] ys = new char[q];
+            for (int i = 0; i < q; i++) {
+                xs[i] = fs.next().charAt(0);
+                ys[i] = fs.next().charAt(0);
+            }
+
+            out.append(transformString(s, xs, ys, q)).append('\n');
+        }
+
+        System.out.print(out.toString());
+    }
+
+    static class FastScanner {
+        private final BufferedInputStream in = new BufferedInputStream(System.in);
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) {
+                    return -1;
+                }
+            }
+            return buffer[ptr++];
+        }
+
+        String next() throws IOException {
+            StringBuilder sb = new StringBuilder();
+            int c;
+            do {
+                c = read();
+            } while (c <= ' ' && c != -1);
+            while (c > ' ') {
+                sb.append((char) c);
+                c = read();
+            }
+            return sb.toString();
+        }
+
+        int nextInt() throws IOException {
+            int c;
+            do {
+                c = read();
+            } while (c <= ' ' && c != -1);
+            int sign = 1;
+            if (c == '-') {
+                sign = -1;
+                c = read();
+            }
+            int val = 0;
+            while (c > ' ') {
+                val = val * 10 + c - '0';
+                c = read();
+            }
+            return val * sign;
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+string transformString(const string& s, const vector<pair<char, char>>& ops) {
+    // mp[i] 表示初始颜色 ('a' + i) 最终会变成的颜色
+    vector<char> mp(26);
+    for (int i = 0; i < 26; i++) {
+        mp[i] = 'a' + i;
+    }
+
+    // 依次处理每个法术
+    for (auto& op : ops) {
+        char x = op.first;
+        char y = op.second;
+        // 所有当前映射为 x 的初始颜色都改为 y
+        for (int i = 0; i < 26; i++) {
+            if (mp[i] == x) {
+                mp[i] = y;
+            }
+        }
+    }
+
+    // 根据最终映射生成宝石序列
+    string res = s;
+    for (int i = 0; i < (int)res.size(); i++) {
+        res[i] = mp[res[i] - 'a'];
+    }
+    return res;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+    while (t--) {
+        int n, q;
+        cin >> n >> q;
+        string s;
+        cin >> s;
+
+        vector<pair<char, char>> ops;
+        ops.reserve(q);
+        for (int i = 0; i < q; i++) {
+            char x, y;
+            cin >> x >> y;
+            ops.push_back({x, y});
+        }
+
+        cout << transformString(s, ops) << '\n';
+    }
+    return 0;
+}
+```

@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1534",
+  "title": "第3题-树上的能量共鸣",
+  "docId": 559,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "trial_videosol": ""
+}

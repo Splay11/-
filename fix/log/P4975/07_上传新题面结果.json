@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4975",
+  "title": "第2题-立体仓直线盘点",
+  "docId": 4318,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "暴力枚举"
+  ],
+  "alg_tag": "暴力枚举",
+  "ai_alg_tags": "暴力枚举",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3322",
+  "title": "第3题-校准码最少改写",
+  "docId": 2662,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

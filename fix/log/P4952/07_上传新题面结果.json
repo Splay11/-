@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4952",
+  "title": "第1题-旋律划分",
+  "docId": 4286,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P4764",
+  "title": "第1题-合数分仓",
+  "docId": 4025,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "其他",
+    "数学",
+    "构造"
+  ],
+  "alg_tag": "构造",
+  "ai_alg_tags": "构造",
+  "videosol": "",
+  "trial_videosol": ""
+}

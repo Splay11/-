@@ -1,0 +1,283 @@
+## 解题思路
+
+这道题本质上是在长度为 $n$ 的序列上进行分组。
+
+每个人只能有两种情况：
+
+1. 自己单独成组；
+2. 和前一个人组成一组，即选择相邻下标 $(i-1,i)$，并且满足：
+
+$$
+|a_i-a_{i-1}| \le K
+$$
+
+由于题目保证 $a_1 \le a_2 \le \cdots \le a_n$，所以可以直接写成：
+
+$$
+a_i-a_{i-1} \le K
+$$
+
+设 $dp[i]$ 表示前 $i$ 个人的合法分组方案数。
+
+考虑第 $i$ 个人：
+
+* 如果第 $i$ 个人单独成组，那么前 $i-1$ 个人可以任意合法分组，贡献为：
+
+$$
+dp[i-1]
+$$
+
+* 如果第 $i$ 个人和第 $i-1$ 个人成组，那么必须满足：
+
+$$
+a_i-a_{i-1} \le K
+$$
+
+此时前 $i-2$ 个人可以任意合法分组，贡献为：
+
+$$
+dp[i-2]
+$$
+
+因此状态转移为：
+
+$$
+dp[i]=dp[i-1]
+$$
+
+如果 $a_i-a_{i-1} \le K$，则：
+
+$$
+dp[i]=dp[i]+dp[i-2]
+$$
+
+初始状态：
+
+$$
+dp[0]=1
+$$
+
+表示没有人时有一种空分组方案。
+
+$$
+dp[1]=1
+$$
+
+表示一个人只能单独成组。
+
+由于每次只依赖 $dp[i-1]$ 和 $dp[i-2]$，所以可以使用两个变量滚动维护，节省空间。
+
+## 复杂度分析
+
+设所有测试数据中 $n$ 的总和为 $N$。
+
+每组测试数据只需要从左到右扫描一次数组，因此时间复杂度为：
+
+$$
+O(n)
+$$
+
+所有测试数据总时间复杂度为：
+
+$$
+O(N)
+$$
+
+由于 $N \le 2 \times 10^5$，复杂度可以满足要求。
+
+滚动数组只需要保存两个状态，因此额外空间复杂度为：
+
+$$
+O(1)
+$$
+
+如果不计输入数组，空间复杂度为 $O(1)$；如果计入输入数组，空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10 ** 9 + 7
+
+
+def count_ways(n, k, a):
+    # dp0 表示 dp[i-2]，dp1 表示 dp[i-1]
+    dp0 = 1
+
+    # 只有 0 个人时，答案是 1
+    if n == 0:
+        return dp0
+
+    # 只有 1 个人时，只能单独成组
+    dp1 = 1
+
+    # 从第 2 个人开始计算
+    for i in range(1, n):
+        # 第 i 个位置的人单独成组，方案数来自 dp[i-1]
+        cur = dp1
+
+        # 如果可以和前一个人组成二人组，则额外加上 dp[i-2]
+        if a[i] - a[i - 1] <= k:
+            cur = (cur + dp0) % MOD
+
+        # 滚动更新状态
+        dp0 = dp1
+        dp1 = cur
+
+    return dp1
+
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    t = int(data[0])
+    idx = 1
+    ans = []
+
+    for _ in range(t):
+        n = int(data[idx])
+        k = int(data[idx + 1])
+        idx += 2
+
+        a = []
+        for _ in range(n):
+            a.append(int(data[idx]))
+            idx += 1
+
+        ans.append(str(count_ways(n, k, a)))
+
+    sys.stdout.write("\n".join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007L;
+
+    static long countWays(int n, long k, long[] a) {
+        // dp0 表示 dp[i-2]，dp1 表示 dp[i-1]
+        long dp0 = 1;
+
+        // 只有 0 个人时，答案是 1
+        if (n == 0) {
+            return dp0;
+        }
+
+        // 只有 1 个人时，只能单独成组
+        long dp1 = 1;
+
+        // 从第 2 个人开始计算
+        for (int i = 1; i < n; i++) {
+            // 第 i 个人单独成组，方案数来自 dp[i-1]
+            long cur = dp1;
+
+            // 如果可以和前一个人组成二人组，则额外加上 dp[i-2]
+            if (a[i] - a[i - 1] <= k) {
+                cur = (cur + dp0) % MOD;
+            }
+
+            // 滚动更新状态
+            dp0 = dp1;
+            dp1 = cur;
+        }
+
+        return dp1;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder out = new StringBuilder();
+
+        int t = Integer.parseInt(br.readLine().trim());
+
+        for (int cas = 0; cas < t; cas++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            long k = Long.parseLong(st.nextToken());
+
+            long[] a = new long[n];
+
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < n; i++) {
+                a[i] = Long.parseLong(st.nextToken());
+            }
+
+            out.append(countWays(n, k, a)).append('\n');
+        }
+
+        System.out.print(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+
+long long countWays(int n, long long k, vector<long long>& a) {
+    // dp0 表示 dp[i-2]，dp1 表示 dp[i-1]
+    long long dp0 = 1;
+
+    // 只有 0 个人时，答案是 1
+    if (n == 0) {
+        return dp0;
+    }
+
+    // 只有 1 个人时，只能单独成组
+    long long dp1 = 1;
+
+    // 从第 2 个人开始计算
+    for (int i = 1; i < n; i++) {
+        // 第 i 个人单独成组，方案数来自 dp[i-1]
+        long long cur = dp1;
+
+        // 如果可以和前一个人组成二人组，则额外加上 dp[i-2]
+        if (a[i] - a[i - 1] <= k) {
+            cur = (cur + dp0) % MOD;
+        }
+
+        // 滚动更新状态
+        dp0 = dp1;
+        dp1 = cur;
+    }
+
+    return dp1;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n;
+        long long k;
+        cin >> n >> k;
+
+        vector<long long> a(n);
+        for (int i = 0; i < n; i++) {
+            cin >> a[i];
+        }
+
+        cout << countWays(n, k, a) << '\n';
+    }
+
+    return 0;
+}
+```

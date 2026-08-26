@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1919",
+  "title": "数字卡片整除挑战",
+  "docId": 1022,
+  "hidden": false,
+  "difficulty": 0,
+  "tag": [
+    "B站"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "trial_videosol": ""
+}

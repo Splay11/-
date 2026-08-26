@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1183",
+  "title": "第1题-明星团队的划分",
+  "docId": 189,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "DFS"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2088",
+  "title": "第1题-翻转后的增长对计数",
+  "docId": 1195,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "前缀和"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "前缀和",
+  "videosol": "",
+  "trial_videosol": ""
+}

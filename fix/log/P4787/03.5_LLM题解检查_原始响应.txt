@@ -1,0 +1,232 @@
+## 解题思路
+
+本题要求在给定 $n$ 颗元素宝石（$1 \le n \le 6$，每颗宝石的数字在 $1 \sim 13$）的情况下，判断是否存在某种宝石的排列顺序，以及严格从左到右的 $n-1$ 次魔法融合（加法、减法、乘法、向零取整的除法），使得最终的合成结果恰好为 $24$。
+
+由于 $n$ 很小，可以直接暴力枚举所有可能性。算法的核心分为两层：
+
+1. **枚举所有宝石的排列**：  
+   将给定的 $n$ 个数字进行全排列，得到所有可能的宝石顺序 $(b_1,b_2,\dots,b_n)$。  
+   排列总数最多为 $6! = 720$，完全可接受。
+
+2. **枚举所有运算方案**：  
+   对每一种排列，需要在 $n-1$ 个间隙中各选择一种魔法（$+,-,\times,\div$），共有 $4^{n-1}$ 种选择。  
+   最大情况 $n=6$ 时，运算方案数为 $4^5 = 1024$。
+
+3. **按题意模拟计算**：  
+   对于给定的排列和运算序列，从 $b_1$ 开始作为当前值，依次与下一个数字及对应运算符进行运算。  
+   表达式严格左结合：  
+   $$((\cdots((b_1\ op_1\ b_2)\ op_2\ b_3)\cdots)\ op_{n-1}\ b_n)$$  
+   其中除法采用向零取整的整数除法（如 $7/3=2$，$-7/3=-2$）。  
+   如果某次运算后得到的结果与后续运算结合，最终恰好等于 $24$，则存在可行方案，输出 `Yes`。
+
+4. **实现细节**：  
+   - 在 Python 中，整数除法 `//` 对负数会向下取整，不符合题意。因此需要手动实现向零取整除法：若被除数非负就用 `x // y`，否则用 `-((-x) // y)`。  
+   - 在 Java 和 C++ 中，`int` 类型的 `/` 运算符本身就是向零取整，直接使用即可。  
+   - 可以使用深度优先搜索（DFS）枚举排列和运算符，或使用库函数（如 Python 的 `itertools.permutations` 和 `product`）来简化枚举过程。
+
+由于总枚举量最多为 $720 \times 1024 \approx 7.37\times10^5$，每次模拟最多进行 $5$ 次运算，因此算法在时限内可以轻松完成。
+
+## 复杂度分析
+
+令 $n$ 为每组数据的宝石数量。
+
+- **时间复杂度**：  
+  枚举所有排列需要 $O(n!)$，枚举所有运算方案需要 $O(4^{n-1})$，对每种组合进行一次 $O(n)$ 的模拟运算。  
+  因此总时间复杂度为 $O(n! \cdot 4^{n-1} \cdot n)$。  
+  当 $n \le 6$ 时，这是完全可以接受的。
+
+- **空间复杂度**：  
+  主要使用了递归栈或临时数组存储当前排列，空间复杂度为 $O(n)$，额外开销很小。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from itertools import permutations, product
+
+# 向零取整的整数除法（题目要求）
+def trunc_div(x, y):
+    if x >= 0:
+        return x // y
+    else:
+        return -((-x) // y)
+
+# 判断给定的一组宝石是否能合成24
+def can_make_24(nums):
+    n = len(nums)
+    # 枚举所有排列
+    for perm in permutations(nums):
+        # 枚举所有运算方案：0:+, 1:-, 2:*, 3:/
+        for ops in product(range(4), repeat=n-1):
+            cur = perm[0]
+            # 严格从左到右进行n-1次融合
+            for i in range(n - 1):
+                x = perm[i + 1]
+                op = ops[i]
+                if op == 0:
+                    cur = cur + x
+                elif op == 1:
+                    cur = cur - x
+                elif op == 2:
+                    cur = cur * x
+                else:
+                    cur = trunc_div(cur, x)
+            # 最终结果是否为24
+            if cur == 24:
+                return True
+    return False
+
+def main():
+    input_data = sys.stdin.read().strip().split()
+    if not input_data:
+        return
+    it = iter(input_data)
+    T = int(next(it))
+    out_lines = []
+    for _ in range(T):
+        n = int(next(it))
+        nums = [int(next(it)) for _ in range(n)]
+        out_lines.append("Yes" if can_make_24(nums) else "No")
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+
+    // 深度优先搜索枚举所有排列
+    private static boolean dfsPerm(int[] nums, boolean[] used, int[] perm, int idx) {
+        int n = nums.length;
+        // 当前排列填满后，开始枚举运算符
+        if (idx == n) {
+            return dfsOps(perm, 1, perm[0]);
+        }
+        for (int i = 0; i < n; i++) {
+            if (!used[i]) {
+                used[i] = true;
+                perm[idx] = nums[i];
+                if (dfsPerm(nums, used, perm, idx + 1)) {
+                    return true;
+                }
+                used[i] = false;
+            }
+        }
+        return false;
+    }
+
+    // 深度优先搜索枚举运算符
+    private static boolean dfsOps(int[] perm, int pos, int cur) {
+        int n = perm.length;
+        if (pos == n) {
+            return cur == 24;
+        }
+        int x = perm[pos];
+        // 依次尝试四种魔法
+        if (dfsOps(perm, pos + 1, cur + x)) return true;
+        if (dfsOps(perm, pos + 1, cur - x)) return true;
+        if (dfsOps(perm, pos + 1, cur * x)) return true;
+        // Java的整数除法本身就是向零取整
+        if (dfsOps(perm, pos + 1, cur / x)) return true;
+        return false;
+    }
+
+    // 主判断函数
+    private static boolean canMake24(int[] nums) {
+        int n = nums.length;
+        boolean[] used = new boolean[n];
+        int[] perm = new int[n];
+        return dfsPerm(nums, used, perm, 0);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        while (T-- > 0) {
+            int n = sc.nextInt();
+            int[] nums = new int[n];
+            for (int i = 0; i < n; i++) {
+                nums[i] = sc.nextInt();
+            }
+            System.out.println(canMake24(nums) ? "Yes" : "No");
+        }
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 深度优先搜索枚举运算符
+bool dfsOps(const vector<int>& perm, int pos, int cur) {
+    int n = perm.size();
+    if (pos == n) {
+        return cur == 24;
+    }
+    int x = perm[pos];
+    // 依次尝试 +, -, *, /
+    if (dfsOps(perm, pos + 1, cur + x)) return true;
+    if (dfsOps(perm, pos + 1, cur - x)) return true;
+    if (dfsOps(perm, pos + 1, cur * x)) return true;
+    // C++ 整数除法对int是向零取整
+    if (dfsOps(perm, pos + 1, cur / x)) return true;
+    return false;
+}
+
+// 深度优先搜索枚举排列
+bool dfsPerm(const vector<int>& nums, vector<bool>& used, vector<int>& perm, int idx) {
+    int n = nums.size();
+    if (idx == n) {
+        return dfsOps(perm, 1, perm[0]);
+    }
+    for (int i = 0; i < n; i++) {
+        if (!used[i]) {
+            used[i] = true;
+            perm[idx] = nums[i];
+            if (dfsPerm(nums, used, perm, idx + 1)) {
+                return true;
+            }
+            used[i] = false;
+        }
+    }
+    return false;
+}
+
+// 判断是否能合成24
+bool canMake24(const vector<int>& nums) {
+    int n = nums.size();
+    vector<bool> used(n, false);
+    vector<int> perm(n);
+    return dfsPerm(nums, used, perm, 0);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        cin >> n;
+        vector<int> nums(n);
+        for (int i = 0; i < n; i++) {
+            cin >> nums[i];
+        }
+        cout << (canMake24(nums) ? "Yes" : "No") << "\n";
+    }
+    return 0;
+}
+```

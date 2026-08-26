@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P3506",
+  "title": "第1题-杰出贡献阈值",
+  "docId": 2849,
+  "hidden": false,
+  "difficulty": 3,
+  "tag": [
+    "其他",
+    "排序"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

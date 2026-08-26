@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "2\nabc 2\nabc 1",
+      "output": "2\n1",
+      "explanation": "第一组 $n=2$：`abc` 的排列中以末字母 `c` 开头的只有 `cab` 与 `cba`，共 `2` 种接龙。第二组 $n=1$，只能保留给定音节，方案数为 `1`。"
+    },
+    {
+      "input": "1\naaa 5",
+      "output": "1",
+      "explanation": "三个字母全相同，任意位置都只有一种音节 `aaa`，无论 $n$ 为多少方案数都是 `1`。"
+    },
+    {
+      "input": "1\naab 2",
+      "output": "1",
+      "explanation": "`aab` 的排列为 `aab`、`aba`、`baa`。当前末字母为 `b`，下一个必须以 `b` 开头，只有 `baa`，故方案数为 `1`。"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1740",
+  "title": "第1题-货架清空",
+  "docId": 838,
+  "hidden": false,
+  "difficulty": 2,
+  "tag": [
+    "饿了么"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "videosol": "",
+  "trial_videosol": ""
+}

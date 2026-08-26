@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4767",
+  "title": "第4题-工单拆分",
+  "docId": 4028,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "递归"
+  ],
+  "alg_tag": "递归",
+  "ai_alg_tags": "递归",
+  "videosol": "",
+  "trial_videosol": ""
+}

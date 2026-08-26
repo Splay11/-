@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4919",
+  "title": "最大化异或结果的方案数",
+  "docId": 4233,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "动态规划",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

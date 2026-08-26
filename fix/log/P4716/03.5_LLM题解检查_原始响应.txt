@@ -1,0 +1,248 @@
+## 解题思路
+
+本题可以转化为经典的括号匹配问题：把 `U` 看作左括号（上升），`D` 看作右括号（下降）。合法序列要求任意前缀中 `U` 的数量不少于 `D` 的数量，且最终 `U` 与 `D` 的总数相等。我们需要通过最少的翻转操作（`U` ↔ `D`）使给定序列变为合法。
+
+1. **消除已匹配部分**  
+   使用栈扫描原序列，下标从 1 开始：
+   - 遇到 `U`：将当前位置入栈，作为待匹配的左括号；
+   - 遇到 `D`：
+     - 若栈非空（存在未匹配的 `U`），则栈顶的 `U` 与当前 `D` 匹配，弹出栈顶；
+     - 否则，将当前 `D` 的位置记录为“未匹配的 `D`”。
+
+   扫描结束后，栈中剩余的都是未匹配的 `U`，而之前记录下来的都是未匹配的 `D`。  
+   由于所有能匹配的括号都被消去，剩下的部分必定形如：前面若干个连续未匹配的 `D`，后面若干个连续未匹配的 `U`（序列中不会出现交织）。
+
+2. **计算最少操作次数**  
+   设未匹配的 `D` 有 $a$ 个（位于左侧），未匹配的 `U` 有 $b$ 个（位于右侧）。  
+   - 左侧这 $a$ 个 `D` 必须有一部分变成 `U`，最少翻转 $\lceil a/2 \rceil$ 个；  
+   - 右侧这 $b$ 个 `U` 必须有一部分变成 `D`，最少翻转 $\lceil b/2 \rceil$ 个。  
+   因此最少总操作次数为：  
+   $$k = \lceil a/2 \rceil + \lceil b/2 \rceil$$
+
+3. **构造具体操作方案**  
+   在满足最少次数的前提下，任意构造一组位置即可：
+   - 对于未匹配的 `D`，翻转其中最前面的 $\lceil a/2 \rceil$ 个（`D` → `U`）；
+   - 对于未匹配的 `U`，翻转其中最后面的 $\lceil b/2 \rceil$ 个（`U` → `D`）。
+
+   这样修改后的序列一定满足括号匹配的合法性条件，且操作次数达到理论下界。
+
+## 复杂度分析
+
+- 时间复杂度：$O(n)$。只需对序列进行一次线性扫描和一次遍历输出答案，每组数据独立处理。
+- 空间复杂度：$O(n)$。需要栈和数组存储未匹配字符的下标，与序列长度成正比。
+
+所有测试数据的 $n$ 总和不超过 $2 \times 10^5$，完全满足要求。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve_one(n, s):
+    stack = []          # 存未匹配的 'U' 的下标
+    bad_down = []       # 存未匹配的 'D' 的下标
+
+    for i, ch in enumerate(s, 1):    # 下标从 1 开始
+        if ch == 'U':
+            stack.append(i)
+        else:  # ch == 'D'
+            if stack:
+                stack.pop()          # 匹配掉一对 U...D
+            else:
+                bad_down.append(i)
+
+    bad_up = stack                   # 剩下的全是未匹配的 U
+
+    a = len(bad_down)
+    b = len(bad_up)
+
+    ans = []
+
+    # 翻转最前面的 ceil(a/2) 个未匹配 D
+    need_down = (a + 1) // 2
+    for i in range(need_down):
+        ans.append(bad_down[i])
+
+    # 翻转最后面的 ceil(b/2) 个未匹配 U
+    need_up = (b + 1) // 2
+    for i in range(b - need_up, b):
+        ans.append(bad_up[i])
+
+    return len(ans), ans
+
+def main():
+    input = sys.stdin.readline
+    t = int(input().strip())
+    out = []
+
+    for _ in range(t):
+        n = int(input().strip())
+        s = input().strip()
+
+        k, ans = solve_one(n, s)
+        out.append(str(k))
+        if k == 0:
+            out.append("")          # 输出空行
+        else:
+            out.append(" ".join(map(str, ans)))
+
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    static ArrayList<Integer> solveOne(int n, String s) {
+        ArrayList<Integer> stack = new ArrayList<>();      // 存未匹配的 'U' 下标
+        ArrayList<Integer> badDown = new ArrayList<>();    // 存未匹配的 'D' 下标
+
+        for (int i = 0; i < n; i++) {
+            char ch = s.charAt(i);
+            int idx = i + 1; // 下标从1开始
+
+            if (ch == 'U') {
+                stack.add(idx);
+            } else { // ch == 'D'
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1); // 匹配掉一对 U...D
+                } else {
+                    badDown.add(idx);
+                }
+            }
+        }
+
+        ArrayList<Integer> ans = new ArrayList<>();
+        int a = badDown.size();
+        int b = stack.size();
+
+        // 翻转最前面的 ceil(a/2) 个未匹配 D
+        int needDown = (a + 1) / 2;
+        for (int i = 0; i < needDown; i++) {
+            ans.add(badDown.get(i));
+        }
+
+        // 翻转最后面的 ceil(b/2) 个未匹配 U
+        int needUp = (b + 1) / 2;
+        for (int i = b - needUp; i < b; i++) {
+            ans.add(stack.get(i));
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        StringTokenizer st;
+
+        int T = Integer.parseInt(br.readLine().trim());
+        while (T-- > 0) {
+            int n = Integer.parseInt(br.readLine().trim());
+            String s = br.readLine().trim();
+
+            ArrayList<Integer> ans = solveOne(n, s);
+            sb.append(ans.size()).append('\n');
+            if (ans.isEmpty()) {
+                sb.append('\n');
+            } else {
+                for (int i = 0; i < ans.size(); i++) {
+                    if (i > 0) sb.append(' ');
+                    sb.append(ans.get(i));
+                }
+                sb.append('\n');
+            }
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+vector<int> solveOne(int n, const string &s) {
+    vector<int> st;        // 存未匹配的 'U' 下标
+    vector<int> badDown;   // 存未匹配的 'D' 下标
+
+    for (int i = 0; i < n; i++) {
+        char ch = s[i];
+        int idx = i + 1;   // 下标从1开始
+
+        if (ch == 'U') {
+            st.push_back(idx);
+        } else { // ch == 'D'
+            if (!st.empty()) {
+                st.pop_back(); // 匹配掉一对 U...D
+            } else {
+                badDown.push_back(idx);
+            }
+        }
+    }
+
+    vector<int> ans;
+    int a = (int)badDown.size();
+    int b = (int)st.size();
+
+    // 翻转最前面的 ceil(a/2) 个未匹配 D
+    int needDown = (a + 1) / 2;
+    for (int i = 0; i < needDown; i++) {
+        ans.push_back(badDown[i]);
+    }
+
+    // 翻转最后面的 ceil(b/2) 个未匹配 U
+    int needUp = (b + 1) / 2;
+    for (int i = b - needUp; i < b; i++) {
+        ans.push_back(st[i]);
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n;
+        string s;
+        cin >> n >> s;
+
+        vector<int> ans = solveOne(n, s);
+
+        cout << ans.size() << '\n';
+        if (ans.empty()) {
+            cout << '\n';
+        } else {
+            for (int i = 0; i < (int)ans.size(); i++) {
+                if (i) cout << ' ';
+                cout << ans[i];
+            }
+            cout << '\n';
+        }
+    }
+
+    return 0;
+}
+```

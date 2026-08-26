@@ -1,0 +1,315 @@
+## 解题思路
+
+1. **预处理基源数**  
+   首先用埃拉托色尼筛法筛选出所有不超过 $10^6$ 的基源数（即素数）。由于每个询问的 $N$ 最大为 $10^{18}$，如果一个基源数 $k$ 满足 $k^2$ 整除 $N$，那么必然有 $k \le 10^9$。预处理的基源数可以覆盖所有 $k \le 10^6$ 的情形。
+
+2. **分类寻找基方因子**  
+   对于每个 $N$，设待处理的数值为 $x = N$，答案集合初始为空。
+
+   - **小基源数的情形 ($k \le 10^6$)**  
+     遍历预处理出的所有基源数 $k$。当 $k^2 > x$ 时停止遍历。对于每个 $k$，统计它在 $x$ 的质因数分解中出现的次数 $cnt$，并在统计过程中不断将 $x$ 除以 $k$。若 $cnt \ge 2$，说明 $k^2$ 是 $N$ 的因子，将 $k^2$ 加入答案。
+
+   - **大基源数的情形 ($k > 10^6$)**  
+     此时 $k^2 > 10^{12}$。在除尽所有不超过 $10^6$ 的基源因子后，剩余部分记为 $x$。如果 $x$ 还能贡献答案，它必然是一个大于 $10^6$ 的基源数的平方。因此只需检查 $x$ 是否为完全平方数，并且其平方根 $r = \lfloor\sqrt{x}\rfloor$ 是否为基源数。若两者都满足，将 $x$（即 $r^2$）加入答案。
+
+3. **输出答案**  
+   由于我们是按从小到大的顺序遍历基源数 $k$，所收集的基方因子 $k^2$ 自然也是升序的。如果答案集合非空，按顺序输出所有基方因子；否则输出 `-1`。
+
+## 复杂度分析
+
+- 预处理基源数：时间 $O(10^6 \log\log 10^6)$，空间 $O(10^6)$。  
+- 单次询问：枚举不超过 $10^6$ 的基源数，其数量约为 $78498$，同时判断剩余部分平方根是否为基源数也需要遍历这些基源数，因此单组时间复杂度 $O\big(\pi(10^6)\big)$。  
+- 整体：总询问数 $T \le 300$，因此总时间复杂度为 $O\big(10^6 \log\log 10^6 + T \cdot \pi(10^6)\big)$，可在时限内运行。额外空间主要用于存储基源数列表，为 $O(10^6)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from math import isqrt
+
+LIMIT = 10 ** 6
+
+def get_primes():
+    # 埃氏筛预处理所有不超过 10^6 的基源数（素数）
+    is_prime = [True] * (LIMIT + 1)
+    is_prime[0] = is_prime[1] = False
+
+    for i in range(2, isqrt(LIMIT) + 1):
+        if is_prime[i]:
+            for j in range(i * i, LIMIT + 1, i):
+                is_prime[j] = False
+
+    primes = []
+    for i in range(2, LIMIT + 1):
+        if is_prime[i]:
+            primes.append(i)
+    return primes
+
+PRIMES = get_primes()
+
+def check_prime(x):
+    # 判断 x 是否为基源数（x <= 10^9）
+    if x < 2:
+        return False
+    for p in PRIMES:
+        if p * p > x:
+            break
+        if x % p == 0:
+            return False
+    return True
+
+def solve_one(n):
+    ans = []
+    x = n
+
+    # 处理所有不超过 10^6 的基源数
+    for p in PRIMES:
+        if p * p > x:
+            break
+
+        cnt = 0
+        while x % p == 0:
+            x //= p
+            cnt += 1
+
+        # 若基源数 p 至少出现 2 次，则 p^2 是基方因子
+        if cnt >= 2:
+            ans.append(p * p)
+
+    # 剩余部分可能是一个大基源数的平方
+    r = isqrt(x)
+    if r * r == x and check_prime(r):
+        ans.append(x)
+
+    return ans
+
+def main():
+    data = sys.stdin.read().strip().split()
+    t = int(data[0])
+    res = []
+
+    for i in range(1, t + 1):
+        n = int(data[i])
+        ans = solve_one(n)
+
+        if ans:
+            res.append(" ".join(map(str, ans)))
+        else:
+            res.append("-1")
+
+    print("\n".join(res))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final int LIMIT = 1000000;
+    static ArrayList<Integer> primes = new ArrayList<>();
+
+    static void getPrimes() {
+        // 埃氏筛预处理所有不超过 10^6 的基源数（素数）
+        boolean[] isPrime = new boolean[LIMIT + 1];
+        Arrays.fill(isPrime, true);
+        isPrime[0] = false;
+        isPrime[1] = false;
+
+        for (int i = 2; i * i <= LIMIT; i++) {
+            if (isPrime[i]) {
+                for (int j = i * i; j <= LIMIT; j += i) {
+                    isPrime[j] = false;
+                }
+            }
+        }
+
+        for (int i = 2; i <= LIMIT; i++) {
+            if (isPrime[i]) {
+                primes.add(i);
+            }
+        }
+    }
+
+    static boolean checkPrime(long x) {
+        // 判断 x 是否为基源数（x <= 10^9）
+        if (x < 2) return false;
+
+        for (int p : primes) {
+            if ((long) p * p > x) break;
+            if (x % p == 0) return false;
+        }
+        return true;
+    }
+
+    static ArrayList<Long> solveOne(long n) {
+        ArrayList<Long> ans = new ArrayList<>();
+        long x = n;
+
+        // 处理所有不超过 10^6 的基源数
+        for (int p : primes) {
+            long pp = (long) p * p;
+            if (pp > x) break;
+
+            int cnt = 0;
+            while (x % p == 0) {
+                x /= p;
+                cnt++;
+            }
+
+            // 若基源数 p 至少出现 2 次，则 p^2 是基方因子
+            if (cnt >= 2) {
+                ans.add(pp);
+            }
+        }
+
+        // 剩余部分可能是一个大基源数的平方
+        long r = (long) Math.sqrt(x);
+        while ((r + 1) * (r + 1) <= x) r++;
+        while (r * r > x) r--;
+
+        if (r * r == x && checkPrime(r)) {
+            ans.add(x);
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        getPrimes();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder out = new StringBuilder();
+
+        int T = Integer.parseInt(br.readLine().trim());
+
+        for (int i = 0; i < T; i++) {
+            long n = Long.parseLong(br.readLine().trim());
+            ArrayList<Long> ans = solveOne(n);
+
+            if (ans.isEmpty()) {
+                out.append("-1");
+            } else {
+                for (int j = 0; j < ans.size(); j++) {
+                    if (j > 0) out.append(' ');
+                    out.append(ans.get(j));
+                }
+            }
+            if (i + 1 < T) out.append('\n');
+        }
+
+        System.out.print(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const int LIMIT = 1000000;
+vector<int> primes;
+
+void get_primes() {
+    // 埃氏筛预处理所有不超过 10^6 的基源数（素数）
+    vector<bool> is_prime(LIMIT + 1, true);
+    is_prime[0] = false;
+    is_prime[1] = false;
+
+    for (int i = 2; i * i <= LIMIT; i++) {
+        if (is_prime[i]) {
+            for (int j = i * i; j <= LIMIT; j += i) {
+                is_prime[j] = false;
+            }
+        }
+    }
+
+    for (int i = 2; i <= LIMIT; i++) {
+        if (is_prime[i]) {
+            primes.push_back(i);
+        }
+    }
+}
+
+bool check_prime(long long x) {
+    // 判断 x 是否为基源数（x <= 10^9）
+    if (x < 2) return false;
+
+    for (int p : primes) {
+        if (1LL * p * p > x) break;
+        if (x % p == 0) return false;
+    }
+    return true;
+}
+
+vector<long long> solve_one(long long n) {
+    vector<long long> ans;
+    long long x = n;
+
+    // 处理所有不超过 10^6 的基源数
+    for (int p : primes) {
+        long long pp = 1LL * p * p;
+        if (pp > x) break;
+
+        int cnt = 0;
+        while (x % p == 0) {
+            x /= p;
+            cnt++;
+        }
+
+        // 若基源数 p 至少出现 2 次，则 p^2 是基方因子
+        if (cnt >= 2) {
+            ans.push_back(pp);
+        }
+    }
+
+    // 剩余部分可能是一个大基源数的平方
+    long long r = sqrt((long double)x);
+    while ((r + 1) <= x / (r + 1)) r++;
+    while (r > x / r) r--;
+
+    if (r * r == x && check_prime(r)) {
+        ans.push_back(x);
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    get_primes();
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        long long n;
+        cin >> n;
+
+        vector<long long> ans = solve_one(n);
+
+        if (ans.empty()) {
+            cout << -1;
+        } else {
+            for (int i = 0; i < (int)ans.size(); i++) {
+                if (i) cout << ' ';
+                cout << ans[i];
+            }
+        }
+
+        if (T) cout << '\n';
+    }
+
+    return 0;
+}
+```

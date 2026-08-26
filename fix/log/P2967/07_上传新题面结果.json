@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2967",
+  "title": "第2题-最小加权混杂度",
+  "docId": 2602,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "CART决策树"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "videosol": "",
+  "trial_videosol": ""
+}

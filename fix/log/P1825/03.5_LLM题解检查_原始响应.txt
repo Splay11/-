@@ -1,0 +1,144 @@
+## 解题思路
+
+题目要求对于每个询问 $(L,X,P)$，求出序列中第 $P$ 项 $s_P$ 的值，其中序列定义为 $s_{L+1}=X$，并且向前递推 $s_i = s_{i+1} \bmod i \;(1 \le i \le L)$。
+
+等价于计算：
+$$
+s_P = X \bmod L \bmod (L-1) \bmod \cdots \bmod P
+$$
+直接模拟这个取模链需要 $O(L-P)$ 次运算，在最坏情况下 $L$ 可达 $10^9$，无法通过所有询问。必须利用取模的性质加速。
+
+**关键观察**：  
+当当前值 $cur$ 小于模数 $i$ 时，$cur \bmod i = cur$，结果不变。因此可以跳过所有 $cur < i$ 的阶段，直接定位到下一次可能发生变化的位置。
+
+**跳跃模拟算法**：
+1. 初始化当前值 $cur = X$，当前下标 $i = L$。
+2. 循环执行以下步骤，直到 $i < P$：
+   - 若 $cur = 0$，则后续所有项均为 $0$，直接跳出。
+   - 若 $cur < i$：
+     - 此时对 $j = i, i-1, \dots, cur+1$，都有 $cur \bmod j = cur$；
+     - 当 $j = cur$ 时，$cur \bmod cur = 0$。
+     - 因此，若查询位置 $P > cur$，答案是 $cur$；否则 $P \le cur$，答案是 $0$。之后可直接结束。
+   - 若 $cur \ge i$：
+     - 执行一次取模：$cur = cur \bmod i$；
+     - 把下标减 $1$：$i \leftarrow i-1$。
+3. 循环结束后，$cur$ 即为 $s_P$ 的值。
+
+因为 $cur$ 在 $cur \ge i$ 时会被严格缩小（且往往大幅度缩小），上述循环的执行轮数非常少（对单个询问通常在常数或者 $O(\log X)$ 的级别），可以高效处理 $Q \le 10^5$ 的输入规模。
+
+## 复杂度分析
+
+- **时间复杂度**：单个询问的 while 循环最多执行 $O(\log X)$ 次（极小的常数），$Q$ 次询问的总时间复杂度为 $O(Q \log X)$，能够在时限内运行。
+- **空间复杂度**：每个询问仅使用常数个变量，空间复杂度为 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve() -> None:
+    input = sys.stdin.readline
+    Q = int(input())
+    out_lines = []
+    for _ in range(Q):
+        L, X, P = map(int, input().split())
+        cur = X
+        i = L
+        while i >= P:
+            if cur == 0:
+                break
+            if cur < i:
+                # cur 保持不变直到 i = cur
+                if P > cur:
+                    break      # 答案就是 cur
+                else:
+                    cur = 0    # P <= cur，会经过 cur % cur = 0
+                    break
+            else:
+                cur %= i
+                i -= 1
+        out_lines.append(str(cur))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int Q = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        for (int t = 0; t < Q; t++) {
+            String[] parts = br.readLine().split(" ");
+            int L = Integer.parseInt(parts[0]);
+            int X = Integer.parseInt(parts[1]);
+            int P = Integer.parseInt(parts[2]);
+            int cur = X;
+            int i = L;
+            while (i >= P) {
+                if (cur == 0) {
+                    break;
+                }
+                if (cur < i) {
+                    if (P > cur) {
+                        // 答案保持 cur
+                    } else {
+                        cur = 0;
+                    }
+                    break;
+                } else {
+                    cur %= i;
+                    i--;
+                }
+            }
+            sb.append(cur).append("\n");
+        }
+        System.out.print(sb);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int Q;
+    cin >> Q;
+    while (Q--) {
+        long long L, X, P;
+        cin >> L >> X >> P;
+        long long cur = X;
+        long long i = L;
+        while (i >= P) {
+            if (cur == 0) break;
+            if (cur < i) {
+                if (P > cur) {
+                    // cur 不变
+                } else {
+                    cur = 0;
+                }
+                break;
+            } else {
+                cur %= i;
+                --i;
+            }
+        }
+        cout << cur << '\n';
+    }
+    return 0;
+}
+```

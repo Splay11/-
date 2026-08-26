@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4784",
+  "title": "最大化水晶能量",
+  "docId": 4050,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "思维"
+  ],
+  "alg_tag": "思维",
+  "ai_alg_tags": "思维",
+  "videosol": "",
+  "trial_videosol": ""
+}

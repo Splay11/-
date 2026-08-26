@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2802",
+  "title": "第3题-偶距异或",
+  "docId": 2434,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "DFS"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1810",
+  "title": "第1题-风标迷阵",
+  "docId": 903,
+  "hidden": false,
+  "difficulty": 1,
+  "tag": [
+    "阿里系"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "模拟",
+  "trial_videosol": ""
+}

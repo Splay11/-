@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1010",
+  "title": "节拍均衡校准",
+  "docId": 11,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "携程"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "贪心算法",
+  "trial_videosol": ""
+}

@@ -1,0 +1,243 @@
+## 解题思路
+
+设网格的总格子数为 $k = r \times c$，由题意 $k \le 16$。  
+每个格子只有两种涂色选择（红色或蓝色），因此所有可能的涂色方案总数为 $2^k$，最大仅为 $2^{16}=65536$，可以直接**枚举所有方案**，再检查每种方案是否满足条件。
+
+核心思路如下：
+
+- 用长度为 $k$ 的二进制数表示一种涂色方案。例如令第 $i$ 个格子对应二进制数的第 $i$ 位，`0` 表示红色，`1` 表示蓝色（反过来的设定也可，不影响结果）。
+- 枚举所有状态（从 $0$ 到 $2^k - 1$），对每一个状态做如下检查：
+  1. 遍历整个网格，找到还未访问过的格子。
+  2. 以该格子为起点，通过**BFS（或DFS）**搜索所有上下左右相邻且颜色相同的格子，即找出一个极大同色连通区域（“色块”）。
+  3. 统计该色块包含的格子数。若为偶数，则该涂色方案不满足“所有色块都优美”的条件，直接判定为不合法。
+  4. 若整个网格搜索完毕后，所有色块的大小都是奇数，则该方案合法，答案加一。
+- 枚举完所有状态后，输出合法方案总数。
+
+这样做的正确性在于：题目要求的优美色块就是“极大同色连通区域”且大小为奇数，上述过程恰好找到了每一个极大连通块并逐一验证。
+
+## 复杂度分析
+
+设总格子数 $k = r \times c$。
+
+- 状态总数：$2^k$。
+- 对于每一个状态，需要遍历所有 $k$ 个格子，并使用 BFS 搜索连通块，最坏情况下每个格子被访问常数次，因此每个状态的检查复杂度为 $O(k)$。
+
+总时间复杂度：$O(2^k \cdot k)$。由于 $k \le 16$，最大计算量约为 $2^{16} \times 16 \approx 10^6$，可以轻松通过。
+
+空间复杂度：主要为 visited 数组和 BFS 队列，均为 $O(k)$。
+
+## 代码实现
+
+### Python
+
+```python
+from collections import deque
+
+def check(state, r, c):
+    visited = [[False] * c for _ in range(r)]
+    dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    # 获取某个格子的颜色：0 表示红色，1 表示蓝色
+    def get_color(x, y):
+        idx = x * c + y
+        return (state >> idx) & 1
+
+    for i in range(r):
+        for j in range(c):
+            if visited[i][j]:
+                continue
+
+            # BFS 搜索同色连通块
+            color = get_color(i, j)
+            q = deque()
+            q.append((i, j))
+            visited[i][j] = True
+            size = 0
+
+            while q:
+                x, y = q.popleft()
+                size += 1
+
+                for dx, dy in dirs:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < r and 0 <= ny < c and not visited[nx][ny]:
+                        if get_color(nx, ny) == color:
+                            visited[nx][ny] = True
+                            q.append((nx, ny))
+
+            # 若色块大小为偶数，则不优美
+            if size % 2 == 0:
+                return False
+    return True
+
+
+def solve(r, c):
+    total = r * c
+    ans = 0
+    for state in range(1 << total):
+        if check(state, r, c):
+            ans += 1
+    return ans
+
+
+if __name__ == "__main__":
+    r, c = map(int, input().split())
+    print(solve(r, c))
+```
+
+### Java
+
+```java
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Main {
+
+    // 检查一个涂色状态是否所有色块大小均为奇数
+    public static boolean check(int state, int r, int c) {
+        boolean[][] visited = new boolean[r][c];
+        int[] dx = {-1, 1, 0, 0};
+        int[] dy = {0, 0, -1, 1};
+
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
+                if (visited[i][j]) {
+                    continue;
+                }
+
+                // 当前格子颜色：0 表示红色，1 表示蓝色
+                int color = (state >> (i * c + j)) & 1;
+
+                // BFS 搜索同色连通块（色块）
+                Queue<int[]> queue = new LinkedList<>();
+                queue.offer(new int[]{i, j});
+                visited[i][j] = true;
+                int size = 0;
+
+                while (!queue.isEmpty()) {
+                    int[] cur = queue.poll();
+                    int x = cur[0];
+                    int y = cur[1];
+                    size++;
+
+                    for (int k = 0; k < 4; k++) {
+                        int nx = x + dx[k];
+                        int ny = y + dy[k];
+
+                        if (nx >= 0 && nx < r && ny >= 0 && ny < c && !visited[nx][ny]) {
+                            int nextColor = (state >> (nx * c + ny)) & 1;
+                            if (nextColor == color) {
+                                visited[nx][ny] = true;
+                                queue.offer(new int[]{nx, ny});
+                            }
+                        }
+                    }
+                }
+
+                // 若发现偶数大小的色块，方案不合法
+                if (size % 2 == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // 计算所有优美涂色方案的数量
+    public static int solve(int r, int c) {
+        int total = r * c;
+        int ans = 0;
+
+        for (int state = 0; state < (1 << total); state++) {
+            if (check(state, r, c)) {
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int r = sc.nextInt();
+        int c = sc.nextInt();
+        System.out.println(solve(r, c));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+// 检查一个状态是否所有色块大小均为奇数
+bool check(int state, int r, int c) {
+    vector<vector<bool>> visited(r, vector<bool>(c, false));
+    int dx[4] = {-1, 1, 0, 0};
+    int dy[4] = {0, 0, -1, 1};
+
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            if (visited[i][j]) continue;
+
+            // 当前格子颜色：0 表示红色，1 表示蓝色
+            int color = (state >> (i * c + j)) & 1;
+
+            // BFS 搜索同色连通块
+            queue<pair<int, int>> q;
+            q.push({i, j});
+            visited[i][j] = true;
+            int size = 0;
+
+            while (!q.empty()) {
+                auto [x, y] = q.front();
+                q.pop();
+                size++;
+
+                for (int k = 0; k < 4; k++) {
+                    int nx = x + dx[k];
+                    int ny = y + dy[k];
+
+                    if (nx >= 0 && nx < r && ny >= 0 && ny < c && !visited[nx][ny]) {
+                        int nextColor = (state >> (nx * c + ny)) & 1;
+                        if (nextColor == color) {
+                            visited[nx][ny] = true;
+                            q.push({nx, ny});
+                        }
+                    }
+                }
+            }
+
+            // 出现偶数大小的色块则方案不合法
+            if (size % 2 == 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// 统计所有优美涂色方案的数量
+int solve(int r, int c) {
+    int total = r * c;
+    int ans = 0;
+
+    for (int state = 0; state < (1 << total); state++) {
+        if (check(state, r, c)) {
+            ans++;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    int r, c;
+    cin >> r >> c;
+    cout << solve(r, c) << endl;
+    return 0;
+}
+```

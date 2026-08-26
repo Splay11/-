@@ -1,0 +1,17 @@
+{
+  "message": "problem update success",
+  "pid": "P3595",
+  "title": "第2题-构造跃升排列",
+  "docId": 2938,
+  "hidden": false,
+  "difficulty": 4,
+  "tag": [
+    "其他",
+    "构造",
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "构造",
+  "videosol": "",
+  "trial_videosol": ""
+}

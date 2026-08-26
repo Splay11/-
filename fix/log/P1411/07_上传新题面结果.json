@@ -1,0 +1,14 @@
+{
+  "message": "problem update success",
+  "pid": "P1411",
+  "title": "第3题-禁数互补对",
+  "docId": 427,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "哈希表",
+  "trial_videosol": ""
+}

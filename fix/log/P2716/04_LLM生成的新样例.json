@@ -1,0 +1,19 @@
+{
+  "samples": [
+    {
+      "input": "abacaba\n3 2\naba\ncab\na",
+      "output": "YES\nYES\nNO",
+      "explanation": "参考字符串 $R = \\text{abacaba}$，长度限制 $L = 2$。\n预处理得到 $R$ 中所有长度为 `2` 的子串集合：$\\{\\text{ab}, \\text{ba}, \\text{ac}, \\text{ca}\\}$（已去重）。\n\n- 第 `1` 次询问：$Q = \\text{aba}$，长度 $|Q| = 3 \\ge 2$，前缀 $\\text{ab}$ 出现在集合中，输出 `YES`。\n- 第 `2` 次询问：$Q = \\text{cab}$，长度满足要求，前缀 $\\text{ca}$ 在集合中，输出 `YES`。\n- 第 `3` 次询问：$Q = \\text{a}$，长度 `1` 小于 $L$，无法构成有效的前缀或后缀，直接输出 `NO`。"
+    },
+    {
+      "input": "z\n3 1\na\nz\nzz",
+      "output": "NO\nYES\nYES",
+      "explanation": "$R = \\text{z}$，$L = 1$，这是允许的最小长度限制。\n$R$ 中唯一的长度为 `1` 的子串为 $\\text{z}$。\n\n- 询问 `a`：长度 $1 \\ge 1$，前缀 `a` 和后缀 `a` 均不在子串集合中，输出 `NO`。\n- 询问 `z`：前缀 `z` 在集合中，输出 `YES`。\n- 询问 `zz`：长度 $2 \\ge 1$，前缀 `z` 和后缀 `z` 均在集合中，因此输出 `YES`。"
+    },
+    {
+      "input": "abcdef\n3 3\nxyzdef\nabc\na",
+      "output": "YES\nYES\nNO",
+      "explanation": "$R = \\text{abcdef}$，$L = 3$。\n$R$ 的长度为 `3` 的子串集合为 $\\{\\text{abc}, \\text{bcd}, \\text{cde}, \\text{def}\\}$。\n\n- 询问 `xyzdef`：长度 $6 \\ge 3$，前缀 `xyz` 不在集合中，但后缀 `def` 出现在集合中，输出 `YES`。\n- 询问 `abc`：长度 $3 \\ge 3$，前缀 `abc`（也是后缀）在集合中，输出 `YES`。\n- 询问 `a`：长度 `1` 小于 $L$，直接输出 `NO`。"
+    }
+  ]
+}

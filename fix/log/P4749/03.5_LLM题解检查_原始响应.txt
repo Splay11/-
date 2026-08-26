@@ -1,0 +1,371 @@
+## 解题思路
+
+题目要求对于每个星球 $u$，计算其管辖区域 $S_u$（以 $u$ 为根的子树）中所有无序星球对 $(x, y)$ 的能量差异度之和：
+
+$$
+\sum_{x, y \in S_u,\ x < y} (e_x \oplus e_y)
+$$
+
+直接枚举子树内所有点对的时间复杂度为 $O(|S_u|^2)$，不可行。由于异或运算可以按位独立计算，我们可以将问题拆解到每个二进制位上。
+
+### 按位统计贡献
+
+对于某个二进制位 $b$，设管辖区域 $S_u$ 中该位为 $1$ 的星球数量为 $cnt_1$，为 $0$ 的星球数量为 $cnt_0$。  
+只有当 $x$ 与 $y$ 在该位上的值不同时，该位异或结果才为 $1$。  
+这一位对管辖混乱度的贡献为：
+
+$$
+cnt_1 \times cnt_0 \times 2^b
+$$
+
+因为子树大小 $size = cnt_1 + cnt_0$ 已知，只需求出 $cnt_1$ 即可得到 $cnt_0 = size - cnt_1$。  
+因此，问题转化为快速查询每个节点的子树内，每个二进制位上值为 $1$ 的节点个数。
+
+### 利用 DFS 序转化为区间查询
+
+对整棵树（以星球 $1$ 为根）做一次深度优先遍历，记录每个节点 $u$ 的：
+
+- 进入时间 $tin[u]$
+- 离开时间 $tout[u]$
+
+这样，节点 $u$ 的管辖区域 $S_u$ 在 DFS 序上对应一个连续的区间 $[tin[u], tout[u]]$。
+
+按照 DFS 序将星球的能量值放入数组 $euler\_val$，即 $euler\_val[tin[u]] = e_u$。
+
+对于每个二进制位 $b$，我们可以对数组 $euler\_val$ 建立前缀和数组 $pre$，其中 $pre[i]$ 表示前 $i$ 个元素里该位为 $1$ 的个数。  
+查询子树 $u$ 中该位为 $1$ 的星球数量即为：
+
+$$
+cnt_1 = pre[tout[u]] - pre[tin[u] - 1]
+$$
+
+子树大小为：
+
+$$
+size = tout[u] - tin[u] + 1
+$$
+
+然后累加该位贡献到答案中。
+
+### 算法步骤
+
+1. 建图，读入 $n$ 个能量值 $e_1 \sim e_n$ 以及 $n-1$ 条边。
+2. 使用非递归 DFS 遍历树（防止递归栈溢出），得到每个节点的 $tin$、$tout$ 以及 DFS 序对应的能量值数组 $euler\_val$。
+3. 由于 $e_i \le 10^6$，考虑 $0 \sim 19$ 共 $B=20$ 个二进制位，对每一位：
+   - 计算该位上的前缀和数组 $pre$。
+   - 对每个节点 $u$ 根据 $tin[u]$、$tout[u]$ 查询 $cnt_1$，求出 $cnt_0$，将 $cnt_1 \times cnt_0 \times 2^b$ 累加到 $ans[u]$。
+4. 输出所有星球的 $ans[1 \dots n]$。
+
+## 复杂度分析
+
+- 时间复杂度：  
+  建树和 DFS 遍历为 $O(n)$；  
+  按位统计时，对 $B = 20$ 个二进制位，每个位需要 $O(n)$ 时间计算前缀和并统计所有节点的贡献。  
+  总时间复杂度 $O(B \cdot n) = O(20n) = O(n)$。
+
+- 空间复杂度：  
+  邻接表、DFS 序相关数组、前缀和数组、答案数组等均与 $n$ 同阶。  
+  总空间复杂度 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve(n, e, edges):
+    # 建图
+    graph = [[] for _ in range(n + 1)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+
+    # 非递归 DFS 求 tin, tout 与 DFS 序上的能量值
+    tin = [0] * (n + 1)
+    tout = [0] * (n + 1)
+    euler_val = [0] * (n + 1)   # 下标从 1 开始，euler_val[tin[u]] = e[u]
+
+    timer = 0
+    stack = [(1, 0, 0)]  # (当前节点, 父节点, 状态: 0=首次进入, 1=即将退出)
+    while stack:
+        u, fa, state = stack.pop()
+        if state == 0:
+            timer += 1
+            tin[u] = timer
+            euler_val[timer] = e[u]
+            # 退出时记录 tout
+            stack.append((u, fa, 1))
+            for v in graph[u]:
+                if v != fa:
+                    stack.append((v, u, 0))
+        else:
+            tout[u] = timer
+
+    ans = [0] * (n + 1)
+    B = 20  # 因为能量值 <= 10^6 < 2^20
+
+    # 按位统计贡献
+    for b in range(B):
+        pre = [0] * (n + 1)
+        for i in range(1, n + 1):
+            pre[i] = pre[i - 1] + ((euler_val[i] >> b) & 1)
+
+        bit_val = 1 << b
+        for u in range(1, n + 1):
+            l = tin[u]
+            r = tout[u]
+            ones = pre[r] - pre[l - 1]
+            size = r - l + 1
+            zeros = size - ones
+            ans[u] += ones * zeros * bit_val
+
+    return ans[1:]
+
+def main():
+    input_data = sys.stdin.read().strip().split()
+    it = iter(input_data)
+    n = int(next(it))
+    e = [0] + [int(next(it)) for _ in range(n)]
+    edges = [(int(next(it)), int(next(it))) for _ in range(n - 1)]
+    res = solve(n, e, edges)
+    print(' '.join(map(str, res)))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static long[] solve(int n, int[] e, List<Integer>[] graph) {
+        int[] tin = new int[n + 1];
+        int[] tout = new int[n + 1];
+        int[] eulerVal = new int[n + 1];
+
+        int timer = 0;
+        // 非递归 DFS 栈：分别存储节点、父节点和状态
+        int[] stackU = new int[2 * n + 5];
+        int[] stackFa = new int[2 * n + 5];
+        int[] stackState = new int[2 * n + 5];
+        int top = 0;
+
+        stackU[top] = 1;
+        stackFa[top] = 0;
+        stackState[top] = 0;
+        top++;
+
+        while (top > 0) {
+            top--;
+            int u = stackU[top];
+            int fa = stackFa[top];
+            int state = stackState[top];
+
+            if (state == 0) {
+                timer++;
+                tin[u] = timer;
+                eulerVal[timer] = e[u];
+
+                // 退出状态入栈
+                stackU[top] = u;
+                stackFa[top] = fa;
+                stackState[top] = 1;
+                top++;
+
+                // 子节点入栈
+                for (int v : graph[u]) {
+                    if (v != fa) {
+                        stackU[top] = v;
+                        stackFa[top] = u;
+                        stackState[top] = 0;
+                        top++;
+                    }
+                }
+            } else {
+                tout[u] = timer;
+            }
+        }
+
+        long[] ans = new long[n + 1];
+        int B = 20; // 能量值 <= 10^6 < 2^20
+
+        for (int b = 0; b < B; b++) {
+            int[] pre = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                pre[i] = pre[i - 1] + ((eulerVal[i] >> b) & 1);
+            }
+
+            long bitVal = 1L << b;
+            for (int u = 1; u <= n; u++) {
+                int l = tin[u];
+                int r = tout[u];
+                int ones = pre[r] - pre[l - 1];
+                int size = r - l + 1;
+                int zeros = size - ones;
+                ans[u] += 1L * ones * zeros * bitVal;
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws IOException {
+        FastScanner fs = new FastScanner(System.in);
+        int n = fs.nextInt();
+        int[] e = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            e[i] = fs.nextInt();
+        }
+
+        List<Integer>[] graph = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < n - 1; i++) {
+            int u = fs.nextInt();
+            int v = fs.nextInt();
+            graph[u].add(v);
+            graph[v].add(u);
+        }
+
+        long[] ans = solve(n, e, graph);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= n; i++) {
+            if (i > 1) sb.append(' ');
+            sb.append(ans[i]);
+        }
+        System.out.println(sb);
+    }
+
+    static class FastScanner {
+        private final InputStream in;
+        private final byte[] buf = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+
+        FastScanner(InputStream is) {
+            this.in = is;
+        }
+
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buf);
+                ptr = 0;
+                if (len <= 0) return -1;
+            }
+            return buf[ptr++] & 0xff;
+        }
+
+        int nextInt() throws IOException {
+            int c = read();
+            while (c <= ' ') c = read();
+            int sign = 1;
+            if (c == '-') {
+                sign = -1;
+                c = read();
+            }
+            int val = 0;
+            while (c > ' ') {
+                val = val * 10 + (c - '0');
+                c = read();
+            }
+            return val * sign;
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<long long> solve(int n, const vector<int>& e, const vector<vector<int>>& graph) {
+    vector<int> tin(n + 1), tout(n + 1), eulerVal(n + 1);
+    int timer = 0;
+
+    // 非递归 DFS
+    struct Node {
+        int u, fa, state; // state = 0 首次到达，1 退出
+    };
+    vector<Node> st;
+    st.push_back({1, 0, 0});
+
+    while (!st.empty()) {
+        Node cur = st.back();
+        st.pop_back();
+        int u = cur.u, fa = cur.fa, state = cur.state;
+
+        if (state == 0) {
+            ++timer;
+            tin[u] = timer;
+            eulerVal[timer] = e[u];
+
+            st.push_back({u, fa, 1});
+            for (int v : graph[u]) {
+                if (v != fa) {
+                    st.push_back({v, u, 0});
+                }
+            }
+        } else {
+            tout[u] = timer;
+        }
+    }
+
+    vector<long long> ans(n + 1, 0);
+    const int B = 20; // 能量值 <= 10^6 < 2^20
+
+    for (int b = 0; b < B; ++b) {
+        vector<int> pre(n + 1, 0);
+        for (int i = 1; i <= n; ++i) {
+            pre[i] = pre[i - 1] + ((eulerVal[i] >> b) & 1);
+        }
+
+        long long bitVal = 1LL << b;
+        for (int u = 1; u <= n; ++u) {
+            int l = tin[u], r = tout[u];
+            int ones = pre[r] - pre[l - 1];
+            int size = r - l + 1;
+            int zeros = size - ones;
+            ans[u] += 1LL * ones * zeros * bitVal;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int> e(n + 1);
+    for (int i = 1; i <= n; ++i) {
+        cin >> e[i];
+    }
+
+    vector<vector<int>> graph(n + 1);
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+
+    vector<long long> ans = solve(n, e, graph);
+    for (int i = 1; i <= n; ++i) {
+        if (i > 1) cout << ' ';
+        cout << ans[i];
+    }
+    cout << '\n';
+
+    return 0;
+}
+```

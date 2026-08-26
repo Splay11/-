@@ -1,0 +1,209 @@
+## 解题思路
+
+题目给定阈值 $\delta$ 和日志序列 $c_1, c_2, \dots, c_n$，要求构造一个正整数序列 $x_1, x_2, \dots, x_m$（$m \ge n$），按照如下规则筛选后恰好得到日志序列 $c$：
+
+- $x_1$ 一定被记录（即 $c_1 = x_1$）；
+- 对于 $i \ge 2$，若 $x_{i-1} + \delta \le x_i$，则 $x_i$ 被记入 $c$；否则被跳过。
+
+并且还须满足：
+
+1. $m$ 尽可能小；
+2. 在 $m$ 最小的前提下，$x$ 的字典序尽可能小。
+
+题目保证对于给定的合法日志一定存在满足全部要求的原始序列。
+
+### 核心思路
+
+依次考虑相邻两个保留元素 $c_{i-1}$ 与 $c_i$ 之间如何构造。
+
+要使 $c_i$ 被保留，只需保证它前面的那个数 $y$ 满足 $y + \delta \le c_i$；若希望 $y$ 不被保留，还需满足 $c_{i-1} + \delta > y$。
+
+#### 情况一：$c_{i-1} + \delta \le c_i$
+
+此时直接把 $c_i$ 接在 $c_{i-1}$ 后面，它会被保留。这一段不需要插入任何额外元素。
+
+#### 情况二：$c_{i-1} + \delta > c_i$
+
+此时若直接把 $c_i$ 接在后面，它会被跳过，不满足要求。因此必须在 $c_{i-1}$ 与 $c_i$ 之间至少插入一个数。为了让长度最短，只插入一个数即可。设插入的数为 $y$，需要满足：
+
+- $c_{i-1} + \delta > y$（使 $y$ 不被保留）；
+- $y + \delta \le c_i$（使 $c_i$ 被保留）。
+
+为了让字典序最小，应选满足条件的最小正整数 $y$。因为整体有解，一定存在某个正整数 $z$ 满足 $z + \delta \le c_i$，因此 $c_i \ge \delta + 1$，从而有 $1 + \delta \le c_i$。同时 $c_{i-1} \ge 1$ 且 $\delta \ge 0$，故 $c_{i-1} + \delta \ge 1$，即 $c_{i-1} + \delta > 1$。因此取 $y = 1$ 一定合法，且字典序最优。
+
+#### 构造算法
+
+1. 初始化 $x = [c_1]$。
+2. 从 $i = 2$ 到 $n$ 依次处理 $c_i$：
+   - 若 $c_{i-1} + \delta \le c_i$，直接将 $c_i$ 加入 $x$；
+   - 否则，依次将 $1$ 和 $c_i$ 加入 $x$。
+3. 最终得到的 $x$ 即为长度最小、字典序最小的原始序列。
+
+## 复杂度分析
+
+- **时间复杂度**：只需线性扫描一次日志序列 $c$，每个元素处理一次，一组数据的时间复杂度为 $O(n)$。设所有测试组的 $n$ 之和为 $S$，总时间复杂度为 $O(S)$。
+- **空间复杂度**：需要额外数组保存构造出的答案 $x$。最坏情况下每两个相邻日志元素之间都要插入一个 $1$，此时 $x$ 长度最长为 $2n-1$，空间复杂度为 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def build_sequence(n, delta, c):
+    x = [c[0]]
+    for i in range(1, n):
+        # 如果当前日志元素可以直接接在前一个记录元素之后
+        if c[i - 1] + delta <= c[i]:
+            x.append(c[i])
+        else:
+            # 否则插入字典序最小的正整数 1
+            x.append(1)
+            x.append(c[i])
+    return x
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    t = data[0]
+    idx = 1
+    out_lines = []
+
+    for _ in range(t):
+        n = data[idx]
+        delta = data[idx + 1]
+        idx += 2
+
+        c = data[idx:idx + n]
+        idx += n
+
+        ans = build_sequence(n, delta, c)
+        out_lines.append(str(len(ans)))
+        out_lines.append(" ".join(map(str, ans)))
+
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    static StringTokenizer st;
+
+    static int nextInt() throws IOException {
+        while (st == null || !st.hasMoreTokens()) {
+            st = new StringTokenizer(br.readLine());
+        }
+        return Integer.parseInt(st.nextToken());
+    }
+
+    static List<Integer> buildSequence(int n, int delta, int[] c) {
+        List<Integer> x = new ArrayList<>();
+        x.add(c[0]);
+
+        for (int i = 1; i < n; i++) {
+            // 直接接在后面可以被保留
+            if ((long) c[i - 1] + delta <= c[i]) {
+                x.add(c[i]);
+            } else {
+                // 插入字典序最小的正整数 1
+                x.add(1);
+                x.add(c[i]);
+            }
+        }
+        return x;
+    }
+
+    public static void main(String[] args) throws Exception {
+        int t = nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        while (t-- > 0) {
+            int n = nextInt();
+            int delta = nextInt();
+
+            int[] c = new int[n];
+            for (int i = 0; i < n; i++) {
+                c[i] = nextInt();
+            }
+
+            List<Integer> x = buildSequence(n, delta, c);
+
+            sb.append(x.size()).append('\n');
+            for (int i = 0; i < x.size(); i++) {
+                if (i > 0) sb.append(' ');
+                sb.append(x.get(i));
+            }
+            sb.append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> buildSequence(int n, int delta, const vector<int>& c) {
+    vector<int> x;
+    x.push_back(c[0]);
+
+    for (int i = 1; i < n; i++) {
+        // 直接接在后面可以被保留
+        if ((long long)c[i - 1] + delta <= c[i]) {
+            x.push_back(c[i]);
+        } else {
+            // 插入字典序最小的正整数 1
+            x.push_back(1);
+            x.push_back(c[i]);
+        }
+    }
+
+    return x;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+
+    while (t--) {
+        int n, delta;
+        cin >> n >> delta;
+
+        vector<int> c(n);
+        for (int i = 0; i < n; i++) {
+            cin >> c[i];
+        }
+
+        vector<int> x = buildSequence(n, delta, c);
+
+        cout << x.size() << '\n';
+        for (int i = 0; i < (int)x.size(); i++) {
+            if (i > 0) cout << ' ';
+            cout << x[i];
+        }
+        cout << '\n';
+    }
+
+    return 0;
+}
+```

@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1125",
+  "title": "奇妙平衡子段",
+  "docId": 129,
+  "hidden": false,
+  "difficulty": 0,
+  "tag": [
+    "腾讯"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,135 @@
+## 题面描述  
+小苯有一个长度为 $n$ 的 $01$ 串 $x$（下标从 $1$ 到 $n$），格格有一个长度恰好为 $n-1$ 的 $01$ 串 $y$（下标从 $1$ 到 $n-1$）。要求在修改尽可能少的 $x$ 串字符后，使其满足以下匹配规则：  
+- 若 $y_i = 1$，则必须有 $x_i \neq x_{i+1}$；  
+- 若 $y_i = 0$，则必须有 $x_i = x_{i+1}$。  
+
+一次修改操作是选择一个位置 $i\,(1\le i\le n)$，令 $x_i := x_i \oplus 1$。求最少需要多少次修改才能使匹配成立。
+
+---
+
+## 问题本质分析  
+上述匹配规则实际上把 $x$ 串的相邻关系完全“锁定”下来：  
+1. 如果我们确定了 $x_1$，那么根据每个 $y_i$，就能“递推”出整条目标串 $t$：  
+   $$t_{i+1} = t_i \oplus y_i\quad(1\le i\le n-1).$$  
+2. 因此，所有满足要求的 $x$ 串只有 **两种可能**：  
+   - 假设 $t_1=0$，按上式生成一条串；  
+   - 假设 $t_1=1$，按上式生成另一条串。  
+3. 对这两种候选串分别计算与原串 $x$ 在对应位置的不同个数，取最小值即为答案。
+
+---
+
+## 解题思路  
+1. 读入 $n, x, y$；  
+2. 枚举两种初始值：$t_1=0$ 和 $t_1=1$。  
+3. 对于每一种，按规则构建目标串 $t$，并用一个计数器统计位置 $i$ 上 $x_i \neq t_i$ 的次数；  
+4. 最后输出两种情况中的最小值。
+
+此方法时间复杂度 $O(n)$，空间复杂度 $O(1)$ 或 $O(n)$（若显式存储 $t$ 串）。
+
+## C++ 
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        cin >> n;
+        string x, y;
+        cin >> x >> y;
+
+        // 统计以 t1=0 和 t1=1 的差异次数
+        long long diff0 = 0, diff1 = 0;
+        // cur0 表示当前 t_i 当 t1=0 时的值；cur1 表示当 t1=1 时的值
+        int cur0 = 0, cur1 = 1;
+
+        // 遍历所有位置
+        for (int i = 0; i < n; i++) {
+            // 比较 x[i] 与 cur0/cur1
+            if (x[i] - '0' != cur0) diff0++;
+            if (x[i] - '0' != cur1) diff1++;
+            // 如果不是最后一个位置，则根据 y[i] 更新下一位
+            if (i < n - 1) {
+                int v = y[i] - '0';
+                cur0 ^= v;
+                cur1 ^= v;
+            }
+        }
+
+        // 最少修改次数
+        cout << min(diff0, diff1) << "\n";
+    }
+    return 0;
+}
+```
+## Python
+```python
+import sys
+input = sys.stdin.readline
+
+def solve():
+    T = int(input())
+    for _ in range(T):
+        n = int(input())
+        x = input().strip()
+        y = input().strip()
+
+        diff0 = 0  # 初始 t1 = 0
+        diff1 = 0  # 初始 t1 = 1
+        cur0, cur1 = 0, 1
+
+        for i in range(n):
+            if int(x[i]) != cur0:
+                diff0 += 1
+            if int(x[i]) != cur1:
+                diff1 += 1
+            if i < n - 1:
+                v = int(y[i])
+                cur0 ^= v
+                cur1 ^= v
+
+        print(min(diff0, diff1))
+
+if __name__ == "__main__":
+    solve()
+```
+## Java
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine());
+
+        while (T-- > 0) {
+            int n = Integer.parseInt(br.readLine());
+            String x = br.readLine().trim();
+            String y = br.readLine().trim();
+
+            long diff0 = 0, diff1 = 0;
+            int cur0 = 0, cur1 = 1;
+
+            for (int i = 0; i < n; i++) {
+                int xi = x.charAt(i) - '0';
+                if (xi != cur0) diff0++;
+                if (xi != cur1) diff1++;
+                if (i < n - 1) {
+                    int v = y.charAt(i) - '0';
+                    cur0 ^= v;
+                    cur1 ^= v;
+                }
+            }
+
+            System.out.println(Math.min(diff0, diff1));
+        }
+    }
+}
+```

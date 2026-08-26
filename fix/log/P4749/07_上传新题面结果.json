@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P4749",
+  "title": "第1题-星际管辖混乱度",
+  "docId": 4009,
+  "hidden": false,
+  "difficulty": 7,
+  "tag": [
+    "DFS"
+  ],
+  "alg_tag": "DFS",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

@@ -1,0 +1,294 @@
+## 解题思路
+
+本题的目标是在最多执行 $k$ 次「基除」操作后，使序列元素之和最小。一次基除操作指：选择一个大于 $1$ 的元素 $x$，将其替换为 $\dfrac{x}{p}$，其中 $p$ 是 $x$ 的一个基除数（即既是 $x$ 的约数又是素数的数，也就是素因子）。
+
+设当前元素为 $x$，选择的基除数为 $p$，则本次操作使总和减少：
+
+$$
+x - \frac{x}{p} = x \left(1 - \frac{1}{p}\right)
+$$
+
+为了使总和尽可能小，每一步都应该选择“当前能带来最大减少量”的操作。对于同一个元素，若希望后续操作的总减少量最大，可以证明最优策略是每次除以当前值的最小基除数（即最小素因子），因为除数越小，减少量越大。
+
+因此，每个元素的最优操作序列是确定的：不断除以当前值的最小基除数，直到变为 $1$。这样问题转化为：
+
+- 初始总和为所有元素之和。
+- 每个元素可产生一系列“收益”（每次操作减少的数值），收益依次递减。
+- 需要从所有收益中选取最多 $k$ 个（每次选最大的），求总和的最小值。
+
+这是一个经典的贪心问题，可以使用大根堆（优先队列）实现：
+
+1. **预处理最小基除数**：用类似埃氏筛的方法求出 $[1, \max(a)]$ 中每个数的最小素因子。
+2. **初始化**：计算序列总和 $total$。对于每个大于 $1$ 的 $a_i$，计算其第一次基除操作的减少量 $a_i - \dfrac{a_i}{\text{spf}(a_i)}$，并将该操作（减少量，当前值）放入大根堆。
+3. **贪心执行操作**：进行最多 $k$ 次循环，每次从堆顶取出减少量最大的操作，从 $total$ 中减去该减少量。然后将当前值更新为除以最小基除数后的值；若新值仍大于 $1$，计算下一次操作的减少量并重新入堆。
+4. 若堆为空或已操作 $k$ 次，停止；最终得到的 $total$ 即为最小总和。
+
+## 复杂度分析
+
+设序列最大值为 $M = \max(a_i) \le 10^6$。
+
+- 预处理最小基除数的时间复杂度为 $O(M \log \log M)$。
+- 每次堆操作需要 $O(\log n)$ 时间。
+- 总操作次数不超过 $\min(k, \text{所有元素可进行的总操作次数})$，最多为 $k$。
+
+因此总时间复杂度为 $O(M \log \log M + k \log n)$，空间复杂度为 $O(M + n)$。在 $n, k \le 2 \times 10^5$ 和 $M \le 10^6$ 的范围内均可行。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import heapq
+
+def solve(n, k, a):
+    mx = max(a)
+
+    # 最小基除数（最小素因子）筛
+    spf = list(range(mx + 1))
+    for i in range(2, int(mx ** 0.5) + 1):
+        if spf[i] == i:          # i 是素数（基除数）
+            for j in range(i * i, mx + 1, i):
+                if spf[j] == j:
+                    spf[j] = i
+
+    total = sum(a)
+    heap = []
+
+    # 每个元素的第一次操作收益入堆（大根堆用负数实现）
+    for x in a:
+        if x > 1:
+            p = spf[x]
+            dec = x - x // p          # 本次减少量
+            heapq.heappush(heap, (-dec, x))
+
+    # 贪心选择最多 k 次
+    for _ in range(k):
+        if not heap:
+            break
+        neg_dec, x = heapq.heappop(heap)
+        dec = -neg_dec
+        total -= dec                 # 总和减去本次减少量
+
+        x //= spf[x]                 # 执行基除操作后的新值
+        if x > 1:
+            p = spf[x]
+            nxt_dec = x - x // p
+            heapq.heappush(heap, (-nxt_dec, x))
+
+    return total
+
+def main():
+    data = list(map(int, sys.stdin.read().split()))
+    n, k = data[0], data[1]
+    a = data[2:2 + n]
+    print(solve(n, k, a))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedInputStream;
+import java.util.PriorityQueue;
+
+public class Main {
+
+    // 存储当前值和本次操作的减少量
+    static class Node {
+        int x;
+        int dec;
+
+        Node(int x, int dec) {
+            this.x = x;
+            this.dec = dec;
+        }
+    }
+
+    static long solve(int n, int k, int[] a) {
+        int mx = 0;
+        for (int x : a) {
+            mx = Math.max(mx, x);
+        }
+
+        // 最小基除数筛
+        int[] spf = new int[mx + 1];
+        for (int i = 0; i <= mx; i++) {
+            spf[i] = i;
+        }
+        for (int i = 2; i * i <= mx; i++) {
+            if (spf[i] == i) { // i 是素数（基除数）
+                for (int j = i * i; j <= mx; j += i) {
+                    if (spf[j] == j) {
+                        spf[j] = i;
+                    }
+                }
+            }
+        }
+
+        long total = 0;
+        for (int x : a) {
+            total += x;
+        }
+
+        // 大根堆，按减少量降序
+        PriorityQueue<Node> pq = new PriorityQueue<>((o1, o2) -> o2.dec - o1.dec);
+
+        for (int x : a) {
+            if (x > 1) {
+                int p = spf[x];
+                int dec = x - x / p;
+                pq.offer(new Node(x, dec));
+            }
+        }
+
+        for (int i = 0; i < k; i++) {
+            if (pq.isEmpty()) {
+                break;
+            }
+            Node cur = pq.poll();
+            total -= cur.dec;                     // 减去本次减少量
+            int nx = cur.x / spf[cur.x];          // 更新为基除后的值
+            if (nx > 1) {
+                int p = spf[nx];
+                int dec = nx - nx / p;
+                pq.offer(new Node(nx, dec));
+            }
+        }
+
+        return total;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        int n = fs.nextInt();
+        int k = fs.nextInt();
+        int[] a = new int[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = fs.nextInt();
+        }
+        System.out.println(solve(n, k, a));
+    }
+
+    // 快读
+    static class FastScanner {
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+        private final BufferedInputStream in = new BufferedInputStream(System.in);
+
+        private int read() throws Exception {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) {
+                    return -1;
+                }
+            }
+            return buffer[ptr++];
+        }
+
+        int nextInt() throws Exception {
+            int c;
+            do {
+                c = read();
+            } while (c <= ' ');
+            int sign = 1;
+            if (c == '-') {
+                sign = -1;
+                c = read();
+            }
+            int val = 0;
+            while (c > ' ') {
+                val = val * 10 + c - '0';
+                c = read();
+            }
+            return val * sign;
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+struct Node {
+    int x;
+    int dec;
+    // 大根堆：减少量大的优先
+    bool operator < (const Node& other) const {
+        return dec < other.dec;
+    }
+};
+
+long long solve(int n, int k, vector<int>& a) {
+    int mx = *max_element(a.begin(), a.end());
+
+    // 最小基除数（最小素因子）筛
+    vector<int> spf(mx + 1);
+    for (int i = 0; i <= mx; i++) {
+        spf[i] = i;
+    }
+    for (int i = 2; i * i <= mx; i++) {
+        if (spf[i] == i) {          // i 是素数（基除数）
+            for (int j = i * i; j <= mx; j += i) {
+                if (spf[j] == j) {
+                    spf[j] = i;
+                }
+            }
+        }
+    }
+
+    long long total = 0;
+    for (int x : a) total += x;
+
+    priority_queue<Node> pq;
+
+    for (int x : a) {
+        if (x > 1) {
+            int p = spf[x];
+            int dec = x - x / p;
+            pq.push({x, dec});
+        }
+    }
+
+    for (int i = 0; i < k; i++) {
+        if (pq.empty()) break;
+        Node cur = pq.top();
+        pq.pop();
+
+        total -= cur.dec;                 // 减去本次减少量
+        int nx = cur.x / spf[cur.x];      // 基除后的新值
+
+        if (nx > 1) {
+            int p = spf[nx];
+            int dec = nx - nx / p;
+            pq.push({nx, dec});
+        }
+    }
+
+    return total;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, k;
+    cin >> n >> k;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+
+    cout << solve(n, k, a) << '\n';
+    return 0;
+}
+```

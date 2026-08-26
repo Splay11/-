@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P1850",
+  "title": "第3题-能级单调序列",
+  "docId": 950,
+  "hidden": false,
+  "difficulty": 8,
+  "tag": [
+    "科大讯飞"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

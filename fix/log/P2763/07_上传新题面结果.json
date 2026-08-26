@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P2763",
+  "title": "状态同步",
+  "docId": 2395,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "动态规划"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "动态规划",
+  "videosol": "",
+  "trial_videosol": ""
+}

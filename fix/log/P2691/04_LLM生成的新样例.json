@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "input": "5\noxszw",
+      "output": "oxszm",
+      "explanation": "只有最后一个字符 `'w'` 需要还原为 `'m'`，其余 `'o'`、`'x'`、`'s'`、`'z'` 颠倒后外形不变。"
+    },
+    {
+      "input": "3\nmmm",
+      "output": "www",
+      "explanation": "三个 `'m'` 颠倒后都应还原为 `'w'`。"
+    },
+    {
+      "input": "6\noxszmw",
+      "output": "oxszwm",
+      "explanation": "前四个字符不变；倒数第二个 `'m'` 还原为 `'w'`，最后一个 `'w'` 还原为 `'m'`，得到 `oxszwm`。"
+    },
+    {
+      "input": "1\no",
+      "output": "o",
+      "explanation": "单字符 `'o'` 上下颠倒后仍是 `'o'`，答案为其本身。"
+    }
+  ]
+}

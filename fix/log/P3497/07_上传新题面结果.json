@@ -1,0 +1,15 @@
+{
+  "message": "problem update success",
+  "pid": "P3497",
+  "title": "第1题-更小同位和",
+  "docId": 2840,
+  "hidden": false,
+  "difficulty": 5,
+  "tag": [
+    "贪心"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "构造",
+  "videosol": "https://www.bilibili.com/video/BV1o1hYzUEnX/",
+  "trial_videosol": ""
+}

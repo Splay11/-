@@ -1,0 +1,16 @@
+{
+  "message": "problem update success",
+  "pid": "P2687",
+  "title": "第4题-偶耦合路径",
+  "docId": 2233,
+  "hidden": false,
+  "difficulty": 6,
+  "tag": [
+    "图结构",
+    "搜索"
+  ],
+  "alg_tag": "",
+  "ai_alg_tags": "DFS",
+  "videosol": "",
+  "trial_videosol": ""
+}

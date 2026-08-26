@@ -1,0 +1,11 @@
+{
+  "pid": "P4762",
+  "mode": 6,
+  "source": "agent",
+  "force": false,
+  "start_time": "2026-08-19 18:41:45",
+  "end_time": "2026-08-19 18:41:45",
+  "new_title": "第2题-压强扰动",
+  "mode6_agent_upload": true,
+  "overall_success": true
+}
