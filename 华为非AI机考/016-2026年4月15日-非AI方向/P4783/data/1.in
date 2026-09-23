@@ -1,0 +1,16 @@
+init 57 32
+queryAllVisibleWindows 29 3 22 17
+createWindow w1 -16 28 7 13 5
+queryAllVisibleWindows 21 28 5 3
+queryAllVisibleWindows 10 5 29 25
+move w1 0 20
+removeWindow w1
+queryAllVisibleWindows 13 4 28 15
+queryAllVisibleWindows 13 7 42 20
+queryAllVisibleWindows 42 17 7 13
+queryAllVisibleWindows 14 27 5 4
+queryAllVisibleWindows 0 29 14 3
+createWindow w2 20 -29 9 20 2
+createWindow w3 6 22 2 -1 3
+queryAllVisibleWindows 17 4 10 13
+queryVisibility w2

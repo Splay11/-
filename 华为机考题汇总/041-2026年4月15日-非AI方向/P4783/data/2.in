@@ -1,0 +1,14 @@
+init 44 50
+createWindow w1 13 -5 -1 11 3
+queryAllVisibleWindows 2 33 21 7
+createWindow w2 10 9 18 14 1
+resize w2 2 11
+resize not_exist_535 5 6
+resize w2 6 -1
+queryAllVisibleWindows 40 49 1 1
+resize w2 3 4
+queryAllVisibleWindows 7 22 9 8
+queryVisibility w2
+queryAllVisibleWindows 19 41 12 4
+removeWindow w2
+queryAllVisibleWindows 15 22 25 2

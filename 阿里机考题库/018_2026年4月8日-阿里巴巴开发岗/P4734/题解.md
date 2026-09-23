@@ -1,0 +1,221 @@
+## 解题思路
+
+设一张银行卡的原密码为一个长度为 $6$ 的数字串。
+
+题目要求进行一次统一改动：
+
+* 选择同一个位置 $pos \in {1,2,3,4,5,6}$
+* 选择同一个数字 $d \in {0,1,\dots,9}$
+* 将所有密码在该位置上的数字都改成 $d$
+
+目标是让改动后，不同密码的种类数尽可能少。
+
+### 核心结论
+
+如果我们固定修改的位置 $pos$，那么修改后的密码在这个位置上的数字全部都一样，因此：
+
+* 两个密码修改后是否相同
+* 只取决于它们在其余 $5$ 个位置上的数字是否完全相同
+
+也就是说，**当位置 $pos$ 固定后，最终不同密码的种类数，等于所有原密码删除第 $pos$ 位后所得长度为 $5$ 的字符串的不同种类数**。
+
+并且可以发现：
+
+* 选择改成哪个数字 $d$ 并不会影响答案
+* 因为第 $pos$ 位最后全都相同，真正决定分类的是其余 $5$ 位
+
+因此，问题就转化为：
+
+* 枚举要修改的位置 $pos=0,1,2,3,4,5$
+* 对每个密码删除这一位，得到一个长度为 $5$ 的新串
+* 统计这些新串的不同种类数
+* 取六种情况中的最小值
+
+## 复杂度分析
+
+设一组数据有 $n$ 个密码。
+
+每个位置都要遍历全部密码一次，共 $6$ 个位置，因此时间复杂度为：
+
+$$
+O(6n)=O(n)
+$$
+
+由于需要用哈希集合存储删除某一位后的字符串，最多存储 $n$ 个字符串，因此空间复杂度为：
+
+$$
+O(n)
+$$
+
+题目保证所有测试数据的 $n$ 之和不超过 $2\times 10^5$，该复杂度完全可行。
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 计算进行一次统一修改后，不同密码的最少种类数
+def solve_case(passwords):
+    # 初始答案设为密码总数，后面不断取更小值
+    ans = len(passwords)
+
+    # 枚举要修改的位置 pos
+    for pos in range(6):
+        seen = set()
+
+        # 删除第 pos 位后，统计不同的 5 位字符串个数
+        for s in passwords:
+            new_s = s[:pos] + s[pos + 1:]
+            seen.add(new_s)
+
+        ans = min(ans, len(seen))
+
+    return ans
+
+
+def main():
+    input = sys.stdin.readline
+    t = int(input().strip())
+    res = []
+
+    for _ in range(t):
+        n = int(input().strip())
+        passwords = input().strip().split()
+        res.append(str(solve_case(passwords)))
+
+    sys.stdout.write("\n".join(res))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.HashSet;
+
+public class Main {
+
+    // 计算进行一次统一修改后，不同密码的最少种类数
+    public static int solveCase(String[] passwords) {
+        int n = passwords.length;
+        int ans = n;
+
+        // 枚举要修改的位置 pos
+        for (int pos = 0; pos < 6; pos++) {
+            HashSet<String> set = new HashSet<>();
+
+            // 删除第 pos 位后，统计不同的 5 位字符串个数
+            for (String s : passwords) {
+                String newStr = s.substring(0, pos) + s.substring(pos + 1);
+                set.add(newStr);
+            }
+
+            ans = Math.min(ans, set.size());
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+
+        int T = fs.nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        for (int tc = 0; tc < T; tc++) {
+            int n = fs.nextInt();
+            String[] passwords = new String[n];
+
+            for (int i = 0; i < n; i++) {
+                passwords[i] = fs.next();
+            }
+
+            sb.append(solveCase(passwords)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+
+    // 简洁输入类，便于处理多组数据
+    static class FastScanner {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreElements()) {
+                st = new StringTokenizer(br.readLine());
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <algorithm>
+using namespace std;
+
+
+// 计算进行一次统一修改后，不同密码的最少种类数
+int solveCase(const vector<string>& passwords) {
+    int n = (int)passwords.size();
+    int ans = n;
+
+    // 枚举要修改的位置 pos
+    for (int pos = 0; pos < 6; pos++) {
+        unordered_set<string> st;
+
+        // 删除第 pos 位后，统计不同的 5 位字符串个数
+        for (const string& s : passwords) {
+            string new_s = s.substr(0, pos) + s.substr(pos + 1);
+            st.insert(new_s);
+        }
+
+        ans = min(ans, (int)st.size());
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n;
+        cin >> n;
+
+        vector<string> passwords(n);
+        for (int i = 0; i < n; i++) {
+            cin >> passwords[i];
+        }
+
+        cout << solveCase(passwords) << '\n';
+    }
+
+    return 0;
+}
+```

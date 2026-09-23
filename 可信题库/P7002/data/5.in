@@ -1,0 +1,6 @@
+JobQueueSys()
+submit(1, 10)
+submit(2, 5)
+cancel(1)
+peekJob()
+popJob()

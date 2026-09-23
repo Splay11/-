@@ -1,0 +1,71 @@
+init 707 775
+createWindow w1 137 848 191 400 5
+resize w1 397 290
+queryAllVisibleWindows 622 51 4 505
+queryVisibility w1
+move w1 -962 154
+createWindow w2 406 -735 49 439 8
+resize w1 276 282
+resize not_exist_314 176 83
+resize not_exist_153 445 46
+move w1 -114 186
+removeWindow w1
+move w2 175 -922
+createWindow w3 -112 -627 424 482 3
+queryVisibility w2
+createWindow w4 -818 -521 263 300 11
+resize not_exist_747 341 383
+resize not_exist_657 63 73
+createWindow w5 845 331 418 133 8
+createWindow w3 596 -763 246 101 17
+move w2 -861 251
+removeWindow w4
+resize not_exist_804 236 127
+removeWindow w3
+removeWindow w5
+queryVisibility w2
+removeWindow w2
+createWindow w6 605 946 127 283 9
+createWindow w7 -766 853 46 473 2
+queryVisibility w6
+queryAllVisibleWindows 524 478 104 272
+move not_exist_472 -878 -570
+removeWindow w6
+queryVisibility not_exist_65
+resize w7 365 381
+queryVisibility w7
+queryAllVisibleWindows 610 64 43 287
+queryVisibility w7
+resize not_exist_949 401 245
+createWindow w8 -411 829 208 491 14
+createWindow w9 -107 969 62 239 16
+removeWindow w7
+queryVisibility w9
+queryVisibility w9
+resize w8 97 275
+queryAllVisibleWindows 286 17 136 400
+queryVisibility not_exist_908
+createWindow w10 779 390 276 229 9
+move w9 -836 149
+createWindow w11 32 496 361 468 14
+queryAllVisibleWindows 408 293 87 113
+createWindow w12 -452 824 369 375 12
+removeWindow w8
+move not_exist_636 -139 964
+queryAllVisibleWindows 432 210 184 468
+createWindow w13 353 -501 204 260 18
+resize not_exist_6 227 318
+createWindow w14 -809 262 89 21 3
+removeWindow not_exist_534
+queryVisibility w11
+queryAllVisibleWindows 632 71 72 308
+move not_exist_34 291 -724
+queryAllVisibleWindows 95 496 356 87
+queryVisibility w11
+move not_exist_917 -14 382
+move w13 984 -175
+resize w14 101 319
+createWindow w15 -30 -724 411 255 3
+createWindow w16 120 582 448 302 20
+resize w9 122 37
+queryVisibility w10

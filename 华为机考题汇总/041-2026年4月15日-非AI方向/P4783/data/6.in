@@ -1,0 +1,36 @@
+init 174 87
+queryAllVisibleWindows 168 44 2 30
+queryAllVisibleWindows 115 20 43 24
+queryAllVisibleWindows 4 42 106 22
+createWindow w1 -97 -14 66 6 7
+queryAllVisibleWindows 129 4 36 28
+queryAllVisibleWindows 165 54 7 21
+queryVisibility w1
+move not_exist_77 -75 16
+resize not_exist_373 44 8
+removeWindow not_exist_807
+createWindow w2 78 -43 26 39 5
+queryAllVisibleWindows 127 24 21 7
+queryVisibility w2
+move not_exist_22 -106 99
+createWindow w3 -77 66 -2 74 0
+move w2 -114 -103
+resize w1 15 43
+queryAllVisibleWindows 113 17 1 37
+move w2 -20 23
+resize w1 51 9
+move w1 84 119
+resize w2 43 77
+createWindow w4 -29 82 64 47 2
+queryVisibility w4
+removeWindow not_exist_932
+createWindow w1 -113 15 73 77 1
+move w4 6 -107
+resize w4 12 6
+move w2 -117 -95
+queryVisibility w4
+resize not_exist_819 34 77
+queryVisibility w4
+resize w4 49 80
+queryAllVisibleWindows 144 66 13 8
+queryVisibility w4

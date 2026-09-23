@@ -1,0 +1,3 @@
+var featureExtraction = function(docs) {
+
+};

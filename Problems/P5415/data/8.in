@@ -1,0 +1,10 @@
+Core-SW-01 K-3
+K-3 L-4
+L-4 K-2
+K-2 K-2
+K-2 L-4
+L-4 Core-SW-01
+Core-SW-01 Core-SW-01
+Core-SW-01 K-3
+K-3 K-1
+K-1 K-3

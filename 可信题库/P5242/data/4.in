@@ -1,0 +1,8 @@
+ParkingLot(3)
+reserve(1, 0, 10)
+reserve(2, 0, 10)
+reserve(3, 0, 10)
+reserve(4, 0, 10)
+cancel(2)
+reserve(5, 0, 10)
+spotOf(5)

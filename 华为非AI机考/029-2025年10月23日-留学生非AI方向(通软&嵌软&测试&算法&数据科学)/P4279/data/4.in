@@ -1,0 +1,43 @@
+42
+mkdir dir1
+mkdir dir2
+ls
+ls
+ls
+cd dir1
+cd ..
+ls
+mkdir dir3
+mkdir dir4
+ls
+cd ..
+mkdir dir5
+cd dir5
+mkdir dir6
+cd dir6
+mkdir dir7
+ls
+ls
+mkdir dir8
+ls
+ls
+mkdir dir9
+ls
+ls
+mkdir dir10
+cd ..
+cd ..
+cd usr
+mkdir dir11
+ls
+mkdir dir12
+ls
+mkdir dir13
+mkdir dir14
+mkdir dir15
+cd dir4
+mkdir dir16
+mkdir dir17
+mkdir dir18
+ls
+cd dir16

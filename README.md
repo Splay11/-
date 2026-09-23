@@ -51,8 +51,20 @@ case2:给定 std
 
 - **codefun2000-problem-uploader**：上传 OJ 工作流。通过本地 `utils` 脚本向 CodeFun2000 上传题解、测试数据、提交标程；**核心代码模式**下 **`compile.sh`、`execute.sh`、`config.yaml`、`template.*`、`user.*` 与测例同在 `data/`** 时，一次 `upload_testdata.py` 即可一并上传；缺环境/脚本/参数时会明确报错并停止。
 
+- **kexin-trusted-exam-set**：可信科目一套题。默认三目录为入门/工作/专业；**第3题固定多函数业务项目**；**第1/2题**算法核对标 CF（入门~800、工作1200～1400、专业卷前两题1400～1600）且须取材**近期新题**，交付物禁止写 CF 出处。业务背景走 `fix/prompts/step3`；单题落地委派 `leetcode-core-code-mode`。
 
 prompt用法：
+
+```
+/kexin-trusted-exam-set 在 @Problems/P8101 @Problems/P8102 @Problems/P8103 出一套可信题
+```
+
+```
+/kexin-trusted-exam-set 专业级三题：@Problems/P8201 @Problems/P8202 @Problems/P8203
+```
+
+
+prompt用法（uploader）：
 
 case1:数据+题解一起上传
 ```

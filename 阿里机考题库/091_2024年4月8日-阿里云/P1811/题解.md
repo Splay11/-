@@ -1,0 +1,151 @@
+## 题目思路
+
+考虑模拟，由于时间比较大，我们无法一个一个时间枚举。可以考虑使用带有时间的事件来模拟步骤的进行。
+
+一个做蛋糕的事件由`t, i, c`表示，t表示这个开始这个事件的时间，i表示做的是蛋糕的第几个步骤，c表示这个事件的蛋糕数量。我们可以将所有的事件按照时间排序，然后按照时间顺序进行模拟。
+
+初始状态便是由`n / c[0]`个事件，每个事件包含`c[0]`个蛋糕，时间依次为`t[0],  2t[0], 3t[0], ...`
+
+然后将事件放入最小堆中模拟，每次根据第一位的时间来排序。由于步骤有一定的容量限制，我们还需要维护一下每个步骤目前正在进行的步骤事件，步骤事件用tim和num分别表示目前正在占用该步骤的蛋糕的结束时间和数量。初始的时候设定所有的步骤事件的时间为0，数量就为步骤的容量。
+
+每次事件表示它需要开始进入对应的步骤，此时查询对应步骤下可以用来做蛋糕的步骤事件，如果有个步骤事件的tim小于等于事件的启动时间t，则说明可以占用，此时就可以进入该步骤做蛋糕，并注册一个完成后需要进入下一个步骤的事件，否则如果遍历完都没有办法放完c个蛋糕，那么剩余的蛋糕就需要等待，加入事件，事件的事件暂定为所有步骤事件完成时间的最小值。
+
+更具体的细节可以看代码。
+
+## 代码
+
+**Python**
+
+~~~python
+import heapq
+n, k = map(int, input().split(' '))
+a = []
+for _ in range(k):
+    c, t = map(int, input().split(' '))
+    a.append([c, t])
+heap = []
+heapq.heapify(heap)
+g = [[[0, a[i][0]]] for i in range(k)]
+T, cur = n // a[0][0] + (n % a[0][0] != 0), 0
+for _ in range(T):
+    cur += a[0][1]
+    heapq.heappush(heap, [cur, 1, a[0][0]])
+cur = 0
+while len(heap) > 0:
+    t, i, c = heapq.heappop(heap)
+    if i == k:
+        cur += c
+        if cur >= n:
+            print(t)
+            break
+        continue
+    for cakes in g[i]:
+        tim, num = cakes
+        if tim <= t:
+            if c <= num:
+                cakes[0], cakes[1] = t + a[i][1], c
+                if num - c > 0:
+                    # 多余的容量
+                    g[i].append([tim, num - c])
+                    # 注册新事件
+                heapq.heappush(heap, [t + a[i][1], i + 1, c])
+                c = 0
+                break
+            else:
+                cakes[0], cakes[1] = t + a[i][1], num
+                heapq.heappush(heap, [t + a[i][1], i + 1, num])
+                c -= num
+    if c != 0:
+        # 注册等待事件
+        heapq.heappush(heap, [min(g[i])[0], i, c])
+~~~
+
+
+### c++
+``` c++
+#include<iostream>
+#include<vector>
+#include<queue>
+using namespace std;
+int main() {
+	int n, k;
+	cin >> n >> k;
+
+	vector<int> c(k+1, 0);
+	vector<int> t(k+1, 0);
+	c[0] = n;
+	//t[0] = 0;
+	for (int i = 1; i <= k; i++) {
+		cin >> c[i] >> t[i];
+	}
+	vector<vector<long long>> plan; //事件结束时间，步骤，释放出的需要进行下一阶段的蛋糕数
+	int cur = 0; // plan_idx
+	plan.push_back({ 0, 0, n });
+	for (int i = 1; i <= k; i++) {
+		// 记录i阶段用工表
+		queue<vector<long long>> q;
+		q.push({ 0, c[i] }); //存结束时间和腾出多少空位
+		while (plan[cur][1] == i - 1) { 
+			int res = plan[cur][2]; // 第i步新完成的蛋糕数量
+			while (res > 0) {
+				long long endtime = max(plan[cur][0], q.front()[0]) + t[i];
+				if (res <= q.front()[1]) {
+					plan.push_back({ endtime ,i, res });
+					q.push({ endtime ,res });
+					q.front()[1] -= res;
+					res = 0;
+					if (q.front()[1] == 0) q.pop();
+				}
+				else {
+					plan.push_back({ endtime,i, q.front()[1] });
+					q.push({ endtime ,q.front()[1] });
+					res -= q.front()[1];
+					q.pop();
+				}
+			}
+			cur++;
+		}
+	}
+	long long ans = 0;
+	for (const auto& p : plan) {
+		ans = max(ans, p[0]);
+	}
+	cout << ans;
+}
+```
+
+### java
+``` java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt(); // 蛋糕数量
+        int k = scanner.nextInt(); // 步骤数量
+        int[][] task = new int[k+1][2]; // 步骤和时间
+        for(int i = 1; i <= k; i++) {
+            task[i][0] = scanner.nextInt(); // 人数
+            task[i][1] = scanner.nextInt(); // 时间
+        }
+        solve(n, k, task);
+    }
+
+    public static void solve(int n, int k, int[][] task) {
+        long[][] people = new long[k+1][1005]; // 每个步骤的人的结束时间
+        long[] cakeTime = new long[n+1]; // 蛋糕完成时间
+        for(int i = 1; i <= k; i++) { // 枚举每个步骤
+            for(int j = 1; j <= n; j++) { // 枚举每个蛋糕
+                int person = (j-1) % task[i][0] + 1; // 当前操作的人
+                cakeTime[j] = Math.max(cakeTime[j], people[i][person]) + task[i][1]; //更新蛋糕的时间
+                people[i][person] = cakeTime[j]; // 更新操作人的结束时间
+            }
+        }
+        Arrays.sort(cakeTime); // 结束后排序
+        System.out.println(cakeTime[n]); // 输出最后一个蛋糕的完成时间，即完成所有蛋糕的最短时间
+    }
+}
+```
+
+
+**会员可通过查看《已通过》的提交记录来查看其他语言哦~**

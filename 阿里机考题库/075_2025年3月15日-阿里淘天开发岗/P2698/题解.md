@@ -1,0 +1,258 @@
+## 题解
+
+## 题目描述
+
+给定一个由$n$个整数构成的数组$\{a_1,a_2,\dots,a_n\}$，其中每个$a_i$满足$0\le a_i\le 2$。定义一个数组的$mex$为未出现在该数组中的最小非负整数。例如  
+- $mex\{1,2,3\}=0$  
+- $mex\{0,2,5\}=1$  
+
+要求取出数组中的所有连续非空子数组，并求每个子数组的$mex$值之和。  
+连续非空子数组指从原数组中取出一段连续的元素（可以取全数组，也可以取部分），且该子数组至少包含一个元素。  
+## 思路
+
+本题的核心在于利用数组中仅有的三个数$0$、$1$和$2$的特性，将所有连续子数组的$mex$值分为四类：不含$0$（$mex=0$）、含$0$但不含$1$（$mex=1$）、同时含$0$和$1$但不含$2$（$mex=2$），以及同时含$0$、$1$和$2$（$mex=3$）；通过扫描数组统计不含某个或某些数字的连续区间，并利用公式$\frac{L(L+1)}{2}$计算区间内子数组的数量，再利用容斥原理求出每一类子数组的个数，最后加权求和得到所有子数组的$mex$之和。
+
+由于数组中元素取值仅为$0$、$1$和$2$，因此对于任一子数组，其可能的$mex$值只有以下几种情况：  
+
+1. $mex=0$：子数组中没有出现$0$。  
+2. $mex=1$：子数组中出现了$0$但没有$1$。  
+3. $mex=2$：子数组中同时出现了$0$和$1$但没有$2$。  
+4. $mex=3$：子数组中同时出现了$0$、$1$和$2$。  
+
+我们可以统计满足上述条件的子数组个数，然后利用$mex$的权值计算答案。记子数组总数为  
+$
+total=\frac{n(n+1)}{2}
+$  
+
+### 如何统计子数组个数
+
+利用“缺失某个数”的思路，设$F(x)$为不含$x$的子数组个数，可以利用扫描数组，找出连续不含$x$的段，其长度为$L$时，其子数组个数为  
+$
+\frac{L(L+1)}{2}
+$
+
+同理，设$F(x,y)$表示不含$x$和$y$的子数组个数，即该子数组中的所有元素只能为剩下的那个数。
+
+接下来分类讨论：  
+
+- **$mex=0$**：子数组中没有$0$  
+  $cnt_0 = F(0)$  
+
+- **$mex=1$**：子数组中出现$0$但没有$1$  
+  统计$F(1)$（即不含$1$的子数组个数），再减去其中同时不含$0$和$1$的，即$F(0,1)$，得到  
+  $cnt_1 = F(1) - F(0,1)$  
+
+- **$mex=2$**：子数组中含有$0$和$1$但没有$2$  
+  先统计$F(2)$（不含$2$的子数组个数），再减去其中不含$0$的和不含$1$的部分，即  
+  $cnt_2 = F(2) - F(0,2) - F(1,2)$ 
+  （这里不必加回$F(0,1,2)$，因为非空子数组不可能同时缺少$0$、$1$和$2$）
+
+- **$mex=3$**：子数组中同时含有$0$、$1$和$2$$
+  利用容斥原理：  
+  $cnt_3$ = $total$ - \Bigl(F(0)+F(1)+F(2)\Bigr)$ + $\Bigl(F(0,1)$+$F(0,2)$+$F(1,2)\Bigr)$
+
+最后答案为  
+$ans$ = $0\times cnt_0$ + $1\times cnt_1$ + $2\times cnt_2$ + $3\times cnt_3$
+
+## cpp
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+typedef long long ll;
+
+// 统计不包含数字 x 的子数组数
+ll countNo(const vector<int>& arr, int x) {
+    ll res = 0;
+    ll cnt = 0;
+    for (int v : arr) {
+        if (v == x) {
+            res += cnt * (cnt + 1LL) / 2;
+            cnt = 0;
+        } else {
+            cnt++;
+        }
+    }
+    res += cnt * (cnt + 1LL) / 2;
+    return res;
+}
+
+// 统计不包含数字 x 和 y 的子数组数，即子数组中只能出现剩下的那个数
+ll countNoPair(const vector<int>& arr, int x, int y) {
+    ll res = 0;
+    ll cnt = 0;
+    for (int v : arr) {
+        if (v == x || v == y) {
+            res += cnt * (cnt + 1LL) / 2;
+            cnt = 0;
+        } else {
+            cnt++;
+        }
+    }
+    res += cnt * (cnt + 1LL) / 2;
+    return res;
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int> arr(n);
+    for (int i = 0; i < n; i++){
+        cin >> arr[i];
+    }
+    
+    ll total = (ll)n * (n + 1LL) / 2;
+    
+    // 统计各个缺失情况
+    ll cnt0 = countNo(arr, 0);      // 不含0的子数组数
+    ll cnt1_all = countNo(arr, 1);    // 不含1的子数组数
+    ll cnt2_all = countNo(arr, 2);    // 不含2的子数组数
+
+    ll cnt01 = countNoPair(arr, 0, 1);  // 不含0和1的子数组数
+    ll cnt02 = countNoPair(arr, 0, 2);  // 不含0和2的子数组数
+    ll cnt12 = countNoPair(arr, 1, 2);  // 不含1和2的子数组数
+
+    // 计算各个类别的子数组个数
+    ll cnt_mex0 = cnt0;                        //mex=0的子数组
+    ll cnt_mex1 = cnt1_all - cnt01;             //mex=1的子数组：包含0但不含1
+    ll cnt_mex2 = cnt2_all - cnt02 - cnt12;     // mex=2的子数组：包含0和1但不含2
+    ll cnt_mex3 = total - (cnt0 + cnt1_all + cnt2_all) + (cnt01 + cnt02 + cnt12); //mex=3的子数组
+    // 最终答案
+    ll ans = 1LL * cnt_mex1 + 2LL * cnt_mex2 + 3LL * cnt_mex3;
+    cout << ans << "\n";
+    return 0;
+}
+
+```
+## python
+```python
+def count_no(arr, x):
+    # 统计不包含数字 x 的子数组数
+    res = 0
+    cnt = 0
+    for v in arr:
+        if v == x:
+            res += cnt * (cnt + 1) // 2
+            cnt = 0
+        else:
+            cnt += 1
+    res += cnt * (cnt + 1) // 2
+    return res
+
+def count_no_pair(arr, x, y):
+    # 统计不包含数字 x 和 y 的子数组数（子数组中只能出现剩下的那个数）
+    res = 0
+    cnt = 0
+    for v in arr:
+        if v == x or v == y:
+            res += cnt * (cnt + 1) // 2
+            cnt = 0
+        else:
+            cnt += 1
+    res += cnt * (cnt + 1) // 2
+    return res
+
+def main():
+    import sys
+    input_data = sys.stdin.read().split()
+    n = int(input_data[0])
+    arr = list(map(int, input_data[1:]))
+    
+    total = n * (n + 1) // 2
+    
+    cnt0 = count_no(arr, 0)       # 不含0的子数组数
+    cnt1_all = count_no(arr, 1)     # 不含1的子数组数
+    cnt2_all = count_no(arr, 2)     # 不含2的子数组数
+    
+    cnt01 = count_no_pair(arr, 0, 1)  # 不含0和1的子数组数
+    cnt02 = count_no_pair(arr, 0, 2)  # 不含0和2的子数组数
+    cnt12 = count_no_pair(arr, 1, 2)  # 不含1和2的子数组数
+
+    # 计算各个类别的子数组个数
+    cnt_mex0 = cnt0                                #mex=0的子数组
+    cnt_mex1 = cnt1_all - cnt01                    #mex=1的子数组：包含0但不含1
+    cnt_mex2 = cnt2_all - cnt02 - cnt12            # mex=2的子数组：包含0和1但不含2
+    cnt_mex3 = total - (cnt0 + cnt1_all + cnt2_all) + (cnt01 + cnt02 + cnt12)  # mex=3的子数组
+
+    # 最终答案
+    ans = 1 * cnt_mex1 + 2 * cnt_mex2 + 3 * cnt_mex3
+    print(ans)
+
+if __name__ == '__main__':
+    main()
+
+```
+## java
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    // 统计不包含数字 x 的子数组数
+    public static long countNo(int[] arr, int x) {
+        long res = 0;
+        long cnt = 0;
+        for (int v : arr) {
+            if (v == x) {
+                res += cnt * (cnt + 1) / 2;
+                cnt = 0;
+            } else {
+                cnt++;
+            }
+        }
+        res += cnt * (cnt + 1) / 2;
+        return res;
+    }
+    
+    // 统计不包含数字 x 和 y 的子数组数（子数组中只能出现剩下的那个数）
+    public static long countNoPair(int[] arr, int x, int y) {
+        long res = 0;
+        long cnt = 0;
+        for (int v : arr) {
+            if (v == x || v == y) {
+                res += cnt * (cnt + 1) / 2;
+                cnt = 0;
+            } else {
+                cnt++;
+            }
+        }
+        res += cnt * (cnt + 1) / 2;
+        return res;
+    }
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim());
+        String[] tokens = br.readLine().split("\\s+");
+        int[] arr = new int[n];
+        for (int i = 0; i < n; i++){
+            arr[i] = Integer.parseInt(tokens[i]);
+        }
+        
+        // 子数组总数 $$total = \frac{n(n+1)}{2}$$
+        long total = (long) n * (n + 1) / 2;
+        
+        long cnt0 = countNo(arr, 0);       // 不含0的子数组数
+        long cnt1_all = countNo(arr, 1);     // 不含1的子数组数
+        long cnt2_all = countNo(arr, 2);     // 不含2的子数组数
+        
+        long cnt01 = countNoPair(arr, 0, 1);  // 不含0和1的子数组数
+        long cnt02 = countNoPair(arr, 0, 2);  // 不含0和2的子数组数
+        long cnt12 = countNoPair(arr, 1, 2);  // 不含1和2的子数组数
+        
+        // 计算各个类别的子数组个数
+        long cnt_mex0 = cnt0;  //mex=0的子数组
+        long cnt_mex1 = cnt1_all - cnt01;  //mex=1的子数组：包含0但不含1
+        long cnt_mex2 = cnt2_all - cnt02 - cnt12;  // mex=2的子数组：包含0和1但不含2
+        long cnt_mex3 = total - (cnt0 + cnt1_all + cnt2_all) + (cnt01 + cnt02 + cnt12);  //mex=3的子数组
+        
+        // 最终答案
+        long ans = 1 * cnt_mex1 + 2 * cnt_mex2 + 3 * cnt_mex3;
+        System.out.println(ans);
+    }
+}
+
+```

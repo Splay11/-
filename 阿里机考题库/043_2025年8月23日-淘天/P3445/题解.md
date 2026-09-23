@@ -1,0 +1,185 @@
+## 题解思路
+
+### 关键观察
+
+初始矩阵全为 0。对第 `i` 行异或一次得到该行所有元素都异或上 `x_i`；对第 `j` 列异或一次得到该列所有元素都异或上 `y_j`。
+同一行/列多次操作只看奇偶次（偶数次等于没操作）。设：
+
+* `r_i ∈ {0,1}` 表示第 `i` 行是否被操作（奇数次为 1）；
+* `c_j ∈ {0,1}` 表示第 `j` 列是否被操作（奇数次为 1）。
+
+则任意位置
+
+$$
+a_{i,j} = (r_i ? x_i : 0)\ \oplus\ (c_j ? y_j : 0)
+$$
+
+特别地，在主对角线上：
+
+$$
+z_i = a_{i,i} = (r_i ? x_i : 0)\ \oplus\ (c_i ? y_i : 0)
+$$
+
+因为题目保证 `x_i, y_i` 均为正且互不相同，集合
+$\{0,\ x_i,\ y_i,\ x_i \oplus y_i\}$ 四个值两两不同。
+因此，给定 `z_i` 可以唯一确定 `(r_i, c_i)`：
+
+* `z_i = 0      → (r_i,c_i) = (0,0)`
+* `z_i = x_i    → (r_i,c_i) = (1,0)`
+* `z_i = y_i    → (r_i,c_i) = (0,1)`
+* `z_i = x_i^y_i→ (r_i,c_i) = (1,1)`
+
+一旦得到了所有 `r_i, c_i`，就能预处理：
+
+* `R_i = (r_i ? x_i : 0)`
+* `C_j = (c_j ? y_j : 0)`
+
+回答查询 `(u,v)` 时，直接输出 `R_u ^ C_v` 即可。
+
+
+### 复杂度分析
+
+* 预处理：`O(n)`
+* 每次查询：`O(1)`
+* 总复杂度：`O(n + q)`，空间 `O(n)`。
+
+
+## 代码
+
+### Python
+
+```python
+import sys
+
+def main():
+    data = list(map(int, sys.stdin.read().strip().split()))
+    it = iter(data)
+    n = next(it); q = next(it)
+    x = [0]*(n+1)
+    y = [0]*(n+1)
+    z = [0]*(n+1)
+    for i in range(1, n+1):
+        x[i] = next(it)
+    for i in range(1, n+1):
+        y[i] = next(it)
+    for i in range(1, n+1):
+        z[i] = next(it)
+
+    R = [0]*(n+1)
+    C = [0]*(n+1)
+    for i in range(1, n+1):
+        xi, yi, zi = x[i], y[i], z[i]
+        # 依据四种唯一情况确定 r_i, c_i
+        if zi == 0:
+            R[i] = 0
+            C[i] = 0
+        elif zi == xi:
+            R[i] = xi
+            C[i] = 0
+        elif zi == yi:
+            R[i] = 0
+            C[i] = yi
+        else:
+            # 必为 xi ^ yi
+            R[i] = xi
+            C[i] = yi
+
+    out = []
+    for _ in range(q):
+        u = next(it); v = next(it)
+        out.append(str(R[u] ^ C[v]))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        // 读完整输入到 tokens，提高速度
+        StringBuilder sbAll = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sbAll.append(line).append(' ');
+        StringTokenizer st = new StringTokenizer(sbAll.toString());
+
+        int n = Integer.parseInt(st.nextToken());
+        int q = Integer.parseInt(st.nextToken());
+
+        int[] x = new int[n + 1];
+        int[] y = new int[n + 1];
+        int[] z = new int[n + 1];
+        for (int i = 1; i <= n; i++) x[i] = Integer.parseInt(st.nextToken());
+        for (int i = 1; i <= n; i++) y[i] = Integer.parseInt(st.nextToken());
+        for (int i = 1; i <= n; i++) z[i] = Integer.parseInt(st.nextToken());
+
+        int[] R = new int[n + 1];
+        int[] C = new int[n + 1];
+
+        for (int i = 1; i <= n; i++) {
+            int xi = x[i], yi = y[i], zi = z[i];
+            if (zi == 0) {
+                R[i] = 0; C[i] = 0;
+            } else if (zi == xi) {
+                R[i] = xi; C[i] = 0;
+            } else if (zi == yi) {
+                R[i] = 0; C[i] = yi;
+            } else { // 必为 xi ^ yi
+                R[i] = xi; C[i] = yi;
+            }
+        }
+
+        StringBuilder out = new StringBuilder();
+        for (int k = 0; k < q; k++) {
+            int u = Integer.parseInt(st.nextToken());
+            int v = Integer.parseInt(st.nextToken());
+            out.append(R[u] ^ C[v]).append('\n');
+        }
+        System.out.print(out.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n, q;
+    if (!(cin >> n >> q)) return 0;
+    vector<int> x(n+1), y(n+1), z(n+1);
+    for (int i = 1; i <= n; ++i) cin >> x[i];
+    for (int i = 1; i <= n; ++i) cin >> y[i];
+    for (int i = 1; i <= n; ++i) cin >> z[i];
+
+    vector<int> R(n+1), C(n+1);
+    for (int i = 1; i <= n; ++i) {
+        int xi = x[i], yi = y[i], zi = z[i];
+        if (zi == 0) {
+            R[i] = 0; C[i] = 0;
+        } else if (zi == xi) {
+            R[i] = xi; C[i] = 0;
+        } else if (zi == yi) {
+            R[i] = 0; C[i] = yi;
+        } else { // 必为 xi ^ yi
+            R[i] = xi; C[i] = yi;
+        }
+    }
+
+    while (q--) {
+        int u, v; cin >> u >> v;
+        cout << (R[u] ^ C[v]) << '\n';
+    }
+    return 0;
+}
+```

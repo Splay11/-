@@ -1,0 +1,12 @@
+10 1
+(wbajrthhez = 'NE10' OR wbajrthhez = 'NW10' OR wbajrthhez = 'N10')
+(wbajrthhez = 'S10' OR wbajrthhez = 'SW10' OR wbajrthhez = 'SE10')
+(wbajrthhez = 'SW10' OR wbajrthhez = 'SE10')
+(wbajrthhez = 'N10' OR wbajrthhez = 'SW10' OR wbajrthhez = 'NE10')
+(wbajrthhez = 'SE10' OR wbajrthhez = 'S10' OR wbajrthhez = 'NE10')
+(wbajrthhez = 'SE10' OR wbajrthhez = 'NW10')
+(wbajrthhez = 'NW10' OR wbajrthhez = 'NE10' OR wbajrthhez = 'SE10')
+wbajrthhez = 'SE10'
+(wbajrthhez = 'N10' OR wbajrthhez = 'S10' OR wbajrthhez = 'NE10')
+wbajrthhez = 'NW10'
+wbajrthhez NW10

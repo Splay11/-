@@ -1,0 +1,335 @@
+## 解题思路
+
+设一个子序列中字符 $1$ 的个数为 $x$，字符 $0$ 的个数为 $y$，那么子序列长度为
+
+$$
+t=x+y
+$$
+
+题目要求这个子序列是“好的”，即：
+
+* $x \neq 0$
+* $t$ 是 $x$ 的倍数
+
+把 $t=x+y$ 代入，可得：
+
+$$
+x+y \equiv 0 \pmod x
+$$
+
+因为 $x \equiv 0 \pmod x$，所以条件等价于：
+
+$$
+y \equiv 0 \pmod x
+$$
+
+也就是说：
+
+* 只要选了 $x$ 个字符 $1$
+* 就必须再选 $0, x, 2x, 3x, \dots$ 个字符 $0$
+
+于是问题就转化成了组合计数问题。
+
+设原串中一共有：
+
+* $cnt1$ 个字符 $1$
+* $cnt0$ 个字符 $0$
+
+那么当我们固定选 $x$ 个字符 $1$ 时：
+
+* 选法数为 $\binom{cnt1}{x}$
+* 可选的字符 $0$ 个数必须是 $k x$，其中 $k \ge 0$ 且 $k x \le cnt0$
+* 对应选法数为 $\binom{cnt0}{k x}$
+
+所以答案就是：
+
+$$
+\sum_{x=1}^{cnt1} \binom{cnt1}{x}
+\left(
+\sum_{k=0}^{\lfloor cnt0/x \rfloor} \binom{cnt0}{k x}
+\right)
+$$
+
+最后对 $10^9+7$ 取模即可。
+
+这里用到的核心算法是：
+
+* 组合数学
+* 阶乘与逆元预处理组合数
+* 按 $x$ 枚举，统计所有合法的 $0$ 的选择数
+
+实现时，先预处理所有 $0 \sim 5 \times 10^5$ 的阶乘和逆阶乘，这样每次求组合数 $\binom{n}{m}$ 都可以做到 $O(1)$。
+
+## 复杂度分析
+
+设当前字符串中：
+
+* $cnt1$ 为字符 $1$ 的数量
+* $cnt0$ 为字符 $0$ 的数量
+
+对于每个 $x$，需要枚举 $0, x, 2x, \dots, \lfloor cnt0/x \rfloor x$，因此总复杂度为：
+
+$$
+\sum_{x=1}^{cnt1} O\left(\left\lfloor \frac{cnt0}{x} \right\rfloor + 1\right)
+$$
+
+这相当于调和级数复杂度，整体可以看作：
+
+$$
+O(cnt1 + cnt0 \log cnt1)
+$$
+
+在所有测试数据中，字符串总长度不超过 $5 \times 10^5$，该复杂度完全可行。
+
+空间复杂度主要来自阶乘和逆阶乘预处理：
+
+$$
+O(5 \times 10^5)
+$$
+
+## 代码实现
+
+### Python
+
+```python
+MOD = 10**9 + 7
+MAXN = 500000
+
+# 预处理阶乘和逆阶乘
+fac = [1] * (MAXN + 1)
+inv_fac = [1] * (MAXN + 1)
+
+for i in range(1, MAXN + 1):
+    fac[i] = fac[i - 1] * i % MOD
+
+inv_fac[MAXN] = pow(fac[MAXN], MOD - 2, MOD)
+for i in range(MAXN, 0, -1):
+    inv_fac[i - 1] = inv_fac[i] * i % MOD
+
+
+# 计算组合数 C(n, k)
+def comb(n, k):
+    if k < 0 or k > n:
+        return 0
+    return fac[n] * inv_fac[k] % MOD * inv_fac[n - k] % MOD
+
+
+# 计算一个字符串的答案
+def solve_case(s):
+    cnt1 = s.count('1')
+    cnt0 = len(s) - cnt1
+
+    ans = 0
+
+    # 枚举选多少个 1
+    for x in range(1, cnt1 + 1):
+        ways_one = comb(cnt1, x)
+
+        # 统计 0 的合法选法：选 0, x, 2x, 3x... 个
+        ways_zero = 0
+        for y in range(0, cnt0 + 1, x):
+            ways_zero = (ways_zero + comb(cnt0, y)) % MOD
+
+        ans = (ans + ways_one * ways_zero) % MOD
+
+    return ans
+
+
+def main():
+    t = int(input())
+    for _ in range(t):
+        n = int(input())
+        s = input().strip()
+        print(solve_case(s))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class Main {
+    static final long MOD = 1000000007L;
+    static final int MAXN = 500000;
+
+    static long[] fac = new long[MAXN + 1];
+    static long[] invFac = new long[MAXN + 1];
+
+    // 快速幂
+    static long qpow(long a, long b) {
+        long res = 1;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = res * a % MOD;
+            }
+            a = a * a % MOD;
+            b >>= 1;
+        }
+        return res;
+    }
+
+    // 预处理阶乘和逆阶乘
+    static void init() {
+        fac[0] = 1;
+        for (int i = 1; i <= MAXN; i++) {
+            fac[i] = fac[i - 1] * i % MOD;
+        }
+
+        invFac[MAXN] = qpow(fac[MAXN], MOD - 2);
+        for (int i = MAXN; i >= 1; i--) {
+            invFac[i - 1] = invFac[i] * i % MOD;
+        }
+    }
+
+    // 计算组合数 C(n, k)
+    static long comb(int n, int k) {
+        if (k < 0 || k > n) {
+            return 0;
+        }
+        return fac[n] * invFac[k] % MOD * invFac[n - k] % MOD;
+    }
+
+    // 计算一个字符串的答案
+    static long solveCase(String s) {
+        int n = s.length();
+        int cnt1 = 0;
+        for (int i = 0; i < n; i++) {
+            if (s.charAt(i) == '1') {
+                cnt1++;
+            }
+        }
+        int cnt0 = n - cnt1;
+
+        long ans = 0;
+
+        // 枚举选多少个 1
+        for (int x = 1; x <= cnt1; x++) {
+            long waysOne = comb(cnt1, x);
+
+            // 统计 0 的合法选法：选 0, x, 2x... 个
+            long waysZero = 0;
+            for (int y = 0; y <= cnt0; y += x) {
+                waysZero = (waysZero + comb(cnt0, y)) % MOD;
+            }
+
+            ans = (ans + waysOne * waysZero) % MOD;
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        init();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+
+        while (T-- > 0) {
+            int n = Integer.parseInt(br.readLine().trim());
+            String s = br.readLine().trim();
+            sb.append(solveCase(s)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+const int MAXN = 500000;
+
+long long fac[MAXN + 1], invFac[MAXN + 1];
+
+// 快速幂
+long long qpow(long long a, long long b) {
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1) {
+            res = res * a % MOD;
+        }
+        a = a * a % MOD;
+        b >>= 1;
+    }
+    return res;
+}
+
+// 预处理阶乘和逆阶乘
+void init() {
+    fac[0] = 1;
+    for (int i = 1; i <= MAXN; i++) {
+        fac[i] = fac[i - 1] * i % MOD;
+    }
+
+    invFac[MAXN] = qpow(fac[MAXN], MOD - 2);
+    for (int i = MAXN; i >= 1; i--) {
+        invFac[i - 1] = invFac[i] * i % MOD;
+    }
+}
+
+// 计算组合数 C(n, k)
+long long comb(int n, int k) {
+    if (k < 0 || k > n) {
+        return 0;
+    }
+    return fac[n] * invFac[k] % MOD * invFac[n - k] % MOD;
+}
+
+// 计算一个字符串的答案
+long long solveCase(const string &s) {
+    int cnt1 = 0;
+    for (char c : s) {
+        if (c == '1') {
+            cnt1++;
+        }
+    }
+    int cnt0 = (int)s.size() - cnt1;
+
+    long long ans = 0;
+
+    // 枚举选多少个 1
+    for (int x = 1; x <= cnt1; x++) {
+        long long waysOne = comb(cnt1, x);
+
+        // 统计 0 的合法选法：选 0, x, 2x... 个
+        long long waysZero = 0;
+        for (int y = 0; y <= cnt0; y += x) {
+            waysZero = (waysZero + comb(cnt0, y)) % MOD;
+        }
+
+        ans = (ans + waysOne * waysZero) % MOD;
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    init();
+
+    int T;
+    cin >> T;
+    while (T--) {
+        int n;
+        string s;
+        cin >> n >> s;
+        cout << solveCase(s) << '\n';
+    }
+
+    return 0;
+}
+```

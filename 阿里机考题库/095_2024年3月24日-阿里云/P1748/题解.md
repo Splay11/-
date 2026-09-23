@@ -1,0 +1,95 @@
+## 题解
+
+分析题意后发现，要从起点到终点，最终会买 $n - 1$ 个单位的物质，那么我只需要判断，当前从 $i$ 到 $i + 1$ 这一步转移所需要的物资从哪个城邦买即可。
+
+**做法**
+
+​	维护一个单调队列 $queue$，其中购买物资的价格依次上升。
+
+​	假设当前要从第 $i$ 个城邦走到第 $i + 1$ 个城邦，并且打算从第 $j$ 个城邦买当前转移的所需的物资（单位1），那么此时的花费为 $i - j + cost[j]$，如果此时从第 $j$ 买物资花费要大于 $cost[i]$ （即从第 $i$ 个城邦买单位 $1$ 的物资），那么对于所有的 $k \in [i, n - 1]$，要从第 $k$ 个 城邦走到第 $k + 1$ 个城邦所购买的物资一定是从 $i$ 购买要优于从 $j$，那么此时的 $j$ 对后面所有城邦都不会造成贡献了，此时直接在队列中删去即可。
+
+时间复杂度：$O(n)$  
+
+## AC代码
+
+- Cpp
+
+```cpp
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long LL;
+
+
+int main (){
+    ios::sync_with_stdio(false);
+    std::cin.tie(0);
+    int n; cin >> n;
+    vector<int> cost(n);
+    for(int & i : cost) cin >> i;
+    queue<int> q;
+    q.push(0);
+    LL s = cost[0];
+    for(int i = 1; i < n - 1; i ++)
+    {
+    	while(q.size() && cost[q.front()] + i - q.front() >= cost[i]) // 如果从当前 i 买物资比之前更划算了
+    		q.pop(); // 直接删去之前的即可
+    	q.push(i);
+    	s += cost[q.front()] + i - q.front(); // 最划算的一个
+    }
+    cout << s << "\n";
+    return 0;
+}
+
+```
+
+- Java
+
+```java
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();
+        int[] cost = new int[n];
+        for (int i = 0; i < n; i++) {
+            cost[i] = scanner.nextInt();
+        }
+        Queue<Integer> q = new ArrayDeque<>();
+        q.offer(0);
+        long s = cost[0];
+        for (int i = 1; i < n - 1; i++) {
+            while (!q.isEmpty() && cost[q.peek()] + i - q.peek() >= cost[i]) {// 如果从当前 i 买物资比之前更划算了
+                q.poll(); // 直接删去之前的即可
+            }
+            q.offer(i);
+            s += cost[q.peek()] + i - q.peek();
+        }
+        System.out.println(s);
+    }
+}
+
+```
+
+- Python
+
+```python
+from collections import deque
+
+n = int(input())
+cost = list(map(int, input().split()))
+q = deque([0])
+s = cost[0]
+for i in range(1, n - 1):
+    while q and cost[q[0]] + i - q[0] >= cost[i]: #  如果从当前 i 买物资比之前更划算了
+        q.popleft() // 直接删去之前的即可
+    q.append(i)
+    s += cost[q[0]] + i - q[0]
+
+print(s)
+
+```

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="460" viewBox="0 0 980 460">
+  <defs>
+    <style><![CDATA[
+      .title { font-family: "Microsoft YaHei", "SimHei", sans-serif; font-size: 34px; font-weight: 700; fill: #1d2340; }
+      .node { fill: #5b83ff; stroke: #355ed9; stroke-width: 3; }
+      .entry { fill: #ff6b6b; stroke: #d94848; stroke-width: 4; }
+      .cycleNode { fill: #22b8a3; stroke: #159885; stroke-width: 3; }
+      .ntext { font-family: "Consolas", "Microsoft YaHei", monospace; font-size: 20px; font-weight: 700; fill: #ffffff; }
+      .desc { font-family: "Microsoft YaHei", "SimHei", sans-serif; font-size: 16px; fill: #3c4366; }
+      .edge { stroke: #5d6aa7; stroke-width: 3; fill: none; }
+      .edgeCycle { stroke: #109d8b; stroke-width: 3.5; fill: none; }
+      .edgeEntry { stroke: #d94848; stroke-width: 3.8; fill: none; }
+    ]]></style>
+    <marker id="arrowMain" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#5d6aa7"/>
+    </marker>
+    <marker id="arrowCycle" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#109d8b"/>
+    </marker>
+    <marker id="arrowEntry" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#d94848"/>
+    </marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#fcfdff"/>
+  <text x="490" y="58" text-anchor="middle" class="title">&#29615;&#30340;&#20837;&#21475;&#23601;&#26159;&#37325;&#22797;&#25968;</text>
+
+  <!-- chain -->
+  <circle cx="110" cy="230" r="28" class="node"/>
+  <text x="110" y="237" text-anchor="middle" class="ntext">0</text>
+
+  <circle cx="220" cy="230" r="24" class="node"/>
+  <text x="220" y="236" text-anchor="middle" class="ntext">A</text>
+
+  <circle cx="320" cy="230" r="24" class="node"/>
+  <text x="320" y="236" text-anchor="middle" class="ntext">B</text>
+
+  <circle cx="420" cy="230" r="24" class="node"/>
+  <text x="420" y="236" text-anchor="middle" class="ntext">C</text>
+
+  <!-- entry and cycle -->
+  <circle cx="560" cy="210" r="30" class="entry"/>
+  <text x="560" y="218" text-anchor="middle" class="ntext">k</text>
+
+  <circle cx="700" cy="130" r="24" class="cycleNode"/>
+  <text x="700" y="136" text-anchor="middle" class="ntext">D</text>
+
+  <circle cx="810" cy="230" r="24" class="cycleNode"/>
+  <text x="810" y="236" text-anchor="middle" class="ntext">E</text>
+
+  <circle cx="700" cy="330" r="24" class="cycleNode"/>
+  <text x="700" y="336" text-anchor="middle" class="ntext">F</text>
+
+  <!-- edges to entry -->
+  <path d="M 138 230 L 196 230" class="edge" marker-end="url(#arrowMain)"/>
+  <path d="M 244 230 L 296 230" class="edge" marker-end="url(#arrowMain)"/>
+  <path d="M 344 230 L 396 230" class="edge" marker-end="url(#arrowMain)"/>
+  <path d="M 444 227 Q 500 218 526 214" class="edgeEntry" marker-end="url(#arrowEntry)"/>
+
+  <!-- cycle edges -->
+  <path d="M 586 196 Q 638 156 676 140" class="edgeCycle" marker-end="url(#arrowCycle)"/>
+  <path d="M 722 144 Q 780 176 792 206" class="edgeCycle" marker-end="url(#arrowCycle)"/>
+  <path d="M 808 254 Q 782 302 724 321" class="edgeCycle" marker-end="url(#arrowCycle)"/>
+  <path d="M 678 319 Q 616 292 576 238" class="edgeCycle" marker-end="url(#arrowCycle)"/>
+
+  <text x="180" y="280" class="desc">&#20174; 0 &#20986;&#21457;&#20808;&#32463;&#36807;&#33509;&#24178;&#33410;&#28857;</text>
+  <text x="640" y="382" class="desc">&#36827;&#20837;&#22823;&#29615;&#21518;&#65292;&#39318;&#27425;&#36827;&#20837;&#30340;&#28857; k &#23601;&#26159;&#29615;&#20837;&#21475;</text>
+  <text x="560" y="166" text-anchor="middle" class="desc" fill="#d94848">&#20837;&#21475; k</text>
+</svg>

@@ -1,0 +1,71 @@
+## 题目思路
+
+考虑构造，首先第一个数字必然是1，可以得到0-k的所有元素，此时无法得到k +1，那么就再加入k + 1，此时可以枚举到0到k * (k + 1) + k的所有数字。
+
+如果此时得到的最大值也无法大于等于n，那就继续加入下一个数字，这个数字取为当前可以取到的最大值+1。
+
+## 代码
+
+
+**Python**
+
+~~~python
+T = int(input())
+
+for _ in range(T):
+    n, k = map(int, input().split())
+    ans = 1
+    cur_mx = k
+    while cur_mx < n:
+        ans += 1
+        cur_mx += (cur_mx + 1) * k
+
+    print(ans)
+~~~
+
+### Java
+``` Java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        while (T-- > 0) {
+            int n = sc.nextInt();
+            int k = sc.nextInt();
+            int ans = 1;
+            long cur_mx = k;
+            while (cur_mx < n) {
+                ++ans;
+                cur_mx += (cur_mx + 1) * k;
+            }
+            System.out.println(ans);
+        }
+    }
+}
+```
+### c++
+```#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int T = 0;
+    cin >> T;
+    while (T) {
+        int n = 0, k = 0;
+        cin >> n >> k;
+        int ans = 1;
+        long long max = k;
+        while (max < n) {
+            max += (max + 1) * k;
+            ans ++;
+        }
+        cout << ans << endl;
+        T --;
+    }
+    return 0;
+}
+```
+**会员可通过查看《已通过》的提交记录来查看其他语言哦~**

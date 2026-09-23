@@ -1,0 +1,7 @@
+ServiceMgrSys()
+startService(1, "A")
+startService(2, "A")
+rebootServers([1])
+isServiceAvailable("A")
+rebootServers([2])
+isServiceAvailable("A")

@@ -1,0 +1,103 @@
+## 解题思路
+
+本题要求使用$KNN$算法对待分类的手写数字进行识别，并且题目已经规定：
+
+* $K=3$
+* 距离度量使用欧式距离
+* 如果最近的$3$个样本中，类别投票数相同，则选择“距离之和更小”的类别
+
+核心做法如下：
+
+1. 读取训练集$trainData$、标签集$labels$以及待分类样本$target$
+2. 对于训练集中的每一个样本，计算它与$target$之间的欧式距离
+3. 将所有样本按距离从小到大排序，取最近的$3$个样本
+4. 统计这$3$个样本中每个类别出现的次数，同时累加该类别对应的距离和
+5. 优先选择出现次数最多的类别；如果多个类别出现次数相同，则选择距离和最小的类别
+6. 返回最终类别结果
+
+实现时可以直接用$eval()$还原输入的$list$数据，再通过循环完成距离计算和分类判断即可。
+
+## 复杂度分析
+
+设训练样本个数为$n$，每个样本的特征维度为$m$。
+
+* 计算所有样本与待分类样本的距离，需要$O(n \times m)$
+* 对所有距离排序，需要$O(n \log n)$
+* 统计最近$3$个样本的类别，复杂度为$O(1)$
+
+因此：
+
+* 时间复杂度：$O(n \times m + n \log n)$
+* 空间复杂度：$O(n)$
+
+该复杂度对于本题是完全可接受的。
+
+## 代码实现
+
+### Python3
+
+```python
+import math
+
+# 使用KNN算法进行分类
+def knn_classify(train_data, labels, target):
+    dist_list = []
+    
+    # 计算目标样本到每个训练样本的欧式距离
+    for i in range(len(train_data)):
+        s = 0.0
+        for j in range(len(target)):
+            diff = train_data[i][j] - target[j]
+            s += diff * diff
+        dist = math.sqrt(s)
+        dist_list.append((dist, labels[i]))
+    
+    # 按距离从小到大排序
+    dist_list.sort()
+    
+    # K固定为3
+    k = 3
+    
+    # 统计前3个最近邻中各类别的出现次数和距离之和
+    count_map = {}
+    dist_sum_map = {}
+    
+    for i in range(k):
+        dist, label = dist_list[i]
+        if label not in count_map:
+            count_map[label] = 0
+            dist_sum_map[label] = 0.0
+        count_map[label] += 1
+        dist_sum_map[label] += dist
+    
+    # 先按出现次数最多选，再按距离和最小选
+    ans = -1
+    max_count = -1
+    min_dist_sum = float('inf')
+    
+    for label in count_map:
+        if count_map[label] > max_count:
+            max_count = count_map[label]
+            min_dist_sum = dist_sum_map[label]
+            ans = label
+        elif count_map[label] == max_count:
+            if dist_sum_map[label] < min_dist_sum:
+                min_dist_sum = dist_sum_map[label]
+                ans = label
+    
+    return ans
+
+def main():
+    # 输入训练数据
+    train_data = eval(input())
+    # 输入对应标签
+    labels = eval(input())
+    # 输入待分类数据
+    target = eval(input())
+    
+    # 输出分类结果
+    print(knn_classify(train_data, labels, target))
+
+if __name__ == "__main__":
+    main()
+```

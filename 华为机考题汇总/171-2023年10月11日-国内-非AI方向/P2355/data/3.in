@@ -1,0 +1,7 @@
+6
+Write 0x10 5 AABBCCDDEE
+Read 0x10 5
+Clear
+Read 0x10 5
+Write 0x20 3 112233
+Read 0x20 3

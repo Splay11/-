@@ -1,0 +1,517 @@
+## 解题思路
+
+设一个正整数为 $n$，它的正因子个数记为 $\tau(n)$。题目要求统计区间 $[l,r]$ 内满足 $\tau(n)$ 是素数的数。
+
+先写出 $n$ 的标准质因数分解：
+
+$$
+n=p_1^{a_1}p_2^{a_2}\cdots p_k^{a_k}
+$$
+
+那么它的正因子个数为：
+
+$$
+\tau(n)=(a_1+1)(a_2+1)\cdots(a_k+1)
+$$
+
+如果 $\tau(n)$ 是素数，那么上式作为若干个正整数乘积，必须只有一个因子大于 $1$，其余都不存在。也就是说：
+
+* $n$ 只能有一个质因子
+* 即 $n=p^a$
+* 且 $\tau(n)=a+1$ 是素数
+
+所以，一个数是“隐式素数”当且仅当它可以写成：
+
+$$
+n=p^a \quad \text{且} \quad a+1 \text{ 是素数}
+$$
+
+### 转化后如何统计
+
+分成两部分：
+
+1. $a=1$ 时，$n=p$，也就是所有素数
+2. $a\ge 2$ 时，$n$ 是某些特殊的素数幂
+
+由于 $r \le 2\times 10^9$，所以指数 $a$ 不会很大，因为：
+
+$$
+2^a \le 2\times 10^9 \Rightarrow a \le 30
+$$
+
+因此只需要考虑所有满足 $a+1$ 为素数且 $2 \le a \le 30$ 的指数：
+
+$$
+a\in{2,4,6,10,12,16,18,22,28,30}
+$$
+
+这些指数对应的素数幂数量很少，可以直接预处理出来，排序后用二分统计区间内个数。
+
+剩下的问题就是：如何快速求区间内素数个数。
+这里使用 $Lehmer\ Prime\ Counting$ 算法，快速求出：
+
+$$
+\pi(x)= [1,x] \text{ 中素数的个数}
+$$
+
+那么区间 $[l,r]$ 中素数个数就是：
+
+$$
+\pi(r)-\pi(l-1)
+$$
+
+最终答案为：
+
+$$
+\bigl(\pi(r)-\pi(l-1)\bigr)+\text{区间内特殊素数幂个数}
+$$
+
+### 核心算法
+
+* 数学结论：隐式素数一定且仅能是 $p^a$，并且 $a+1$ 为素数
+* 预处理：枚举所有满足条件的 $a\ge 2$，生成所有 $p^a\le 2\times 10^9$
+* 查询：
+
+  * 用 $Lehmer$ 算法求区间素数个数
+  * 用二分统计预处理表中落在区间内的特殊素数幂个数
+
+---
+
+## 复杂度分析
+
+设最大值为 $M=2\times 10^9$。
+
+* 预处理特殊素数幂的复杂度很小，约为 $O(\sqrt M)$ 范围内筛质数，再枚举有限个指数
+* 每次查询：
+
+  * $Lehmer$ 求素数个数复杂度约为 $O(M^{2/3})$ 的很小常数实现，实际很快
+  * 二分统计特殊素数幂复杂度为 $O(\log K)$，其中 $K$ 是特殊素数幂数量，极小
+
+因此总复杂度足以通过。
+
+* 时间复杂度：单次查询约为 $O(\text{Lehmer}(r))$
+* 空间复杂度：$O(N)$，用于筛法和辅助数组
+
+---
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import math
+from bisect import bisect_left, bisect_right
+
+LIMIT = 2 * 10**9
+
+def isqrt(x):
+    """兼容旧版本 Python 的整数平方根"""
+    r = int(math.sqrt(x))
+    while (r + 1) * (r + 1) <= x:
+        r += 1
+    while r * r > x:
+        r -= 1
+    return r
+
+def sieve(n):
+    """筛出 1~n 的所有素数"""
+    vis = [False] * (n + 1)
+    primes = []
+    for i in range(2, n + 1):
+        if not vis[i]:
+            primes.append(i)
+        for p in primes:
+            if i * p > n:
+                break
+            vis[i * p] = True
+            if i % p == 0:
+                break
+    return primes
+
+# 预处理到 sqrt(2e9) 即可
+BASE_PRIMES = sieve(isqrt(LIMIT))
+
+def build_extra():
+    """预处理所有 a>=2 的特殊素数幂"""
+    exponents = [2, 4, 6, 10, 12, 16, 18, 22, 28, 30]
+    extra = set()
+
+    max_base = isqrt(LIMIT)
+    for p in BASE_PRIMES:
+        if p > max_base:
+            break
+        for a in exponents:
+            val = 1
+            ok = True
+            for _ in range(a):
+                if val > LIMIT // p:
+                    ok = False
+                    break
+                val *= p
+            if not ok:
+                break
+            extra.add(val)
+
+    return sorted(extra)
+
+extra_nums = build_extra()
+
+def count_primes_in_range(l, r):
+    """分段筛统计区间 [l, r] 内素数个数"""
+    size = r - l + 1
+    is_prime_seg = [True] * size
+
+    if l == 1:
+        is_prime_seg[0] = False
+
+    for p in BASE_PRIMES:
+        if p * p > r:
+            break
+        start = max(p * p, ((l + p - 1) // p) * p)
+        for x in range(start, r + 1, p):
+            is_prime_seg[x - l] = False
+
+    return sum(is_prime_seg)
+
+def count_implicit_primes(l, r):
+    """统计区间 [l, r] 内隐式素数个数"""
+    # 1. 统计素数个数（对应 a=1）
+    ans = count_primes_in_range(l, r)
+
+    # 2. 统计特殊素数幂（对应 a>=2）
+    ans += bisect_right(extra_nums, r) - bisect_left(extra_nums, l)
+
+    return ans
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+
+    t = int(data[0])
+    idx = 1
+    out = []
+
+    for _ in range(t):
+        l = int(data[idx])
+        r = int(data[idx + 1])
+        idx += 2
+        out.append(str(count_implicit_primes(l, r)))
+
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+/* ACM 风格，类名必须为 Main */
+public class Main {
+    static final long LIMIT = 2000000000L;
+    static final int MAXN = 2000000;
+
+    static boolean[] isPrime = new boolean[MAXN + 1];
+    static int[] piSmall = new int[MAXN + 1];
+    static ArrayList<Integer> primes = new ArrayList<>();
+    static ArrayList<Long> extraNums = new ArrayList<>();
+
+    // phi 记忆化
+    static HashMap<Long, Long> phiMemo = new HashMap<>();
+    // lehmer_pi 记忆化
+    static HashMap<Long, Long> lehmerMemo = new HashMap<>();
+
+    static void sieve() {
+        Arrays.fill(isPrime, true);
+        isPrime[0] = isPrime[1] = false;
+
+        for (int i = 2; i * (long) i <= MAXN; i++) {
+            if (isPrime[i]) {
+                for (int j = i * i; j <= MAXN; j += i) {
+                    isPrime[j] = false;
+                }
+            }
+        }
+
+        int cnt = 0;
+        for (int i = 2; i <= MAXN; i++) {
+            if (isPrime[i]) {
+                primes.add(i);
+                cnt++;
+            }
+            piSmall[i] = cnt;
+        }
+    }
+
+    static long phi(long x, int s) {
+        if (s == 0) return x;
+        if (s == 1) return x - x / 2;
+        if (s == 2) return x - x / 2 - x / 3 + x / 6;
+
+        long key = (x << 6) ^ s; // 简单压状态
+        Long val = phiMemo.get(key);
+        if (val != null) return val;
+
+        long res = phi(x, s - 1) - phi(x / primes.get(s - 1), s - 1);
+        phiMemo.put(key, res);
+        return res;
+    }
+
+    static long icbrt(long x) {
+        long y = (long) Math.round(Math.cbrt(x));
+        while ((y + 1) * (y + 1) * (y + 1) <= x) y++;
+        while (y * y * y > x) y--;
+        return y;
+    }
+
+    static long lehmerPi(long x) {
+        if (x < MAXN) return piSmall[(int) x];
+
+        Long val = lehmerMemo.get(x);
+        if (val != null) return val;
+
+        int a = (int) lehmerPi((long) Math.sqrt(Math.sqrt(x)));
+        int b = (int) lehmerPi((long) Math.sqrt(x));
+        int c = (int) lehmerPi(icbrt(x));
+
+        long res = phi(x, a) + ((long) (b + a - 2) * (b - a + 1)) / 2;
+
+        for (int i = a + 1; i <= b; i++) {
+            long p = primes.get(i - 1);
+            long w = x / p;
+            res -= lehmerPi(w);
+            if (i <= c) {
+                int lim = (int) lehmerPi((long) Math.sqrt(w));
+                for (int j = i; j <= lim; j++) {
+                    res -= lehmerPi(w / primes.get(j - 1)) - (j - 1);
+                }
+            }
+        }
+
+        lehmerMemo.put(x, res);
+        return res;
+    }
+
+    static void buildExtra() {
+        int[] exponents = {2, 4, 6, 10, 12, 16, 18, 22, 28, 30};
+        long maxBase = (long) Math.sqrt(LIMIT);
+        TreeSet<Long> set = new TreeSet<>();
+
+        for (int p : primes) {
+            if (p > maxBase) break;
+            for (int a : exponents) {
+                long v = 1;
+                boolean ok = true;
+                for (int i = 0; i < a; i++) {
+                    if (v > LIMIT / p) {
+                        ok = false;
+                        break;
+                    }
+                    v *= p;
+                }
+                if (!ok) break;
+                set.add(v);
+            }
+        }
+
+        extraNums.addAll(set);
+    }
+
+    static int lowerBound(ArrayList<Long> list, long target) {
+        int l = 0, r = list.size();
+        while (l < r) {
+            int mid = (l + r) >>> 1;
+            if (list.get(mid) >= target) r = mid;
+            else l = mid + 1;
+        }
+        return l;
+    }
+
+    static int upperBound(ArrayList<Long> list, long target) {
+        int l = 0, r = list.size();
+        while (l < r) {
+            int mid = (l + r) >>> 1;
+            if (list.get(mid) > target) r = mid;
+            else l = mid + 1;
+        }
+        return l;
+    }
+
+    static long countImplicitPrimes(long l, long r) {
+        // 统计区间内素数个数
+        long ans = lehmerPi(r) - lehmerPi(l - 1);
+
+        // 统计区间内特殊素数幂个数
+        ans += upperBound(extraNums, r) - lowerBound(extraNums, l);
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        sieve();
+        buildExtra();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+
+        while (T-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            long l = Long.parseLong(st.nextToken());
+            long r = Long.parseLong(st.nextToken());
+            sb.append(countImplicitPrimes(l, r)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long LIMIT = 2000000000LL;
+const int MAXN = 2000000;
+
+vector<int> primes;
+vector<int> piSmall(MAXN + 1);
+vector<bool> isPrime(MAXN + 1, true);
+vector<long long> extraNums;
+
+// phi 记忆化
+unordered_map<unsigned long long, long long> phiMemo;
+// lehmer_pi 记忆化
+unordered_map<long long, long long> lehmerMemo;
+
+void sieve() {
+    isPrime[0] = isPrime[1] = false;
+    for (int i = 2; 1LL * i * i <= MAXN; i++) {
+        if (isPrime[i]) {
+            for (int j = i * i; j <= MAXN; j += i) {
+                isPrime[j] = false;
+            }
+        }
+    }
+
+    int cnt = 0;
+    for (int i = 2; i <= MAXN; i++) {
+        if (isPrime[i]) {
+            primes.push_back(i);
+            cnt++;
+        }
+        piSmall[i] = cnt;
+    }
+}
+
+long long phi(long long x, int s) {
+    if (s == 0) return x;
+    if (s == 1) return x - x / 2;
+    if (s == 2) return x - x / 2 - x / 3 + x / 6;
+
+    // 把状态压成一个 key
+    unsigned long long key = (unsigned long long)x * 64ULL + (unsigned long long)s;
+    auto it = phiMemo.find(key);
+    if (it != phiMemo.end()) return it->second;
+
+    long long res = phi(x, s - 1) - phi(x / primes[s - 1], s - 1);
+    phiMemo[key] = res;
+    return res;
+}
+
+long long icbrt(long long x) {
+    long long y = round(cbrt((long double)x));
+    while ((y + 1) * 1LL * (y + 1) * (y + 1) <= x) y++;
+    while (y * 1LL * y * y > x) y--;
+    return y;
+}
+
+long long lehmerPi(long long x) {
+    if (x < MAXN) return piSmall[(int)x];
+
+    auto it = lehmerMemo.find(x);
+    if (it != lehmerMemo.end()) return it->second;
+
+    int a = (int)lehmerPi(sqrt(sqrt((long double)x)));
+    int b = (int)lehmerPi(sqrt((long double)x));
+    int c = (int)lehmerPi(icbrt(x));
+
+    // Lehmer 公式主项
+    long long res = phi(x, a) + 1LL * (b + a - 2) * (b - a + 1) / 2;
+
+    // 减去后续部分
+    for (int i = a + 1; i <= b; i++) {
+        long long p = primes[i - 1];
+        long long w = x / p;
+        res -= lehmerPi(w);
+        if (i <= c) {
+            int lim = (int)lehmerPi(sqrt((long double)w));
+            for (int j = i; j <= lim; j++) {
+                res -= lehmerPi(w / primes[j - 1]) - (j - 1);
+            }
+        }
+    }
+
+    lehmerMemo[x] = res;
+    return res;
+}
+
+void buildExtra() {
+    vector<int> exponents = {2, 4, 6, 10, 12, 16, 18, 22, 28, 30};
+    long long maxBase = sqrt((long double)LIMIT);
+    set<long long> st;
+
+    for (int p : primes) {
+        if (p > maxBase) break;
+        for (int a : exponents) {
+            long long v = 1;
+            bool ok = true;
+            for (int i = 0; i < a; i++) {
+                if (v > LIMIT / p) {
+                    ok = false;
+                    break;
+                }
+                v *= p;
+            }
+            if (!ok) break;
+            st.insert(v);
+        }
+    }
+
+    extraNums.assign(st.begin(), st.end());
+}
+
+long long countImplicitPrimes(long long l, long long r) {
+    // 统计区间内所有素数
+    long long ans = lehmerPi(r) - lehmerPi(l - 1);
+
+    // 统计区间内特殊素数幂
+    ans += upper_bound(extraNums.begin(), extraNums.end(), r)
+         - lower_bound(extraNums.begin(), extraNums.end(), l);
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sieve();
+    buildExtra();
+
+    int T;
+    cin >> T;
+    while (T--) {
+        long long l, r;
+        cin >> l >> r;
+        cout << countImplicitPrimes(l, r) << '\n';
+    }
+    return 0;
+}
+```

@@ -1,0 +1,320 @@
+## 解题思路
+
+设第一类套装卖出 $x$ 套，第二类套装卖出 $y$ 套。
+
+根据题意可以列出约束：
+
+* 领带数量限制：$x \le a$
+* 围巾数量限制：$y \le b$
+* 夹克数量限制：$x + y \le c$
+* 展位数量限制：$x + 2y \le r$
+* $x,y \ge 0$，且必须为整数
+
+目标是最大化总收益：
+
+$$
+d x + e y
+$$
+
+于是问题转化为一个只有两个变量的整数线性规划问题。
+
+### 核心思路
+
+固定第二类套装数量 $y$ 后，第一类套装数量 $x$ 一定会尽可能取大，因为第一类套装收益 $d \ge 0$，多卖不会更差。
+
+此时：
+
+$$
+x = \min(a,\ c-y,\ r-2y)
+$$
+
+所以原问题可化为只求一个变量 $y$ 的最大值：
+
+$$
+f(y)=e y + d \cdot \min(a,\ c-y,\ r-2y)
+$$
+
+其中
+
+$$
+0 \le y \le \min\left(b,\ c,\ \left\lfloor \frac r2 \right\rfloor\right)
+$$
+
+
+
+注意到：
+
+* $a$ 是常数
+* $c-y$ 是关于 $y$ 的一次函数
+* $r-2y$ 也是关于 $y$ 的一次函数
+
+因此 $\min(a,\ c-y,\ r-2y)$ 是一个分段一次函数，整个 $f(y)$ 也是分段一次函数。
+
+分段函数在线性区间上的最大值一定出现在区间端点，所以只需要检查这些“分界点”附近的整数值即可，不需要枚举所有 $y$。
+
+### 分界点来源
+
+三个式子两两相等时，可能发生分段切换：
+
+1. $a = c-y \Rightarrow y = c-a$
+2. $a = r-2y \Rightarrow y = \dfrac{r-a}{2}$
+3. $c-y = r-2y \Rightarrow y = r-c$
+
+再加上定义域边界：
+
+* $0$
+* $U=\min\left(b,c,\left\lfloor \frac r2 \right\rfloor\right)$
+
+由于最优解要求整数，而分界点可能不是整数，所以把每个关键值附近若干个整数都检查一遍即可。
+检查 $\lfloor t \rfloor-2$ 到 $\lfloor t \rfloor+2$ 这一小段就足够稳妥。
+
+这样每组数据只会计算常数个候选点，复杂度为 $O(1)$。
+
+### 实现方法
+
+1. 计算 $y$ 的上界
+   $$
+   U=\min\left(b,c,\left\lfloor \frac r2 \right\rfloor\right)
+   $$
+2. 收集关键位置：
+
+   * $0$
+   * $U$
+   * $c-a$
+   * $r-c$
+   * $\dfrac{r-a}{2}$
+3. 对每个关键位置附近的整数进行检查：
+
+   * 若 $y$ 不在 $[0,U]$ 内则跳过
+   * 计算
+     $$
+     x=\min(a,c-y,r-2y)
+     $$
+   * 更新答案
+4. 输出最大收益
+
+
+
+之所以这样做是正确的，是因为：
+
+* 固定 $y$ 时，最优 $x$ 一定取到允许的最大值
+* 所以问题降成一元函数最大化
+* 一元函数是分段一次函数
+* 分段一次函数的最大值只会出现在边界点附近
+
+## 复杂度分析
+
+每组数据只检查常数个候选点，每个候选点计算都是 $O(1)$。
+
+因此：
+
+* 时间复杂度：$O(1)$（每组数据），总计 $O(T)$
+* 空间复杂度：$O(1)$
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+def calc_max_income(a, b, c, d, e, r):
+    # y 表示第二类套装数量，其上界同时受围巾、夹克、展位限制
+    upper = min(b, c, r // 2)
+
+    # 计算某个 y 下的收益
+    def value(y):
+        if y < 0 or y > upper:
+            return -1
+        # 固定 y 后，x 取能取到的最大值
+        x = min(a, c - y, r - 2 * y)
+        if x < 0:
+            return -1
+        return d * x + e * y
+
+    # 所有可能发生分段变化的位置
+    points = [
+        0,
+        upper,
+        c - a,
+        r - c,
+        (r - a) // 2
+    ]
+
+    ans = 0
+
+    # 由于最优解一定在分界点附近的整数处，检查每个关键点附近一小段
+    for p in points:
+        for y in range(p - 2, p + 3):
+            ans = max(ans, value(y))
+
+    return ans
+
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    t = data[0]
+    idx = 1
+    res = []
+
+    for _ in range(t):
+        a = data[idx]
+        b = data[idx + 1]
+        c = data[idx + 2]
+        d = data[idx + 3]
+        e = data[idx + 4]
+        r = data[idx + 5]
+        idx += 6
+
+        res.append(str(calc_max_income(a, b, c, d, e, r)))
+
+    sys.stdout.write("\n".join(res))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.StreamTokenizer;
+
+public class Main {
+
+    // 计算单组数据的最大收益
+    static long calcMaxIncome(long a, long b, long c, long d, long e, long r) {
+        // y 表示第二类套装数量，其上界同时受围巾、夹克、展位限制
+        long upper = Math.min(b, Math.min(c, r / 2));
+
+        long ans = 0;
+
+        // 所有可能发生分段变化的位置
+        long[] points = new long[] {
+            0,
+            upper,
+            c - a,
+            r - c,
+            (r - a) / 2
+        };
+
+        // 检查某个 y 是否可行，并计算收益
+        for (long p : points) {
+            for (long y = p - 2; y <= p + 2; y++) {
+                if (y < 0 || y > upper) {
+                    continue;
+                }
+
+                // 固定 y 后，x 取能取到的最大值
+                long x = Math.min(a, Math.min(c - y, r - 2 * y));
+                if (x < 0) {
+                    continue;
+                }
+
+                long income = d * x + e * y;
+                if (income > ans) {
+                    ans = income;
+                }
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        StreamTokenizer in = new StreamTokenizer(new BufferedInputStream(System.in));
+
+        in.nextToken();
+        int T = (int) in.nval;
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < T; i++) {
+            in.nextToken();
+            long a = (long) in.nval;
+            in.nextToken();
+            long b = (long) in.nval;
+            in.nextToken();
+            long c = (long) in.nval;
+            in.nextToken();
+            long d = (long) in.nval;
+            in.nextToken();
+            long e = (long) in.nval;
+            in.nextToken();
+            long r = (long) in.nval;
+
+            long ans = calcMaxIncome(a, b, c, d, e, r);
+            sb.append(ans).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+// 计算单组数据的最大收益
+long long calcMaxIncome(long long a, long long b, long long c,
+                        long long d, long long e, long long r) {
+    // y 表示第二类套装数量，其上界同时受围巾、夹克、展位限制
+    long long upper = min(b, min(c, r / 2));
+
+    long long ans = 0;
+
+    // 所有可能发生分段变化的位置
+    long long points[5] = {
+        0,
+        upper,
+        c - a,
+        r - c,
+        (r - a) / 2
+    };
+
+    // 枚举每个关键点附近的整数
+    for (long long p : points) {
+        for (long long y = p - 2; y <= p + 2; y++) {
+            if (y < 0 || y > upper) {
+                continue;
+            }
+
+            // 固定 y 后，x 取能取到的最大值
+            long long x = min(a, min(c - y, r - 2 * y));
+            if (x < 0) {
+                continue;
+            }
+
+            long long income = d * x + e * y;
+            ans = max(ans, income);
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        long long a, b, c, d, e, r;
+        cin >> a >> b >> c >> d >> e >> r;
+
+        cout << calcMaxIncome(a, b, c, d, e, r) << '\n';
+    }
+
+    return 0;
+}
+```

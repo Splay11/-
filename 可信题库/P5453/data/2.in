@@ -1,0 +1,7 @@
+ParkingLane(1)
+arrive(10)
+arrive(20)
+depart(10)
+undo()
+front()
+waiting()

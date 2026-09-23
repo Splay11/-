@@ -1,0 +1,59 @@
+## 思路:数位dp+二分答案+小优化
+
+​	首先学习一下数位dp，并且先知道一下这个题:**洛谷P2602**
+
+​	知道了这个题，很容易我们可以想到可以二分答案。check的时候，只需要$min(i出现的次数,i\in[0,9])$ 和 $k$的关系即可。
+
+​	但是这样并不能拿满分(至少python是过不去的)。我们需要找规律，发现$0$ 总是出现的最少的那个。所以$dp$ 转移的时候只需要求$0$.快个$10$倍。
+
+## 代码
+
+python
+
+```python
+def calcNumber (l , r):
+    nu = 17
+    dp = [0 for _ in range(nu)]
+    arr1 = [0]
+    arr2 = [0]
+    mid = [0 for _ in range(nu)]
+    mid[0] = 1
+    for i in range(1,14):
+        dp[i] = dp[i-1]*10+mid[i-1]
+        mid[i] = 10 * mid[i-1]
+    def solve(n,ans):
+        a = [0 for _ in range(nu)]
+        tt = n
+        len = 0
+        while(n):
+            len += 1
+            a[len] = int(n%10)
+            n=int(n/10)
+        for i in range(len,0,-1):
+            ans[0] += dp[i-1]*a[i]
+            if a[i] > 0:	
+ 	           ans[0] += mid[i-1]
+            tt -= mid[i-1]*a[i]
+            if a[i] == 0:
+	            ans[a[i]] += tt+1
+            ans[0]-= mid[i-1]
+        return ans
+    
+    g1=solve(r,arr1)
+    g2=solve(l-1,arr2)
+    return g1[0]-g2[0]
+
+t = int(input())
+for x in range (t):
+    k = int (input())
+    l = 1
+    r = 10000000000000
+    while l <= r:
+        mid = (l + r) >> 1
+        mi = calcNumber(1 , mid)
+        if mi >= k:
+            r = mid - 1
+        else:
+            l = mid + 1
+    print (l)
+```

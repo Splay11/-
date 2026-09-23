@@ -1,0 +1,98 @@
+def solve():
+    # 读取输入
+    n, m = map(int, input().split())
+    grid = []
+    special_cells = set()
+    
+    for i in range(n):
+        row = input().strip()
+        grid.append(row)
+        for j in range(m):
+            if row[j] == '*':
+                special_cells.add((i, j))
+    
+    # 将网格状态转换为位掩码
+    def state_to_mask(state):
+        mask = 0
+        for i in range(n):
+            for j in range(m):
+                if state[i][j]:
+                    mask |= (1 << (i * m + j))
+        return mask
+    
+    # 将位掩码转换为网格状态
+    def mask_to_state(mask):
+        state = [[False] * m for _ in range(n)]
+        for i in range(n):
+            for j in range(m):
+                if mask & (1 << (i * m + j)):
+                    state[i][j] = True
+        return state
+    
+    # 检查积木是否可以放置
+    def can_place_block(state, positions):
+        # 检查所有位置是否在边界内且未被占用
+        for r, c in positions:
+            if r < 0 or r >= n or c < 0 or c >= m or state[r][c]:
+                return False
+        
+        # 检查是否至少有一个端点与特殊格子重合
+        # 对于1×3或3×1的积木，端点是第一个和最后一个位置
+        first_pos = positions[0]  # 第一个端点
+        last_pos = positions[-1]  # 最后一个端点
+        
+        has_special_endpoint = False
+        if first_pos in special_cells or last_pos in special_cells:
+            has_special_endpoint = True
+        
+        return has_special_endpoint
+    
+    # 放置积木
+    def place_block(state, positions):
+        new_state = [row[:] for row in state]
+        for r, c in positions:
+            new_state[r][c] = True
+        return new_state
+    
+    # 生成所有可能的积木位置（1×3和3×1）
+    def get_all_block_positions():
+        positions = []
+        
+        # 1×3 积木（横向）
+        for i in range(n):
+            for j in range(m - 2):
+                positions.append([(i, j), (i, j + 1), (i, j + 2)])
+        
+        # 3×1 积木（纵向）
+        for i in range(n - 2):
+            for j in range(m):
+                positions.append([(i, j), (i + 1, j), (i + 2, j)])
+        
+        return positions
+    
+    all_positions = get_all_block_positions()
+    final_states = set()
+    
+    # DFS搜索所有可能的最终状态
+    def dfs(state):
+        state_mask = state_to_mask(state)
+        
+        # 尝试放置每一种可能的积木
+        can_place_any = False
+        for positions in all_positions:
+            if can_place_block(state, positions):
+                can_place_any = True
+                new_state = place_block(state, positions)
+                dfs(new_state)
+        
+        # 如果无法放置任何积木，这是一个最终状态
+        if not can_place_any:
+            final_states.add(state_mask)
+    
+    # 从空网格开始搜索
+    initial_state = [[False] * m for _ in range(n)]
+    dfs(initial_state)
+    
+    return len(final_states)
+
+print(solve())

@@ -1,12 +1,14 @@
-"""上传题解到 /api/problem/upload_sol；账号密码从环境变量读取。"""
+"""上传题解到 /api/problem/upload_sol；鉴权用 CF_API_KEY（X-Api-Key）。"""
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
 import requests
+
+from codefun_auth import api_headers
+
 
 
 def require_https(url: str) -> None:
@@ -39,23 +41,11 @@ def main() -> None:
         default=None,
         help="题解正文字符串（小内容可用；大内容建议用文件）",
     )
-    parser.add_argument("--user", default=None, help="覆盖环境变量 HYDRO_API_UNAME")
-    parser.add_argument("--password", default=None, help="覆盖环境变量 HYDRO_API_PASSWORD")
     parser.add_argument("--ca-cert", default=None, help="可选：自签证书 CA 路径")
     parser.add_argument("--no-proxy", action="store_true")
     args = parser.parse_args()
 
     require_https(args.base_url)
-
-    uname = args.user or os.environ.get("HYDRO_API_UNAME")
-    password = args.password or os.environ.get("HYDRO_API_PASSWORD")
-    if not uname or not password:
-        print(
-            "请设置环境变量 HYDRO_API_UNAME 与 HYDRO_API_PASSWORD，"
-            "或传入 --user / --password。",
-            file=sys.stderr,
-        )
-        sys.exit(1)
 
     solution_path = args.solution_file or args.file
     if solution_path:
@@ -77,8 +67,6 @@ def main() -> None:
     url = f"{args.base_url.rstrip('/')}/api/problem/upload_sol"
     payload = {
         "domainId": args.domain_id,
-        "uname": uname,
-        "password": password,
         "pid": args.pid.upper(),
         "solution": solution,
     }
@@ -94,7 +82,7 @@ def main() -> None:
             json=payload,
             timeout=(10, 120),
             verify=verify,
-            headers={"Accept": "application/json", "Content-Type": "application/json"},
+            headers=api_headers(),
         )
     except requests.RequestException as e:
         print(f"请求失败: {e}", file=sys.stderr)

@@ -1,0 +1,46 @@
+HOT100笔记 LeetCode Python 签名修复报告
+changed: 33 / total blocks: 90
+
+- P0017.md | LC128 | longestConsecutive | fixed longestConsecutive
+- P0022.md | LC22 | generateParenthesis | fixed generateParenthesis
+- P0022.md | LC22 | generateParenthesis | fixed generateParenthesis
+- P0022.md | LC131 | partition | fixed partition
+- P0022.md | LC39 | combinationSum | fixed combinationSum
+- P0022.md | LC39 | combinationSum | fixed combinationSum
+- P0022.md | LC78 | subsets | fixed subsets
+- P0024.md | LC51 | solveNQueens | fixed solveNQueens
+- P0024.md | LC79 | exist | fixed exist
+- P0024.md | LC17 | letterCombinations | fixed letterCombinations
+- P0024.md | LC46 | permute | fixed permute
+- P0025.md | LC152 | maxProduct | fixed maxProduct
+- P0025.md | LC152 | maxProduct | fixed maxProduct
+- P0025.md | LC32 | longestValidParentheses | fixed longestValidParentheses
+- P0025.md | LC139 | wordBreak | fixed wordBreak
+- P0025.md | LC322 | coinChange | fixed coinChange
+- P0025.md | LC279 | numSquares | fixed numSquares
+- P0025.md | LC300 | lengthOfLIS | fixed lengthOfLIS
+- P0025.md | LC198 | rob | fixed rob
+- P0025.md | LC53 | maxSubArray | fixed maxSubArray
+- P0025.md | LC70 | climbStairs | fixed climbStairs
+- P0025.md | LC70 | climbStairs | fixed climbStairs
+- P0027.md | LC416 | canPartition | fixed canPartition
+- P0027.md | LC416 | canPartition | fixed canPartition
+- P0028.md | LC72 | minDistance | fixed minDistance
+- P0028.md | LC1143 | longestCommonSubsequence | fixed longestCommonSubsequence
+- P0028.md | LC5 | longestPalindrome | fixed longestPalindrome
+- P0028.md | LC5 | longestPalindrome | fixed longestPalindrome
+- P0028.md | LC64 | minPathSum | fixed minPathSum
+- P0028.md | LC62 | uniquePaths | fixed uniquePaths
+- P0032.md | LC739 | dailyTemperatures | fixed dailyTemperatures
+- P0035.md | LC200 | numIslands | fixed numIslands
+- P0037.md | LC21 | mergeTwoLists | fixed mergeTwoLists
+
+issues:
+- P0013.md | LC15 | no_block
+- P0021.md | LC240 | no_block
+- P0021.md | LC48 | no_block
+- P0030.md | LC155 | no_method
+- P0032.md | LC84 | no_block
+- P0032.md | LC456 | no_block
+- P0041.md | LC102 | no_block
+- P0047.md | LC295 | no_method

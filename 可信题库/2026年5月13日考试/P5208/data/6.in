@@ -1,0 +1,7 @@
+GCSystem(2)
+createObject(1)
+createObject(2)
+markObjects([1, 2])
+manualGC(0)
+getLiveObjects(0)
+getLiveObjects(1)

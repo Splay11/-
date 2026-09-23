@@ -1,0 +1,17 @@
+{
+  "kind": "leetcode_core_bundle_paths",
+  "version": 1,
+  "generated_at": "2026-06-10T14:31:18.477085+00:00",
+  "problem_root": "D:\\机考出题\\problem-maker\\Problems\\P5109",
+  "files": {
+    "compile.sh": "D:\\机考出题\\problem-maker\\Problems\\P5109\\data\\compile.sh",
+    "config.yaml": "D:\\机考出题\\problem-maker\\Problems\\P5109\\data\\config.yaml",
+    "template.py": "D:\\机考出题\\problem-maker\\Problems\\P5109\\data\\template.py",
+    "template.cc": "D:\\机考出题\\problem-maker\\Problems\\P5109\\data\\template.cc",
+    "template.java": "D:\\机考出题\\problem-maker\\Problems\\P5109\\data\\template.java",
+    "user.cc": "D:\\机考出题\\problem-maker\\Problems\\P5109\\data\\user.cc",
+    "user.java": "D:\\机考出题\\problem-maker\\Problems\\P5109\\data\\user.java",
+    "user.py": "D:\\机考出题\\problem-maker\\Problems\\P5109\\data\\user.py"
+  },
+  "missing": []
+}

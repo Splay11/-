@@ -1,0 +1,7 @@
+ParcelSlots(1)
+put(2, 3)
+take(1)
+moveRight(1)
+put(1, 9)
+moveRight(1)
+occupied()

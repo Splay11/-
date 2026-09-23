@@ -1,0 +1,175 @@
+169
+mkdir dir1
+cd ..
+mkdir dir2
+mkdir dir3
+ls
+mkdir dir4
+mkdir dir5
+ls
+ls
+ls
+mkdir dir6
+mkdir dir7
+cd dir4
+mkdir dir8
+mkdir dir9
+cd ..
+ls
+cd dir6
+mkdir dir10
+ls
+cd dir10
+cd ..
+ls
+mkdir dir11
+ls
+ls
+mkdir dir12
+mkdir dir13
+mkdir dir14
+mkdir dir15
+mkdir dir16
+mkdir dir17
+ls
+cd ..
+mkdir dir18
+mkdir dir19
+cd dir4
+ls
+ls
+ls
+ls
+mkdir dir20
+mkdir dir21
+cd dir9
+ls
+mkdir dir22
+mkdir dir23
+ls
+ls
+ls
+cd dir22
+mkdir dir24
+ls
+ls
+mkdir dir25
+mkdir dir26
+cd dir24
+cd ..
+cd dir26
+mkdir dir27
+cd dir27
+mkdir dir28
+cd ..
+ls
+mkdir dir29
+ls
+cd dir29
+mkdir dir30
+cd dir30
+mkdir dir31
+mkdir dir32
+ls
+ls
+cd dir32
+cd ..
+ls
+ls
+mkdir dir33
+ls
+cd dir31
+mkdir dir34
+mkdir dir35
+mkdir dir36
+cd dir35
+mkdir dir37
+cd dir37
+mkdir dir38
+mkdir dir39
+mkdir dir40
+mkdir dir41
+mkdir dir42
+mkdir dir43
+ls
+cd ..
+mkdir dir44
+mkdir dir45
+ls
+cd dir44
+mkdir dir46
+cd dir46
+ls
+ls
+mkdir dir47
+mkdir dir48
+mkdir dir49
+ls
+ls
+mkdir dir50
+ls
+ls
+cd dir50
+ls
+mkdir dir51
+mkdir dir52
+cd ..
+ls
+ls
+mkdir dir53
+cd dir48
+mkdir dir54
+cd dir54
+ls
+ls
+mkdir dir55
+cd dir55
+mkdir dir56
+mkdir dir57
+mkdir dir58
+ls
+ls
+ls
+ls
+ls
+ls
+mkdir dir59
+ls
+mkdir dir60
+mkdir dir61
+ls
+cd dir56
+ls
+ls
+cd ..
+cd ..
+mkdir dir62
+ls
+mkdir dir63
+cd ..
+cd dir54
+ls
+mkdir dir64
+mkdir dir65
+ls
+mkdir dir66
+mkdir dir67
+mkdir dir68
+mkdir dir69
+mkdir dir70
+ls
+mkdir dir71
+cd dir71
+mkdir dir72
+cd dir72
+mkdir dir73
+mkdir dir74
+mkdir dir75
+cd ..
+ls
+cd dir72
+mkdir dir76
+cd ..
+cd ..
+mkdir dir77
+ls

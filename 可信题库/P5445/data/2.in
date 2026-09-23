@@ -1,0 +1,7 @@
+PickupDesk()
+order(7)
+order(7)
+waiting()
+serve()
+order(7)
+waiting()

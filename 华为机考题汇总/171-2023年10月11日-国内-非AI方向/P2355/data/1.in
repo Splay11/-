@@ -1,0 +1,6 @@
+5
+Read 0x100 4
+Write 0x100 4 A1B2
+Read 0x100 4
+Write 0x100 2 FFFFAA
+Read 0x100 4

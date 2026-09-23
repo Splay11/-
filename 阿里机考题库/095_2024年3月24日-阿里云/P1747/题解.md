@@ -1,0 +1,102 @@
+## 题解
+
+**简述题意**：给定两个数组 $a$ , $b$ ，要从 $a, b$ 中各选一个连续的子数组，满足其对应位置的值都不相同，其中两个子数组的下标要一样，问能选多少个。
+
+**做法**：从左往右枚举，维护一个计数器 $cnt$, 表示当前连续的 $a[i] != b[i]$ 的数组长度，记 $res$ 为最终答案
+
+> 假设当前有 $len$ 长度的连续子数组满足条件，那么对答案的贡献为 $\frac{(1 + len) \times len}{2}$
+
+所有满足条件连续子数组的贡献相加即可
+
+时间复杂度 $O(n)$
+
+
+
+## AC代码
+
+- Cpp
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long LL;
+int main (){
+    ios::sync_with_stdio(false);
+    std::cin.tie(0);
+    int n; cin >> n;
+    vector<int> a(n), b(n);
+    for(int& i : a) cin >> i;
+    for(int& i : b) cin >> i;
+    LL res = 0;
+    int c = 0;
+    for(int i = 0; i < n; i ++)
+    {
+        if(a[i] != b[i])
+        {
+            c ++ ;
+            res += c;
+        }
+        else{
+            c = 0;
+        } 
+    }
+    cout << res << "\n";
+    return 0;
+}
+
+```
+
+
+
+
+- Java
+
+```Java
+import java.util.Scanner;
+​
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();
+        int[] a = new int[n];
+        int[] b = new int[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = scanner.nextInt();
+        }
+        for (int i = 0; i < n; i++) {
+            b[i] = scanner.nextInt();
+        }
+        long res = 0;
+        int c = 0;
+        for (int i = 0; i < n; i++) {
+            if (a[i] != b[i]) {
+                c++;
+                res += c;
+            } else {
+                c = 0;
+            }
+        }
+        System.out.println(res);
+    }
+}
+​
+```
+
+
+
+- Python
+
+```python
+n = int(input())
+a = list(map(int, input().split()))
+b = list(map(int, input().split()))
+res = 0
+c = 0
+for i in range(n):
+    if a[i] != b[i]:
+        c += 1
+        res += c
+    else:
+        c = 0
+print(res)
+
+```

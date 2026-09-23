@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <defs>
+    <style>
+      .title { font: 700 28px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #222; }
+      .subtitle { font: 600 19px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #333; }
+      .label { font: 500 16px Consolas, monospace; fill: #fff; text-anchor: middle; dominant-baseline: middle; }
+      .normal-edge { stroke: #a0a7b4; stroke-width: 4; }
+      .path-edge { stroke: #e53935; stroke-width: 6; }
+      .node { fill: #3f6fd9; stroke: #ffffff; stroke-width: 3; }
+      .path-node { fill: #ef5350; stroke: #ffffff; stroke-width: 3; }
+      .panel { fill: #fafbff; stroke: #d7dcea; stroke-width: 2; rx: 14; }
+      .split { stroke: #d7dcea; stroke-width: 2; stroke-dasharray: 8 8; }
+    </style>
+  </defs>
+
+  <text x="600" y="46" class="title" text-anchor="middle">&#36335;&#24452;&#24418;&#24577;&#31034;&#24847;</text>
+  <line x1="600" y1="78" x2="600" y2="730" class="split" />
+  <line x1="40" y1="400" x2="1160" y2="400" class="split" />
+
+  <rect x="40" y="90" width="520" height="280" class="panel" />
+  <text x="300" y="120" class="subtitle" text-anchor="middle">
+    Case 1&#65306;&#38142; -&gt; &#25200;&#28857; -&gt; &#38142;
+  </text>
+  <line x1="300" y1="165" x2="240" y2="235" class="path-edge" />
+  <line x1="300" y1="165" x2="360" y2="235" class="path-edge" />
+  <line x1="240" y1="235" x2="200" y2="305" class="path-edge" />
+  <line x1="240" y1="235" x2="280" y2="305" class="normal-edge" />
+  <line x1="360" y1="235" x2="320" y2="305" class="normal-edge" />
+  <line x1="360" y1="235" x2="400" y2="305" class="path-edge" />
+  <circle cx="300" cy="165" r="20" class="path-node"/><text x="300" y="165" class="label">1</text>
+  <circle cx="240" cy="235" r="20" class="path-node"/><text x="240" y="235" class="label">2</text>
+  <circle cx="360" cy="235" r="20" class="path-node"/><text x="360" y="235" class="label">3</text>
+  <circle cx="200" cy="305" r="20" class="path-node"/><text x="200" y="305" class="label">4</text>
+  <circle cx="280" cy="305" r="20" class="node"/><text x="280" y="305" class="label">5</text>
+  <circle cx="320" cy="305" r="20" class="node"/><text x="320" y="305" class="label">6</text>
+  <circle cx="400" cy="305" r="20" class="path-node"/><text x="400" y="305" class="label">7</text>
+
+  <rect x="640" y="90" width="520" height="280" class="panel" />
+  <text x="900" y="120" class="subtitle" text-anchor="middle">
+    Case 2&#65306;&#31354; -&gt; &#25200;&#28857; -&gt; &#38142;
+  </text>
+  <line x1="900" y1="165" x2="840" y2="235" class="normal-edge" />
+  <line x1="900" y1="165" x2="960" y2="235" class="path-edge" />
+  <line x1="840" y1="235" x2="800" y2="305" class="normal-edge" />
+  <line x1="840" y1="235" x2="880" y2="305" class="normal-edge" />
+  <line x1="960" y1="235" x2="920" y2="305" class="normal-edge" />
+  <line x1="960" y1="235" x2="1000" y2="305" class="path-edge" />
+  <circle cx="900" cy="165" r="20" class="path-node"/><text x="900" y="165" class="label">1</text>
+  <circle cx="840" cy="235" r="20" class="node"/><text x="840" y="235" class="label">2</text>
+  <circle cx="960" cy="235" r="20" class="path-node"/><text x="960" y="235" class="label">3</text>
+  <circle cx="800" cy="305" r="20" class="node"/><text x="800" y="305" class="label">4</text>
+  <circle cx="880" cy="305" r="20" class="node"/><text x="880" y="305" class="label">5</text>
+  <circle cx="920" cy="305" r="20" class="node"/><text x="920" y="305" class="label">6</text>
+  <circle cx="1000" cy="305" r="20" class="path-node"/><text x="1000" y="305" class="label">7</text>
+
+  <rect x="40" y="430" width="520" height="280" class="panel" />
+  <text x="300" y="460" class="subtitle" text-anchor="middle">
+    Case 3&#65306;&#38142; -&gt; &#25200;&#28857; -&gt; &#31354;
+  </text>
+  <line x1="300" y1="505" x2="240" y2="575" class="path-edge" />
+  <line x1="300" y1="505" x2="360" y2="575" class="normal-edge" />
+  <line x1="240" y1="575" x2="200" y2="645" class="path-edge" />
+  <line x1="240" y1="575" x2="280" y2="645" class="normal-edge" />
+  <line x1="360" y1="575" x2="320" y2="645" class="normal-edge" />
+  <line x1="360" y1="575" x2="400" y2="645" class="normal-edge" />
+  <circle cx="300" cy="505" r="20" class="path-node"/><text x="300" y="505" class="label">1</text>
+  <circle cx="240" cy="575" r="20" class="path-node"/><text x="240" y="575" class="label">2</text>
+  <circle cx="360" cy="575" r="20" class="node"/><text x="360" y="575" class="label">3</text>
+  <circle cx="200" cy="645" r="20" class="path-node"/><text x="200" y="645" class="label">4</text>
+  <circle cx="280" cy="645" r="20" class="node"/><text x="280" y="645" class="label">5</text>
+  <circle cx="320" cy="645" r="20" class="node"/><text x="320" y="645" class="label">6</text>
+  <circle cx="400" cy="645" r="20" class="node"/><text x="400" y="645" class="label">7</text>
+
+  <rect x="640" y="430" width="520" height="280" class="panel" />
+  <text x="900" y="460" class="subtitle" text-anchor="middle">
+    Case 4&#65306;&#31354; -&gt; &#25200;&#28857; -&gt; &#31354;
+  </text>
+  <line x1="900" y1="505" x2="840" y2="575" class="normal-edge" />
+  <line x1="900" y1="505" x2="960" y2="575" class="normal-edge" />
+  <line x1="840" y1="575" x2="800" y2="645" class="normal-edge" />
+  <line x1="840" y1="575" x2="880" y2="645" class="normal-edge" />
+  <line x1="960" y1="575" x2="920" y2="645" class="normal-edge" />
+  <line x1="960" y1="575" x2="1000" y2="645" class="normal-edge" />
+  <circle cx="900" cy="505" r="20" class="node"/><text x="900" y="505" class="label">1</text>
+  <circle cx="840" cy="575" r="20" class="path-node"/><text x="840" y="575" class="label">2</text>
+  <circle cx="960" cy="575" r="20" class="node"/><text x="960" y="575" class="label">3</text>
+  <circle cx="800" cy="645" r="20" class="node"/><text x="800" y="645" class="label">4</text>
+  <circle cx="880" cy="645" r="20" class="node"/><text x="880" y="645" class="label">5</text>
+  <circle cx="920" cy="645" r="20" class="node"/><text x="920" y="645" class="label">6</text>
+  <circle cx="1000" cy="645" r="20" class="node"/><text x="1000" y="645" class="label">7</text>
+</svg>

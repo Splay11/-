@@ -1,0 +1,5 @@
+type: default
+score: 100
+time: 3s
+memory: 512m
+filename: testdata

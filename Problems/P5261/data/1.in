@@ -1,0 +1,11 @@
+3 7
+pkg_a scene1 v1.0
+pkg_b scene1 v1.0
+pkg_c scene2 v2.0
+pkg_a v1.0 android READY
+pkg_a v1.0 ios READY
+pkg_a v1.0 pc READY
+pkg_b v1.0 android READY
+pkg_b v1.0 ios FAIL
+pkg_b v1.0 pc READY
+pkg_c v1.5 android READY

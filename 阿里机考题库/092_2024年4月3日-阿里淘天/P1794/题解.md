@@ -1,0 +1,158 @@
+# 思路
+反悔贪心。
+考虑当前在第 i 个城市，即将前往第 i+1 个城市，手上没有粮食，需要在第 [1, i] 个城市中选择一个城市购买1单位。
+
+Q：应该选择哪个呢？
+
+A：要求花费最少，所以选择粮食价格最低的那个城市
+
+Q：如果有多个城市的花费都一样最低呢？
+
+A：哪个城市粮食被购买的次数最少，则选择对应的城市
+
+Q：如果有多个城市花费一样最低，被购买次数一样最少呢？
+
+A：那就随便
+
+所以我们可以维护前 i 个城市里，每个城市的粮食价格和被购买次数，用一个优先队列维护这两个值。
+每次取出队头：花费最低且购买次数最少的那个城市，在该城市购买1单位粮食即可。
+
+时间复杂度：$O(n\log n)$
+
+# 代码
+### python
+```python
+import heapq
+
+class Node:
+    def __init__(self, idx, val, cnt):
+        self.idx = idx
+        self.val = val
+        self.cnt = cnt
+
+    def __lt__(self, other):
+        if self.val != other.val:
+            return self.val < other.val
+        if self.cnt != other.cnt:
+            return self.cnt < other.cnt
+        return self.idx > other.idx
+
+n = int(input())
+a = list(map(int, input().split()))
+
+heap = []
+ans = [0] * n
+
+for i in range(n - 1):
+    heapq.heappush(heap, Node(i, a[i], 0))
+    top = heapq.heappop(heap)
+    top.cnt += 1
+    ans[top.idx] += 1
+    heapq.heappush(heap, top)
+
+print(*ans)
+```
+### java
+```java
+import java.util.PriorityQueue;
+import java.util.Scanner;
+
+class Node implements Comparable<Node> {
+    int idx, val, cnt;
+
+    public Node(int idx, int val, int cnt) {
+        this.idx = idx;
+        this.val = val;
+        this.cnt = cnt;
+    }
+
+    @Override
+    public int compareTo(Node other) {
+        if (this.val != other.val) {
+            return Integer.compare(this.val, other.val);
+        }
+        if (this.cnt != other.cnt) {
+            return Integer.compare(this.cnt, other.cnt);
+        }
+        return Integer.compare(other.idx, this.idx); // Note the reversed order for idx
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();
+        int[] a = new int[n];
+        int[] ans = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            a[i] = scanner.nextInt();
+        }
+
+        PriorityQueue<Node> heap = new PriorityQueue<>();
+
+        for (int i = 0; i < n - 1; i++) {
+            heap.offer(new Node(i, a[i], 0));
+            Node top = heap.poll();
+            top.cnt += 1;
+            ans[top.idx] += 1;
+            heap.offer(top);
+        }
+
+        for (int i = 0; i < n; i++) {
+            System.out.print(ans[i] + " ");
+        }
+    }
+}
+```
+### C++
+```Cpp
+#include <functional>
+#include <iostream>
+#include <queue>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+int main(){
+    int n;
+    cin>>n;
+    int dp[n],ans[n];
+    for(int i=0;i<n;i++){
+        cin>> dp[i];
+        ans[i]=0;
+    }
+    auto cmp=[](pair<int, int>& a, pair<int, int> &b){
+        return a.second>b.second;
+    };
+    priority_queue<pair<int, int>,vector<pair<int, int>>,decltype(cmp)>qu(cmp);
+    for(int i=0;i<n-1;i++){
+        if(qu.empty() || dp[i]==dp[qu.top().first]){
+            qu.push({i,1});
+        }else{
+            if(dp[i]<dp[qu.top().first]){
+                while(!qu.empty()){
+                    pair<int,int> t=qu.top();
+                    ans[t.first]=t.second;
+                    qu.pop();
+                }
+                qu.push({i,1});
+            }else{
+                pair<int,int> t=qu.top();
+                qu.pop();
+                qu.push({t.first,t.second+1});                
+            }
+        }
+    }
+     while(!qu.empty()){
+        pair<int,int> t=qu.top();
+        ans[t.first]=t.second;
+        qu.pop();
+    }
+    for(int i=0;i<n;i++){
+        cout<<ans[i]<<' ';
+    }
+
+}
+```

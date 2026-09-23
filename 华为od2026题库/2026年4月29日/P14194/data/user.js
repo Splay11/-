@@ -1,0 +1,3 @@
+var findAnomalyLogs = function(logs) {
+
+};

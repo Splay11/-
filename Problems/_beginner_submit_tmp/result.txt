@@ -1,0 +1,12 @@
+P7012 py.py3 Accepted
+P7012 java Accepted
+P7012 cc.cc14o2 Accepted
+P7012 c Accepted
+P7013 py.py3 Accepted
+P7013 java Accepted
+P7013 cc.cc14o2 Accepted
+P7013 c Accepted
+P7014 py.py3 Accepted
+P7014 java LOGIN_FAIL
+P7014 cc.cc14o2 Accepted
+P7014 c Accepted

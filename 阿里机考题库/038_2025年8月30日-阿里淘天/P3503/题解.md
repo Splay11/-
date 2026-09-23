@@ -1,0 +1,180 @@
+## 思路与做法
+
+### 计数分解
+
+设 $h(d)$ 为数字 $d$ 的洞数。长度为 $n$ 的合法数字共有 $9\cdot 10^{n-1}$ 个。把贡献按**每一位**统计：
+
+* 最高位（第 1 位）：只允许 1\~9。每个数字在这一位出现 $10^{\,n-1}$ 次。
+  贡献：$\displaystyle A \cdot 10^{\,n-1}$，其中
+
+  $A=\sum_{d=1}^{9} h(d)=0+0+0+1+0+1+0+2+1=5$
+
+* 其余 $n-1$ 位：允许 0\~9。对任意一位，每个数字出现 $9\cdot 10^{\,n-2}$ 次。
+  单个这类位置的贡献：$\displaystyle B\cdot 9\cdot 10^{\,n-2}$，其中
+
+  $B=\sum_{d=0}^{9} h(d)=1+0+0+0+1+0+1+0+2+1=6$
+
+  共 $n-1$ 个位置，于是总贡献：$(n-1)\cdot B\cdot 9\cdot 10^{\,n-2}$。
+
+于是答案
+
+  $S(n)=A\cdot$$ 10^{\,n-1}+(n-1)\cdot $$B\cdot 9\cdot 10^{\,n-2}$
+
+边界：当 $n=1$ 时，第二项为 0，仅剩第一项。
+
+### 模运算与快速幂
+
+* 需要计算 $10^{\,n-1}$ 与 $10^{\,n-2}$（$n\ge2$）的大次幂，使用**快速幂** $O(\log n)$。
+* 全程取模 $MOD=998244353$。
+
+### 复杂度
+
+* 每组数据仅做常数次运算 + 两次快速幂，时间复杂度 $O(\log n)$，空间 $O(1)$。
+* 可轻松应对 $T\le 10^4$。
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 998244353
+A = 5  # sum h[1..9]
+B = 6  # sum h[0..9]
+
+def qpow(a, e):
+    # 快速幂 a^e mod MOD
+    r = 1
+    a %= MOD
+    while e > 0:
+        if e & 1:
+            r = (r * a) % MOD
+        a = (a * a) % MOD
+        e >>= 1
+    return r
+
+def solve():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    it = iter(data)
+    T = int(next(it))
+    out = []
+    for _ in range(T):
+        n = int(next(it))
+        if n == 1:
+            # S = A * 10^(0)
+            out.append(str(A % MOD))
+            continue
+        p1 = qpow(10, n - 1)          # 10^(n-1)
+        p2 = qpow(10, n - 2)          # 10^(n-2)
+        term1 = A * p1 % MOD
+        term2 = (n - 1) % MOD
+        term2 = term2 * B % MOD
+        term2 = term2 * 9 % MOD
+        term2 = term2 * p2 % MOD
+        ans = (term1 + term2) % MOD
+        out.append(str(ans))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 998244353L;
+    static final long A = 5; // h[1..9] 之和
+    static final long B = 6; // h[0..9] 之和
+
+    // 快速幂 a^e mod MOD
+    static long qpow(long a, long e) {
+        long r = 1 % MOD;
+        a %= MOD;
+        while (e > 0) {
+            if ((e & 1) == 1) r = (r * a) % MOD;
+            a = (a * a) % MOD;
+            e >>= 1;
+        }
+        return r;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        String s = br.readLine();
+        if (s == null || s.trim().isEmpty()) return;
+        int T = Integer.parseInt(s.trim());
+        for (int t = 0; t < T; t++) {
+            long n = Long.parseLong(br.readLine().trim());
+            if (n == 1) {
+                sb.append(A % MOD).append('\n'); // 仅最高位贡献
+                continue;
+            }
+            long p1 = qpow(10, n - 1); // 10^(n-1)
+            long p2 = qpow(10, n - 2); // 10^(n-2)
+            long term1 = (A * p1) % MOD;
+            long term2 = ((n - 1) % MOD) * B % MOD;
+            term2 = term2 * 9 % MOD;
+            term2 = term2 * p2 % MOD;
+            long ans = (term1 + term2) % MOD;
+            sb.append(ans).append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using int64 = long long;
+
+const long long MOD = 998244353;
+const long long A = 5; // h[1..9] 之和
+const long long B = 6; // h[0..9] 之和
+
+// 快速幂 a^e mod MOD
+long long qpow(long long a, long long e){
+    long long r = 1 % MOD;
+    a %= MOD;
+    while(e){
+        if(e & 1) r = r * a % MOD;
+        a = a * a % MOD;
+        e >>= 1;
+    }
+    return r;
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    if(!(cin >> T)) return 0;
+    while(T--){
+        long long n; cin >> n;
+        if(n == 1){
+            cout << (A % MOD) << "\n"; // 最高位贡献
+            continue;
+        }
+        long long p1 = qpow(10, n - 1); // 10^(n-1)
+        long long p2 = qpow(10, n - 2); // 10^(n-2)
+        long long term1 = A * p1 % MOD;
+        long long term2 = ((n - 1) % MOD) * B % MOD;
+        term2 = term2 * 9 % MOD;
+        term2 = term2 * p2 % MOD;
+        long long ans = (term1 + term2) % MOD;
+        cout << ans << "\n";
+    }
+    return 0;
+}
+```

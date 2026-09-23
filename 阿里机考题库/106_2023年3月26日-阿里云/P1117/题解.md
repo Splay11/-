@@ -1,0 +1,219 @@
+## 解题思路
+
+把环形数组看成首尾相接的 $n$ 个数，在两个位置下刀后，会被分成两段连续区间。
+
+设整个数组元素和为 $S$。
+
+如果两段和相等，那么每一段的和都必须是 $\dfrac{S}{2}$。
+所以问题就变成：
+
+在环上选两个切口，等价于在线性数组里选一段连续区间，使它的区间和为 $\dfrac{S}{2}$。
+
+为了避免重复计数，我们固定只统计形如：
+
+* 左切口在位置 $i$
+* 右切口在位置 $j$
+* 满足 $0 \le i < j < n$
+
+此时对应的这一段就是线性数组中的区间 $[i, j-1]$。
+
+设前缀和为 $pre$，则区间和为：
+
+$$
+sum(i,j-1)=pre[j]-pre[i]
+$$
+
+所以只需要统计有多少对下标满足：
+
+$$
+pre[j]-pre[i]=\dfrac{S}{2}
+$$
+
+也就是：
+
+$$
+pre[i]=pre[j]-\dfrac{S}{2}
+$$
+
+这就可以用：
+
+* 前缀和
+* 哈希表计数
+
+来解决。
+
+具体做法：
+
+1. 先求总和 $S$
+2. 如果 $S$ 是奇数，则不可能平分，答案直接为 $0$
+3. 从左到右枚举前缀和位置 $j$
+4. 用哈希表记录前面出现过多少个前缀和
+5. 对当前前缀和 $pre[j]$，查询有多少个 $pre[i]=pre[j]-\dfrac{S}{2}$，累加到答案中
+
+注意：
+
+* 只需要枚举到前缀位置 $1 \sim n-1$
+* 因为两刀切出来的两段都必须非空，所以不能把整个数组都选进去
+
+## 复杂度分析
+
+设数组长度为 $n$。
+
+* 时间复杂度：$O(n)$
+* 空间复杂度：$O(n)$
+
+对于 $n \le 10^5$ 的数据范围，这个复杂度是完全可行的。
+
+## 代码实现
+
+### Python
+
+```python
+def solve(nums):
+    # 计算数组总和
+    total = sum(nums)
+
+    # 总和为奇数时，不可能分成两段和相等
+    if total % 2 != 0:
+        return 0
+
+    target = total // 2
+    cnt = {0: 1}  # 记录前面出现过的前缀和个数，初始前缀和为0
+    pre = 0
+    ans = 0
+    n = len(nums)
+
+    # 只枚举到 n-1，保证两段都非空
+    for i in range(n - 1):
+        pre += nums[i]  # 当前前缀和
+        ans += cnt.get(pre - target, 0)  # 统计满足条件的前缀和个数
+        cnt[pre] = cnt.get(pre, 0) + 1   # 记录当前前缀和
+
+    return ans
+
+
+if __name__ == "__main__":
+    n = int(input())
+    nums = list(map(int, input().split()))
+    print(solve(nums))
+```
+
+### Java
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Main {
+    public static long solve(long[] nums) {
+        int n = nums.length;
+        long total = 0;
+
+        // 计算数组总和
+        for (long x : nums) {
+            total += x;
+        }
+
+        // 总和为奇数时，不可能分成两段和相等
+        if (total % 2 != 0) {
+            return 0;
+        }
+
+        long target = total / 2;
+        long pre = 0;
+        long ans = 0;
+
+        // 哈希表记录前缀和出现次数
+        Map<Long, Long> cnt = new HashMap<>();
+        cnt.put(0L, 1L); // 初始前缀和为0
+
+        // 只枚举到 n-1，保证两段都非空
+        for (int i = 0; i < n - 1; i++) {
+            pre += nums[i]; // 当前前缀和
+
+            // 查询满足 pre[i] = pre - target 的个数
+            ans += cnt.getOrDefault(pre - target, 0L);
+
+            // 记录当前前缀和
+            cnt.put(pre, cnt.getOrDefault(pre, 0L) + 1);
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int n = sc.nextInt();
+        long[] nums = new long[n];
+
+        // 输入数组
+        for (int i = 0; i < n; i++) {
+            nums[i] = sc.nextLong();
+        }
+
+        System.out.println(solve(nums));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+long long solve(const vector<long long>& nums) {
+    int n = nums.size();
+    long long total = 0;
+
+    // 计算数组总和
+    for (long long x : nums) {
+        total += x;
+    }
+
+    // 总和为奇数时，不可能分成两段和相等
+    if (total % 2 != 0) {
+        return 0;
+    }
+
+    long long target = total / 2;
+    long long pre = 0;
+    long long ans = 0;
+
+    // 哈希表记录前缀和出现次数
+    unordered_map<long long, long long> cnt;
+    cnt[0] = 1; // 初始前缀和为0
+
+    // 只枚举到 n-1，保证两段都非空
+    for (int i = 0; i < n - 1; i++) {
+        pre += nums[i]; // 当前前缀和
+
+        // 统计满足条件的前缀和个数
+        if (cnt.count(pre - target)) {
+            ans += cnt[pre - target];
+        }
+
+        // 记录当前前缀和
+        cnt[pre]++;
+    }
+
+    return ans;
+}
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<long long> nums(n);
+    for (int i = 0; i < n; i++) {
+        cin >> nums[i];
+    }
+
+    cout << solve(nums) << endl;
+    return 0;
+}
+```

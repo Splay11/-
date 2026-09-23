@@ -1,0 +1,61 @@
+## 题解思路与方法
+
+### 问题分析
+给定一个二维数据集，每行是一个样本，最后一列为标签。要对每个特征计算基尼指数，选择基尼值最小的特征。基尼指数常用于决策树（CART）算法的划分标准。
+
+### 算法流程
+1. 记样本总数为 $n$，特征数为 $m$。
+2. 对每个特征 $j$ （$0 \le j < m$）：
+   1. 按该特征的取值 $v\in V_j$ 将样本分组，得到子集 $D^v$。
+   2. 对每个子集 $D^v$ 计算其基尼值：
+      $Gini(D^v)=1-\sum_{k}(p_k)^2,$$\quad p_k=\frac{\text{类别}~k~\text{的样本数}}{|D^v|}.$
+   3. 计算该特征的加权基尼：
+      $Gini(D,j)=\sum_{v\in V_j}$$\frac{|D^v|}{n}\,Gini(D^v).$
+3. 取最小的 $Gini(D,j)$ ，若有并列则取最小索引。
+
+### 相关算法
+- **CART 决策树**：选择使划分后节点基尼指数最小的特征及切分点。
+
+## 复杂度分析
+- **时间复杂度**：对每个特征做一次遍历分组并统计，约 $O(mn)$，其中 $m$ 为特征数，$n$ 为样本数。
+- **空间复杂度**：存储分组与计数，最坏 $O(n)$。
+
+## 代码实现
+
+### Python
+
+```python
+def best_feature(data):
+    # data: 二维列表，每行末尾是标签
+    n = len(data)
+    m = len(data[0]) - 1  # 特征数
+    best_idx, best_g = 0, float('inf')
+    for j in range(m):
+        # 按 data[i][j] 分组，存各组的标签列表
+        groups = {}
+        for row in data:
+            v = row[j]
+            groups.setdefault(v, []).append(row[-1])
+        # 计算特征 j 的基尼指数
+        g_j = 0.0
+        for labels in groups.values():
+            size = len(labels)
+            # 统计每个类别的数量
+            cnt = {}
+            for lbl in labels:
+                cnt[lbl] = cnt.get(lbl, 0) + 1
+            # 计算子集基尼
+            score = 1.0
+            for c in cnt.values():
+                p = c / size
+                score -= p * p
+            g_j += size / n * score
+        # 更新最小基尼
+        if g_j < best_g:
+            best_g, best_idx = g_j, j
+    # 保留一位小数
+    return best_idx, round(best_g, 1)
+
+data = eval(input())
+print(best_feature(data))  # 输出
+```

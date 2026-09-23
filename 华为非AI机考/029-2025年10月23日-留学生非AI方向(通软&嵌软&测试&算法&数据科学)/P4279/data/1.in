@@ -1,0 +1,16 @@
+15
+ls
+mkdir dir1
+ls
+mkdir dir2
+mkdir dir3
+ls
+ls
+cd ..
+ls
+cd usr
+mkdir dir4
+cd dir3
+cd ..
+ls
+ls

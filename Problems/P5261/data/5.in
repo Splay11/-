@@ -1,0 +1,63 @@
+20 42
+r0 sc0 v0
+r1 sc1 v1
+r2 sc2 v0
+r3 sc0 v1
+r4 sc1 v0
+r5 sc2 v1
+r6 sc0 v0
+r7 sc1 v1
+r8 sc2 v0
+r9 sc0 v1
+r10 sc1 v0
+r11 sc2 v1
+r12 sc0 v0
+r13 sc1 v1
+r14 sc2 v0
+r15 sc0 v1
+r16 sc1 v0
+r17 sc2 v1
+r18 sc0 v0
+r19 sc1 v1
+r0 v0 android READY
+r0 v0 ios READY
+r0 v0 pc READY
+r1 v1 android READY
+r1 v1 pc READY
+r2 v0 android READY
+r2 v0 ios READY
+r3 v1 ios FAIL
+r4 v0 android READY
+r4 v0 ios READY
+r4 v0 pc READY
+r5 v1 android READY
+r5 v1 pc READY
+r6 v0 ios FAIL
+r6 v0 pc FAIL
+r7 v1 android READY
+r7 v1 ios READY
+r7 v1 pc READY
+r8 v0 ios FAIL
+r8 v0 pc FAIL
+r9 v1 android READY
+r9 v1 pc READY
+r10 v0 ios READY
+r11 v1 android READY
+r11 v1 ios READY
+r11 v1 pc READY
+r12 v0 ios READY
+r13 v1 ios FAIL
+r14 v0 android READY
+r14 v0 ios READY
+r14 v0 pc READY
+r15 v1 android READY
+r15 v1 ios READY
+r16 v0 ios READY
+r16 v0 pc READY
+r17 v1 pc READY
+r18 v0 android READY
+r18 v0 ios FAIL
+r18 v0 pc READY
+r19 v1 android FAIL
+r19 v1 ios READY
+r19 v1 pc READY

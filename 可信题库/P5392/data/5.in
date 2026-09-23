@@ -1,0 +1,8 @@
+FileLockBoard()
+lock(1, 7)
+lock(2, 8)
+lock(3, 7)
+holder(2)
+unlock(1, 8)
+unlock(1, 7)
+lockedCount()

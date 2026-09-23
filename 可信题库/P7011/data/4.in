@@ -1,0 +1,6 @@
+CertAuthority()
+issue(1, 0, 5)
+isValid(1, 4)
+isValid(1, 5)
+ttl(1, 4)
+ttl(1, 5)

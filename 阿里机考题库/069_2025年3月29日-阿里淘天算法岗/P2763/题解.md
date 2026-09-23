@@ -1,0 +1,155 @@
+# 题解
+
+## 题面描述
+
+给定一个长度为 $n$ 的 $01$ 串 $x$（下标从 $1$ 到 $n$），和另一个长度为 $n-1$ 的 $01$ 串 $y$（下标从 $1$ 到 $n-1$）。串 $y$ 用于约束串 $x$，具体规则如下：  
+- 如果 $y_i=1$（$1 \leq i \leq n-1$），则要求 $x_i \neq x_{i+1}$。  
+- 如果 $y_i=0$（$1 \leq i \leq n-1$），则要求 $x_i = x_{i+1}$。  
+
+初始的串 $x$ 可能不满足 $y$ 的要求，允许通过将 $x$ 中的某个字符取反（即执行 $x_i := x_i \oplus 1$）来修改。目标是修改尽可能少的字符，使得最终的 $x$ 串满足所有的约束条件。  
+
+---
+
+## 思路
+
+我们可以采用动态规划（$DP$）的方法求解。令 $dp[i][b]$ 表示处理到 $x$ 串的第 $i$ 个位置，并且第 $i$ 个字符修改后为 $b$（其中 $b \in \{0,1\}$）时的最少修改次数。状态转移分为两种情况：  
+
+- 对于第 $1$ 个位置，由于没有前一个字符，所以直接比较原字符与目标字符是否相同即可。  
+  - $dp[1][0] = (x_1 == 0 ? 0 : 1)$  
+  - $dp[1][1] = (x_1 == 1 ? 0 : 1)$  
+
+- 对于第 $i$ 个位置（$2 \leq i \leq n$），根据 $y_{i-1}$ 的值不同，有如下转移：  
+  - 若 $y_{i-1}=0$，则要求 $x_{i-1}$ 和 $x_i$ 必须相同。  
+    - $dp[i][b] = dp[i-1][b] + cost$，其中 $cost = (x_i == b ? 0 : 1)$。  
+  - 若 $y_{i-1}=1$，则要求 $x_{i-1}$ 和 $x_i$ 必须不同。  
+    - $dp[i][b] = dp[i-1][1-b] + cost$。  
+
+最后答案为 $\min(dp[n][0], dp[n][1])$。
+
+---
+
+## 代码分析
+
+整个算法的时间复杂度为 $O(n)$，由于我们只维护前一个状态，可以考虑空间优化。算法核心在于根据 $y$ 的约束决定 $x_i$ 与前一个位置 $x_{i-1}$ 是否取同样的值或者相反的值，并累计修改次数。状态转移时，每一步仅需要考虑两种可能，故整体实现十分高效。
+
+## C++
+
+```cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <vector>
+using namespace std;
+ 
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    cin >> T;
+    while(T--){
+        int n;
+        cin >> n;
+        string x, y;
+        cin >> x >> y;
+        // dp[i][0] 表示前 i 个字符，且第 i 个字符为 '0' 时的最小修改次数
+        // dp[i][1] 表示前 i 个字符，且第 i 个字符为 '1' 时的最小修改次数
+        vector<vector<int>> dp(n+1, vector<int>(2, 1e9));
+        // 初始化第 1 个字符
+        dp[1][0] = (x[0] == '0' ? 0 : 1);
+        dp[1][1] = (x[0] == '1' ? 0 : 1);
+        for(int i = 2; i <= n; i++){
+            // cost 表示将 x[i-1] 修改为目标字符 b 所需的代价
+            for(int b = 0; b < 2; b++){
+                int cost = (x[i-1] - '0' == b ? 0 : 1);
+                if(y[i-2] == '0'){
+                    // 当 y[i-1] 为 0 时，要求相等
+                    dp[i][b] = dp[i-1][b] + cost;
+                } else {
+                    // 当 y[i-1] 为 1 时，要求不相等
+                    dp[i][b] = dp[i-1][1-b] + cost;
+                }
+            }
+        }
+        int ans = min(dp[n][0], dp[n][1]);
+        cout << ans << "\n";
+    }
+    return 0;
+}
+```
+## python
+
+```python
+# 读取输入并处理多组测试数据
+import sys
+input = sys.stdin.readline
+
+T = int(input())
+for _ in range(T):
+    n = int(input().strip())
+    x = input().strip()
+    y = input().strip()
+    # dp[i][0] 表示前 i 个字符，且第 i 个字符为 '0' 的最小修改次数
+    # dp[i][1] 表示前 i 个字符，且第 i 个字符为 '1' 的最小修改次数
+    dp = [[10**9, 10**9] for _ in range(n+1)]
+    # 初始化第 1 个字符
+    dp[1][0] = 0 if x[0] == '0' else 1
+    dp[1][1] = 0 if x[0] == '1' else 1
+    for i in range(2, n+1):
+        for b in range(2):
+            # cost 表示将 x[i-1] 修改为字符 str(b) 所需的代价
+            cost = 0 if x[i-1] == str(b) else 1
+            if y[i-2] == '0':
+                # y[i-1] 为 0 时，要求相等
+                dp[i][b] = dp[i-1][b] + cost
+            else:
+                # y[i-1] 为 1 时，要求不相等
+                dp[i][b] = dp[i-1][1-b] + cost
+    ans = min(dp[n][0], dp[n][1])
+    sys.stdout.write(str(ans) + "\n")
+```
+## java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringTokenizer;
+ 
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(in.readLine());
+        while(T-- > 0){
+            int n = Integer.parseInt(in.readLine());
+            String x = in.readLine();
+            String y = in.readLine();
+            // dp[i][0] 表示前 i 个字符，且第 i 个字符为 '0' 的最小修改次数
+            // dp[i][1] 表示前 i 个字符，且第 i 个字符为 '1' 的最小修改次数
+            int[][] dp = new int[n+1][2];
+            int INF = 1000000000;
+            for(int i = 0; i <= n; i++){
+                dp[i][0] = INF;
+                dp[i][1] = INF;
+            }
+            // 初始化第 1 个字符
+            dp[1][0] = (x.charAt(0) == '0' ? 0 : 1);
+            dp[1][1] = (x.charAt(0) == '1' ? 0 : 1);
+            for(int i = 2; i <= n; i++){
+                for(int b = 0; b < 2; b++){
+                    // cost 表示将 x[i-1] 修改为字符 (char)(b + '0') 所需的代价
+                    int cost = (x.charAt(i-1) == (char)(b + '0') ? 0 : 1);
+                    if(y.charAt(i-2) == '0'){
+                        // y[i-1] 为 0 时，要求相等
+                        dp[i][b] = dp[i-1][b] + cost;
+                    } else {
+                        // y[i-1] 为 1 时，要求不相等
+                        dp[i][b] = dp[i-1][1-b] + cost;
+                    }
+                }
+            }
+            int ans = Math.min(dp[n][0], dp[n][1]);
+            System.out.println(ans);
+        }
+    }
+}
+```

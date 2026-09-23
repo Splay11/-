@@ -1,0 +1,214 @@
+## 解题思路
+
+设第 $i$ 位最终都变成 $c_i$，由于操作只能减小，所以一定有：
+
+$$
+c_i \le \min(a_i,b_i)
+$$
+
+为了让操作次数最少，显然应让最终值尽量大，因此最优一定是：
+
+$$
+c_i=\min(a_i,b_i)
+$$
+
+这样每一位多出来的部分都必须被删掉：
+
+* 若 $a_i>b_i$，则 $a_i-b_i$ 这部分只能从 $a_i$ 中减掉
+* 若 $b_i>a_i$，则 $b_i-a_i$ 这部分只能从 $b_i$ 中减掉
+
+记：
+
+$$
+needA=\sum \max(a_i-b_i,0)
+$$
+
+$$
+needB=\sum \max(b_i-a_i,0)
+$$
+
+操作3可以同时让某个 $a_i$ 和某个 $b_j$ 各减 $1$，因此可以尽量同时消耗两边的需求。
+所以最少操作次数就是：
+
+$$
+\boxed{\max(needA,needB)}
+$$
+
+### 实现方法
+
+遍历一遍数组：
+
+* 如果 $a_i>b_i$，累加到 `needA`
+* 否则累加到 `needB`
+
+最后输出 `max(needA, needB)` 即可。
+
+## 复杂度分析
+
+遍历一次数组即可：
+
+* 时间复杂度：$O(n)$
+* 空间复杂度：$O(1)$
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 计算一组数据的最少操作次数
+def solve_one(n, a, b):
+    # need_a 表示数组 a 还需要单独减少的总量
+    need_a = 0
+    # need_b 表示数组 b 还需要单独减少的总量
+    need_b = 0
+
+    # 逐位比较 a 和 b
+    for i in range(n):
+        if a[i] > b[i]:
+            # 如果 a[i] 更大，那么最终至少要把 a[i] 多出来的部分减掉
+            need_a += a[i] - b[i]
+        else:
+            # 如果 b[i] 更大，那么最终至少要把 b[i] 多出来的部分减掉
+            need_b += b[i] - a[i]
+
+    # 操作3可以同时消耗两边各 1 的需求
+    # 因此最少操作次数就是两边需求的较大值
+    return max(need_a, need_b)
+
+
+def main():
+    input = sys.stdin.readline
+    T = int(input())
+    ans = []
+
+    for _ in range(T):
+        n = int(input())
+        a = list(map(int, input().split()))
+        b = list(map(int, input().split()))
+
+        ans.append(str(solve_one(n, a, b)))
+
+    print("\n".join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.*;
+
+
+public class Main {
+
+    // 计算一组数据的最少操作次数
+    public static long solveOne(int n, int[] a, int[] b) {
+        // needA 表示数组 a 还需要单独减少的总量
+        long needA = 0;
+        // needB 表示数组 b 还需要单独减少的总量
+        long needB = 0;
+
+        // 逐位比较 a 和 b
+        for (int i = 0; i < n; i++) {
+            if (a[i] > b[i]) {
+                // a[i] 比 b[i] 大，多出的部分一定要从 a 中减掉
+                needA += (long) a[i] - b[i];
+            } else {
+                // b[i] 比 a[i] 大，多出的部分一定要从 b 中减掉
+                needB += (long) b[i] - a[i];
+            }
+        }
+
+        // 最少操作次数为两边需求的较大值
+        return Math.max(needA, needB);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int T = sc.nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        while (T-- > 0) {
+            int n = sc.nextInt();
+            int[] a = new int[n];
+            int[] b = new int[n];
+
+            for (int i = 0; i < n; i++) {
+                a[i] = sc.nextInt();
+            }
+            for (int i = 0; i < n; i++) {
+                b[i] = sc.nextInt();
+            }
+
+            sb.append(solveOne(n, a, b)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+
+// 计算一组数据的最少操作次数
+long long solveOne(int n, const vector<long long>& a, const vector<long long>& b) {
+    // needA 表示数组 a 还需要单独减少的总量
+    long long needA = 0;
+    // needB 表示数组 b 还需要单独减少的总量
+    long long needB = 0;
+
+    // 逐位比较 a 和 b
+    for (int i = 0; i < n; i++) {
+        if (a[i] > b[i]) {
+            // a[i] 多出来的部分最终必须减掉
+            needA += a[i] - b[i];
+        } else {
+            // b[i] 多出来的部分最终必须减掉
+            needB += b[i] - a[i];
+        }
+    }
+
+    // 最少操作次数等于两边需求的较大值
+    return max(needA, needB);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n;
+        cin >> n;
+
+        vector<long long> a(n), b(n);
+
+        for (int i = 0; i < n; i++) {
+            cin >> a[i];
+        }
+        for (int i = 0; i < n; i++) {
+            cin >> b[i];
+        }
+
+        cout << solveOne(n, a, b) << '\n';
+    }
+
+    return 0;
+}
+```

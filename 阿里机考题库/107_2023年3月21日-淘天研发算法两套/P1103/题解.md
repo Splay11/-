@@ -1,0 +1,29 @@
+## 思路:枚举 + 滑动窗口
+
+​	很容易想到暴力枚举的方法。先枚举最终这段连续相同的数字是什么，再去枚举每个长度为$k$的子段。然后再去计算答案。这样复杂度是$O(10n^2)$的。
+
+​	我们发现每个子段的答案可以使用滑动窗口的方法动态维护。即往右移动一格就把出去的值给减去，然后再加上就行。复杂度$O(10n)$
+
+## 代码
+
+python
+
+```python
+n , k = list(map(int , input().split()))
+a = list(map(int , input().split()))
+ans = 10000000000
+# 枚举最后变成什么
+for d in range (10):
+	cost = 0
+	# 先求前k个
+	for i in range (k):
+		cost += abs(a[i] - d)
+	ans = min (ans , cost)
+	# 滑动窗口
+	for i in range (k , n):
+		cost += abs(a[i] - d)
+		cost -= abs(a[i - k] - d)
+		ans = min (ans , cost)
+
+print (ans)
+```

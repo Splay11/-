@@ -1,0 +1,210 @@
+## 解题思路
+
+先把题目中双方对 $A-B$ 的影响拆开来看。
+
+设某个位置 $i$ 的权值为：
+
+$$
+x_i = a_i - b_i
+$$
+
+那么：
+
+* 如果这个位置被 Alice 选中，她这一回合的净收益是 $a_i-b_i=x_i$，因此 $A-B$ 增加 $x_i$。
+* 如果这个位置被 Bob 选中，他这一回合的净收益是 $b_i-a_i$，这会让 $B$ 增加 $b_i-a_i$，于是
+
+$$
+A-B = A-(B+(b_i-a_i)) = (A-B) - (b_i-a_i) = (A-B) + (a_i-b_i)
+$$
+
+也就是说，**Bob 选中位置 $i$ 时，$A-B$ 同样增加 $x_i=a_i-b_i$。**
+
+这说明一个非常关键的结论：
+
+> 不管位置 $i$ 是被 Alice 选，还是被 Bob 选，它对最终答案 $A-B$ 的贡献始终都是 $a_i-b_i$。
+
+而题目规定每个位置都会且只会被选择一次，所以最终分差恒为所有位置贡献之和：
+
+$$
+A-B=\sum_{i=1}^{n}(a_i-b_i)
+$$
+
+因此：
+
+* 双方是否“最优博弈”并不影响结果；
+* 不需要真的模拟博弈过程；
+* 不需要使用贪心、动态规划、极大极小搜索等复杂算法；
+* 直接求和即可。
+
+这其实是一个**博弈结论转化为数学不变量**的问题。
+核心算法就是：
+
+1. 读入 $n$
+2. 读入数组 $a$
+3. 读入数组 $b$
+4. 计算 $\sum (a_i-b_i)$
+5. 输出结果
+
+如果题目有多组数据，就对每组数据分别这样处理即可。
+
+## 复杂度分析
+
+对于每组数据，只需要遍历一次数组：
+
+* 时间复杂度：$O(n)$
+* 空间复杂度：$O(1)$（若不计输入存储可视为 $O(1)$；若存储数组则为 $O(n)$）
+
+这个复杂度是完全合适的。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+def solve(a, b):
+    # 计算所有位置对最终分差 A-B 的总贡献
+    ans = 0
+    for i in range(len(a)):
+        ans += a[i] - b[i]
+    return ans
+
+
+def main():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+
+    # 第一位是测试组数
+    t = int(data[0])
+    idx = 1
+    res = []
+
+    for _ in range(t):
+        # 读入当前测试用例的 n
+        n = int(data[idx])
+        idx += 1
+
+        # 读入数组 a
+        a = list(map(int, data[idx:idx + n]))
+        idx += n
+
+        # 读入数组 b
+        b = list(map(int, data[idx:idx + n]))
+        idx += n
+
+        # 调用外部函数计算答案
+        res.append(str(solve(a, b)))
+
+    print("\n".join(res))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+
+    public static long solve(int[] a, int[] b) {
+        // 计算所有位置对最终分差 A-B 的总贡献
+        long ans = 0;
+        for (int i = 0; i < a.length; i++) {
+            ans += (long) a[i] - b[i];
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // 读入测试组数
+        int t = sc.nextInt();
+        List<Long> list = new ArrayList<>();
+
+        while (t-- > 0) {
+            // 读入当前测试用例的 n
+            int n = sc.nextInt();
+
+            // 读入数组 a
+            int[] a = new int[n];
+            for (int i = 0; i < n; i++) {
+                a[i] = sc.nextInt();
+            }
+
+            // 读入数组 b
+            int[] b = new int[n];
+            for (int i = 0; i < n; i++) {
+                b[i] = sc.nextInt();
+            }
+
+            // 调用外部函数计算答案
+            list.add(solve(a, b));
+        }
+
+        // 按行输出所有答案
+        StringBuilder sb = new StringBuilder();
+        for (long ans : list) {
+            sb.append(ans).append('\n');
+        }
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+long long solve(const vector<int>& a, const vector<int>& b) {
+    // 计算所有位置对最终分差 A-B 的总贡献
+    long long ans = 0;
+    for (int i = 0; i < (int)a.size(); i++) {
+        ans += 1LL * a[i] - b[i];
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // 读入测试组数
+    int t;
+    cin >> t;
+
+    while (t--) {
+        // 读入当前测试用例的 n
+        int n;
+        cin >> n;
+
+        // 读入数组 a
+        vector<int> a(n);
+        for (int i = 0; i < n; i++) {
+            cin >> a[i];
+        }
+
+        // 读入数组 b
+        vector<int> b(n);
+        for (int i = 0; i < n; i++) {
+            cin >> b[i];
+        }
+
+        // 调用外部函数计算答案
+        cout << solve(a, b) << '\n';
+    }
+
+    return 0;
+}
+```

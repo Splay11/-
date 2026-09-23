@@ -1,0 +1,8 @@
+MemMgmtSys(6)
+processMemAlloc(1, 1)
+processMemAlloc(2, 1)
+processMemAlloc(3, 1)
+processMemFree(2)
+processMemAlloc(4, 2)
+processMemQuery(1)
+processMemQuery(3)

@@ -1,0 +1,7 @@
+MicQueue()
+enroll(1, 10)
+enroll(2, 20)
+boost(1, 100)
+nextPlay()
+nextPlay()
+waiting()

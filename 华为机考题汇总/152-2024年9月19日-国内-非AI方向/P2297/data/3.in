@@ -1,0 +1,11 @@
+5 5
+(rwqkcbzena = 'NW10' OR rwqkcbzena = 'N10' OR rwqkcbzena = 'SW10') OR snhvqcotia = 'NE10' OR (ddkduqjfbv = 'NE10' OR ddkduqjfbv = 'N10') OR esoqqnyfde = 'N10' OR pzbkgopjex = 'SW10'
+rwqkcbzena = 'NW10' AND (snhvqcotia = 'NE10' OR snhvqcotia = 'SE10') AND ddkduqjfbv = 'NW10' AND esoqqnyfde = 'NW10' OR (pzbkgopjex = 'SE10' OR pzbkgopjex = 'SW10' OR pzbkgopjex = 'S10')
+(rwqkcbzena = 'NW10' OR rwqkcbzena = 'S10' OR rwqkcbzena = 'SE10') OR snhvqcotia = 'SW10' OR ddkduqjfbv = 'SW10' OR (esoqqnyfde = 'SE10' OR esoqqnyfde = 'N10') AND (pzbkgopjex = 'NW10' OR pzbkgopjex = 'S10')
+(rwqkcbzena = 'S10' OR rwqkcbzena = 'SE10') AND snhvqcotia = 'NW10' OR (ddkduqjfbv = 'N10' OR ddkduqjfbv = 'SW10') OR (esoqqnyfde = 'NE10' OR esoqqnyfde = 'S10' OR esoqqnyfde = 'NW10') OR (pzbkgopjex = 'SW10' OR pzbkgopjex = 'S10' OR pzbkgopjex = 'NW10')
+(rwqkcbzena = 'S10' OR rwqkcbzena = 'SE10' OR rwqkcbzena = 'NW10') AND (snhvqcotia = 'N10' OR snhvqcotia = 'SE10') AND ddkduqjfbv = 'SE10' OR (esoqqnyfde = 'NE10' OR esoqqnyfde = 'S10' OR esoqqnyfde = 'N10') AND pzbkgopjex = 'NW10'
+rwqkcbzena N10
+snhvqcotia SW10
+ddkduqjfbv NW10
+esoqqnyfde NE10
+pzbkgopjex S10

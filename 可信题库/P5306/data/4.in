@@ -1,0 +1,7 @@
+LeaseManager(100)
+acquire(7, 3, 50)
+renew(7, 3, 60)
+release(7, 4)
+release(7, 3)
+acquire(7, 4, 70)
+holder(7, 70)

@@ -1,0 +1,6 @@
+TTLCache(1)
+put(1, 1, 10)
+put(2, 2, 5)
+get(1, 0)
+get(2, 0)
+size()

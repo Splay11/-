@@ -1,0 +1,1 @@
+["AddProductionRecord,solar,300,1640000000,1640002000", "AddConsumptionRecord,150,1640001000,1640003000", "QueryNetEnergy,A,1640000000,1640002000"]

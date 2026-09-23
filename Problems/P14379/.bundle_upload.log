@@ -1,0 +1,368 @@
+﻿宸插埛鏂?manifest: D:\鏈鸿€冨嚭棰榎problem-maker\Problems\P14379\leetcode_core_bundle_paths.json
+HTTP 404
+<!DOCTYPE html>
+<html data-page="error" data-layout="basic" class="layout--basic page--error theme--light nojs" data-mantine-color-scheme="light" lang="" data-app="Hydro">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+  <link rel="canonical" href="codefun2000.comapi/problem/upload_leetcode_core_bundle">  <meta name="theme-color" content="#56758f">
+    <meta property="og:site_name" content="CodeFun2000" />
+  <meta property="og:url" content="codefun2000.comapi/problem/upload_leetcode_core_bundle" />
+  <meta property="og:image" content="/favicon-96x96.png" />
+      <title>error - CodeFun2000</title>
+  <style>
+    body {
+      --font-family: "Open Sans", "Open Sans", "Seravek", "Segoe UI", "Verdana", "PingFang SC", "Hiragino Sans GB", "Lantinghei SC", "Microsoft Yahei", "WenQuanYi Micro Hei", "sans";
+      --code-font-family: "Source Code Pro", "monaco", "Source Code Pro", "Consolas", "Lucida Console", "monospace";
+      --font-ligatures: none !important;
+    }
+          #panel { display: flex; flex-direction: column; }
+      </style>
+      <link rel="stylesheet" media="all" href="/theme-4.58.0-beta.21.css">
+        <script>
+      var _htmlNode = document.documentElement;
+      _htmlNode.className = _htmlNode.className.replace(' nojs', ' hasjs');
+      window.UiContext = '{"cdn_prefix":"/","url_prefix":"/","ws_prefix":"/","aiFeatures":{"askai":false,"aiChat":true,"translate":false},"aiAssets":{"js":"index-CJl_Cx3K.js","css":"index-BLrdB0V-.css"},"aiChat":{"problem":{"prepend":"\u7528\u6237\u6B63\u5728\u9488\u5BF9\u8FD9\u9053\u9898\u76EE\u8FDB\u884C\u63D0\u95EE\uFF1A\\n{problem}","selectText":false,"choices":[{"title":"\u6211\u4E0D\u7406\u89E3\u8FD9\u9053\u9898\u76EE","label":"","action":"\u6211\u4E0D\u7406\u89E3\u8FD9\u9053\u9898\u76EE"}]},"solution":{"enabled":false}},"constantVersion":"8e19b0e7","domainId":"system","domain":{"_id":"system","lower":"system","owner":1,"name":"CodeFun","bulletin":"# <div>\u6B22\u8FCE\u6765\u5230\u5854\u5B50\u54E5\u7684\u7B97\u6CD5\u5C0F\u5C4BCodeFun2000\uD83D\uDE18</div>\\r\\n\\r\\n## \u9898\u5E93\\r\\n\\r\\n\u672C\u7AD9\u6839\u636E\u7F51\u53CB\u6295\u7A3F\u6536\u5F55\u4E86\u4E92\u8054\u7F51\u4E0A\u5404\u4E2A\u516C\u53F8\u7684**3000+\u9053**[**\u7B14\u8BD5\u9898**](https://codefun2000.com/pset)\uFF0C\u63D0\u4F9B\\r\\n\\r\\n1\uFE0F\u20E3\u6587\u5B57\u9898\u89E3\\r\\n\\r\\n2\uFE0F\u20E3C++,Python,Java\u89E3\u6790\\r\\n\\r\\n3\uFE0F\u20E3[\u89C6\u9891\u9898\u89E3\uFF08\u90E8\u5206\uFF09](https://space.bilibili.com/1167140350/lists)\u3002\\r\\n\\r\\n**\u914D\u5957\u9898\u5355**\\r\\n\\r\\n[\u4E92\u8054\u7F51\u6700\u65B0\u7B14\u8BD5\u5237\u9898\u9898\u5355](https://rttxvuqg3f.feishu.cn/docx/H5C9dEQsHo5NEXxHU7JcEGeQnhg)\\r\\n\\r\\n[\u534E\u4E3A\u4E13\u9879\u5237\u9898\u9898\u5355&\u4E0A\u5CB8\u5B9D\u5178](https://rttxvuqg3f.feishu.cn/docx/PcBHdy3GsoIhxnx1RqucVqRdnAf)\\r\\n\\r\\n> \u6B64\u5916:\u540C\u5B66\u5927\u5BB6\u53EF\u4EE5\u5173\u6CE8\u516C\u4F17\u53F7**\u5854\u5B50\u54E5\u5B66\u7B97\u6CD5**\u5B9E\u65F6\u66F4\u65B0\u6700\u65B0\u7B14\u8BD5\u9898\uD83D\uDE4B\u200D\\r\\n\\r\\n## \u8BFE\u7A0B\\r\\n\\r\\n\u5982\u679C\u60F3\u9762\u8BD5\u548C\u7B14\u8BD5\u4E24\u624B\u6293\uFF0C\u5854\u5B50\u54E5\u63A8\u51FA\u4E86\u4ECE0\u52301\u7684[**\u4E13\u9879\u7B97\u6CD5\u57FA\u7840\u8BFE**](https://codefun2000.com/course)\uFF0C\u77E5\u8BC6\u70B9\u5BF9\u6807Hot 100 \uFF0C \u5728\u6B64\u57FA\u7840\u4E0A\u5F15\u5165\u7ECF\u5178\u7684\u5927\u5382\u7B14\u8BD5\u9898\uFF0C\u6BCF\u9053\u9898\u6709\u6587\u5B57\u9898\u89E3+\u89C6\u9891\u9898\u89E3+\u5185\u90E8\u7B54\u7591\uFF0C\u52A9\u529B\u5404\u4F4D\u79CB\u62DB&\u5B9E\u4E60\uD83D\uDCAA\uD83D\uDCAA\\r\\n\\r\\n## \u9762\u8BD5\u624B\u6495 Hot 100 \u9898\u5E93(ACM\u6A21\u5F0F\u7248)\\r\\n\\r\\n\u7531\u4E8E\u76EE\u524D\u4E92\u8054\u7F51\u5382\u8D8A\u6765\u8D8A\u591A\u503E\u5411\u4E8E\u4ECEACM\u6A21\u5F0F\u51FA\u53D1\u8003\u5BDF\u624B\u6495\u7B97\u6CD5\u9898\uFF0C\u4E3A\u4E86\u8BA9\u5927\u5BB6\u66F4\u597D\u7684\u719F\u6089\u7EC3\u4E60\u8FD9\u79CD\u6A21\u5F0F\uFF0C\u540C\u65F6\u66F4\u597D\u7684\u987A\u624B\u53BB**\u51C6\u5907\u673A\u8003\uFF0899%\u7684\u673A\u8003\u662FACM\u6A21\u5F0F\uFF09** \uFF0C \u8FD9\u91CC\u63A8\u51FA[LC Hot 100 \u9898\u5E93(ACM\u6A21\u5F0F\u7248)](https://codefun2000.com/pset/67d122887f55428268388997)\\r\\n\\r\\n## \u6C38\u4E45\u4F1A\u5458\\r\\n\\r\\n\u8D2D\u4E70[\u6C38\u4E45\u4F1A\u5458](https://codefun2000.com/vip)\uFF0C\u53EF\u4EAB\u53D7**\u5168\u7AD9\u6240\u6709\u670D\u52A1\uFF0C\u4E00\u6B65\u5230\u4F4D**\\r\\n\\r\\n## \u5E73\u53F0\u4F7F\u7528\u6307\u5357\\r\\n\\r\\n\uD83D\uDD25\uD83D\uDD25[\u4F7F\u7528\u6307\u5357](https://rttxvuqg3f.feishu.cn/docx/PeFCde74poFyj3x8gnHcZdajnWz)\uD83D\uDD25\uD83D\uDD25\\r\\n\\r\\n## \u514D\u8D23\u58F0\u660E\\r\\n\\r\\n\u672C\u7AD9\u6240\u6709\u9898\u76EE\u5747\u6765\u81EA\u7F51\u7EDC\uFF0C\u4EC5\u4F9B\u5B66\u4E60\u4EA4\u6D41\u4F7F\u7528\u3002\u4E0E\u4EFB\u4F55\u62DB\u8058\u4F01\u4E1A\u65E0\u5173\u3002\u6536\u8D39\u90E8\u5206\u4EC5\u4E3A\u5B66\u4E60\u8F85\u5BFC\u670D\u52A1\uFF08\u9898\u89E3\u3001\u6570\u636E\u3001\u5185\u90E8\u7B54\u7591\uFF09\uFF0C\u4E0D\u5305\u542B\u4EFB\u4F55\u8003\u8BD5\u539F\u9898\u5E93\u5185\u5BB9\u3002\\r\\n","roles":{"guest":"10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831653804978457923079372929","default":"10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831653957463626135305425537","problemUploader":"10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831653958117424336886273921","vip":"10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831653957536387416785130113","upload":"10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831653958116720649479116753","test":"10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831653958116720649444243329","admin":"10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831653958116720929725741041","enemy":"10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069376"},"avatar":"","langs":"","share":"Test"}}';
+      window.UserContext = '{"_id":0,"mail":"Guest@hydro.local","uname":"Guest","hashType":"hydro","priv":8,"regat":"2023-02-21T09:40:56.580Z","loginat":"2026-05-20T13:20:46.203Z","perm":"BigInt::10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831653804978457923079372929","role":"guest","scope":"BigInt::-1","tfa":false,"authn":false,"group":[],"domains":[],"timeZone":"Asia/Shanghai","codeLang":"cc.cc17o2","avatar":"gravatar:Guest@hydro.local","gender":2,"backgroundImage":"/components/profile/backgrounds/1.jpg","pinnedDomains":[],"showTimeAgo":true,"fontFamily":"Open Sans","codeFontFamily":"Source Code Pro","theme":"light","preferredEditorType":"sv","formatCode":true,"avatarUrl":"//dn-qiniu-avatar.qbox.me/avatar/97119d3d15d5201ab506330ed4bab0f7?d=mm&s=128"}';
+    </script>
+      </head>
+<body>
+      <script type="text/javascript" src="/resource/8e19b0e7/entry.js"></script>
+    <script type="text/javascript" src="/resource/4.58.0-beta.21/lang-en.js"></script>
+    <script type="text/javascript" src="/hydro-4.58.0-beta.21.js"></script>
+    <nav class="nav slideout-menu" id="menu">
+  <div class="row"><div class="columns clearfix">
+    <ol class="nav__list nav__list--main clearfix">
+      <li class="nav__list-item">
+        <a href="/"><img class="nav__logo" src="/tazi.png"></a>
+      </li>        <li class="nav__list-item">
+  <a href="/roadmap" class="nav__item">
+    Job Roadmap
+  </a>
+</li>
+              <li class="nav__list-item">
+  <a href="/" class="nav__item">
+    Home
+  </a>
+</li>
+              <li class="nav__list-item">
+  <a href="/p" class="nav__item">
+    Problem Set
+  </a>
+</li>
+              <li class="nav__list-item">
+  <a href="/codenote" class="nav__item">
+    codenotelist
+  </a>
+</li>
+              <li class="nav__list-item">
+  <a href="/forum" class="nav__item">
+    Forum
+  </a>
+</li>
+              <li class="nav__list-item">
+  <a href="/course" class="nav__item">
+    course
+  </a>
+</li>
+              <li class="nav__list-item">
+  <a href="/shore-share" class="nav__item">
+    Shore Share Sessions
+  </a>
+</li>
+              <li class="nav__list-item">
+  <a href="/record" class="nav__item">
+    Record
+  </a>
+</li>
+      </ol>
+    <ol class="nav__list nav__list--secondary clearfix">
+          <li class="nav__list-item"><a href="/login" class="nav__item" name="nav_login">Login</a></li>
+            <li class="nav__list-item"><a href="/register" class="nav__item--round">Sign Up</a></li>
+            <li class="nav__list-item nojs--hide" data-dropdown-pos="bottom right" data-dropdown-custom-class="nav__dropdown" data-dropdown-target="#menu-nav-user" data-dropdown-disabledconstrainToWindow data-dropdown-trigger-desktop-only>
+        <a href="javascript:;" class="nav__item">
+          <span class="icon icon-global"></span>Language <span class="icon icon-expand_more"></span>
+        </a>
+        <ol class="dropdown-target menu" id="menu-nav-user"><li class="menu__item"><a class="menu__link" href="/language/en">English</a></li><li class="menu__item"><a class="menu__link" href="/language/ko">頃滉淡鞏?/a></li><li class="menu__item"><a class="menu__link" href="/language/zh">绠€浣撲腑鏂?/a></li><li class="menu__item"><a class="menu__link" href="/language/zh_TW">姝ｉ珨涓枃</a></li></ol>
+      </li>
+        </ol>
+  </div></div>
+</nav>
+<nav class="nav--shadow"></nav>
+<div class="slideout-panel" id="panel">
+    <div class="slideout-overlay"></div>
+  <div class="header--mobile">
+  <div class="row"><div class="columns clearfix">
+    <div class="float-left">
+      <a class="header--mobile__domain" href="/" target="_self">
+        <img src="/tazi.png">
+      </a>
+    </div>
+    <div class="float-right">
+      <button type="button" class="header__hamburger">
+  <div class="hamburger hamburger--spin">
+    <span class="hamburger-box">
+      <span class="hamburger-inner"></span>
+    </span>
+  </div>
+</button>
+    </div>
+  </div></div>
+</div>
+  <div class="main">
+        <div class="error__container clearfix">
+  <div class="error__icon-container">
+    <div class="error__twd2"></div>
+  </div>
+  <div class="error__text-container">
+    <h1>Oops!</h1>
+    <p>NotFoundError</p>
+    <p>Technical Information:</p>
+    <p>Type: </p>
+    <p>Arguments:
+      <ol>          <li>/api/problem/upload_leetcode_core_bundle</li>
+        </ol>
+    </p>
+  </div>
+</div>
+  </div>
+  <div class="footer">
+  <div class="row"><div class="columns">
+      <div class="row footer__links">
+      <div class="medium-3 large-2 columns footer__category expandable">
+        <h1>
+          Status
+          <span class="expand-icon">
+            <span class="icon icon-expand_more"></span>
+          </span>
+        </h1>
+        <div class="footer__category__expander"><ul class="footer__category__list">
+          <li class="footer__category__item"><a href="/record">Judging Queue</a></li>
+          <li class="footer__category__item"><a href="/status">Service Status</a></li>
+        </ul></div>
+      </div>
+      <div class="medium-3 large-2 columns footer__category expandable">
+        <h1>
+          Development
+          <span class="expand-icon">
+            <span class="icon icon-expand_more"></span>
+          </span>
+        </h1>
+        <div class="footer__category__expander"><ul class="footer__category__list">
+          <li class="footer__category__item"><a href="https://github.com/hydro-dev/Hydro" target="_blank">Open Source</a></li>
+        </ul></div>
+      </div>
+      <div class="medium-3 large-2 columns footer__category expandable">
+        <h1>
+          Support
+          <span class="expand-icon">
+            <span class="icon icon-expand_more"></span>
+          </span>
+        </h1>
+        <div class="footer__category__expander"><ul class="footer__category__list">
+          <li class="footer__category__item"><a href="/wiki/help">Help</a></li>
+          <li class="footer__category__item"><a href="/wiki/about#contact">Contact Us</a></li>
+        </ul></div>
+      </div>
+      <div class="medium-3 large-2 columns footer__category expandable end">
+        <h1>
+          About
+          <span class="expand-icon">
+            <span class="icon icon-expand_more"></span>
+          </span>
+        </h1>
+        <div class="footer__category__expander"><ul class="footer__category__list">
+          <li class="footer__category__item"><a href="/wiki/about">About</a></li>
+          <li class="footer__category__item"><a href="/wiki/about#privacy">Privacy</a></li>
+          <li class="footer__category__item"><a href="/wiki/about#tos">Terms of Service</a></li>
+          <li class="footer__category__item"><a href="/wiki/about#contact">Copyright Complaint</a></li>
+        </ul></div>
+      </div>
+    </div>
+      <div class="footer__extra-link clearfix">
+      <div class="footer__extra-left">
+        <ol class="clearfix">
+                    <li class="footer__extra-link-item nojs--hide" data-dropdown-target="#menu-footer-lang">
+            <span><span class="icon icon-global"></span> Language <span class="icon icon-expand_less"></span></span>
+            <ol class="dropdown-target menu" id="menu-footer-lang"><li class="menu__item"><a class="menu__link" href="/language/en">English</a></li><li class="menu__item"><a class="menu__link" href="/language/ko">頃滉淡鞏?/a></li><li class="menu__item"><a class="menu__link" href="/language/zh">绠€浣撲腑鏂?/a></li><li class="menu__item"><a class="menu__link" href="/language/zh_TW">姝ｉ珨涓枃</a></li></ol>
+          </li>
+          <li class="footer__extra-link-item">
+                          <a href="/legacy?legacy=true">Legacy mode</a>
+                      </li>
+          <li class="footer__extra-link-item nojs--hide" data-dropdown-target="#menu-footer-theme">
+            <span><span class="icon icon-global"></span> Theme <span class="icon icon-expand_less"></span></span>
+            <ol class="dropdown-target menu" id="menu-footer-theme">
+              <li class="menu__item"><a class="menu__link" href="/set_theme/light">Light</a></li>
+              <li class="menu__item"><a class="menu__link" href="/set_theme/dark">Dark</a></li>
+            </ol>
+          </li>
+        </ol>
+      </div>
+      <div class="footer__extra-right">
+        <ol class="clearfix"><li class="footer__extra-link-item"></li><li class="footer__extra-link-item"><a href="https://beian.miit.gov.cn/" target="_blank">浜琁CP澶?025123107鍙?1</a></li><li class="footer__extra-link-item">Worker 1, 8ms</li>
+          <!-- Prepare NaNms -->
+          <!-- Method NaNms -->
+          
+          
+          <li class="footer__extra-link-item">Powered by <a href="https://hydro.js.org">Hydro v5.0.0-beta.18</a> Community</li>
+        </ol>
+      </div>
+    </div>
+  </div></div>
+</div>
+</div>
+<div class="dialog dialog--signin" data-wechat-login-signin="1" style="display:none">
+    <div class="dialog__content" style=" height: 420px; display: flex; flex-direction: column;">
+        <div class="dialog--signin__main wechat-auth-dialog-wrap" style="flex-grow: 1; overflow-y: auto;" data-wechat-auth-root="dialog">
+            <div class="dialog--signin__close-container supplementary">
+                <a name="dialog--signin__close" href="javascript:;" class="close-button">CLOSE</a>
+            </div>
+
+            <br>
+            <br>
+
+            <div class="tab-container auth-mode-tabs">
+                <button type="button" class="tab-button active" data-show-auth-pane="login">WeChatLogin</button>
+                <button type="button" class="tab-button" data-show-auth-pane="register">娉ㄥ唽</button>
+            </div>
+
+            <div class="wechat-auth--pane-login" style="display: block;">
+                <p class="text-center">ScanQRCodePrompt</p>
+            </div>
+
+            <div class="wechat-auth--pane-register" style="display: none;">
+                <div class="wechat-auth--register-step1 row">
+                    <div class="columns">
+                        <label class="material textbox">
+                            鐢ㄦ埛鍚嶇О
+                            <input type="text" class="wechat-auth--register-uname" autocomplete="username" placeholder="娉ㄥ唽鍓嶈鍏堣缃敤鎴峰悕">
+                        </label>
+                    </div>
+                    <div class="columns text-center" style="margin-top: 0.75rem;">
+                        <button type="button" class="expanded rounded primary button wechat-auth--register-next">涓嬩竴姝ワ細鏄剧ず寰俊浜岀淮鐮?/button>
+                    </div>
+                </div>
+                <div class="wechat-auth--register-step2" style="display: none;">
+                    <p class="text-center">璇蜂娇鐢ㄥ井淇℃壂鎻忎笅鏂逛簩缁寸爜瀹屾垚娉ㄥ唽</p>
+                </div>
+            </div>
+
+            <div class="wechat-auth--qr-mount row">
+                <div class="columns text-center">
+                    <img id="qrcode" src="" alt="" data-uuid="" style="width: 80%;margin: 20px 10%;">
+                </div>
+            </div>
+
+            <div class="wechat-auth--password-panel" style="display: none; margin-top: 12px;">
+                <form action="/login" method="post">
+                                        <div class="row"><div class="columns">
+                        <label class="material textbox">
+                            Username
+                            <input name="uname" type="text" data-autofocus autocomplete="username webauthn">
+                        </label>
+                    </div></div>
+                    <div class="row"><div class="columns">
+                        <label class="material textbox">
+                            Password
+                            <input name="password" type="password" autocomplete="current-password">
+                        </label>
+                    </div></div>
+                    <div class="row"><div class="columns">
+                        <label class="checkbox">
+                            <input type="checkbox" name="rememberme" class="checkbox">Remember me
+                        </label>
+                    </div></div>
+                    <div class="row"><div class="columns">
+                        <input type="hidden" name="tfa" value="">
+                        <input type="hidden" name="authnChallenge" value="">
+                        <input type="submit" value="Login" name="login_submit" class="expanded rounded primary button">
+                    </div></div>
+                                    </form>
+                <div class="row">
+                    <div class="columns">
+                        <div class="supplementary text-center">
+                            <a href="/lostpass">Forgot password or username?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          <input name="uname" type="text" style="display: none;" autocomplete="username webauthn">
+        </div>
+    </div>
+</div>
+
+<style>
+    .dialog--signin__main {
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        background-color: #fff;
+    }
+
+    .tab-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .tab-button {
+        padding: 10px 25px;
+        cursor: pointer;
+        border: none;
+        background-color: #f1f1f1;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+        border-radius: 0;
+        flex-grow: 1;
+    }
+
+    .tab-button:first-child {
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .tab-button:last-child {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .tab-button.active {
+        background-color: #0073e6;
+        color: white;
+    }
+
+    .wechat-qr-code {
+        width: 150px;
+        height: 150px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+    }
+
+    .close-button {
+        font-size: 14px;
+        color: #888;
+        text-decoration: none;
+    }
+
+    .close-button:hover {
+        color: #333;
+    }
+</style>
+        <script>
+      window.UiContextNew = '{}';
+      window.UserContextNew = '{}';
+    </script>
+  </body>
+</html>
+

@@ -3,6 +3,8 @@ import sys
 import argparse
 import requests
 
+from codefun_auth import api_headers
+
 def require_https(url: str):
     if not url.startswith("https://"):
         raise ValueError("出于通信安全考虑，BASE_URL 必须是 https:// 开头")
@@ -25,24 +27,21 @@ def main():
     except ValueError as e:
         fail(str(e))
 
-    uname = os.getenv("HYDRO_API_UNAME")
-    password = os.getenv("HYDRO_API_PASSWORD")
-    if not uname or not password:
-        fail("请先设置环境变量 HYDRO_API_UNAME / HYDRO_API_PASSWORD")
-
     verify = args.ca_cert if args.ca_cert else True
     timeout = (5, 20)
 
     params = {
         "domainId": args.domain_id,
-        "uname": uname,
-        "password": password,
         "pid": args.pid,
     }
 
     url = f"{args.base_url.rstrip('/')}/api/problem/detail"
     try:
-        resp = requests.get(url, params=params, timeout=timeout, verify=verify)
+        session = requests.Session()
+        session.trust_env = False
+        resp = session.get(
+            url, params=params, timeout=timeout, verify=verify, headers=api_headers(json_body=False)
+        )
         resp.raise_for_status()
     except requests.exceptions.RequestException as e:
         fail(f"请求题面接口失败：{e}")

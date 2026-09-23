@@ -1,0 +1,6 @@
+CertAuthority()
+isValid(1, 0)
+ttl(1, 0)
+issuerOf(1)
+rootOf(1)
+revoke(1)

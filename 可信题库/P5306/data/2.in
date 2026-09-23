@@ -1,0 +1,6 @@
+LeaseManager(1)
+acquire(1, 1, 0)
+holder(1, 0)
+holder(1, 1)
+acquire(1, 2, 1)
+holder(1, 1)

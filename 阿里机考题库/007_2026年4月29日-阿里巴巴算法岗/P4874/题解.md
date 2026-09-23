@@ -1,0 +1,244 @@
+## 解题思路
+
+要求找到最小的非负整数时刻 $x$，使得 $x$ 不属于任何一个维护窗口 $[s_i,e_i]$。
+
+可以使用排序加区间合并的思想。
+
+核心做法如下：
+
+1. 令答案候选值 $ans=0$，表示当前最早可能空闲的时刻。
+2. 将所有维护窗口按起点 $s$ 从小到大排序。
+3. 依次遍历排序后的窗口 $[s,e]$：
+
+   * 如果 $s>ans$，说明窗口从 $s$ 才开始占用，而 $ans$ 没有被当前窗口以及之前窗口占用，此时 $ans$ 就是答案。
+   * 如果 $s \le ans \le e$，说明 $ans$ 被当前窗口占用，那么需要把 $ans$ 更新为 $e+1$。
+   * 如果 $e<ans$，说明当前窗口完全在 $ans$ 左边，对答案没有影响。
+4. 遍历结束后，当前的 $ans$ 就是最早空闲时刻。
+
+该算法本质上是对窗口排序后，维护从 $0$ 开始已经被连续占用的位置。
+
+## 复杂度分析
+
+设维护窗口数量为 $n$。
+
+- 排序需要 $O(n \log n)$ 的时间。
+- 遍历所有窗口需要 $O(n)$ 的时间。
+
+因此总时间复杂度为：
+
+$$O(n \log n)$$
+
+除了存储窗口数组外，只使用常数额外变量，因此空间复杂度为：
+
+$$O(n)$$
+
+该复杂度可以满足 $n \le 2 \times 10^5$ 的数据范围。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 计算最早空闲时刻：排序维护窗口后，找第一个不被任何窗口覆盖的非负整数
+def find_earliest_free(windows):
+    # 按窗口起点从小到大排序
+    windows.sort()
+
+    # ans 表示当前最早可能空闲的时刻
+    ans = 0
+
+    for s, e in windows:
+        # 若当前窗口起点大于 ans，说明 ans 未被占用，即为答案
+        if s > ans:
+            break
+
+        # 若 ans 落在当前窗口内，则把 ans 推进到窗口终点之后
+        if e >= ans:
+            ans = e + 1
+
+    return ans
+
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n = int(data[0])
+
+    windows = []
+    idx = 1
+
+    # 读取 n 个维护窗口
+    for _ in range(n):
+        s = int(data[idx])
+        e = int(data[idx + 1])
+        idx += 2
+        windows.append((s, e))
+
+    print(find_earliest_free(windows))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    // 计算最早空闲时刻：排序维护窗口后，找第一个不被任何窗口覆盖的非负整数
+    static long findEarliestFree(long[][] windows) {
+        // 按窗口起点从小到大排序
+        Arrays.sort(windows, new Comparator<long[]>() {
+            public int compare(long[] a, long[] b) {
+                if (a[0] == b[0]) {
+                    return Long.compare(a[1], b[1]);
+                }
+                return Long.compare(a[0], b[0]);
+            }
+        });
+
+        // ans 表示当前最早可能空闲的时刻
+        long ans = 0;
+
+        for (long[] w : windows) {
+            long s = w[0];   // 窗口起点
+            long e = w[1];   // 窗口终点
+
+            // 若当前窗口起点大于 ans，说明 ans 未被占用，即为答案
+            if (s > ans) {
+                break;
+            }
+
+            // 若 ans 落在当前窗口内，则把 ans 推进到窗口终点之后
+            if (e >= ans) {
+                ans = e + 1;
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner(System.in);
+        PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
+
+        int n = fs.nextInt();
+        long[][] windows = new long[n][2];
+
+        // 读取 n 个维护窗口
+        for (int i = 0; i < n; i++) {
+            windows[i][0] = fs.nextLong();
+            windows[i][1] = fs.nextLong();
+        }
+
+        out.println(findEarliestFree(windows));
+        out.flush();
+    }
+
+    // 快读类
+    static class FastScanner {
+        private final InputStream in;
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0;
+        private int len = 0;
+
+        FastScanner(InputStream in) {
+            this.in = in;
+        }
+
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) {
+                    return -1;
+                }
+            }
+            return buffer[ptr++];
+        }
+
+        long nextLong() throws IOException {
+            int c;
+            do {
+                c = read();
+            } while (c <= ' ' && c != -1);
+
+            long sign = 1;
+            if (c == '-') {
+                sign = -1;
+                c = read();
+            }
+
+            long num = 0;
+            while (c > ' ') {
+                num = num * 10 + c - '0';
+                c = read();
+            }
+
+            return num * sign;
+        }
+
+        int nextInt() throws IOException {
+            return (int) nextLong();
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// 计算最早空闲时刻：排序维护窗口后，找第一个不被任何窗口覆盖的非负整数
+long long findEarliestFree(vector<pair<long long, long long>>& windows) {
+    // 按窗口起点从小到大排序
+    sort(windows.begin(), windows.end());
+
+    // ans 表示当前最早可能空闲的时刻
+    long long ans = 0;
+
+    for (auto w : windows) {
+        long long s = w.first;   // 窗口起点
+        long long e = w.second;  // 窗口终点
+
+        // 若当前窗口起点大于 ans，说明 ans 未被占用，即为答案
+        if (s > ans) {
+            break;
+        }
+
+        // 若 ans 落在当前窗口内，则把 ans 推进到窗口终点之后
+        if (e >= ans) {
+            ans = e + 1;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+
+    vector<pair<long long, long long>> windows(n);
+
+    // 读取 n 个维护窗口
+    for (int i = 0; i < n; i++) {
+        cin >> windows[i].first >> windows[i].second;
+    }
+
+    cout << findEarliestFree(windows) << '\n';
+
+    return 0;
+}
+```

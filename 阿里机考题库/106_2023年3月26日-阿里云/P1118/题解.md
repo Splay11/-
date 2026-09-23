@@ -1,0 +1,244 @@
+## 解题思路
+
+把这个过程看成一个“步长不断变化”的约瑟夫环问题。
+
+设报到的素数依次为 $2,3,5,7,11,\dots$ 。
+
+第一次淘汰发生在报到 $2$ 时，因此第一次的淘汰步长是 $2$。
+第二次淘汰发生在报到 $3$ 时，距离上一次只多了 $1$，所以第二次步长是 $1$。
+第三次淘汰发生在报到 $5$ 时，距离上一次多了 $2$，所以第三次步长是 $2$。
+
+因此淘汰步长序列就是：
+
+$$
+2,\ 1,\ 2,\ 2,\ 4,\dots
+$$
+
+也就是相邻素数的差分，第一项可以看成 $2-0=2$。
+
+---
+
+对于这种“每轮步长不同”的约瑟夫环，可以用递推解决。
+
+设 $f(m)$ 表示当前有 $m$ 个人时，最终留下来的人的下标（从 $0$ 开始编号）。
+
+若当前这一轮的淘汰步长为 $k$，则有经典递推：
+
+$$
+f(m) = (f(m-1) + k) \bmod m
+$$
+
+这里要注意步长的使用顺序：
+
+* 正向淘汰时，先用第 $1$ 个步长，再用第 $2$ 个步长……
+* 递推时是从 $1$ 个人反推到 $n$ 个人，所以要倒着取步长
+
+因此做法是：
+
+1. 先求出前 $n-1$ 个素数
+2. 得到步长数组 $step$
+3. 用约瑟夫环递推求最终答案
+4. 最后把下标转成题目中的编号（即 $+1$）
+
+---
+
+相关算法：
+
+* 素数筛选（本题数据范围小，直接试除即可）
+* 约瑟夫环递推
+
+## 复杂度分析
+
+设第 $n-1$ 个素数大约为 $p$。
+
+1. 求前 $n-1$ 个素数，使用试除法，时间复杂度约为：
+
+$$
+O(p\sqrt{p})
+$$
+
+在本题 $n \le 10^4$ 的范围内完全可行。
+
+2. 约瑟夫环递推一遍，时间复杂度为：
+
+$$
+O(n)
+$$
+
+所以总时间复杂度可以记为：
+
+$$
+O(p\sqrt{p} + n)
+$$
+
+空间复杂度为：
+
+$$
+O(n)
+$$
+
+用于存储素数和步长数组。
+
+## 代码实现
+
+### Python
+
+```python
+def get_answer(n):
+    # 只有 1 个人时，答案就是 1
+    if n == 1:
+        return 1
+
+    primes = []
+    x = 2
+
+    # 求前 n-1 个素数
+    while len(primes) < n - 1:
+        ok = True
+        i = 2
+        while i * i <= x:
+            if x % i == 0:
+                ok = False
+                break
+            i += 1
+        if ok:
+            primes.append(x)
+        x += 1
+
+    # 构造步长数组
+    steps = []
+    prev = 0
+    for p in primes:
+        steps.append(p - prev)
+        prev = p
+
+    # 约瑟夫环递推，f 表示 0 下标答案
+    f = 0
+    for m in range(2, n + 1):
+        f = (f + steps[n - m]) % m
+
+    return f + 1
+
+
+def main():
+    n = int(input())
+    print(get_answer(n))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    // 计算最终留下来的编号
+    public static int getAnswer(int n) {
+        // 只有 1 个人时，答案就是 1
+        if (n == 1) {
+            return 1;
+        }
+
+        int[] primes = new int[n - 1];
+        int count = 0;
+        int x = 2;
+
+        // 求前 n-1 个素数
+        while (count < n - 1) {
+            boolean ok = true;
+            for (int i = 2; i * i <= x; i++) {
+                if (x % i == 0) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) {
+                primes[count++] = x;
+            }
+            x++;
+        }
+
+        // 构造步长数组
+        int[] steps = new int[n - 1];
+        int prev = 0;
+        for (int i = 0; i < n - 1; i++) {
+            steps[i] = primes[i] - prev;
+            prev = primes[i];
+        }
+
+        // 约瑟夫环递推，f 表示 0 下标答案
+        int f = 0;
+        for (int m = 2; m <= n; m++) {
+            f = (f + steps[n - m]) % m;
+        }
+
+        return f + 1;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        System.out.println(getAnswer(n));
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 计算最终留下来的编号
+int getAnswer(int n) {
+    // 只有 1 个人时，答案就是 1
+    if (n == 1) {
+        return 1;
+    }
+
+    vector<int> primes;
+    int x = 2;
+
+    // 求前 n-1 个素数
+    while ((int)primes.size() < n - 1) {
+        bool ok = true;
+        for (int i = 2; i * i <= x; i++) {
+            if (x % i == 0) {
+                ok = false;
+                break;
+            }
+        }
+        if (ok) {
+            primes.push_back(x);
+        }
+        x++;
+    }
+
+    // 构造步长数组
+    vector<int> steps;
+    int prev = 0;
+    for (int p : primes) {
+        steps.push_back(p - prev);
+        prev = p;
+    }
+
+    // 约瑟夫环递推，f 表示 0 下标答案
+    int f = 0;
+    for (int m = 2; m <= n; m++) {
+        f = (f + steps[n - m]) % m;
+    }
+
+    return f + 1;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    cout << getAnswer(n) << endl;
+    return 0;
+}
+```

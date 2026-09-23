@@ -1,0 +1,2665 @@
+{
+  "cardInfo": {
+    "id": 47,
+    "cardTitle": "字节面试手撕通关指南",
+    "cardLogo": "https://sspnote.oss-cn-hangzhou.aliyuncs.com/static/zijietiaodong.png",
+    "cardType": 2,
+    "cardDescription": "收集了最近2年全网5000+字节跳动技术岗面经，整理的这一套字节面试高频手撕题，助力应届生速通字节面试手撕。\n注意：字节面试手撕为ACM模式，一般是在飞书或者本地IDE写代码，并且字节还很喜欢考链表，二叉树，因此一定要熟练掌握这两个数据结构的ACM模式",
+    "industry": null,
+    "companyInfo": null,
+    "questionCount": 158,
+    "exerciseTimes": 18050,
+    "createTime": "2026-04-09 21:59:53",
+    "hasPermission": false,
+    "price": null,
+    "productId": "0",
+    "testProgress": null,
+    "showExamPointStats": false,
+    "sidebarLinks": [],
+    "isFree": null
+  },
+  "questions": [
+    {
+      "questionId": "925",
+      "title": "A+B（一）",
+      "hardLevel": "EASY",
+      "vip": false,
+      "detailUrl": "/oj/47/925",
+      "tags": [
+        "ACM模式"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "整数"
+      ]
+    },
+    {
+      "questionId": "926",
+      "title": "A+B（二）",
+      "hardLevel": "EASY",
+      "vip": false,
+      "detailUrl": "/oj/47/926",
+      "tags": [
+        "ACM模式"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "整数"
+      ]
+    },
+    {
+      "questionId": "927",
+      "title": "A+B（三）",
+      "hardLevel": "EASY",
+      "vip": false,
+      "detailUrl": "/oj/47/927",
+      "tags": [
+        "ACM模式"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "整数"
+      ]
+    },
+    {
+      "questionId": "929",
+      "title": "数组求和（一）",
+      "hardLevel": "EASY",
+      "vip": false,
+      "detailUrl": "/oj/47/929",
+      "tags": [
+        "ACM模式"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "数组"
+      ]
+    },
+    {
+      "questionId": "930",
+      "title": "数组求和（二）",
+      "hardLevel": "EASY",
+      "vip": false,
+      "detailUrl": "/oj/47/930",
+      "tags": [
+        "ACM模式"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "数组"
+      ]
+    },
+    {
+      "questionId": "931",
+      "title": "数组求和（三）",
+      "hardLevel": "EASY",
+      "vip": false,
+      "detailUrl": "/oj/47/931",
+      "tags": [
+        "ACM模式"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "数组"
+      ]
+    },
+    {
+      "questionId": "932",
+      "title": "矩阵求和（一）",
+      "hardLevel": "EASY",
+      "vip": false,
+      "detailUrl": "/oj/47/932",
+      "tags": [
+        "ACM模式"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "矩阵"
+      ]
+    },
+    {
+      "questionId": "933",
+      "title": "矩阵求和（二）",
+      "hardLevel": "MIDDLE",
+      "vip": false,
+      "detailUrl": "/oj/47/933",
+      "tags": [
+        "ACM模式"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "矩阵"
+      ]
+    },
+    {
+      "questionId": "1240",
+      "title": "遍历链表",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1240",
+      "tags": [
+        "大厂面试",
+        "链表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1241",
+      "title": "层序遍历二叉树",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1241",
+      "tags": [
+        "二叉树",
+        "大厂面试",
+        "BFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "962",
+      "title": "最长路径(一)",
+      "hardLevel": "MIDDLE",
+      "vip": false,
+      "detailUrl": "/oj/47/962",
+      "tags": [
+        "ACM模式",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "图"
+      ]
+    },
+    {
+      "questionId": "963",
+      "title": "最长路径(二)",
+      "hardLevel": "MIDDLE",
+      "vip": false,
+      "detailUrl": "/oj/47/963",
+      "tags": [
+        "ACM模式",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "图"
+      ]
+    },
+    {
+      "questionId": "964",
+      "title": "最长路径(三)",
+      "hardLevel": "MIDDLE",
+      "vip": false,
+      "detailUrl": "/oj/47/964",
+      "tags": [
+        "ACM模式",
+        "DFS",
+        "哈希表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "图"
+      ]
+    },
+    {
+      "questionId": "965",
+      "title": "最长路径(四)",
+      "hardLevel": "MIDDLE",
+      "vip": false,
+      "detailUrl": "/oj/47/965",
+      "tags": [
+        "ACM模式",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "图"
+      ]
+    },
+    {
+      "questionId": "976",
+      "title": "最长路径(五)",
+      "hardLevel": "MIDDLE",
+      "vip": false,
+      "detailUrl": "/oj/47/976",
+      "tags": [
+        "ACM模式",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "ACM入门指南",
+        "图"
+      ]
+    },
+    {
+      "questionId": "895",
+      "title": "两数之和",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/895",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "虾皮",
+        "哈希表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "哈希"
+      ]
+    },
+    {
+      "questionId": "961",
+      "title": "和为k的子数组",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/961",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "前缀和",
+        "哈希表",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "哈希"
+      ]
+    },
+    {
+      "questionId": "1905",
+      "title": "三数之和",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1905",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "双指针"
+      ]
+    },
+    {
+      "questionId": "1906",
+      "title": "接雨水",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/1906",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "双指针"
+      ]
+    },
+    {
+      "questionId": "1916",
+      "title": "无重复字符的最长子串",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1916",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "双指针"
+      ]
+    },
+    {
+      "questionId": "2253",
+      "title": "长度最小的子数组",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2253",
+      "tags": [
+        "字节面试题",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "双指针"
+      ]
+    },
+    {
+      "questionId": "902",
+      "title": "滑动窗口最大值",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/902",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "单调队列",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "字符串"
+      ]
+    },
+    {
+      "questionId": "2259",
+      "title": "比较版本号",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2259",
+      "tags": [
+        "字节面试题",
+        "模拟"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "字符串"
+      ]
+    },
+    {
+      "questionId": "2260",
+      "title": "字符串相加",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2260",
+      "tags": [
+        "字节面试题",
+        "模拟"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "字符串"
+      ]
+    },
+    {
+      "questionId": "1964",
+      "title": "最小覆盖子串",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/1964",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "哈希表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "字符串"
+      ]
+    },
+    {
+      "questionId": "3109",
+      "title": "最长公共前缀",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/3109",
+      "tags": [
+        "字节面试题",
+        "字符串"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "字符串"
+      ]
+    },
+    {
+      "questionId": "2256",
+      "title": "合并两个有序数组",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2256",
+      "tags": [
+        "字节面试题",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "普通数组"
+      ]
+    },
+    {
+      "questionId": "113",
+      "title": "最大子数组和",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/113",
+      "tags": [
+        "模板题",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "普通数组"
+      ]
+    },
+    {
+      "questionId": "1922",
+      "title": "合并区间",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1922",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "数组",
+        "排序"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "普通数组"
+      ]
+    },
+    {
+      "questionId": "1923",
+      "title": "轮转数组",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1923",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "数组"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "普通数组"
+      ]
+    },
+    {
+      "questionId": "1947",
+      "title": "下一个排列",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1947",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "数组"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "普通数组"
+      ]
+    },
+    {
+      "questionId": "1941",
+      "title": "螺旋矩阵",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1941",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "矩阵",
+        "模拟"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "矩阵"
+      ]
+    },
+    {
+      "questionId": "1943",
+      "title": "搜索二维矩阵 II",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1943",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "矩阵",
+        "模拟"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "矩阵"
+      ]
+    },
+    {
+      "questionId": "1927",
+      "title": "反转链表",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1927",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1933",
+      "title": "删除链表的倒数第 N 个结点",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1933",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1935",
+      "title": "K 个一组翻转链表",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/1935",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1938",
+      "title": "合并K个升序链表",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/1938",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "优先队列"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1931",
+      "title": "合并两个有序链表",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1931",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1937",
+      "title": "排序链表",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1937",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "归并排序"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1929",
+      "title": "环形链表",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1929",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1930",
+      "title": "环形链表 II",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1930",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1932",
+      "title": "两数相加",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1932",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "2254",
+      "title": "反转链表 II",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2254",
+      "tags": [
+        "字节面试题",
+        "链表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "2564",
+      "title": "删除排序链表中的重复元素 II",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2564",
+      "tags": [
+        "字节面试题",
+        "链表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "2576",
+      "title": "重排链表",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2576",
+      "tags": [
+        "字节面试题",
+        "链表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1926",
+      "title": "相交链表",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1926",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "双指针"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "2578",
+      "title": "奇偶链表",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2578",
+      "tags": [
+        "字节面试题",
+        "链表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "链表"
+      ]
+    },
+    {
+      "questionId": "1895",
+      "title": "二叉树的最近公共祖先",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1895",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "2248",
+      "title": "二叉树的锯齿形层序遍历",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2248",
+      "tags": [
+        "字节面试题",
+        "二叉树"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1887",
+      "title": "二叉树的层序遍历",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1887",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "BFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1891",
+      "title": "二叉树的右视图",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1891",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "BFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1885",
+      "title": "对称二叉树",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1885",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "2249",
+      "title": "另一棵树的子树",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2249",
+      "tags": [
+        "字节面试题",
+        "二叉树"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1886",
+      "title": "二叉树的直径",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1886",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "2568",
+      "title": "二叉树最大宽度",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2568",
+      "tags": [
+        "字节面试题",
+        "二叉树"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1896",
+      "title": "二叉树中的最大路径和",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/1896",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1884",
+      "title": "翻转二叉树",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1884",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1893",
+      "title": "从前序与中序遍历序列构造二叉树",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1893",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1883",
+      "title": "二叉树的最大深度",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1883",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "DFS",
+        "BFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1882",
+      "title": "二叉树的中序遍历",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1882",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二叉树",
+        "DFS",
+        "BFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二叉树"
+      ]
+    },
+    {
+      "questionId": "1907",
+      "title": "岛屿数量",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1907",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "DFS",
+        "BFS",
+        "并查集"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "2567",
+      "title": "岛屿的最大面积",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2567",
+      "tags": [
+        "字节面试题",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "1909",
+      "title": "课程表",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1909",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "图论",
+        "拓扑排序"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "1956",
+      "title": "全排列",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1956",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "1957",
+      "title": "子集",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1957",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "2506",
+      "title": "复原 IP 地址",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2506",
+      "tags": [
+        "DFS",
+        "华为面试题",
+        "字节面试题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "1960",
+      "title": "括号生成",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1960",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "1961",
+      "title": "单词搜索",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1961",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "1879",
+      "title": "数组中的第K个最大元素",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1879",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "快速选择",
+        "优先队列"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "1911",
+      "title": "有效的括号",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1911",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "栈"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "2258",
+      "title": "用栈实现队列",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2258",
+      "tags": [
+        "字节面试题",
+        "栈"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "1972",
+      "title": "最长有效括号",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1972",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP",
+        "栈"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "2617",
+      "title": "验证二叉树的前序序列化",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2617",
+      "tags": [
+        "字节面试题",
+        "图论",
+        "栈"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "1913",
+      "title": "字符串解码",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1913",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "栈"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "1912",
+      "title": "最小栈",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1912",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "栈"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "1918",
+      "title": "买卖股票的最佳时机",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/1918",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "贪心"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "贪心"
+      ]
+    },
+    {
+      "questionId": "2257",
+      "title": "买卖股票的最佳时机 II",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2257",
+      "tags": [
+        "字节面试题",
+        "贪心"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "贪心"
+      ]
+    },
+    {
+      "questionId": "2563",
+      "title": "分发糖果",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2563",
+      "tags": [
+        "字节面试题",
+        "贪心"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "贪心"
+      ]
+    },
+    {
+      "questionId": "2561",
+      "title": "移掉K位数字",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2561",
+      "tags": [
+        "字节面试题",
+        "单调栈"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "贪心"
+      ]
+    },
+    {
+      "questionId": "228",
+      "title": "爬楼梯(一)",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/228",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP",
+        "中国联通"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "1968",
+      "title": "零钱兑换",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1968",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "128",
+      "title": "最长递增子序列",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/128",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "1971",
+      "title": "分割等和子集",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1971",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "背包DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "1969",
+      "title": "单词拆分",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1969",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP",
+        "哈希表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "1966",
+      "title": "打家劫舍",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1966",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "2616",
+      "title": "最大正方形",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2616",
+      "tags": [
+        "字节面试题",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "2252",
+      "title": "最大为 N 的数字组合",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/2252",
+      "tags": [
+        "动态规划",
+        "数位DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "1951",
+      "title": "最长回文子串",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1951",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "多维动态规划"
+      ]
+    },
+    {
+      "questionId": "1953",
+      "title": "编辑距离",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1953",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "多维动态规划"
+      ]
+    },
+    {
+      "questionId": "1952",
+      "title": "最长公共子序列",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1952",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "多维动态规划"
+      ]
+    },
+    {
+      "questionId": "2247",
+      "title": "最长重复子数组",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2247",
+      "tags": [
+        "字节面试题",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "多维动态规划"
+      ]
+    },
+    {
+      "questionId": "1950",
+      "title": "最小路径和",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1950",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "多维动态规划"
+      ]
+    },
+    {
+      "questionId": "1948",
+      "title": "寻找重复数",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1948",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "数组"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "技巧"
+      ]
+    },
+    {
+      "questionId": "2637",
+      "title": "用 Rand7() 实现 Rand10()",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2637",
+      "tags": [
+        "腾讯面试题",
+        "技巧"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "技巧"
+      ]
+    },
+    {
+      "questionId": "1899",
+      "title": "在排序数组中查找元素的第一个和最后一个位置",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1899",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二分查找"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二分与排序"
+      ]
+    },
+    {
+      "questionId": "1900",
+      "title": "搜索旋转排序数组",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1900",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二分查找"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二分与排序"
+      ]
+    },
+    {
+      "questionId": "1901",
+      "title": "寻找旋转排序数组中的最小值",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1901",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二分查找"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二分与排序"
+      ]
+    },
+    {
+      "questionId": "2250",
+      "title": "x 的平方根",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/2250",
+      "tags": [
+        "字节面试题",
+        "二分查找"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二分与排序"
+      ]
+    },
+    {
+      "questionId": "2251",
+      "title": "二分查找",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2251",
+      "tags": [
+        "字节面试题",
+        "二分查找"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二分与排序"
+      ]
+    },
+    {
+      "questionId": "1902",
+      "title": "寻找两个正序数组的中位数",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/1902",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "二分查找"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二分与排序"
+      ]
+    },
+    {
+      "questionId": "2255",
+      "title": "排序数组",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2255",
+      "tags": [
+        "字节面试题",
+        "排序"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "二分与排序"
+      ]
+    },
+    {
+      "questionId": "1939",
+      "title": "LRU缓存",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1939",
+      "tags": [
+        "Hot100",
+        "大厂面试",
+        "链表",
+        "哈希表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动面试高频手撕",
+        "设计"
+      ]
+    },
+    {
+      "questionId": "1982",
+      "title": "K-Means 聚类",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1982",
+      "tags": [
+        "机器学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "机器学习"
+      ]
+    },
+    {
+      "questionId": "2580",
+      "title": "AUC 计算",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2580",
+      "tags": [
+        "字节面试题",
+        "机器学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "机器学习"
+      ]
+    },
+    {
+      "questionId": "1985",
+      "title": "线性回归",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1985",
+      "tags": [
+        "机器学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "机器学习"
+      ]
+    },
+    {
+      "questionId": "1983",
+      "title": "逻辑回归",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1983",
+      "tags": [
+        "机器学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "机器学习"
+      ]
+    },
+    {
+      "questionId": "1989",
+      "title": "交叉熵损失",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1989",
+      "tags": [
+        "深度学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "1990",
+      "title": "MLP训练",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1990",
+      "tags": [
+        "深度学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "2581",
+      "title": "梯度下降求平方根",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2581",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "1988",
+      "title": "Softmax",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1988",
+      "tags": [
+        "深度学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "2582",
+      "title": "反向传播（两层全连接网络）",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2582",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "1996",
+      "title": "Layer Normalization",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1996",
+      "tags": [
+        "深度学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "1986",
+      "title": "多通道卷积计算",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1986",
+      "tags": [
+        "深度学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "2589",
+      "title": "一维卷积 im2col 矩阵展开",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2589",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "1987",
+      "title": "Sigmoid",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1987",
+      "tags": [
+        "深度学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "2588",
+      "title": "Adam 优化器",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2588",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "2658",
+      "title": "Linear Layer",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/2658",
+      "tags": [
+        "华为面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "1997",
+      "title": "Batch Normalization",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1997",
+      "tags": [
+        "深度学习",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "2747",
+      "title": "FFN（前馈网络前向传播）",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2747",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "2749",
+      "title": "BCE（二元交叉熵损失）",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2749",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "2750",
+      "title": "Max Pooling（二维最大池化前向传播）",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2750",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "3117",
+      "title": "KL 散度",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/3117",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "3118",
+      "title": "SGD 随机梯度下降",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/3118",
+      "tags": [
+        "字节面试题",
+        "深度学习"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "深度学习"
+      ]
+    },
+    {
+      "questionId": "1992",
+      "title": "Multi-Head Attention",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1992",
+      "tags": [
+        "大模型",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "1991",
+      "title": "Self-Attention",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1991",
+      "tags": [
+        "大模型",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "1994",
+      "title": "Grouped Query Attention",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1994",
+      "tags": [
+        "大模型",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "2583",
+      "title": "Transformer Encoder Block",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2583",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "1998",
+      "title": "RMS Normalization",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1998",
+      "tags": [
+        "大模型",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "1993",
+      "title": "Cross Attention",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/1993",
+      "tags": [
+        "大模型",
+        "模板题"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "2584",
+      "title": "InfoNCE 对比学习损失",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2584",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "2585",
+      "title": "DPO 损失函数",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/2585",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "2587",
+      "title": "SFT 损失函数（Shift Right）",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2587",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "2590",
+      "title": "MLA（Multi-head Latent Attention）",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2590",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "2586",
+      "title": "LoRA 低秩适配",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2586",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "2748",
+      "title": "SwiGLU（LLaMA 系激活前向传播）",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2748",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "3115",
+      "title": "GRPO 损失函数",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/3115",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "3116",
+      "title": "PPO 损失函数",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/3116",
+      "tags": [
+        "字节面试题",
+        "大模型"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "算法岗专项手撕真题",
+        "大模型"
+      ]
+    },
+    {
+      "questionId": "351",
+      "title": "最小整数 I",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/351",
+      "tags": [
+        "字节面试题",
+        "贪心"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "贪心"
+      ]
+    },
+    {
+      "questionId": "2262",
+      "title": "数组循环k次最大子数组和",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2262",
+      "tags": [
+        "字节面试题",
+        "贪心"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "贪心"
+      ]
+    },
+    {
+      "questionId": "2263",
+      "title": "山峰子序列最大长度",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2263",
+      "tags": [
+        "字节面试题",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "2264",
+      "title": "01背包问题",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2264",
+      "tags": [
+        "字节面试题",
+        "动态规划",
+        "背包DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "2265",
+      "title": "加分二叉树",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/2265",
+      "tags": [
+        "字节面试题",
+        "动态规划",
+        "区间DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "2266",
+      "title": "打靶凑分方案数",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2266",
+      "tags": [
+        "字节面试题",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "2267",
+      "title": "最小非连续子数组和",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2267",
+      "tags": [
+        "字节面试题",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "2268",
+      "title": "三个字符串最长公共子序列",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2268",
+      "tags": [
+        "字节面试题",
+        "动态规划",
+        "线性DP"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "动态规划"
+      ]
+    },
+    {
+      "questionId": "2271",
+      "title": "子数组异或和为K的个数",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2271",
+      "tags": [
+        "字节面试题",
+        "哈希表",
+        "前缀和"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "哈希"
+      ]
+    },
+    {
+      "questionId": "2272",
+      "title": "m个苹果分给n个人",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2272",
+      "tags": [
+        "字节面试题",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "回溯"
+      ]
+    },
+    {
+      "questionId": "2273",
+      "title": "数组均分最大份数",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2273",
+      "tags": [
+        "字节面试题",
+        "前缀和"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "前缀和与差分"
+      ]
+    },
+    {
+      "questionId": "2274",
+      "title": "找出比左边大比右边小的所有数",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2274",
+      "tags": [
+        "字节面试题",
+        "前缀和"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "前缀和与差分"
+      ]
+    },
+    {
+      "questionId": "2276",
+      "title": "带过期时间的LRU缓存",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/2276",
+      "tags": [
+        "字节面试题",
+        "哈希表"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "设计"
+      ]
+    },
+    {
+      "questionId": "2277",
+      "title": "乘法与开方操作求最小值",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2277",
+      "tags": [
+        "字节面试题",
+        "数论",
+        "质数"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "数论"
+      ]
+    },
+    {
+      "questionId": "2278",
+      "title": "序列切分使两部分方差和最大",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/2278",
+      "tags": [
+        "字节面试题",
+        "数论",
+        "前缀和"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "数论"
+      ]
+    },
+    {
+      "questionId": "2279",
+      "title": "数组恢复次序最小交换次数",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2279",
+      "tags": [
+        "字节面试题",
+        "数论"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "数论"
+      ]
+    },
+    {
+      "questionId": "2280",
+      "title": "有向图环检测",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2280",
+      "tags": [
+        "字节面试题",
+        "DFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "2281",
+      "title": "求迷宫最短路径",
+      "hardLevel": "MIDDLE",
+      "vip": true,
+      "detailUrl": "/oj/47/2281",
+      "tags": [
+        "字节面试题",
+        "BFS"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "搜索与图论"
+      ]
+    },
+    {
+      "questionId": "2282",
+      "title": "字符串移除b去连续ac",
+      "hardLevel": "EASY",
+      "vip": true,
+      "detailUrl": "/oj/47/2282",
+      "tags": [
+        "字节面试题",
+        "栈"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "2283",
+      "title": "二维滑动窗口最大值",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/2283",
+      "tags": [
+        "字节面试题",
+        "优先队列"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "栈与队列"
+      ]
+    },
+    {
+      "questionId": "2284",
+      "title": "n个长m的升序数组找TopK",
+      "hardLevel": "HARD",
+      "vip": true,
+      "detailUrl": "/oj/47/2284",
+      "tags": [
+        "字节面试题",
+        "优先队列"
+      ],
+      "groupPath": [
+        "字节面试通关指南",
+        "字节跳动原创手撕真题",
+        "栈与队列"
+      ]
+    }
+  ]
+}

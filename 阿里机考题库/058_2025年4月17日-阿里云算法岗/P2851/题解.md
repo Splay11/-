@@ -1,0 +1,80 @@
+# 题解
+
+## 题面描述  
+给定一个函数 $f$，满足：  
+- $f(0)=1$；  
+- 对任意非负整数 $n$，有  
+  - 若 $x=2n$，则 $f(x)=f(n)$；  
+  - 若 $x=2n+1$，则 $f(x)=2\,f(n)$。  
+现有 $q$ 次询问，每次给定一个非负整数 $x$，求 $f(x)$ 的值。
+
+---
+
+## 思路  
+从递推式看，每向右移一位（除以2），如果末位是1，就要在结果上乘2，否则不变。  
+因此，$f(x)$ 正好等于  
+$f(x)=2^{\#\{\text{二进制表示中“1”的个数}\}}\,. $ 
+记 $\operatorname{popcount}(x)$ 为 $x$ 的二进制 1 的个数，则  
+$f(x)$ = $2^{\operatorname{popcount}(x)}.$  
+既然如此，只要对每个 $x$ 调用内建函数统计 1 的个数，然后左移即可。
+
+---
+
+## cpp 
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int q;
+    cin >> q;                       // 读入询问次数 q
+    while (q--) {
+        unsigned int x;
+        cin >> x;                   // 读入当前查询的 x
+        // __builtin_popcount(x) 计算 x 的二进制中 1 的个数 c
+        // 1u << c 即 2^c
+        cout << (1u << __builtin_popcount(x)) << '\n';
+    }
+    return 0;
+}
+```
+## python
+```python
+import sys
+input = sys.stdin.readline
+
+def main():
+    q = int(input())                  # 读入查询次数 q
+    for _ in range(q):
+        x = int(input())              # 读入当前的 x
+        # bin(x) 返回形如 '0b1011' 的字符串，count('1') 即统计其中 '1' 的个数
+        c = bin(x).count('1')         
+        # 1 << c 相当于 2**c，正好是 2 的 c 次幂
+        print(1 << c)
+
+if __name__ == "__main__":
+    main()
+```
+## java
+```java
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        int q = Integer.parseInt(in.readLine());  // 读入查询次数 q
+        
+        while (q-- > 0) {
+            int x = Integer.parseInt(in.readLine());  
+            // Integer.bitCount(x) 直接返回 x 的二进制表示中 1 的个数
+            int c = Integer.bitCount(x);
+            // 1 << c 即将 1 左移 c 位，得到 2^c
+            System.out.println(1 << c);
+        }
+    }
+}
+
+```

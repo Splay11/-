@@ -1,0 +1,230 @@
+# 题解
+
+## 题面描述
+
+给定一个长度为$n$的数组，数组中每个元素为$a_i$。定义一组数为**亲密数**当且仅当这组数的乘积是一个**完全平方数**。要求从数组中选出至少一个元素，使得这些选出的元素构成一组亲密数，求所有可能的选取方案数。
+
+---
+
+## 思路
+
+- 每个正整数的质因数分解可以表示成：
+  $a_i$ = $p_1^{e_1}$ $\times p_2^{e_2}$ $\times \cdots \times p_k^{e_k}$
+- 乘积是完全平方数当且仅当每个质因数的指数之和为偶数，即对于每个质因数都有：
+  $$
+  e_1 + e_2 + \cdots + e_k \equiv 0 \pmod{2}
+  $$
+- 我们可以将每个数转换为一个**模$2$下的指数向量**，即对于每个质因数，如果指数为奇数则记为$1$，偶数则记为$0$。由于乘法在指数上相加，在模$2$下加法对应异或操作，因此我们只需要对选中的数对应的向量异或，判断结果是否全为零。
+- 由于$n \le 20$，可以枚举所有非空子集（最多$2^n-1$种情况），对于每个子集计算所有元素的模$2$指数和，若为全零则计数。
+
+---
+
+## 代码分析
+
+- **预处理**：利用筛法或直接枚举质数，将所有小于等于$100$的质数保存在数组中。
+- **因数分解**：对于每个数$a_i$，依次判断每个质数能否整除，如果可以，则更新对应的模$2$指数（使用$0/1$记录）。
+- **枚举子集**：用位运算枚举所有非空子集，利用预处理好的每个数的“质数模$2$指数向量”（可以使用一个整数位掩码表示）计算异或结果，若结果为零则计数。
+
+## C++ 
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 求质数列表（所有小于等于100的质数）
+vector<int> getPrimes() {
+    vector<int> primes;
+    bool isPrime[101] = {false};
+    for (int i = 2; i <= 100; i++) isPrime[i] = true;
+    for (int i = 2; i <= 100; i++) {
+        if (isPrime[i]) {
+            primes.push_back(i);
+            for (int j = i * i; j <= 100; j += i)
+                isPrime[j] = false;
+        }
+    }
+    return primes;
+}
+
+int main(){
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++){
+        cin >> a[i];
+    }
+    
+    // 获取所有小于等于100的质数
+    vector<int> primes = getPrimes();
+    int pCount = primes.size();
+    
+    // 对每个数计算质因数分解的模2表示，用位掩码表示
+    vector<int> mask(n, 0);
+    for (int i = 0; i < n; i++){
+        int x = a[i];
+        int curMask = 0;
+        for (int j = 0; j < pCount; j++){
+            int cnt = 0;
+            while(x % primes[j] == 0){
+                cnt++;
+                x /= primes[j];
+            }
+            // 如果指数为奇数，则设置第j位为1
+            if(cnt % 2 == 1) {
+                curMask |= (1 << j);
+            }
+        }
+        mask[i] = curMask;
+    }
+    
+    long long ans = 0;
+    // 枚举所有非空子集，共计 2^n - 1 种情况
+    int total = 1 << n;
+    for (int s = 1; s < total; s++){
+        int xorSum = 0;
+        // 对子集中的每个元素进行异或累加
+        for (int i = 0; i < n; i++){
+            if(s & (1 << i)){
+                xorSum ^= mask[i];
+            }
+        }
+        // 如果异或结果为0，则乘积为完全平方数
+        if(xorSum == 0)
+            ans++;
+    }
+    
+    cout << ans << endl;
+    return 0;
+}
+```
+## Python
+
+```python
+# -*- coding: utf-8 -*-
+import math
+
+# 获取所有小于等于100的质数
+def get_primes():
+    primes = []
+    is_prime = [True] * 101
+    for i in range(2, 101):
+        if is_prime[i]:
+            primes.append(i)
+            for j in range(i * i, 101, i):
+                is_prime[j] = False
+    return primes
+
+def main():
+    n = int(input().strip())
+    a = list(map(int, input().split()))
+    
+    primes = get_primes()  # 所有质数
+    pCount = len(primes)
+    
+    # 对每个数计算质因数分解模2的表示，使用位掩码存储
+    masks = [0] * n
+    for i in range(n):
+        x = a[i]
+        cur_mask = 0
+        for j in range(pCount):
+            cnt = 0
+            while x % primes[j] == 0:
+                cnt += 1
+                x //= primes[j]
+            # 如果指数为奇数，则设置对应位为1
+            if cnt % 2 == 1:
+                cur_mask |= (1 << j)
+        masks[i] = cur_mask
+    
+    ans = 0
+    total = 1 << n  # 总共2^n种子集
+    # 枚举所有非空子集
+    for s in range(1, total):
+        xor_sum = 0
+        for i in range(n):
+            if s & (1 << i):
+                xor_sum ^= masks[i]
+        # 如果异或结果为0，说明乘积为完全平方数
+        if xor_sum == 0:
+            ans += 1
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+```
+
+## Java 
+
+```java
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    // 获取所有小于等于100的质数
+    public static ArrayList<Integer> getPrimes() {
+        ArrayList<Integer> primes = new ArrayList<>();
+        boolean[] isPrime = new boolean[101];
+        Arrays.fill(isPrime, true);
+        for (int i = 2; i <= 100; i++) {
+            if(isPrime[i]) {
+                primes.add(i);
+                for (int j = i * i; j <= 100; j += i) {
+                    isPrime[j] = false;
+                }
+            }
+        }
+        return primes;
+    }
+    
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt(); // 数组长度
+        int[] a = new int[n];
+        for (int i = 0; i < n; i++){
+            a[i] = sc.nextInt();
+        }
+        
+        ArrayList<Integer> primes = getPrimes(); // 所有小于等于100的质数
+        int pCount = primes.size();
+        int[] masks = new int[n];
+        
+        // 对每个数计算质因数分解模2的表示，存储在整数掩码中
+        for (int i = 0; i < n; i++){
+            int x = a[i];
+            int curMask = 0;
+            for (int j = 0; j < pCount; j++){
+                int cnt = 0;
+                int p = primes.get(j);
+                while (x % p == 0) {
+                    cnt++;
+                    x /= p;
+                }
+                // 如果指数为奇数，则将第j位设为1
+                if (cnt % 2 == 1) {
+                    curMask |= (1 << j);
+                }
+            }
+            masks[i] = curMask;
+        }
+        
+        long ans = 0;
+        int total = 1 << n;  // 总共2^n个子集
+        // 枚举所有非空子集
+        for (int s = 1; s < total; s++){
+            int xorSum = 0;
+            for (int i = 0; i < n; i++){
+                if ((s & (1 << i)) != 0) {
+                    xorSum ^= masks[i];
+                }
+            }
+            // 若异或结果为0，则该子集乘积为完全平方数
+            if (xorSum == 0) {
+                ans++;
+            }
+        }
+        
+        System.out.println(ans);
+    }
+}
+```

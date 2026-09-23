@@ -1,0 +1,52 @@
+ 
+dir1
+dir5
+dir5 dir6
+dir5 dir6 dir7
+dir4 usr
+dir10 dir11 dir4 dir8 dir9 usr
+dir10 dir11 dir4 dir8 dir9 usr
+dir10 dir11 dir12 dir13 dir14 dir4 dir8 dir9 usr
+dir10 dir11 dir12 dir13 dir14 dir4 dir8 dir9 usr
+dir1
+dir17 dir18 dir2 dir3
+ 
+dir17 dir18 dir19 dir2 dir20 dir21 dir3
+dir17 dir18 dir19 dir2 dir20 dir21 dir3
+dir1 dir23 dir29 dir30
+ 
+dir1 dir23 dir29 dir30 dir31 dir32
+dir1 dir23 dir29 dir30 dir31 dir32
+dir34
+dir34 dir35 dir36 dir37
+dir34 dir35 dir36 dir37
+ 
+dir42
+dir39 dir40 dir41 dir44 dir45
+dir39 dir40 dir41 dir44 dir45
+dir39 dir40 dir41 dir44 dir45 dir46
+dir39 dir40 dir41 dir44 dir45 dir46
+dir39 dir40 dir41 dir44 dir45 dir46
+ 
+dir39 dir40 dir41 dir44 dir45 dir46
+dir1 dir23 dir29 dir30 dir31 dir32 dir33 dir48 dir49 dir50 dir51 dir52 dir53 dir54
+dir10 dir11 dir12 dir13 dir14 dir15 dir16 dir24 dir25 dir26 dir27 dir28 dir4 dir55 dir8 dir9 usr
+dir10 dir11 dir12 dir13 dir14 dir15 dir16 dir24 dir25 dir26 dir27 dir28 dir4 dir55 dir8 dir9 usr
+dir17 dir18 dir19 dir2 dir20 dir21 dir22 dir3
+dir17 dir18 dir19 dir2 dir20 dir21 dir22 dir3 dir57
+dir39 dir40 dir41 dir44 dir45 dir46 dir61
+dir39 dir40 dir41 dir44 dir45 dir46 dir61
+dir39 dir40 dir41 dir44 dir45 dir46 dir61 dir62 dir63
+dir39 dir40 dir41 dir44 dir45 dir46 dir61 dir62 dir63 dir64
+dir1 dir23 dir29 dir30 dir31 dir32 dir33 dir48 dir49 dir50 dir51 dir52 dir53 dir54 dir58 dir59 dir60
+dir1 dir23 dir29 dir30 dir31 dir32 dir33 dir48 dir49 dir50 dir51 dir52 dir53 dir54 dir58 dir59 dir60
+dir1 dir23 dir29 dir30 dir31 dir32 dir33 dir48 dir49 dir50 dir51 dir52 dir53 dir54 dir58 dir59 dir60 dir67 dir68
+dir10 dir11 dir12 dir13 dir14 dir15 dir16 dir24 dir25 dir26 dir27 dir28 dir4 dir55 dir71 dir72 dir73 dir74 dir75 dir8 dir9 usr
+dir10 dir11 dir12 dir13 dir14 dir15 dir16 dir24 dir25 dir26 dir27 dir28 dir4 dir55 dir71 dir72 dir73 dir74 dir75 dir76 dir8 dir9 usr
+ 
+dir82 dir83 dir84
+ 
+ 
+ 
+ 
+ 

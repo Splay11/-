@@ -1,0 +1,6 @@
+LeaseManager(3)
+acquire(1, 1, 0)
+acquire(1, 1, 2)
+holder(1, 4)
+acquire(1, 2, 5)
+aliveCount(5)

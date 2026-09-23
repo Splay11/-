@@ -1,0 +1,33 @@
+32
+{
+ let a
+ let b
+ let c
+ let d
+ let e
+ let f
+ let g
+ let h
+ let i
+ let j
+ let k
+ let l
+ let m
+ let n
+ let o
+ drop g
+ drop b
+ drop f
+ drop h
+ drop o
+ drop a
+ drop m
+ drop i
+ drop c
+ drop d
+ drop n
+ drop l
+ drop e
+ drop j
+ drop k
+}

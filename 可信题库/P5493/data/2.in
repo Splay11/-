@@ -1,0 +1,7 @@
+FileLogger(6, 16)
+putLog(1, 5)
+putLog(2, 4)
+putLog(1, 3)
+putLog(2, 5)
+totalSize()
+listFiles()

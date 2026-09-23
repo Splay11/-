@@ -1,0 +1,332 @@
+## 解题思路
+
+### 核心思路
+
+题目的限制是：
+
+* 在任意连续的 $k$ 句话中，最多只有 $1$ 句是假话；
+* 也就是任意两个假话的位置之间，距离必须至少为 $k$。
+
+原因很简单：
+
+* 如果两个 $0$ 的下标差小于 $k$，那么一定能找到一个长度为 $k$ 的连续区间同时包含它们，这样这个区间里就会出现至少两个假话，不合法；
+* 反过来，如果任意两个 $0$ 的距离都不少于 $k$，那么任意长度为 $k$ 的区间内最多只会出现一个 $0$。
+
+所以问题就转化为：
+
+* 把所有 $-1$ 填成 $0/1$；
+* 已知的 $1$ 和 $0$ 必须保留；
+* 最终所有为 $0$ 的位置，两两距离至少为 $k$；
+* 统计方案数。
+
+
+
+### 状态设计
+
+设 $dp[i]$ 表示前 $i$ 个位置满足条件的填充方案数。
+
+那么第 $i$ 个位置只有两种决策：
+
+#### 1. 第 $i$ 个位置填 $1$
+
+只要 $a_i \neq 0$，那么这个位置可以填成真话。
+
+此时前 $i-1$ 个位置怎么填都可以，因此有转移：
+
+$$
+dp[i] += dp[i-1]
+$$
+
+
+
+#### 2. 第 $i$ 个位置填 $0$
+
+只要 $a_i \neq 1$，那么这个位置可以填成假话。
+
+如果第 $i$ 个位置是 $0$，那么为了保证任意两个 $0$ 之间距离至少为 $k$，位置区间
+
+$$
+[i-k+1,, i-1]
+$$
+
+中的所有位置都必须是 $1$。
+
+设
+
+$$
+s = \max(1, i-k+1)
+$$
+
+那么区间 $[s, i-1]$ 必须全为 $1$。
+
+这意味着：
+
+* 前 $s-1$ 个位置可以是任意合法方案，共有 $dp[s-1]$ 种；
+* 区间 $[s, i-1]$ 必须全部填成 $1$；
+* 第 $i$ 个位置填成 $0$。
+
+但是这里有一个前提：区间 $[s, i-1]$ 中不能存在题目已经给定的 $0$，否则无法全部填成 $1$。
+
+因此若区间 $[s, i-1]$ 中没有已知的 $0$，则有转移：
+
+$$
+dp[i] += dp[s-1]
+$$
+
+
+
+### 如何快速判断一个区间内是否存在已知的 0
+
+预处理前缀数组 $pre0$：
+
+$$
+pre0[i] = \text{前 } i \text{ 个位置中已知为 }0\text{ 的数量}
+$$
+
+那么区间 $[l, r]$ 中已知 $0$ 的个数为：
+
+$$
+pre0[r] - pre0[l-1]
+$$
+
+所以就能在 $O(1)$ 时间判断区间 $[s, i-1]$ 中是否存在已知的 $0$。
+
+
+
+### 转移总结
+
+初始化：
+
+$$
+dp[0] = 1
+$$
+
+对于每个位置 $i$：
+
+1. 若 $a_i \neq 0$，则可以填 $1$：
+
+$$
+dp[i] += dp[i-1]
+$$
+
+2. 若 $a_i \neq 1$，则可以填 $0$：
+
+令
+
+$$
+s = \max(1, i-k+1)
+$$
+
+若区间 $[s, i-1]$ 中没有已知的 $0$，则：
+
+$$
+dp[i] += dp[s-1]
+$$
+
+所有计算对 $10^9+7$ 取模。
+
+
+### 实现方法
+
+1. 读入数组；
+2. 预处理前缀已知零个数数组 $pre0$；
+3. 动态规划计算 $dp$；
+4. 输出 $dp[n]$。
+
+这样每个位置只处理常数次，适合本题数据范围。
+
+## 复杂度分析
+
+设单组数据长度为 $n$。
+
+* 预处理前缀数组复杂度为 $O(n)$；
+* 动态规划复杂度为 $O(n)$；
+* 总时间复杂度为 $O(n)$；
+* 空间复杂度为 $O(n)$。
+
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+MOD = 10**9 + 7
+
+# 计算单组测试数据的答案
+def count_ways(n, k, a):
+    # pre0[i] 表示前 i 个位置中，已知为 0 的数量
+    pre0 = [0] * (n + 1)
+    for i in range(1, n + 1):
+        pre0[i] = pre0[i - 1] + (1 if a[i - 1] == 0 else 0)
+
+    # dp[i] 表示前 i 个位置的合法填充方案数
+    dp = [0] * (n + 1)
+    dp[0] = 1
+
+    for i in range(1, n + 1):
+        # 情况 1：第 i 个位置填 1
+        if a[i - 1] != 0:
+            dp[i] = (dp[i] + dp[i - 1]) % MOD
+
+        # 情况 2：第 i 个位置填 0
+        if a[i - 1] != 1:
+            s = max(1, i - k + 1)
+
+            # 判断区间 [s, i - 1] 中是否存在已知的 0
+            known_zero_cnt = pre0[i - 1] - pre0[s - 1]
+            if known_zero_cnt == 0:
+                dp[i] = (dp[i] + dp[s - 1]) % MOD
+
+    return dp[n]
+
+
+def main():
+    input = sys.stdin.readline
+    T = int(input().strip())
+    ans = []
+
+    for _ in range(T):
+        n, k = map(int, input().split())
+        a = list(map(int, input().split()))
+        ans.append(str(count_ways(n, k, a)))
+
+    print("\n".join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 1000000007L;
+
+    // 计算单组测试数据的答案
+    static long countWays(int n, int k, int[] a) {
+        // pre0[i] 表示前 i 个位置中，已知为 0 的数量
+        int[] pre0 = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            pre0[i] = pre0[i - 1] + (a[i] == 0 ? 1 : 0);
+        }
+
+        // dp[i] 表示前 i 个位置的合法填充方案数
+        long[] dp = new long[n + 1];
+        dp[0] = 1;
+
+        for (int i = 1; i <= n; i++) {
+            // 情况 1：第 i 个位置填 1
+            if (a[i] != 0) {
+                dp[i] = (dp[i] + dp[i - 1]) % MOD;
+            }
+
+            // 情况 2：第 i 个位置填 0
+            if (a[i] != 1) {
+                int s = Math.max(1, i - k + 1);
+
+                // 判断区间 [s, i - 1] 中是否存在已知的 0
+                int knownZeroCnt = pre0[i - 1] - pre0[s - 1];
+                if (knownZeroCnt == 0) {
+                    dp[i] = (dp[i] + dp[s - 1]) % MOD;
+                }
+            }
+        }
+
+        return dp[n];
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder out = new StringBuilder();
+
+        int T = Integer.parseInt(br.readLine().trim());
+
+        while (T-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            int k = Integer.parseInt(st.nextToken());
+
+            int[] a = new int[n + 1];
+            st = new StringTokenizer(br.readLine());
+            for (int i = 1; i <= n; i++) {
+                a[i] = Integer.parseInt(st.nextToken());
+            }
+
+            out.append(countWays(n, k, a)).append('\n');
+        }
+
+        System.out.print(out);
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+
+// 计算单组测试数据的答案
+long long countWays(int n, int k, const vector<int>& a) {
+    // pre0[i] 表示前 i 个位置中，已知为 0 的数量
+    vector<int> pre0(n + 1, 0);
+    for (int i = 1; i <= n; i++) {
+        pre0[i] = pre0[i - 1] + (a[i] == 0 ? 1 : 0);
+    }
+
+    // dp[i] 表示前 i 个位置的合法填充方案数
+    vector<long long> dp(n + 1, 0);
+    dp[0] = 1;
+
+    for (int i = 1; i <= n; i++) {
+        // 情况 1：第 i 个位置填 1
+        if (a[i] != 0) {
+            dp[i] = (dp[i] + dp[i - 1]) % MOD;
+        }
+
+        // 情况 2：第 i 个位置填 0
+        if (a[i] != 1) {
+            int s = max(1, i - k + 1);
+
+            // 判断区间 [s, i - 1] 中是否存在已知的 0
+            int knownZeroCnt = pre0[i - 1] - pre0[s - 1];
+            if (knownZeroCnt == 0) {
+                dp[i] = (dp[i] + dp[s - 1]) % MOD;
+            }
+        }
+    }
+
+    return dp[n];
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n, k;
+        cin >> n >> k;
+
+        vector<int> a(n + 1);
+        for (int i = 1; i <= n; i++) {
+            cin >> a[i];
+        }
+
+        cout << countWays(n, k, a) << '\n';
+    }
+
+    return 0;
+}
+```

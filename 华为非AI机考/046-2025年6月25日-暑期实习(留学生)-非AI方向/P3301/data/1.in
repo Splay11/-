@@ -1,0 +1,14 @@
+13
+algorithm 40,67,83,43-45
+algorithm 17-22
+algorithm 22,25-29
+undo algorithm 31,85,27
+undo algorithm 51-51,99-100
+undo algorithm 86,84,94-99
+undo algorithm 32-41,96-99
+undo algorithm 56,37-42,46
+undo algorithm 96-99
+undo algorithm 42-42,73,68-74,51-54,19-28
+algorithm 64
+undo algorithm 16-24
+algorithm 35

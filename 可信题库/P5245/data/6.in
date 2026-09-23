@@ -1,0 +1,8 @@
+TTLCache(2)
+put(-1, -10, 3)
+put(-2, 0, 4)
+get(-1, 2)
+put(0, 1, 1)
+get(-2, 0)
+purge(4)
+size()

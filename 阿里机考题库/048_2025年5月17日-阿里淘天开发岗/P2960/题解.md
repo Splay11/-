@@ -1,0 +1,131 @@
+## 题目描述
+
+小红现在有每种小写字母若干个，她想把这些字母组成一个字符串 $s$，使得字符串中任意两个相邻字母都不一样。请你帮助她求出能构造的最长字符串的长度。
+
+## 思路
+
+设所有字母数量之和为  
+$$
+S=\sum_{i=1}^{26}x_i
+$$  
+其中最大数量的字母个数为  
+$$
+M=\max_{1\le i\le26}x_i.
+$$  
+
+若要两两相邻字母都不相同，最困难的是“最多”的那种字母。  
+- 如果将这 $M$ 个最多字母尽量平均地插入其它字母之间，需要的“间隔位”至少为 $M-1$。  
+- 其它字母总共能提供的位置数为 $S-M$。
+
+**情况划分：**
+
+1. 若  
+   $$
+   M-1\le S-M
+   $$  
+   即  
+   $$
+   M\le S-M+1
+   $$  
+   则可以完全插开，构造出长度为  
+   $$
+   S
+   $$  
+   的合法字符串。
+
+2. 否则，即  
+   $$
+   M> S-M+1
+   $$  
+   即其它字母不足以插开所有同类字母，则最多能用的字母数为：  
+   $$
+   2(S-M)+1
+   $$  
+   （把其它字母全插满间隔后，只能再多放一个最多字母）。
+
+综合可得答案公式：  
+$$
+\text{ans}=\min\bigl(S,\;2(S-M)+1\bigr).
+$$
+
+## C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while (T--) {
+        long long S = 0;     // 总字母数
+        long long M = 0;     // 出现最多的字母数
+        for (int i = 0; i < 26; i++) {
+            long long x;
+            cin >> x;
+            S += x;
+            M = max(M, x);
+        }
+        // 计算答案：min(S, 2*(S-M)+1)
+        long long ans = min(S, 2 * (S - M) + 1);
+        cout << ans << "\n";
+    }
+    return 0;
+}
+```
+## Python
+
+```python
+import sys
+import threading
+
+def main():
+    data = sys.stdin.read().split()
+    T = int(data[0])
+    idx = 1
+    for _ in range(T):
+        # 读取 26 个字母数量
+        xs = list(map(int, data[idx:idx+26]))
+        idx += 26
+        S = sum(xs)         # 总字母数
+        M = max(xs)         # 最多字母数
+        # 最长长度为 min(S, 2*(S-M)+1)
+        ans = min(S, 2*(S-M) + 1)
+        print(ans)
+
+if __name__ == "__main__":
+    threading.Thread(target=main).start()
+```
+## Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        while (T-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            long S = 0;    // 总字母数
+            long M = 0;    // 出现最多的字母数
+            for (int i = 0; i < 26; i++) {
+                long x = Long.parseLong(st.nextToken());
+                S += x;
+                if (x > M) {
+                    M = x;
+                }
+            }
+            // 答案为 min(S, 2*(S-M)+1)
+            long ans = Math.min(S, 2*(S - M) + 1);
+            System.out.println(ans);
+        }
+    }
+}
+```

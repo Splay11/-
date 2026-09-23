@@ -1,0 +1,6 @@
+storage_fail 1 power_off 1 low_power 1 mem_bad 1 err_9 1
+r_los 1 bit_error 1 power_off 2 hard_bad 1 err_9 1
+low_power 2 err_9 2 mem_bad 1 dbms_error 1
+power_off 2 hard_bad 1 mem_bad 2 err_9 1
+mem_bad 2 low_power 1 power_off 1 storage_fail 1
+err_9 1 bit_error 1 power_off 1

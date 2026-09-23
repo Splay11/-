@@ -1,0 +1,52 @@
+class Solution:
+    def kMeans(self, points, k):
+        """标准 K-Means：前 k 个点初始化，最多 100 轮或中心移动和 <= 1e-6。"""
+        n = len(points)
+        # 初始中心取前 k 个样本
+        centers = [list(points[i]) for i in range(k)]
+        for _ in range(100):
+            clusters = [[] for _ in range(k)]
+            # 分配：每个点归到欧氏距离最近的中心
+            for p in points:
+                best = 0
+                best_d = float("inf")
+                for j, c in enumerate(centers):
+                    d = (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2 + (p[2] - c[2]) ** 2
+                    if d < best_d:
+                        best_d = d
+                        best = j
+                clusters[best].append(p)
+            # 更新中心为簇均值；空簇保留原中心
+            new_centers = []
+            move = 0.0
+            for j in range(k):
+                if not clusters[j]:
+                    new_centers.append(list(centers[j]))
+                    continue
+                sx = sy = sz = 0.0
+                for p in clusters[j]:
+                    sx += p[0]
+                    sy += p[1]
+                    sz += p[2]
+                m = len(clusters[j])
+                nc = [sx / m, sy / m, sz / m]
+                move += (
+                    (nc[0] - centers[j][0]) ** 2
+                    + (nc[1] - centers[j][1]) ** 2
+                    + (nc[2] - centers[j][2]) ** 2
+                ) ** 0.5
+                new_centers.append(nc)
+            centers = new_centers
+            if move <= 1e-6:
+                break
+        return centers
+
+
+if __name__ == "__main__":
+    n, k = map(int, input().split())
+    points = []
+    for _ in range(n):
+        points.append(list(map(float, input().split())))
+    centers = Solution().kMeans(points, k)
+    for c in centers:
+        print(f"{c[0]:.2f} {c[1]:.2f} {c[2]:.2f}")

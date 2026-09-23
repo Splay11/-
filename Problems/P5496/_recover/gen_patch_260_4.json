@@ -1,0 +1,4 @@
+{
+  "old": "    # 8 小随机\n    write_case(8, 12, [random.randint(1, 100) for _ in range(12)])\n    # 9 最大规模随机\n    write_case(9, 200, [random.randint(1, 100) for _ in range(200)])\n    # 10 最大规模：交替高低，强迫多次切开\n    p10 = []\n    for i in range(200):\n        p10.append(100 if i % 2 == 0 else 1)\n    write_case(10, 200, p10)",
+  "new": "    # 8 最大规模随机，卡无记忆化 DFS\n    write_case(8, 200, [random.randint(1, 100) for _ in range(200)])\n    # 9 最大规模随机\n    write_case(9, 200, [random.randint(1, 100) for _ in range(200)])\n    # 10 最大规模：交替高低，强迫多次切开\n    p10 = []\n    for i in range(200):\n        p10.append(100 if i % 2 == 0 else 1)\n    write_case(10, 200, p10)"
+}

@@ -1,0 +1,159 @@
+# 题解
+
+## 题目描述
+
+给定一个长度为 $n$ 的数组 $a$，需要将其划分为三个非空的连续子数组  
+$[1,x],\quad[x+1,y],\quad[y+1,n]$  
+使得三段和的乘积  
+![image](/file/2/o_rxfXzeR6mWSW7_3PDJ0.png) 
+最大化。输出最大值对 $998244353$ 取模的结果。
+
+---
+
+## 思路
+
+1. **前缀和**  
+   令  
+   $$s[i]=\sum_{k=1}^i a_k,\quad i=0,1,\dots,n.$$  
+   则三段的和分别为  
+   $$S_1=s[x],\quad S_2=s[y]-s[x],\quad S_3=s[n]-s[y].$$  
+   目标是最大化  
+   $S_1$$\times$ $S_2$$\times$ $S_3$=$(s[x])$$(s[y]-s[x])$$(s[n]-s[y])$
+
+2. **分治枚举**  
+   - 枚举第二个分割点 $y$（即前两段的右端位置），$y$ 从 $2$ 到 $n-1$。  
+   - 令 $T=s[y]$，此时第三段和 $S_3=s[n]-T$ 是常数。要最大化  
+     $$(s[x])\,(T-s[x]).$$  
+   - 函数 $f(u)=u\,(T-u)$ 关于 $u$ 是以 $T/2$ 为对称轴的下凹函数，最优点附近一定在最接近 $T/2$ 的两个整数位置。  
+   - 所以在前缀和数组 $s[1\ldots y-1]$ 上二分查找第一个不小于 $T/2$ 的位置 $p$，再检查 $p$ 和 $p-1$ 的结果，取最大值。
+
+3. **复杂度**  
+   - 前缀和和枚举 $y$ 共 $O(n)$。  
+   - 每次二分查找 $O(\log n)$，总体 $O(n\log n)$，可通过。
+
+---
+
+# C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll MOD = 998244353;
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;                  // 读入数组长度 n
+    vector<ll> a(n+1), s(n+1);
+    for(int i = 1; i <= n; i++){
+        cin >> a[i];           // 读入 a[i]
+        s[i] = s[i-1] + a[i];   // 计算前缀和 s[i]
+    }
+
+    __int128 maxv = 0;         // 存放最大值，用 __int128 防止中间溢出
+    // 枚举中间分割点 y
+    for(int y = 2; y < n; y++){
+        ll T = s[y];            // 前两段总和
+        // 在 s[1..y-1] 中二分查找最接近 T/2 的位置
+        int p = lower_bound(s.begin()+1, s.begin()+y, T/2) - s.begin();
+        // 分别尝试 p 和 p-1
+        for(int d = -1; d <= 0; d++){
+            int x = p + d;
+            if(x >= 1 && x < y){
+                // 计算三段乘积
+                __int128 v = (__int128)s[x] * (T - s[x]) * (s[n] - T);
+                if(v > maxv) maxv = v;
+            }
+        }
+    }
+
+    ll ans = (ll)(maxv % MOD);
+    cout << ans << "\n";       // 输出结果
+    return 0;
+}
+```
+# Python
+
+```python
+import sys
+import bisect
+
+def main():
+    data = sys.stdin.read().split()
+    n = int(data[0])                # 读入数组长度 n
+    a = list(map(int, data[1:]))    # 读入数组 a
+    # 计算前缀和 s，s[0]=0, s[i]=a[0]+...+a[i-1]
+    s = [0]
+    for v in a:
+        s.append(s[-1] + v)
+
+    M = 998244353
+    total = s[n]
+    maxv = 0
+    # 枚举第二段结束 y，从 2 到 n-1
+    for y in range(2, n):
+        T = s[y]  # 前两段和
+        # 找到第一个不小于 T/2 的索引
+        p = bisect.bisect_left(s, T/2, 1, y)
+        # 分别尝试 p 和 p-1
+        for d in (0, -1):
+            x = p + d
+            if 1 <= x < y:
+                # 计算三段乘积
+                prod = s[x] * (T - s[x]) * (total - T)
+                if prod > maxv:
+                    maxv = prod
+    # 输出对 M 取模的结果
+    print(maxv % M)
+
+if __name__ == "__main__":
+    main()
+```
+# Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static final long MOD = 998244353;
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine().trim()); // 读入 n
+        long[] a = new long[n+1], s = new long[n+1];
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        for(int i = 1; i <= n; i++){
+            a[i] = Long.parseLong(st.nextToken());      // 读入 a[i]
+            s[i] = s[i-1] + a[i];                       // 构造前缀和
+        }
+
+        // 存放最大乘积，用于防溢出用 long double 模拟 __int128
+        long maxv = 0;
+        // 枚举 y
+        for(int y = 2; y < n; y++){
+            long T = s[y];  // 前两段总和
+            // 二分查找最接近 T/2 的位置
+            int l = 1, r = y;
+            while(l < r){
+                int mid = (l + r) >>> 1;
+                if(s[mid] < T/2.0) l = mid + 1;
+                else r = mid;
+            }
+            // 检查 l 和 l-1
+            for(int d = -1; d <= 0; d++){
+                int x = l + d;
+                if(x >= 1 && x < y){
+                    long v = s[x] * (T - s[x]) * (s[n] - T);
+                    if(v > maxv) maxv = v;
+                }
+            }
+        }
+        // 输出结果
+        System.out.println(maxv % MOD);
+    }
+}
+```

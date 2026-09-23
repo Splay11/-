@@ -1,0 +1,4 @@
+{
+  "old": "# -*- coding: utf-8 -*-\n\"\"\"Generate 10 test cases for P5496. First 8 small, last 2 n=200.\"\"\"",
+  "new": "# -*- coding: utf-8 -*-\n\"\"\"Generate 10 test cases for P5496. First 7 small (DFS 70), last 3 n=200 (DP 100).\"\"\""
+}

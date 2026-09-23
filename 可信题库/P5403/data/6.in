@@ -1,0 +1,8 @@
+MicQueue()
+enroll(6, 50)
+enroll(7, 1)
+cancel(6)
+nextPlay()
+enroll(6, 3)
+nextPlay()
+waiting()

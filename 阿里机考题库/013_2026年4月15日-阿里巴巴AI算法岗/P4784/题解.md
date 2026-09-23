@@ -1,0 +1,185 @@
+## 解题思路
+
+核心思路：
+这道题的关键在于理解操作的本质：每次可以选择相邻两个元素同时改变符号。我们需要找到一种策略使得最终数组元素之和最大。
+
+让我们分析操作的影响：
+- 操作将$a_i$和$a_{i+1}$都变为相反数
+- 这意味着如果原来$a_i$和$a_{i+1}$都是负数，操作后变成正数，对总和有利
+- 如果$a_i$和$a_{i+1}$中一个是正数一个是负数，操作可能会让总和变小
+
+更深入思考，我们发现：
+- 我们可以连续应用操作来"移动"符号
+- 例如，如果$a_1, a_2, a_3$都是负数，我们可以先对$(a_1, a_2)$操作，再对$(a_2, a_3)$操作，结果是只有$a_1, a_3$为正，$a_2$为负
+
+关键观察：
+- 我们可以通过操作改变任意偶数个元素的符号
+- 但无法改变奇数个元素的符号（因为每次操作影响两个元素）
+
+因此，最优策略是：
+- 如果原数组中有偶数个负数，则所有数都可以变为非负数
+- 如果原数组中有奇数个负数，且整个数组绝对值最小的数是负数，则保留这个绝对值最小的数为负，其余全为正
+- 如果原数组中有奇数个负数，且整个数组绝对值最小的数是正数，则将这个绝对值最小的数变为负，其余全为正
+
+实际上，更简单的思路是：我们总是可以让最多偶数个负数变为正数，如果原来是奇数个负数，就保留绝对值最小的那个为负。
+
+实现方法：
+1. 计算所有元素的绝对值之和
+2. 找出绝对值最小的元素
+3. 统计负数的个数
+4. 如果负数个数为偶数，则结果就是所有绝对值之和
+5. 如果负数个数为奇数，则结果是所有绝对值之和减去两倍的最小绝对值（因为要保留一个最小绝对值为负）
+
+## 复杂度分析
+
+时间复杂度：O(n)，只需要遍历数组一次来计算绝对值之和和找最小绝对值
+空间复杂度：O(1)，只使用了常数额外空间
+
+## 代码实现
+
+### Python
+```python
+def solve():
+    n = int(input())
+    arr = list(map(int, input().split()))
+    
+    # 计算所有元素的绝对值之和
+    abs_sum = sum(abs(x) for x in arr)
+    
+    # 找到绝对值最小的元素
+    min_abs = min(abs(x) for x in arr)
+    
+    # 统计负数的个数
+    neg_count = sum(1 for x in arr if x < 0)
+    
+    # 如果负数个数为偶数，所有数都可以为正
+    # 如果负数个数为奇数，必须保留一个最小绝对值为负
+    if neg_count % 2 == 0:
+        return abs_sum
+    else:
+        return abs_sum - 2 * min_abs
+
+T = int(input())
+for _ in range(T):
+    print(solve())
+```
+
+### Java
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        
+        for (int t = 0; t < T; t++) {
+            int n = sc.nextInt();
+            int[] arr = new int[n];
+            
+            // 读取数组
+            for (int i = 0; i < n; i++) {
+                arr[i] = sc.nextInt();
+            }
+            
+            System.out.println(solve(arr));
+        }
+        sc.close();
+    }
+    
+    public static long solve(int[] arr) {
+        int n = arr.length;
+        
+        // 计算所有元素的绝对值之和
+        long absSum = 0;
+        for (int x : arr) {
+            absSum += Math.abs((long)x);
+        }
+        
+        // 找到绝对值最小的元素
+        int minAbs = Math.abs(arr[0]);
+        for (int x : arr) {
+            minAbs = Math.min(minAbs, Math.abs(x));
+        }
+        
+        // 统计负数的个数
+        int negCount = 0;
+        for (int x : arr) {
+            if (x < 0) {
+                negCount++;
+            }
+        }
+        
+        // 如果负数个数为偶数，所有数都可以为正
+        // 如果负数个数为奇数，必须保留一个最小绝对值为负
+        if (negCount % 2 == 0) {
+            return absSum;
+        } else {
+            return absSum - 2 * (long)minAbs;
+        }
+    }
+}
+```
+
+### C++
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+long long solve(vector<int>& arr) {
+    int n = arr.size();
+    
+    // 计算所有元素的绝对值之和
+    long long absSum = 0;
+    for (int x : arr) {
+        absSum += abs(x);
+    }
+    
+    // 找到绝对值最小的元素
+    int minAbs = INT_MAX;
+    for (int x : arr) {
+        minAbs = min(minAbs, abs(x));
+    }
+    
+    // 统计负数的个数
+    int negCount = 0;
+    for (int x : arr) {
+        if (x < 0) {
+            negCount++;
+        }
+    }
+    
+    // 如果负数个数为偶数，所有数都可以为正
+    // 如果负数个数为奇数，必须保留一个最小绝对值为负
+    if (negCount % 2 == 0) {
+        return absSum;
+    } else {
+        return absSum - 2LL * minAbs;
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    int T;
+    cin >> T;
+    
+    for (int t = 0; t < T; t++) {
+        int n;
+        cin >> n;
+        vector<int> arr(n);
+        
+        for (int i = 0; i < n; i++) {
+            cin >> arr[i];
+        }
+        
+        cout << solve(arr) << endl;
+    }
+    
+    return 0;
+}
+```

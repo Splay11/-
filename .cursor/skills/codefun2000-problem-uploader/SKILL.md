@@ -60,7 +60,8 @@ python "<utils_dir>\upload_testdata.py" --base-url https://codefun2000.com ...
 ### 1.1 何时必须 fatal stop
 
 - **第 0.1 / 0.2 节**：找不到 `<utils_dir>`，或当前任务所需的脚本在 `<utils_dir>` 中不存在。
-- 未设置 `HYDRO_API_UNAME` / `HYDRO_API_PASSWORD`。
+- 未设置 `CF_API_KEY`（题目 `/api/problem*` 鉴权，见 `utils/README.md` / 项目根 `.env`）。
+- 仅在线评测 std（`submit_proxy`）时还需要 `HYDRO_API_UNAME` / `HYDRO_API_PASSWORD`。
 - 用户未提供可用的 **`--domain-id`**（且无法从任务说明中唯一确定）。
 - **无法确定 PID**（见第 2 节）：题目文件夹名中**不含**形如 `P4000` 的 pid，且用户也**未在对话中显式给出** pid（例如「pid 为 P4719」「上传到 P4719」）。
 - **仅当任务范围包含「上传测试数据」时**（默认整套上传，或用户明确说**只上传数据**）：用户指定的题目根目录下**不存在名为 `data` 的文件夹**（不是「data 为空」，而是**没有该目录**）。若用户明确只要**只上传题解**或**只测试 std**，**不要求**存在 `data/`。

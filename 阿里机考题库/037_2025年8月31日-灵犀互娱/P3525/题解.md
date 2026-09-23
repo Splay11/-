@@ -1,0 +1,103 @@
+## 解法与正确性
+
+**贪心**：在每一步，若能跳 2 就优先跳 2；否则跳 1。
+理由：两步跳比一步跳更“划算”，且跳 2 不会阻断可达性（题意保证存在解）。若某处能跳 2 却选择跳 1，只会增加一次额外跳跃而不带来任何好处，因此始终优先跳 2 是最优。
+
+
+## 复杂度分析
+
+* 时间复杂度：`O(n)`，每个位置最多检查一次。
+* 空间复杂度：`O(1)`，仅常数额外变量。
+
+## 代码实现
+
+### Python
+
+```python
+# 读取所有输入并求解，中文注释
+import sys
+
+def solve():
+    data = sys.stdin.read().strip().split()
+    if not data:
+        return
+    n = int(data[0])
+    c = list(map(int, data[1:1+n]))
+    i = 0
+    ans = 0
+    while i < n - 1:
+        # 若可以跳两步且是积云，则优先跳两步
+        if i + 2 < n and c[i + 2] == 0:
+            i += 2
+        else:
+            i += 1
+        ans += 1
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+// 贪心解法：能跳2就跳2，否则跳1
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String s;
+        // 读 n
+        s = br.readLine();
+        while (s != null && s.trim().isEmpty()) s = br.readLine();
+        int n = Integer.parseInt(s.trim());
+        // 读数组
+        String line = br.readLine();
+        while (line != null && line.trim().isEmpty()) line = br.readLine();
+        StringTokenizer st = new StringTokenizer(line);
+        int[] c = new int[n];
+        for (int i = 0; i < n; i++) {
+            if (!st.hasMoreTokens()) { // 若换行，继续读
+                line = br.readLine();
+                if (line == null) break;
+                st = new StringTokenizer(line);
+            }
+            c[i] = Integer.parseInt(st.nextToken());
+        }
+        int i = 0, ans = 0;
+        while (i < n - 1) {
+            if (i + 2 < n && c[i + 2] == 0) i += 2;
+            else i += 1;
+            ans++;
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+### C++
+
+```cpp
+// 贪心：优先跳两步
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    if (!(cin >> n)) return 0;
+    vector<int> c(n);
+    for (int i = 0; i < n; ++i) cin >> c[i];
+    int i = 0, ans = 0;
+    while (i < n - 1) {
+        if (i + 2 < n && c[i + 2] == 0) i += 2;
+        else i += 1;
+        ++ans;
+    }
+    cout << ans << "\n";
+    return 0;
+}
+```

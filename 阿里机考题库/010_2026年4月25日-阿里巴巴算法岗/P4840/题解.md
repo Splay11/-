@@ -1,0 +1,156 @@
+## 解题思路
+
+交叉表第 $i$ 行第 $j$ 列元素为 $\textit{pulse}_i \times \textit{gauge}_j$，需统计 $\ge \textit{bound}$ 的格子数。
+
+$\textit{pulse}$、$\textit{gauge}$ 均为非负整数。先将 $\textit{gauge}$ 升序排序，再对每个 $\textit{pulse}_i$：
+
+- 若 $\textit{bound}=0$，所有乘积均 $\ge 0$，贡献 $C$；
+- 若 $\textit{pulse}_i=0$ 且 $\textit{bound}>0$，无贡献；
+- 否则需 $\textit{gauge}_j \ge \lceil \textit{bound}/\textit{pulse}_i \rceil$，在排序后的 $\textit{gauge}$ 上二分第一个达标位置，后缀全部达标。
+
+## 复杂度分析
+
+设两组测点带长度分别为 $R$、$C$。
+
+- 时间复杂度：$O(C \log C + R \log C)$
+- 空间复杂度：$O(1)$（不计输入数组）
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+from bisect import bisect_left
+
+def count_pairs(pulse, gauge, bound):
+    gauge = sorted(gauge)
+    C = len(gauge)
+    ans = 0
+    for p in pulse:
+        if bound == 0:
+            ans += C
+        elif p == 0:
+            continue
+        else:
+            need = (bound + p - 1) // p
+            pos = bisect_left(gauge, need)
+            ans += C - pos
+    return ans
+
+data = list(map(int, sys.stdin.buffer.read().split()))
+idx = 0
+T = data[idx]; idx += 1
+res = []
+for _ in range(T):
+    R, C, bound = data[idx], data[idx+1], data[idx+2]; idx += 3
+    pulse = data[idx:idx+R]; idx += R
+    gauge = data[idx:idx+C]; idx += C
+    res.append(str(count_pairs(pulse, gauge, bound)))
+print("\n".join(res))
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static long countPairs(long[] pulse, long[] gauge, long bound) {
+        Arrays.sort(gauge);
+        int C = gauge.length;
+        long ans = 0;
+        for (long p : pulse) {
+            if (bound == 0) ans += C;
+            else if (p == 0) continue;
+            else {
+                long need = (bound + p - 1) / p;
+                int pos = lowerBound(gauge, need);
+                ans += C - pos;
+            }
+        }
+        return ans;
+    }
+
+    static int lowerBound(long[] arr, long target) {
+        int l = 0, r = arr.length;
+        while (l < r) {
+            int m = (l + r) / 2;
+            if (arr[m] >= target) r = m;
+            else l = m + 1;
+        }
+        return l;
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner(System.in);
+        int T = fs.nextInt();
+        StringBuilder sb = new StringBuilder();
+        for (int tc = 0; tc < T; tc++) {
+            int R = fs.nextInt(), C = fs.nextInt();
+            long bound = fs.nextLong();
+            long[] pulse = new long[R], gauge = new long[C];
+            for (int i = 0; i < R; i++) pulse[i] = fs.nextLong();
+            for (int j = 0; j < C; j++) gauge[j] = fs.nextLong();
+            sb.append(countPairs(pulse, gauge, bound)).append('\n');
+        }
+        System.out.print(sb);
+    }
+
+    static class FastScanner {
+        private final InputStream in;
+        private final byte[] buf = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+        FastScanner(InputStream is) { in = is; }
+        private int read() throws IOException {
+            if (ptr >= len) { len = in.read(buf); ptr = 0; if (len <= 0) return -1; }
+            return buf[ptr++];
+        }
+        long nextLong() throws IOException {
+            int c; do { c = read(); } while (c <= ' ');
+            long x = 0; while (c > ' ') { x = x * 10 + c - '0'; c = read(); }
+            return x;
+        }
+        int nextInt() throws IOException { return (int) nextLong(); }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+long long countPairs(vector<long long>& pulse, vector<long long>& gauge, long long bound) {
+    sort(gauge.begin(), gauge.end());
+    int C = gauge.size();
+    long long ans = 0;
+    for (long long p : pulse) {
+        if (bound == 0) ans += C;
+        else if (p == 0) continue;
+        else {
+            long long need = (bound + p - 1) / p;
+            int pos = lower_bound(gauge.begin(), gauge.end(), need) - gauge.begin();
+            ans += C - pos;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T; cin >> T;
+    while (T--) {
+        int R, C; long long bound;
+        cin >> R >> C >> bound;
+        vector<long long> pulse(R), gauge(C);
+        for (int i = 0; i < R; i++) cin >> pulse[i];
+        for (int j = 0; j < C; j++) cin >> gauge[j];
+        cout << countPairs(pulse, gauge, bound) << '\n';
+    }
+    return 0;
+}
+```

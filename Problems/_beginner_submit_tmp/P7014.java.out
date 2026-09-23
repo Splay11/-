@@ -1,0 +1,32 @@
+RID: 6a8bdf8ae3edccf70d3f4e28
+是否完全通过: True
+错误种类: 无
+状态: Accepted
+编译信息: []
+运行信息: 
+失败点: null
+完整返回:
+{
+  "ok": true,
+  "rid": "6a8bdf8ae3edccf70d3f4e28",
+  "result": {
+    "isAccepted": true,
+    "status": {
+      "code": 1,
+      "name": "Accepted",
+      "textZh": "Accepted"
+    },
+    "errorType": "无",
+    "score": 100,
+    "timeMs": 765.316,
+    "memoryBytes": 43160,
+    "compilerMessage": [],
+    "runtimeMessage": "",
+    "firstFailedCase": null,
+    "caseSummary": {
+      "total": 10,
+      "accepted": 0
+    }
+  }
+}
+

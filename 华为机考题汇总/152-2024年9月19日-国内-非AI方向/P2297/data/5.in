@@ -1,0 +1,16 @@
+5 10
+(oxrevtztoo = 'SE10' OR oxrevtztoo = 'S10') AND (ooprieiiya = 'NW10' OR ooprieiiya = 'N10' OR ooprieiiya = 'NE10') AND fzbfvahudc = 'NW10' AND (jakxbbfljv = 'SE10' OR jakxbbfljv = 'S10' OR jakxbbfljv = 'NE10') OR (xerxzsvpmw = 'N10' OR xerxzsvpmw = 'SE10') AND xdichxdhwh = 'NE10' AND awbgnoyvmr = 'SE10' OR (bxanoqsglg = 'NW10' OR bxanoqsglg = 'SE10') OR iipfazobji = 'SW10' OR wfmmqsjrup = 'SE10'
+(oxrevtztoo = 'SE10' OR oxrevtztoo = 'SW10') OR (ooprieiiya = 'NW10' OR ooprieiiya = 'N10' OR ooprieiiya = 'SE10') OR (fzbfvahudc = 'N10' OR fzbfvahudc = 'SW10') OR (jakxbbfljv = 'NW10' OR jakxbbfljv = 'NE10') AND (xerxzsvpmw = 'SW10' OR xerxzsvpmw = 'NW10' OR xerxzsvpmw = 'NE10') OR (xdichxdhwh = 'NE10' OR xdichxdhwh = 'S10' OR xdichxdhwh = 'NW10') AND (awbgnoyvmr = 'NE10' OR awbgnoyvmr = 'NW10' OR awbgnoyvmr = 'SW10') AND bxanoqsglg = 'S10' AND iipfazobji = 'NW10' OR (wfmmqsjrup = 'N10' OR wfmmqsjrup = 'NE10' OR wfmmqsjrup = 'SW10')
+(oxrevtztoo = 'NW10' OR oxrevtztoo = 'SE10') AND (ooprieiiya = 'NE10' OR ooprieiiya = 'S10' OR ooprieiiya = 'SW10') AND (fzbfvahudc = 'NE10' OR fzbfvahudc = 'SE10') OR (jakxbbfljv = 'SW10' OR jakxbbfljv = 'NE10') OR (xerxzsvpmw = 'N10' OR xerxzsvpmw = 'NW10' OR xerxzsvpmw = 'S10') AND xdichxdhwh = 'SW10' AND (awbgnoyvmr = 'S10' OR awbgnoyvmr = 'SE10') AND bxanoqsglg = 'NE10' OR (iipfazobji = 'N10' OR iipfazobji = 'NW10' OR iipfazobji = 'SW10') AND (wfmmqsjrup = 'S10' OR wfmmqsjrup = 'NE10' OR wfmmqsjrup = 'NW10')
+(oxrevtztoo = 'N10' OR oxrevtztoo = 'NW10' OR oxrevtztoo = 'SW10') OR (ooprieiiya = 'NW10' OR ooprieiiya = 'NE10' OR ooprieiiya = 'SE10') AND fzbfvahudc = 'S10' OR (jakxbbfljv = 'SE10' OR jakxbbfljv = 'NE10') OR (xerxzsvpmw = 'NE10' OR xerxzsvpmw = 'NW10') OR (xdichxdhwh = 'SW10' OR xdichxdhwh = 'SE10' OR xdichxdhwh = 'NE10') OR (awbgnoyvmr = 'SW10' OR awbgnoyvmr = 'NE10' OR awbgnoyvmr = 'SE10') OR bxanoqsglg = 'SE10' OR iipfazobji = 'NW10' AND (wfmmqsjrup = 'NE10' OR wfmmqsjrup = 'S10')
+(oxrevtztoo = 'N10' OR oxrevtztoo = 'NW10' OR oxrevtztoo = 'S10') AND ooprieiiya = 'N10' AND fzbfvahudc = 'S10' OR jakxbbfljv = 'NW10' OR xerxzsvpmw = 'NE10' AND xdichxdhwh = 'S10' OR awbgnoyvmr = 'SW10' AND (bxanoqsglg = 'SW10' OR bxanoqsglg = 'S10') OR iipfazobji = 'SW10' OR (wfmmqsjrup = 'N10' OR wfmmqsjrup = 'NE10')
+oxrevtztoo SE10
+ooprieiiya N10
+fzbfvahudc S10
+jakxbbfljv S10
+xerxzsvpmw SW10
+xdichxdhwh NE10
+awbgnoyvmr SW10
+bxanoqsglg N10
+iipfazobji NE10
+wfmmqsjrup S10

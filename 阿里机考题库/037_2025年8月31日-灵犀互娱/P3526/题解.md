@@ -1,0 +1,125 @@
+## 解题思路
+
+### 栈模拟
+
+按目标从底到顶依次“定格”每个目标元素 `x`：
+
+* 持续从预备区把积木 `next` 扔到堆叠区（执行 `In`），直到把 `x` 压入栈顶。
+* 对于中间被压入的非目标数（`next != x`），立刻执行一次 `Out` 丢弃，保证不会破坏已定格的下层结构。
+* 当压入的正好是 `x` 时，不再 `Out`，保留在栈中，进入下一个目标。
+
+完成全部目标后即可停止（无需处理余下的预备区积木）。
+
+## 复杂度分析
+
+* 时间复杂度：`O(n)`（每个积木最多一次 `In` 与一次 `Out` 检查/操作）。
+* 空间复杂度：`O(1)`（除输出外只用常数变量；如不显式维护栈，直接构造操作序列即可）。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def solve():
+    data = list(map(int, sys.stdin.read().strip().split()))
+    if not data:
+        return
+    n, m = data[0], data[1]
+    target = data[2:2+m]
+
+    ops = []
+    nxt = 1  # 下一个将从预备区取出的编号
+
+    for x in target:
+        # 一直取到 x 为止
+        while nxt <= x:
+            ops.append("In")
+            if nxt != x:
+                ops.append("Out")  # 中间数不是目标，立即丢弃
+            nxt += 1
+        # 现在栈顶保留了 x，不执行 Out
+
+    print(",".join(ops))
+
+if __name__ == "__main__":
+    solve()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        List<Integer> all = new ArrayList<>();
+        String line;
+        // 读到所有整数
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+            StringTokenizer st = new StringTokenizer(line);
+            while (st.hasMoreTokens()) all.add(Integer.parseInt(st.nextToken()));
+        }
+        if (all.size() < 2) return;
+        int n = all.get(0), m = all.get(1);
+        int[] target = new int[m];
+        for (int i = 0; i < m; i++) target[i] = all.get(2 + i);
+
+        StringBuilder ans = new StringBuilder();
+        int nxt = 1; // 将要 In 的编号
+        boolean first = true;
+
+        for (int x : target) {
+            while (nxt <= x) {
+                if (!first) ans.append(",");
+                ans.append("In");
+                first = false;
+                if (nxt != x) {
+                    ans.append(",Out");
+                }
+                nxt++;
+            }
+            // 栈顶为 x，保留
+        }
+        System.out.println(ans.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n, m;
+    if (!(cin >> n >> m)) return 0;
+    vector<int> a(m);
+    for (int i = 0; i < m; ++i) cin >> a[i];
+
+    vector<string> ops;
+    int nxt = 1;
+    for (int x : a) {
+        while (nxt <= x) {
+            ops.push_back("In");
+            if (nxt != x) ops.push_back("Out");
+            ++nxt;
+        }
+        // x 留在栈上
+    }
+    for (int i = 0; i < (int)ops.size(); ++i) {
+        if (i) cout << ",";
+        cout << ops[i];
+    }
+    cout << "\n";
+    return 0;
+}
+```

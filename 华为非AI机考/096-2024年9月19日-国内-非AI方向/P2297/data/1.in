@@ -1,0 +1,11 @@
+7 3
+(xnygevujzz = 'SE10' OR xnygevujzz = 'S10' OR xnygevujzz = 'SW10') OR (ybvsvcqpss = 'SE10' OR ybvsvcqpss = 'N10' OR ybvsvcqpss = 'SW10') OR (ghvcggjqko = 'NE10' OR ghvcggjqko = 'NW10')
+(xnygevujzz = 'SW10' OR xnygevujzz = 'SE10' OR xnygevujzz = 'N10') OR (ybvsvcqpss = 'NE10' OR ybvsvcqpss = 'N10') AND (ghvcggjqko = 'SE10' OR ghvcggjqko = 'NW10')
+xnygevujzz = 'N10' OR (ybvsvcqpss = 'NW10' OR ybvsvcqpss = 'NE10') OR (ghvcggjqko = 'NE10' OR ghvcggjqko = 'NW10' OR ghvcggjqko = 'SW10')
+(xnygevujzz = 'NE10' OR xnygevujzz = 'NW10' OR xnygevujzz = 'SE10') OR ybvsvcqpss = 'N10' OR (ghvcggjqko = 'S10' OR ghvcggjqko = 'SE10' OR ghvcggjqko = 'N10')
+xnygevujzz = 'S10' OR ybvsvcqpss = 'NW10' AND (ghvcggjqko = 'SW10' OR ghvcggjqko = 'S10')
+(xnygevujzz = 'SW10' OR xnygevujzz = 'NE10') OR (ybvsvcqpss = 'S10' OR ybvsvcqpss = 'SE10' OR ybvsvcqpss = 'NE10') OR (ghvcggjqko = 'NE10' OR ghvcggjqko = 'S10')
+(xnygevujzz = 'SW10' OR xnygevujzz = 'S10' OR xnygevujzz = 'NW10') OR (ybvsvcqpss = 'SW10' OR ybvsvcqpss = 'S10') OR (ghvcggjqko = 'S10' OR ghvcggjqko = 'N10')
+xnygevujzz NW10
+ybvsvcqpss SW10
+ghvcggjqko N10

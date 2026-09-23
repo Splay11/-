@@ -1,0 +1,24 @@
+23
+{
+ let a
+ let b
+ let c
+ let d
+ {
+ let e
+ let f
+ let g
+ let h
+ let i
+ let j
+ let k
+ let l
+ drop g
+ drop i
+ drop j
+ }
+ drop b
+ drop d
+ drop a
+ drop c
+}

@@ -1,0 +1,58 @@
+# SFT 交叉熵损失
+
+## 题目描述
+
+实现大语言模型 SFT（Supervised Fine-Tuning）阶段的损失函数计算。
+
+给定一个长度为 $L$ 的 token 序列和模型输出的 logits 矩阵（$L \times V$，$V$ 为词表大小），计算自回归语言模型的交叉熵损失。
+
+关键细节：
+
+1. Shift Right：第 $i$ 个位置的 logits 预测第 $i+1$ 个 token，因此 logits 取前 $L-1$ 个位置，labels 取后 $L-1$ 个位置。
+2. Padding Mask：padding token（标记为 $-1$）不参与损失计算。
+3. 损失：对有效位置计算 cross-entropy 的均值。
+
+$$
+\mathcal{L} = -\frac{1}{|\mathrm{valid}|}\sum_{i \in \mathrm{valid}}\log\frac{\exp(\mathrm{logits}[i][y_i])}{\sum_{j}\exp(\mathrm{logits}[i][j])}
+$$
+
+## 输入描述
+
+第一行包含两个整数 $L, V$（$2 \le L \le 64$，$2 \le V \le 32$）。
+
+第二行 $L$ 个整数，表示 token 序列（$0 \le \mathrm{token}_i < V$，或 $-1$ 表示 padding）。
+
+接下来 $L$ 行，每行 $V$ 个浮点数，表示模型输出的 logits 矩阵。
+
+## 输出描述
+
+输出 SFT 损失值，保留 $4$ 位小数。若无有效 token，输出 `0.0000`。
+
+## 样例 1
+
+**输入**
+
+```text
+4 3
+0 1 2 -1
+0.5 0.3 0.2
+0.1 0.8 0.1
+0.2 0.3 0.5
+0.4 0.4 0.2
+```
+
+**输出**
+
+```text
+1.2648
+```
+
+**样例解释**
+
+Shift right 后：logits 取前 $3$ 行（位置 $0,1,2$），labels 取后 $3$ 个 token（$1, 2, -1$）。位置 $2$ 的 label 是 $-1$（padding），跳过。有效位置：位置 $0$ 预测 token $1$，位置 $1$ 预测 token $2$。实际损失 $\approx 1.2648$。
+
+## 提示
+
+1. Shift Right 是关键：logits 和 labels 要错位一个位置。
+2. 数值稳定 $\log\mathrm{softmax}$：$\log\mathrm{softmax}(x)_i = x_i - \log\sum_j e^{x_j}$，先减最大值。
+3. Padding 处理：$-1$ 的位置不计入损失，分母也不计。

@@ -1,0 +1,13 @@
+testcases:
+  small:
+    - "data/testcaseg01"
+    - "data/testcaseg02"
+    - "data/testcaseg03"
+    - "data/testcaseg04"
+    - "data/testcaseg05"
+    - "data/testcaseg06"
+    - "data/testcaseg07"
+    - "data/testcaseg08"
+  large:
+    - "data/testcaseg09"
+    - "data/testcaseg10"

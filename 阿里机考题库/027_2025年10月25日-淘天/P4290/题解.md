@@ -1,0 +1,188 @@
+## 解题思路
+
+给定牌编号为 1…n（第 i 张牌数字为 i），对每个查询给出整数 k，要求从这些牌中选出若干张使其数字之和为 k，并输出所选牌的编号（升序）。若无解输出 -1。各次查询互不影响。
+
+核心思想：利用连续整数集合 {1,2,…,n} 的贪心可表示性。记前缀和
+$S=n(n+1)/2$。若 $k>S$，无论如何都无法得到 k，直接输出 -1。
+当 $k\le S$ 时，从大到小扫描 i=n…1，若 $k\ge i$ 就选 i，并令 $k\leftarrow k-i$。由于 {1,…,n} 连续且互不相同，贪心（每次尽量取不超过剩余 k 的最大数）一定能在 $k\le S$ 时构造出一个解；当扫描结束必然得到 $k=0$。这是一个“标准币值为 1..n 的找零问题”，该体系是规范（canonical）的，贪心正确。
+
+实现要点：
+
+1. 先判断 $k>S$ 是否无解。
+2. 有解时按 i=n…1 贪心挑选，将被选编号保存；最后反转（或排序）后升序输出。
+3. 每个查询独立执行即可。因为题目保证所有数据组的 $\sum (n\times m)\le 2\times10^6$，每次 O(n) 的贪心总复杂度可接受。
+
+## 复杂度分析
+
+* 对单个查询：时间复杂度 $O(n)$，空间复杂度 $O(n)$（存放答案，最坏时选 1..n）。
+* 对整份输入：根据约束 $\sum (n\times m)\le 2\times10^6$，总步数上线约为 2e6，能通过。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+# 外部函数：在 [1..n] 中选若干数使和为 k，返回升序列表；无解返回空列表
+def pick_cards(n: int, k: int):
+    S = n * (n + 1) // 2
+    if k > S:
+        return []  # 无解
+    ans = []
+    # 从大到小贪心选取
+    for i in range(n, 0, -1):
+        if k >= i:
+            ans.append(i)
+            k -= i
+            if k == 0:
+                break
+    if k != 0:  # 理论上不会发生（k<=S 时必可表示）
+        return []
+    ans.reverse()  # 升序输出
+    return ans
+
+def main():
+    data = list(map(int, sys.stdin.read().split()))
+    it = iter(data)
+    T = next(it)
+    out_lines = []
+    for _ in range(T):
+        n = next(it); m = next(it)
+        for _ in range(m):
+            k = next(it)
+            res = pick_cards(n, k)
+            if not res:
+                out_lines.append("-1")
+            else:
+                out_lines.append(str(len(res)))
+                out_lines.append(" ".join(map(str, res)))
+    sys.stdout.write("\n".join(out_lines))
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+/* ACM 风格主类 */
+public class Main {
+
+    // 外部函数：返回一个升序的选牌列表；无解返回空列表
+    static List<Integer> pickCards(int n, long k) {
+        long S = 1L * n * (n + 1) / 2;
+        if (k > S) return Collections.emptyList(); // 无解
+        ArrayList<Integer> ans = new ArrayList<>();
+        // 从大到小贪心取数
+        for (int i = n; i >= 1; i--) {
+            if (k >= i) {
+                ans.add(i);
+                k -= i;
+                if (k == 0) break;
+            }
+        }
+        if (k != 0) return Collections.emptyList(); // 理论上不会发生
+        Collections.reverse(ans); // 升序输出
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        // 使用 BufferedReader + StringTokenizer，简单高效
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+        ArrayList<String> out = new ArrayList<>();
+        st = new StringTokenizer(br.readLine());
+        int T = Integer.parseInt(st.nextToken());
+        for (int tc = 0; tc < T; tc++) {
+            // 读取 n m
+            st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            int m = Integer.parseInt(st.nextToken());
+            for (int q = 0; q < m; q++) {
+                // 每个查询一行一个 k
+                long k = Long.parseLong(br.readLine().trim());
+                List<Integer> res = pickCards(n, k);
+                if (res.isEmpty()) {
+                    out.add("-1");
+                } else {
+                    out.add(String.valueOf(res.size()));
+                    // 输出升序编号
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < res.size(); i++) {
+                        if (i > 0) sb.append(' ');
+                        sb.append(res.get(i));
+                    }
+                    out.add(sb.toString());
+                }
+            }
+        }
+        // 统一输出
+        StringBuilder all = new StringBuilder();
+        for (int i = 0; i < out.size(); i++) {
+            all.append(out.get(i)).append('\n');
+        }
+        System.out.print(all.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// 外部函数：在 [1..n] 中用若干不同数字表示 k；返回升序解，若无解返回空向量
+vector<int> pick_cards(int n, long long k) {
+    long long S = 1LL * n * (n + 1) / 2;
+    if (k > S) return {};  // 无解
+    vector<int> ans;
+    // 从大到小贪心
+    for (int i = n; i >= 1; --i) {
+        if (k >= i) {
+            ans.push_back(i);
+            k -= i;
+            if (k == 0) break;
+        }
+    }
+    if (k != 0) return {}; // 理论上不会发生
+    reverse(ans.begin(), ans.end()); // 升序输出
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T;
+    if (!(cin >> T)) return 0;
+    vector<string> out;
+    while (T--) {
+        int n, m;
+        cin >> n >> m;
+        for (int i = 0; i < m; ++i) {
+            long long k;
+            cin >> k;
+            vector<int> res = pick_cards(n, k);
+            if (res.empty()) {
+                out.emplace_back("-1");
+            } else {
+                out.emplace_back(to_string((int)res.size()));
+                // 拼一行升序编号
+                string line;
+                for (int j = 0; j < (int)res.size(); ++j) {
+                    if (j) line.push_back(' ');
+                    line += to_string(res[j]);
+                }
+                out.emplace_back(line);
+            }
+        }
+    }
+    // 统一输出
+    for (auto &s : out) cout << s << "\n";
+    return 0;
+}
+```

@@ -1,0 +1,8 @@
+FileLockBoard()
+lock(5, 1)
+lock(5, 2)
+holder(5)
+unlock(5, 2)
+holder(5)
+unlock(5, 1)
+holder(5)

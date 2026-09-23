@@ -1,0 +1,6 @@
+5
+Write 0x100 8 00001122AABBCCDD
+Read 0x100 8
+Write 0x102 3 FFEEDD
+Read 0x100 8
+Read 0x101 5

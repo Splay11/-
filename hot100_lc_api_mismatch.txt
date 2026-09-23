@@ -1,0 +1,62 @@
+与 LeetCode 官网 Python3 模板不一致：方法名或参数名不同，或缺少 class Solution 代码块
+共 25 条（总扫描小节 71）
+
+- P0013.md | LC42 | slug=trapping-rain-water | no_python_solution_block
+
+- P0016.md | LC3 | slug=longest-substring-without-repeating-characters | no_python_solution_block
+
+- P0016.md | LC76 | slug=minimum-window-substring | no_python_solution_block
+
+- P0017.md | LC217 | slug=contains-duplicate | no_official_fetch
+
+- P0019.md | LC189 | slug=rotate-array | no_python_solution_block
+
+- P0020.md | LC238 | slug=product-of-array-except-self | no_python_solution_block
+
+- P0021.md | LC48 | slug=rotate-image | no_python_solution_block
+
+- P0021.md | LC240 | slug=search-a-2d-matrix-ii | no_python_solution_block
+
+- P0022.md | LC78 | slug=subsets | method_name_mismatch
+  官网入口 subsets('nums',)，本地未找到同名方法
+  本地 Solution 方法列表: ['combinationSum']
+
+- P0022.md | LC22 | slug=generate-parentheses | no_python_solution_block
+
+- P0025.md | LC32 | slug=longest-valid-parentheses | no_python_solution_block
+
+- P0027.md | LC89 | slug=gray-code | method_name_mismatch
+  官网入口 grayCode('n',)，本地未找到同名方法
+  本地 Solution 方法列表: ['canPartition']
+
+- P0028.md | LC91 | slug=decode-ways | method_name_mismatch
+  官网入口 numDecodings('s',)，本地未找到同名方法
+  本地 Solution 方法列表: ['uniquePaths']
+
+- P0028.md | LC92 | slug=reverse-linked-list-ii | method_name_mismatch
+  官网入口 reverseBetween('head', 'left', 'right')，本地未找到同名方法
+  本地 Solution 方法列表: ['minPathSum']
+
+- P0028.md | LC93 | slug=restore-ip-addresses | no_python_solution_block
+
+- P0028.md | LC94 | slug=binary-tree-inorder-traversal | no_python_solution_block
+
+- P0028.md | LC95 | slug=unique-binary-search-trees-ii | no_python_solution_block
+
+- P0030.md | LC155 | slug=min-stack | no_official_method
+
+- P0030.md | LC394 | slug=decode-string | no_python_solution_block
+
+- P0030.md | LC71 | slug=simplify-path | no_python_solution_block
+
+- P0032.md | LC84 | slug=largest-rectangle-in-histogram | no_python_solution_block
+
+- P0038.md | LC207 | slug=course-schedule | no_python_solution_block
+
+- P0042.md | LC45 | slug=jump-game-ii | no_python_solution_block
+
+- P0042.md | LC736 | slug=parse-lisp-expression | method_name_mismatch
+  官网入口 evaluate('expression',)，本地未找到同名方法
+  本地 Solution 方法列表: ['partitionLabels']
+
+- P0047.md | LC295 | slug=find-median-from-data-stream | no_official_method

@@ -1,0 +1,239 @@
+### 思路
+
+* **关键等式**：方差可用 $Var = E[X^2] - (E[X])^2$ 计算。只需区间的 $sum$ 与 $sum$ 的平方和 $\sum a_i^2$。
+* **数据结构**：维护两个树状数组（或线段树）：
+
+  * 一个维护区间和 $S=\sum a_i$。
+  * 一个维护平方和 $Q=\sum a_i^2$。
+* **操作复杂度**：单点修改 $O(log n)$，区间查询 $O(log n)$。
+* **计算**：查询 $[l,r]$ 时，$m=r-l+1$，$Var = \dfrac{Q}{m} - \left(\dfrac{S}{m}\right)^2$。使用 $64$ 位整型累计，最终用浮点输出。
+
+---
+
+## C++ 
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Fenwick {
+	int n;
+	vector<long long> bit;
+	Fenwick(int n=0): n(n), bit(n+1, 0) {}
+	void add(int idx, long long delta) {
+		for (; idx <= n; idx += idx & -idx) bit[idx] += delta;
+	}
+	long long sumPrefix(int idx) const {
+		long long res = 0;
+		for (; idx > 0; idx -= idx & -idx) res += bit[idx];
+		return res;
+	}
+	long long sumRange(int l, int r) const {
+		return sumPrefix(r) - sumPrefix(l - 1);
+	}
+};
+
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+
+	int n, q;
+	if (!(cin >> n >> q)) return 0;
+	vector<long long> a(n + 1);
+	for (int i = 1; i <= n; ++i) cin >> a[i];
+
+	// 一个树状数组维护和，另一个维护平方和
+	Fenwick bitSum(n), bitSq(n);
+	for (int i = 1; i <= n; ++i) {
+		bitSum.add(i, a[i]);
+		bitSq.add(i, a[i] * a[i]);
+	}
+
+	cout.setf(std::ios::fixed);
+	cout << setprecision(6);
+
+	while (q--) {
+		int t; cin >> t;
+		if (t == 1) {
+			int i; long long x; cin >> i >> x;
+			// 单点修改：更新和与平方和
+			long long delta = x - a[i];
+			long long deltaSq = x * x - a[i] * a[i];
+			bitSum.add(i, delta);
+			bitSq.add(i, deltaSq);
+			a[i] = x;
+		} else {
+			int l, r; cin >> l >> r;
+			long long S = bitSum.sumRange(l, r);
+			long long Q = bitSq.sumRange(l, r);
+			long double m = (long double)(r - l + 1);
+			long double mean = S / m;
+			long double var = Q / m - mean * mean;
+			if (var < 0 && var > -1e-12) var = 0; // 数值误差修正
+			cout << (double)var << '\n';
+		}
+	}
+	return 0;
+}
+```
+
+## Python 
+
+```python
+import sys
+
+def readints():
+	data = list(map(int, sys.stdin.buffer.read().split()))
+	it = iter(data)
+	return it
+
+it = readints()
+try:
+	n = next(it); q = next(it)
+except StopIteration:
+	sys.exit(0)
+
+a = [0] * (n + 1)
+for i in range(1, n + 1):
+	a[i] = next(it)
+
+# 树状数组（1-indexed）
+bit_sum = [0] * (n + 2)
+bit_sq  = [0] * (n + 2)
+
+def add(bit, idx, delta):
+	while idx <= n:
+		bit[idx] += delta
+		idx += idx & -idx
+
+def sum_prefix(bit, idx):
+	res = 0
+	while idx > 0:
+		res += bit[idx]
+		idx -= idx & -idx
+	return res
+
+def sum_range(bit, l, r):
+	return sum_prefix(bit, r) - sum_prefix(bit, l - 1)
+
+for i in range(1, n + 1):
+	add(bit_sum, i, a[i])
+	add(bit_sq,  i, a[i] * a[i])
+
+out = []
+for _ in range(q):
+	t = next(it)
+	if t == 1:
+		i = next(it); x = next(it)
+		delta = x - a[i]
+		delta_sq = x * x - a[i] * a[i]
+		add(bit_sum, i, delta)
+		add(bit_sq,  i, delta_sq)
+		a[i] = x
+	else:
+		l = next(it); r = next(it)
+		S = sum_range(bit_sum, l, r)
+		Q = sum_range(bit_sq,  l, r)
+		m = r - l + 1
+		mean = S / m
+		var = Q / m - mean * mean
+		if var < 0 and var > -1e-12:
+			var = 0.0
+		out.append(f"{var:.6f}\n")
+
+sys.stdout.write(''.join(out))
+```
+
+## Java 
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+	static final class FastScanner {
+		private final InputStream in;
+		private final byte[] buffer = new byte[1 << 16];
+		private int ptr = 0, len = 0;
+		FastScanner(InputStream is) { in = is; }
+		private int read() throws IOException {
+			if (ptr >= len) {
+				len = in.read(buffer);
+				ptr = 0;
+				if (len <= 0) return -1;
+			}
+			return buffer[ptr++];
+		}
+		int nextInt() throws IOException {
+			int c, sgn = 1, x = 0;
+			do { c = read(); } while (c <= 32);
+			if (c == '-') { sgn = -1; c = read(); }
+			while (c > 32) {
+				x = x * 10 + (c - '0');
+				c = read();
+			}
+			return x * sgn;
+		}
+	}
+
+	static final class Fenwick {
+		int n;
+		long[] bit;
+		Fenwick(int n) {
+			this.n = n;
+			this.bit = new long[n + 1];
+		}
+		void add(int idx, long delta) {
+			for (; idx <= n; idx += idx & -idx) bit[idx] += delta;
+		}
+		long sumPrefix(int idx) {
+			long res = 0;
+			for (; idx > 0; idx -= idx & -idx) res += bit[idx];
+			return res;
+		}
+		long sumRange(int l, int r) {
+			return sumPrefix(r) - sumPrefix(l - 1);
+		}
+	}
+
+	public static void main(String[] args) throws Exception {
+		FastScanner fs = new FastScanner(System.in);
+		int n = fs.nextInt();
+		int q = fs.nextInt();
+		long[] a = new long[n + 1];
+		for (int i = 1; i <= n; i++) a[i] = fs.nextInt();
+
+		Fenwick bitSum = new Fenwick(n);
+		Fenwick bitSq  = new Fenwick(n);
+		for (int i = 1; i <= n; i++) {
+			bitSum.add(i, a[i]);
+			bitSq.add(i, a[i] * a[i]);
+		}
+
+		StringBuilder sb = new StringBuilder();
+		for (int k = 0; k < q; k++) {
+			int t = fs.nextInt();
+			if (t == 1) {
+				int i = fs.nextInt();
+				long x = fs.nextInt();
+				long delta = x - a[i];
+				long deltaSq = x * x - a[i] * a[i];
+				bitSum.add(i, delta);
+				bitSq.add(i, deltaSq);
+				a[i] = x;
+			} else {
+				int l = fs.nextInt();
+				int r = fs.nextInt();
+				long S = bitSum.sumRange(l, r);
+				long Q = bitSq.sumRange(l, r);
+				double m = (double)(r - l + 1);
+				double mean = S / m;
+				double var = Q / m - mean * mean;
+				if (var < 0 && var > -1e-12) var = 0.0; // 数值误差修正
+				sb.append(String.format(java.util.Locale.ROOT, "%.6f\n", var));
+			}
+		}
+		System.out.print(sb.toString());
+	}
+}
+```

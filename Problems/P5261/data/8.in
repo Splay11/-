@@ -1,0 +1,401 @@
+100 300
+p0 s v1
+p1 s v1
+p2 s v1
+p3 s v1
+p4 s v1
+p5 s v1
+p6 s v1
+p7 s v1
+p8 s v1
+p9 s v1
+p10 s v1
+p11 s v1
+p12 s v1
+p13 s v1
+p14 s v1
+p15 s v1
+p16 s v1
+p17 s v1
+p18 s v1
+p19 s v1
+p20 s v1
+p21 s v1
+p22 s v1
+p23 s v1
+p24 s v1
+p25 s v1
+p26 s v1
+p27 s v1
+p28 s v1
+p29 s v1
+p30 s v1
+p31 s v1
+p32 s v1
+p33 s v1
+p34 s v1
+p35 s v1
+p36 s v1
+p37 s v1
+p38 s v1
+p39 s v1
+p40 s v1
+p41 s v1
+p42 s v1
+p43 s v1
+p44 s v1
+p45 s v1
+p46 s v1
+p47 s v1
+p48 s v1
+p49 s v1
+p50 s v1
+p51 s v1
+p52 s v1
+p53 s v1
+p54 s v1
+p55 s v1
+p56 s v1
+p57 s v1
+p58 s v1
+p59 s v1
+p60 s v1
+p61 s v1
+p62 s v1
+p63 s v1
+p64 s v1
+p65 s v1
+p66 s v1
+p67 s v1
+p68 s v1
+p69 s v1
+p70 s v1
+p71 s v1
+p72 s v1
+p73 s v1
+p74 s v1
+p75 s v1
+p76 s v1
+p77 s v1
+p78 s v1
+p79 s v1
+p80 s v1
+p81 s v1
+p82 s v1
+p83 s v1
+p84 s v1
+p85 s v1
+p86 s v1
+p87 s v1
+p88 s v1
+p89 s v1
+p90 s v1
+p91 s v1
+p92 s v1
+p93 s v1
+p94 s v1
+p95 s v1
+p96 s v1
+p97 s v1
+p98 s v1
+p99 s v1
+p0 v1 android READY
+p0 v1 ios READY
+p0 v1 pc READY
+p1 v1 android READY
+p1 v1 ios READY
+p1 v1 pc READY
+p2 v1 android READY
+p2 v1 ios READY
+p2 v1 pc READY
+p3 v1 android READY
+p3 v1 ios READY
+p3 v1 pc READY
+p4 v1 android READY
+p4 v1 ios READY
+p4 v1 pc READY
+p5 v1 android READY
+p5 v1 ios READY
+p5 v1 pc READY
+p6 v1 android READY
+p6 v1 ios READY
+p6 v1 pc READY
+p7 v1 android READY
+p7 v1 ios READY
+p7 v1 pc READY
+p8 v1 android READY
+p8 v1 ios READY
+p8 v1 pc READY
+p9 v1 android READY
+p9 v1 ios READY
+p9 v1 pc READY
+p10 v1 android READY
+p10 v1 ios READY
+p10 v1 pc READY
+p11 v1 android READY
+p11 v1 ios READY
+p11 v1 pc READY
+p12 v1 android READY
+p12 v1 ios READY
+p12 v1 pc READY
+p13 v1 android READY
+p13 v1 ios READY
+p13 v1 pc READY
+p14 v1 android READY
+p14 v1 ios READY
+p14 v1 pc READY
+p15 v1 android READY
+p15 v1 ios READY
+p15 v1 pc READY
+p16 v1 android READY
+p16 v1 ios READY
+p16 v1 pc READY
+p17 v1 android READY
+p17 v1 ios READY
+p17 v1 pc READY
+p18 v1 android READY
+p18 v1 ios READY
+p18 v1 pc READY
+p19 v1 android READY
+p19 v1 ios READY
+p19 v1 pc READY
+p20 v1 android READY
+p20 v1 ios READY
+p20 v1 pc READY
+p21 v1 android READY
+p21 v1 ios READY
+p21 v1 pc READY
+p22 v1 android READY
+p22 v1 ios READY
+p22 v1 pc READY
+p23 v1 android READY
+p23 v1 ios READY
+p23 v1 pc READY
+p24 v1 android READY
+p24 v1 ios READY
+p24 v1 pc READY
+p25 v1 android READY
+p25 v1 ios READY
+p25 v1 pc READY
+p26 v1 android READY
+p26 v1 ios READY
+p26 v1 pc READY
+p27 v1 android READY
+p27 v1 ios READY
+p27 v1 pc READY
+p28 v1 android READY
+p28 v1 ios READY
+p28 v1 pc READY
+p29 v1 android READY
+p29 v1 ios READY
+p29 v1 pc READY
+p30 v1 android READY
+p30 v1 ios READY
+p30 v1 pc READY
+p31 v1 android READY
+p31 v1 ios READY
+p31 v1 pc READY
+p32 v1 android READY
+p32 v1 ios READY
+p32 v1 pc READY
+p33 v1 android READY
+p33 v1 ios READY
+p33 v1 pc READY
+p34 v1 android READY
+p34 v1 ios READY
+p34 v1 pc READY
+p35 v1 android READY
+p35 v1 ios READY
+p35 v1 pc READY
+p36 v1 android READY
+p36 v1 ios READY
+p36 v1 pc READY
+p37 v1 android READY
+p37 v1 ios READY
+p37 v1 pc READY
+p38 v1 android READY
+p38 v1 ios READY
+p38 v1 pc READY
+p39 v1 android READY
+p39 v1 ios READY
+p39 v1 pc READY
+p40 v1 android READY
+p40 v1 ios READY
+p40 v1 pc READY
+p41 v1 android READY
+p41 v1 ios READY
+p41 v1 pc READY
+p42 v1 android READY
+p42 v1 ios READY
+p42 v1 pc READY
+p43 v1 android READY
+p43 v1 ios READY
+p43 v1 pc READY
+p44 v1 android READY
+p44 v1 ios READY
+p44 v1 pc READY
+p45 v1 android READY
+p45 v1 ios READY
+p45 v1 pc READY
+p46 v1 android READY
+p46 v1 ios READY
+p46 v1 pc READY
+p47 v1 android READY
+p47 v1 ios READY
+p47 v1 pc READY
+p48 v1 android READY
+p48 v1 ios READY
+p48 v1 pc READY
+p49 v1 android READY
+p49 v1 ios READY
+p49 v1 pc READY
+p50 v1 android READY
+p50 v1 ios READY
+p50 v1 pc READY
+p51 v1 android READY
+p51 v1 ios READY
+p51 v1 pc READY
+p52 v1 android READY
+p52 v1 ios READY
+p52 v1 pc READY
+p53 v1 android READY
+p53 v1 ios READY
+p53 v1 pc READY
+p54 v1 android READY
+p54 v1 ios READY
+p54 v1 pc READY
+p55 v1 android READY
+p55 v1 ios READY
+p55 v1 pc READY
+p56 v1 android READY
+p56 v1 ios READY
+p56 v1 pc READY
+p57 v1 android READY
+p57 v1 ios READY
+p57 v1 pc READY
+p58 v1 android READY
+p58 v1 ios READY
+p58 v1 pc READY
+p59 v1 android READY
+p59 v1 ios READY
+p59 v1 pc READY
+p60 v1 android READY
+p60 v1 ios READY
+p60 v1 pc READY
+p61 v1 android READY
+p61 v1 ios READY
+p61 v1 pc READY
+p62 v1 android READY
+p62 v1 ios READY
+p62 v1 pc READY
+p63 v1 android READY
+p63 v1 ios READY
+p63 v1 pc READY
+p64 v1 android READY
+p64 v1 ios READY
+p64 v1 pc READY
+p65 v1 android READY
+p65 v1 ios READY
+p65 v1 pc READY
+p66 v1 android READY
+p66 v1 ios READY
+p66 v1 pc READY
+p67 v1 android READY
+p67 v1 ios READY
+p67 v1 pc READY
+p68 v1 android READY
+p68 v1 ios READY
+p68 v1 pc READY
+p69 v1 android READY
+p69 v1 ios READY
+p69 v1 pc READY
+p70 v1 android READY
+p70 v1 ios READY
+p70 v1 pc READY
+p71 v1 android READY
+p71 v1 ios READY
+p71 v1 pc READY
+p72 v1 android READY
+p72 v1 ios READY
+p72 v1 pc READY
+p73 v1 android READY
+p73 v1 ios READY
+p73 v1 pc READY
+p74 v1 android READY
+p74 v1 ios READY
+p74 v1 pc READY
+p75 v1 android READY
+p75 v1 ios READY
+p75 v1 pc READY
+p76 v1 android READY
+p76 v1 ios READY
+p76 v1 pc READY
+p77 v1 android READY
+p77 v1 ios READY
+p77 v1 pc READY
+p78 v1 android READY
+p78 v1 ios READY
+p78 v1 pc READY
+p79 v1 android READY
+p79 v1 ios READY
+p79 v1 pc READY
+p80 v1 android READY
+p80 v1 ios READY
+p80 v1 pc READY
+p81 v1 android READY
+p81 v1 ios READY
+p81 v1 pc READY
+p82 v1 android READY
+p82 v1 ios READY
+p82 v1 pc READY
+p83 v1 android READY
+p83 v1 ios READY
+p83 v1 pc READY
+p84 v1 android READY
+p84 v1 ios READY
+p84 v1 pc READY
+p85 v1 android READY
+p85 v1 ios READY
+p85 v1 pc READY
+p86 v1 android READY
+p86 v1 ios READY
+p86 v1 pc READY
+p87 v1 android READY
+p87 v1 ios READY
+p87 v1 pc READY
+p88 v1 android READY
+p88 v1 ios READY
+p88 v1 pc READY
+p89 v1 android READY
+p89 v1 ios READY
+p89 v1 pc READY
+p90 v1 android READY
+p90 v1 ios READY
+p90 v1 pc READY
+p91 v1 android READY
+p91 v1 ios READY
+p91 v1 pc READY
+p92 v1 android READY
+p92 v1 ios READY
+p92 v1 pc READY
+p93 v1 android READY
+p93 v1 ios READY
+p93 v1 pc READY
+p94 v1 android READY
+p94 v1 ios READY
+p94 v1 pc READY
+p95 v1 android READY
+p95 v1 ios READY
+p95 v1 pc READY
+p96 v1 android READY
+p96 v1 ios READY
+p96 v1 pc READY
+p97 v1 android READY
+p97 v1 ios READY
+p97 v1 pc READY
+p98 v1 android READY
+p98 v1 ios READY
+p98 v1 pc READY
+p99 v1 android READY
+p99 v1 ios READY
+p99 v1 pc READY

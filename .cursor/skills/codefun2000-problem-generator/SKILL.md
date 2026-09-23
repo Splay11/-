@@ -2,7 +2,7 @@
 name: codefun2000-problem-generator
 description: |
   use this skill when the user wants to create a problem workspace: statement, std (cpp/py/java), editorial, and test data.
-  Primary path: user provides CodeFun2000 pid → create P{pid}/ and 题面.md first, run get_problem.py, write fetched bytes to 题面.md as UTF-8 after encoding detection/conversion; then generate stds, editorial, data, validate (requires algorithm-contest-problemsetter skill + local utils/templates).
+  Primary path: user provides CodeFun2000 pid → create P{pid}/ and 题面.md first, run get_problem.py, write fetched bytes to 题面.md as UTF-8 after encoding detection/conversion; then generate stds, editorial (Python/Java/C++ 三份代码均须详细中文注释，禁止只写一两句), data, validate (requires algorithm-contest-problemsetter skill + local utils/templates).
   Alternate paths: user explicitly attaches or pastes 题面.md → skip pid fetch; user supplies std in cpp/java/py → use as authoritative for those languages instead of generating; user supplies 题解.md → use its ideas/code to drive std and data generation, with mandatory consistency checks (logic, compile, statement alignment).
   If a required artifact cannot be obtained after applying these rules, report missing items only and stop (fail closed).
 ---
@@ -12,6 +12,18 @@ description: |
 本 Skill 用于创建题目工作目录，整理题面、标准程序、题解与测试数据，并在可能时完成验题。
 
 默认路径：用户提供 **PID**，从 CodeFun2000 抓取题面，再生成 `std.cpp` / `std.py` / `Main.java`、题解与数据。
+
+## 三语言中文注释（写死 · 强制）
+
+凡本 Skill **生成或改写**的代码，`题解.md` 里的 **Python、Java、C++** 三份代码块，以及对应的 `std.py` / `Main.java` / `std.cpp`，**每一份都必须有详细中文注释**。
+
+写死要求：
+
+1. **三份都要写**：不能只给一种语言加注释，另外两种裸代码交差。  
+2. **必须详细**：禁止整份代码只有开头一两句，或只在 `main` / 读入处敷衍一行。读入、初始化、核心循环/转移、边界处理、输出，都要有对应中文说明。  
+3. **对着步骤写**：注释要解释「这一段在干什么、为什么这样写」，不要只重复变量名（如只写 `// 循环`）。  
+4. **只用中文**：禁止用英文注释代替；专有算法名可保留英文缩写，但句子必须是中文。  
+5. **自检**：交题解前扫一眼三份代码，若某一份注释明显少于关键步骤数，视为未完成，补完再交付。
 
 **兼容路径**：用户在对话中**显式提供**以下任一内容时，以用户内容为优先，**不再**对同一项做「凭空生成」替代：
 
@@ -317,6 +329,13 @@ std.cpp / std.py / Main.java（已存在的部分）
 ```
 
 生成 `<题目目录>/题解.md`。生成前若模板或规范缺失，fatal stop。
+
+**题解正文禁止项（写死）**：
+
+- **不要**写「常见假解」或列举错误解法（假解只用于内部造数，不进 `题解.md`）。
+- **不要**写评测时限、内存限制（例如「$3$ 秒」「$512$ MB」）。复杂度分析只写时间/空间 $O(\cdots)$ 及简要说明。
+
+**题解代码注释（强制）**：见文首「三语言中文注释」。`题解.md` 的 Python / Java / C++ **每一份**都要详细中文注释（读入、核心、边界、输出都要写），禁止无注释、禁止英文注释、禁止整份只有一两句。
 
 ### 7.3 与「LeetCode 核心代码模式」题解对齐（当仓库采用该规范时）
 

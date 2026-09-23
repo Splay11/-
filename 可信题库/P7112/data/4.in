@@ -1,0 +1,5 @@
+ShardLeaseManager(2, 2)
+acquire(1, 2, 0, 5)
+acquire(1, -1, 0, 5)
+owner(2, 0)
+heldCount(0, 0)

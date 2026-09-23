@@ -1,0 +1,82 @@
+init 405 639
+createWindow w1 -981 562 317 146 12
+queryVisibility w1
+queryAllVisibleWindows 237 634 109 5
+createWindow w2 508 -203 431 117 4
+queryAllVisibleWindows 270 46 18 4
+move w2 290 -731
+createWindow w3 464 -608 55 344 6
+queryAllVisibleWindows 22 298 246 135
+resize not_exist_239 262 301
+queryVisibility w1
+move w1 -980 -998
+removeWindow w3
+removeWindow w2
+createWindow w4 174 -402 200 3 8
+removeWindow w4
+move w1 881 0
+move w1 -977 -608
+queryVisibility w1
+createWindow w5 71 -167 195 165 17
+queryAllVisibleWindows 164 494 53 80
+createWindow w6 396 -547 64 75 8
+createWindow w7 191 -292 439 486 3
+move w7 -512 -162
+resize w1 62 287
+createWindow w6 701 991 245 289 4
+removeWindow w7
+createWindow w8 200 585 364 326 3
+resize w6 371 140
+removeWindow w6
+createWindow w9 -570 797 137 140 13
+resize w8 170 409
+resize not_exist_215 146 311
+createWindow w10 223 523 207 71 13
+move w5 -125 178
+resize w8 9 122
+move w8 206 62
+createWindow w11 517 674 12 440 4
+move w5 -565 88
+resize not_exist_599 273 260
+createWindow w12 -424 983 351 364 20
+resize w5 400 6
+queryVisibility w8
+removeWindow w8
+queryVisibility w9
+removeWindow not_exist_43
+resize w9 356 472
+removeWindow w5
+queryAllVisibleWindows 223 164 64 302
+resize w12 429 161
+queryVisibility w12
+queryAllVisibleWindows 396 102 1 277
+queryAllVisibleWindows 220 176 3 179
+move w1 -274 -684
+queryVisibility w10
+move w12 -970 809
+move not_exist_496 205 -304
+resize w9 491 322
+move not_exist_741 372 864
+move w10 -849 608
+queryVisibility not_exist_760
+queryAllVisibleWindows 135 167 240 211
+resize w11 216 480
+createWindow w13 -306 -47 325 469 7
+removeWindow w12
+queryAllVisibleWindows 315 487 27 35
+resize w11 282 425
+createWindow w14 166 489 442 280 3
+createWindow w15 -960 -900 91 74 2
+createWindow w16 387 696 168 493 9
+createWindow w17 779 -523 224 279 16
+createWindow w18 -732 -545 87 147 6
+removeWindow not_exist_835
+move w11 213 -129
+queryVisibility not_exist_573
+removeWindow not_exist_770
+queryVisibility w11
+resize w17 216 285
+createWindow w13 -446 641 177 117 18
+removeWindow not_exist_250
+queryVisibility w18
+move w11 -370 506

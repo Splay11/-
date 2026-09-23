@@ -1,0 +1,923 @@
+**前置基础:[图论基础](https://codefun2000.com/codenote/hot100/P0034)**
+
+开始本章的学习之前，先过一遍上一小节的内容。
+
+## 广度优先搜索(BFS)
+
+广度优先搜索是一种图的遍历方式。它可以用来👇
+
+1.判定点的连通性以及连通分量个数：**Leetcode 200.岛屿数量**
+
+2.求 边权全为1 的图的最短路：**Leetcode 994.腐烂的橘子**
+
+3.[拓扑排序](https://codefun2000.com/codenote/hot100/P0035)：**Leetcode 207.课程表**
+
+它的基本算法流程如下👇
+
+
+![](/file/2/P2kyUCL4t0AEZVX4xaUcp.png)
+
+**我们配合动画来进一步理解BFS的思想👇**
+
+@[video](https://codefun2000.com/p/4086/file/%E5%9B%BE%E7%9A%84BFS.mp4)
+
+## 计算连通分量个数:Leetcode 200.岛屿数量
+
+[在线刷题](https://codefun2000.com/p/P4019)
+
+给你一个由 '$1$ '（陆地）和 '$0$'（水）组成的的二维网格，请你计算网格中岛屿的数量。
+
+岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
+
+此外，你可以假设该网格的四条边均被水包围
+
+**输入** 
+
+```
+4 5
+11000
+11000
+00100
+00011
+```
+
+**输出** 
+
+```
+3
+```
+
+**提示**
+
+- $m == grid.length$
+- $n == grid[i].length$
+- $1 <= m, n <= 300$
+- $grid[i][j]$的值为 '$0$' 或 '$1$'
+
+
+**思路**
+
+根据图论基础中提到的概念，我们知道本题本质上就是**给定一个2D网格图**，求连通分量的个数。
+
+而本题的边未显式定义，它是说：任意两个格子如果相邻且点值都是1，则存在一条边，样例3如下所示👇
+![](/file/2/hWec05a2qKYJREI-D-KDT.png)
+
+本题思路相对简单：遍历每一个点值为1的，且未被访问过的格子，以这个点为起点进行BFS，探索它所在的连通分量并统计个数。动画如下所示👇
+@[video](https://codefun2000.com/p/4086/file/%E7%9F%A9%E9%98%B5%E8%81%94%E9%80%9A%E5%9D%97.mp4)
+#code-switcher
+```python
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        # 如果网格为空，岛屿数量为 0
+        if not grid or not grid[0]:
+            return 0
+
+        n = len(grid)
+        m = len(grid[0])
+        ans = 0
+
+        # 四个方向的偏移量，表示上下左右四个相邻格子
+        dx = [0, 0, -1, 1]
+        dy = [-1, 1, 0, 0]
+
+        # 以坐标 sx, sy 为起点进行 BFS，遍历整座岛屿
+        def bfs(sx, sy):
+            q = [(sx, sy)]
+            grid[sx][sy] = '0'
+
+            head = 0
+            while head < len(q):
+                x, y = q[head]
+                head += 1
+
+                # 枚举四个方向
+                for i in range(4):
+                    newx = x + dx[i]
+                    newy = y + dy[i]
+
+                    # 如果新坐标在网格内，并且是陆地，就加入当前连通分量
+                    if 0 <= newx < n and 0 <= newy < m and grid[newx][newy] == '1':
+                        grid[newx][newy] = '0'
+                        q.append((newx, newy))
+
+        # 枚举每一个格子，遇到没有访问过的陆地，就找到一座新的岛屿
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == '1':
+                    ans += 1
+                    bfs(i, j)
+
+        return ans
+```
+
+```cpp
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        // 如果网格为空，岛屿数量为 0
+        if (grid.empty() || grid[0].empty()) {
+            return 0;
+        }
+
+        int n = grid.size();
+        int m = grid[0].size();
+        int ans = 0;
+
+        // 四个方向的偏移量，表示上下左右四个相邻格子
+        int dx[4] = {0, 0, -1, 1};
+        int dy[4] = {-1, 1, 0, 0};
+
+        // 枚举每一个格子，遇到没有访问过的陆地，就找到一座新的岛屿
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] == '1') {
+                    ans++;
+
+                    // 以当前格子为起点进行 BFS，遍历整座岛屿
+                    queue<pair<int, int>> q;
+                    q.push({i, j});
+                    grid[i][j] = '0';
+
+                    while (!q.empty()) {
+                        int x = q.front().first;
+                        int y = q.front().second;
+                        q.pop();
+
+                        // 枚举四个方向
+                        for (int k = 0; k < 4; k++) {
+                            int newx = x + dx[k];
+                            int newy = y + dy[k];
+
+                            // 如果新坐标在网格内，并且是陆地，就加入当前连通分量
+                            if (0 <= newx && newx < n && 0 <= newy && newy < m && grid[newx][newy] == '1') {
+                                grid[newx][newy] = '0';
+                                q.push({newx, newy});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return ans;
+    }
+};
+```
+
+```java
+class Solution {
+    public int numIslands(char[][] grid) {
+        // 如果网格为空，岛屿数量为 0
+        if (grid == null || grid.length == 0 || grid[0].length == 0) {
+            return 0;
+        }
+
+        int n = grid.length;
+        int m = grid[0].length;
+        int ans = 0;
+
+        // 四个方向的偏移量，表示上下左右四个相邻格子
+        int[] dx = new int[]{0, 0, -1, 1};
+        int[] dy = new int[]{-1, 1, 0, 0};
+
+        // 枚举每一个格子，遇到没有访问过的陆地，就找到一座新的岛屿
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] == '1') {
+                    ans++;
+
+                    // 以当前格子为起点进行 BFS，遍历整座岛屿
+                    Queue<int[]> q = new LinkedList<>();
+                    q.offer(new int[]{i, j});
+                    grid[i][j] = '0';
+
+                    while (!q.isEmpty()) {
+                        int[] cur = q.poll();
+                        int x = cur[0];
+                        int y = cur[1];
+
+                        // 枚举四个方向
+                        for (int k = 0; k < 4; k++) {
+                            int newx = x + dx[k];
+                            int newy = y + dy[k];
+
+                            // 如果新坐标在网格内，并且是陆地，就加入当前连通分量
+                            if (0 <= newx && newx < n && 0 <= newy && newy < m && grid[newx][newy] == '1') {
+                                grid[newx][newy] = '0';
+                                q.offer(new int[]{newx, newy});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+```go
+func numIslands(grid [][]byte) int {
+	// 如果网格为空，岛屿数量为 0
+	if len(grid) == 0 || len(grid[0]) == 0 {
+		return 0
+	}
+
+	n := len(grid)
+	m := len(grid[0])
+	ans := 0
+
+	// 四个方向的偏移量，表示上下左右四个相邻格子
+	dx := []int{0, 0, -1, 1}
+	dy := []int{-1, 1, 0, 0}
+
+	// 枚举每一个格子，遇到没有访问过的陆地，就找到一座新的岛屿
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			if grid[i][j] == '1' {
+				ans++
+
+				// 以当前格子为起点进行 BFS，遍历整座岛屿
+				qx := []int{i}
+				qy := []int{j}
+				grid[i][j] = '0'
+
+				head := 0
+				for head < len(qx) {
+					x := qx[head]
+					y := qy[head]
+					head++
+
+					// 枚举四个方向
+					for k := 0; k < 4; k++ {
+						newx := x + dx[k]
+						newy := y + dy[k]
+
+						// 如果新坐标在网格内，并且是陆地，就加入当前连通分量
+						if 0 <= newx && newx < n && 0 <= newy && newy < m && grid[newx][newy] == '1' {
+							grid[newx][newy] = '0'
+							qx = append(qx, newx)
+							qy = append(qy, newy)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return ans
+}
+```
+
+```javascript
+function numIslands(grid) {
+    // 如果网格为空，岛屿数量为 0
+    if (grid.length === 0 || grid[0].length === 0) {
+        return 0;
+    }
+
+    const n = grid.length;
+    const m = grid[0].length;
+    let ans = 0;
+
+    // 四个方向的偏移量，表示上下左右四个相邻格子
+    const dx = [0, 0, -1, 1];
+    const dy = [-1, 1, 0, 0];
+
+    // 枚举每一个格子，遇到没有访问过的陆地，就找到一座新的岛屿
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < m; j++) {
+            if (grid[i][j] === '1') {
+                ans++;
+
+                // 以当前格子为起点进行 BFS，遍历整座岛屿
+                const q = [[i, j]];
+                grid[i][j] = '0';
+
+                let head = 0;
+                while (head < q.length) {
+                    const x = q[head][0];
+                    const y = q[head][1];
+                    head++;
+
+                    // 枚举四个方向
+                    for (let k = 0; k < 4; k++) {
+                        const newx = x + dx[k];
+                        const newy = y + dy[k];
+
+                        // 如果新坐标在网格内，并且是陆地，就加入当前连通分量
+                        if (0 <= newx && newx < n && 0 <= newy && newy < m && grid[newx][newy] === '1') {
+                            grid[newx][newy] = '0';
+                            q.push([newx, newy]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return ans;
+}
+```
+
+```c
+int numIslands(char** grid, int gridSize, int* gridColSize) {
+    // 如果网格为空，岛屿数量为 0
+    if (gridSize == 0 || gridColSize[0] == 0) {
+        return 0;
+    }
+
+    int n = gridSize;
+    int m = gridColSize[0];
+    int ans = 0;
+
+    // 四个方向的偏移量，表示上下左右四个相邻格子
+    int dx[4] = {0, 0, -1, 1};
+    int dy[4] = {-1, 1, 0, 0};
+
+    // BFS 队列，最多存放 n * m 个格子
+    int* qx = (int*)malloc(sizeof(int) * n * m);
+    int* qy = (int*)malloc(sizeof(int) * n * m);
+
+    // 枚举每一个格子，遇到没有访问过的陆地，就找到一座新的岛屿
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (grid[i][j] == '1') {
+                ans++;
+
+                // 以当前格子为起点进行 BFS，遍历整座岛屿
+                int head = 0;
+                int tail = 0;
+
+                qx[tail] = i;
+                qy[tail] = j;
+                tail++;
+                grid[i][j] = '0';
+
+                while (head < tail) {
+                    int x = qx[head];
+                    int y = qy[head];
+                    head++;
+
+                    // 枚举四个方向
+                    for (int k = 0; k < 4; k++) {
+                        int newx = x + dx[k];
+                        int newy = y + dy[k];
+
+                        // 如果新坐标在网格内，并且是陆地，就加入当前连通分量
+                        if (0 <= newx && newx < n && 0 <= newy && newy < m && grid[newx][newy] == '1') {
+                            grid[newx][newy] = '0';
+                            qx[tail] = newx;
+                            qy[tail] = newy;
+                            tail++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    free(qx);
+    free(qy);
+
+    return ans;
+}
+```
+
+#code-switcher
+**注意**：代码里使用了`dx = [0 , 0 , -1 , 1] ,  dy = [-1 , 1 , 0 , 0] `来访问四周。其原理是将四个方向的位移 拆分 成横坐标与纵坐标的偏移量，如下所示👇
+![](/file/2/49aAFYkGw2hNxdIfjRyH5.png)
+
+同时注意这里四个方向的访问顺序不影响BFS的正确性与效率。
+
+**时间复杂度**：$O(n * m)$ , 虽然可能有多次BFS，但是每个节点最多进入一次队列，每个节点最多有4条边。则计算次数根据乘法原理为 不超过$4nm$次
+
+**空间复杂度**：$O(n * m)$ , 开销来源于队列。
+
+**面试问答**
+
+**1.本题的思路是什么？**
+
+这题要求我们求出岛屿数量，它本质上是求图上的连通块个数。我们使用BFS来解决。具体的，对于每个非0的且未访问过的岛屿为起点进行BFS即可。
+
+时间复杂度：$O(n * m)$ , 虽然可能有多次BFS，但是每个节点最多进入一次队列，每个节点最多有4条边。则计算次数根据乘法原理为 不超过$4nm$次。空间复杂度：$O(n * m)$ , 开销来源于队列
+
+**2.BFS为什么能解决这个问题？**
+
+BFS解决本题的核心思想其实就是：**从起点开始，不断往外扩展**。
+ 开始时把起点放进队列里，然后每次从队头取出一个点，去看它所有还能到达、并且还没有访问过的相邻点，把这些点继续加入队列，直到队列为空。所以当队列为空的时候，代表当前没有其他可以到达的点了，此时等价于我们发现了一个完整的新岛屿。
+
+## 多源最短路:LeetCode .994 腐烂的橘子
+
+想完全理解这个题，我们先得搞懂两个前置知识：**1.BFS求最短路 + 2.多源最短路**
+
+
+
+### 1.利用BFS求解边权为1的单源最短路
+
+上一小结我们学习到了如何使用BFS求解连通分量。那么如何进一步求解边权为1的单源最短路径呢？
+
+我们记录$dist[v]$ 代表从起点$s$ 到 点$v$的最短路径，如下图所示👇
+
+![](/file/2/MA0DAap-Su223RtffS6eC.png =80%x)
+
+
+算法如下（红色字体为改动部分，黑色字体部分和BFS基本流程一致）👇 
+
+![](/file/2/gpE9CuvhLKFwvFKhQAI3M.png =80%x)
+
+这么看，其实就改了俩地方：
+
+1.`dist` 数组把`vis` 给替了。这个很好理解，**已经计算出最短路径的点 等价于 已经被访问过了**
+
+2.`dist`的计算直接依赖于它的源点。相信这个细节 ， 不需要严谨的证明，大家都能感觉出来它是对的，比较靠谱。
+
+这是因为BFS 的搜索过程具有一个非常重要的性质：
+
+**它总是按离起点的距离从小到大，一层一层地扩展节点。**
+
+具体来说：
+
+起点 $s$的距离为 0 
+
+第一层把$s$的所有邻居节点$v_1 \in neighbor[s]$ 都塞队列里。显然这些点的$dist[v_1] = dist[s] + 1 = 1$
+
+第二层把$v_1$们的所有邻居节点$v_2 \in neighbor[v_1]$往队列里塞，这些点也满足:$dist[v_2] = dist[v_1] + 1 = 2$
+
+以此类推...
+
+因此，某个点$v$第一次被 BFS 访问到时，一定是通过最少步数到达它的。
+如果还存在一条更短的路径，那么这条更短路径上的前一个点一定会更早被访问，从而$v$也应该更早被发现，这就矛盾了。
+
+**我们用一个动画来为大家演示这个过程👇**
+@[video](https://codefun2000.com/p/4086/file/%E5%8D%95%E6%BA%90%E6%9C%80%E7%9F%AD%E8%B7%AF.mp4)
+
+
+
+
+**思考：BFS为什么不能求边权任意值的最短路？**
+
+**BFS假定了经过的边越少，最短路就越短**。但是如果带边权了，这个性质就不成立了👇
+
+![](/file/2/KJjTm7_Q64HsYoQwkPRG4.png =80%x)
+
+### 2.多源最短路
+
+给定一个无向图，给定一个起点集合$S = \{s_1,s_2,...,s_k\}$ ，求起点集合中的点到其他点的最短路.
+
+即：$distM(x) = min(dist(s_1,x),dist(s_2,x),...,dist(s_k,x))$
+
+如下图所示👇
+
+![](/file/2/noiL5ap2npyKSh4JvIB6Q.png =80%x)
+
+**有一个很巧妙的思路，将这个问题规约为单源最短路👇**
+
+
+![](/file/2/eoXe-rPlOoUjOG0zJGQTG.png)
+
+**说明**：考虑构造一个不存在的起点(又叫虚点)$Start$ , 然后对$Start$和所有起点$s \in S$ 连接一条开销为$0$的边。**这样从$Start$ 开始BFS就等价于同时从多个起点一起开始BFS了**。
+
+对于右边的图进行单源BFS，第一步把虚点塞到队列，第二步就是把所有起点集合塞到队列，并弹出虚点。
+
+
+
+在代码实现的过程中，我们不需要实际构造这个虚点和虚边，我们直接从第二步开始即可：
+
+即先把所有起点同时塞到队列里，并将它们的最短路初始化为$0$：$dist[s] = 0 , s \in S$ ，然后跑BFS
+
+
+
+
+
+**有了上述知识，我们来一起看看这道题：LeetCode .994 腐烂的橘子**
+
+[在线刷题](https://codefun2000.com/p/P4020)
+
+在给定的 $m × n$ 网格 $grid$ 中，每个单元格可以有以下三个值之一：
+
+- 值 $0$ 代表空单元格；
+- 值 $1$ 代表新鲜橘子；
+- 值 $2$代表腐烂的橘子。
+
+每分钟，腐烂的橘子 周围 $4$ 个方向上相邻 的新鲜橘子都会腐烂。
+
+输出 直到单元格中没有新鲜橘子为止所必须经过的最小分钟数。如果不可能，返回 $-1$ 。
+
+**样例1** 
+
+
+![](/file/2/EfP2gxJKFRHsnKI1EiCah.png)
+
+
+**输入** 
+
+```
+3 3
+2 1 1
+1 1 0
+0 1 1
+```
+
+**输出** 
+
+```
+4
+```
+
+**思路：多源最短路**
+
+
+本题本质上就是**给定一个2D网格图**，求**多源最短路**
+
+1.本题的边未显示定义，它是说：任意两个格子如果相邻且点值都不等于$0$，则存在一条边
+
+2.**起点集合**为所有点值为$2$的格子。
+
+3.“单元格中没有新鲜橘子为止所必须经过的最小分钟数”  等价于 **求所有点值为$1$的格子中的$dist$的最大值。**
+
+现在通过两个样例来结合着理解👇
+
+![](/file/2/9rWR4yiSqIP0cR3eFXLpa.png)
+
+结合第一题的经验，我们可以直接在这张2D网格图上跑一个多源BFS
+
+#code-switcher
+```python
+class Solution:
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        n = len(grid)
+        m = len(grid[0])
+
+        # dist[x][y] 表示这个位置的橘子被腐烂的最短时间，-1 表示还没有被腐烂到
+        dist = [[-1] * m for _ in range(n)]
+        q = []
+
+        # 多源 BFS：先把所有腐烂橘子作为起点加入队列
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 2:
+                    q.append((i, j))
+                    dist[i][j] = 0
+
+        # 四个方向的偏移量
+        dx = [0, 0, 1, -1]
+        dy = [1, -1, 0, 0]
+
+        ans = 0
+        head = 0
+
+        # 从所有腐烂橘子同时开始扩散
+        while head < len(q):
+            x, y = q[head]
+            head += 1
+
+            # 枚举上下左右四个方向
+            for i in range(4):
+                nx = x + dx[i]
+                ny = y + dy[i]
+
+                # 只有在网格内、是新鲜橘子、并且没有被访问过，才能被腐烂
+                if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] == 1 and dist[nx][ny] == -1:
+                    dist[nx][ny] = dist[x][y] + 1
+                    ans = max(ans, dist[nx][ny])
+                    q.append((nx, ny))
+
+        # 如果还有新鲜橘子没有被腐烂到，说明无法全部腐烂
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 1 and dist[i][j] == -1:
+                    return -1
+
+        return ans
+```
+
+```cpp
+class Solution {
+public:
+    int orangesRotting(vector<vector<int>>& grid) {
+        int n = grid.size();
+        int m = grid[0].size();
+
+        // dist[x][y] 表示这个位置的橘子被腐烂的最短时间，-1 表示还没有被腐烂到
+        vector<vector<int>> dist(n, vector<int>(m, -1));
+        queue<pair<int, int>> q;
+
+        // 多源 BFS：先把所有腐烂橘子作为起点加入队列
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] == 2) {
+                    q.push({i, j});
+                    dist[i][j] = 0;
+                }
+            }
+        }
+
+        // 四个方向的偏移量
+        int dx[4] = {0, 0, 1, -1};
+        int dy[4] = {1, -1, 0, 0};
+
+        int ans = 0;
+
+        // 从所有腐烂橘子同时开始扩散
+        while (!q.empty()) {
+            int x = q.front().first;
+            int y = q.front().second;
+            q.pop();
+
+            // 枚举上下左右四个方向
+            for (int i = 0; i < 4; i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+
+                // 只有在网格内、是新鲜橘子、并且没有被访问过，才能被腐烂
+                if (0 <= nx && nx < n && 0 <= ny && ny < m && grid[nx][ny] == 1 && dist[nx][ny] == -1) {
+                    dist[nx][ny] = dist[x][y] + 1;
+                    ans = max(ans, dist[nx][ny]);
+                    q.push({nx, ny});
+                }
+            }
+        }
+
+        // 如果还有新鲜橘子没有被腐烂到，说明无法全部腐烂
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] == 1 && dist[i][j] == -1) {
+                    return -1;
+                }
+            }
+        }
+
+        return ans;
+    }
+};
+```
+
+```java
+class Solution {
+    public int orangesRotting(int[][] grid) {
+        int n = grid.length;
+        int m = grid[0].length;
+
+        // dist[x][y] 表示这个位置的橘子被腐烂的最短时间，-1 表示还没有被腐烂到
+        int[][] dist = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dist[i], -1);
+        }
+
+        Queue<int[]> q = new LinkedList<>();
+
+        // 多源 BFS：先把所有腐烂橘子作为起点加入队列
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] == 2) {
+                    q.offer(new int[]{i, j});
+                    dist[i][j] = 0;
+                }
+            }
+        }
+
+        // 四个方向的偏移量
+        int[] dx = {0, 0, 1, -1};
+        int[] dy = {1, -1, 0, 0};
+
+        int ans = 0;
+
+        // 从所有腐烂橘子同时开始扩散
+        while (!q.isEmpty()) {
+            int[] cur = q.poll();
+            int x = cur[0];
+            int y = cur[1];
+
+            // 枚举上下左右四个方向
+            for (int i = 0; i < 4; i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+
+                // 只有在网格内、是新鲜橘子、并且没有被访问过，才能被腐烂
+                if (0 <= nx && nx < n && 0 <= ny && ny < m && grid[nx][ny] == 1 && dist[nx][ny] == -1) {
+                    dist[nx][ny] = dist[x][y] + 1;
+                    ans = Math.max(ans, dist[nx][ny]);
+                    q.offer(new int[]{nx, ny});
+                }
+            }
+        }
+
+        // 如果还有新鲜橘子没有被腐烂到，说明无法全部腐烂
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] == 1 && dist[i][j] == -1) {
+                    return -1;
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+```go
+func orangesRotting(grid [][]int) int {
+	n := len(grid)
+	m := len(grid[0])
+
+	// dist[x][y] 表示这个位置的橘子被腐烂的最短时间，-1 表示还没有被腐烂到
+	dist := make([][]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = make([]int, m)
+		for j := 0; j < m; j++ {
+			dist[i][j] = -1
+		}
+	}
+
+	q := [][]int{}
+
+	// 多源 BFS：先把所有腐烂橘子作为起点加入队列
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			if grid[i][j] == 2 {
+				q = append(q, []int{i, j})
+				dist[i][j] = 0
+			}
+		}
+	}
+
+	// 四个方向的偏移量
+	dx := []int{0, 0, 1, -1}
+	dy := []int{1, -1, 0, 0}
+
+	ans := 0
+	head := 0
+
+	// 从所有腐烂橘子同时开始扩散
+	for head < len(q) {
+		x := q[head][0]
+		y := q[head][1]
+		head++
+
+		// 枚举上下左右四个方向
+		for i := 0; i < 4; i++ {
+			nx := x + dx[i]
+			ny := y + dy[i]
+
+			// 只有在网格内、是新鲜橘子、并且没有被访问过，才能被腐烂
+			if 0 <= nx && nx < n && 0 <= ny && ny < m && grid[nx][ny] == 1 && dist[nx][ny] == -1 {
+				dist[nx][ny] = dist[x][y] + 1
+				if dist[nx][ny] > ans {
+					ans = dist[nx][ny]
+				}
+				q = append(q, []int{nx, ny})
+			}
+		}
+	}
+
+	// 如果还有新鲜橘子没有被腐烂到，说明无法全部腐烂
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			if grid[i][j] == 1 && dist[i][j] == -1 {
+				return -1
+			}
+		}
+	}
+
+	return ans
+}
+```
+
+```javascript
+function orangesRotting(grid) {
+    const n = grid.length;
+    const m = grid[0].length;
+
+    // dist[x][y] 表示这个位置的橘子被腐烂的最短时间，-1 表示还没有被腐烂到
+    const dist = Array.from({ length: n }, () => Array(m).fill(-1));
+    const q = [];
+
+    // 多源 BFS：先把所有腐烂橘子作为起点加入队列
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < m; j++) {
+            if (grid[i][j] === 2) {
+                q.push([i, j]);
+                dist[i][j] = 0;
+            }
+        }
+    }
+
+    // 四个方向的偏移量
+    const dx = [0, 0, 1, -1];
+    const dy = [1, -1, 0, 0];
+
+    let ans = 0;
+    let head = 0;
+
+    // 从所有腐烂橘子同时开始扩散
+    while (head < q.length) {
+        const [x, y] = q[head];
+        head++;
+
+        // 枚举上下左右四个方向
+        for (let i = 0; i < 4; i++) {
+            const nx = x + dx[i];
+            const ny = y + dy[i];
+
+            // 只有在网格内、是新鲜橘子、并且没有被访问过，才能被腐烂
+            if (0 <= nx && nx < n && 0 <= ny && ny < m && grid[nx][ny] === 1 && dist[nx][ny] === -1) {
+                dist[nx][ny] = dist[x][y] + 1;
+                ans = Math.max(ans, dist[nx][ny]);
+                q.push([nx, ny]);
+            }
+        }
+    }
+
+    // 如果还有新鲜橘子没有被腐烂到，说明无法全部腐烂
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < m; j++) {
+            if (grid[i][j] === 1 && dist[i][j] === -1) {
+                return -1;
+            }
+        }
+    }
+
+    return ans;
+}
+```
+
+```c
+int orangesRotting(int** grid, int gridSize, int* gridColSize) {
+    int n = gridSize;
+    int m = gridColSize[0];
+
+    // dist[x][y] 表示这个位置的橘子被腐烂的最短时间，-1 表示还没有被腐烂到
+    int* dist = (int*)malloc(sizeof(int) * n * m);
+    for (int i = 0; i < n * m; i++) {
+        dist[i] = -1;
+    }
+
+    // 队列中存储坐标
+    int* qx = (int*)malloc(sizeof(int) * n * m);
+    int* qy = (int*)malloc(sizeof(int) * n * m);
+    int head = 0;
+    int tail = 0;
+
+    // 多源 BFS：先把所有腐烂橘子作为起点加入队列
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (grid[i][j] == 2) {
+                qx[tail] = i;
+                qy[tail] = j;
+                tail++;
+                dist[i * m + j] = 0;
+            }
+        }
+    }
+
+    // 四个方向的偏移量
+    int dx[4] = {0, 0, 1, -1};
+    int dy[4] = {1, -1, 0, 0};
+
+    int ans = 0;
+
+    // 从所有腐烂橘子同时开始扩散
+    while (head < tail) {
+        int x = qx[head];
+        int y = qy[head];
+        head++;
+
+        // 枚举上下左右四个方向
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+
+            // 只有在网格内、是新鲜橘子、并且没有被访问过，才能被腐烂
+            if (0 <= nx && nx < n && 0 <= ny && ny < m && grid[nx][ny] == 1 && dist[nx * m + ny] == -1) {
+                dist[nx * m + ny] = dist[x * m + y] + 1;
+                if (dist[nx * m + ny] > ans) {
+                    ans = dist[nx * m + ny];
+                }
+                qx[tail] = nx;
+                qy[tail] = ny;
+                tail++;
+            }
+        }
+    }
+
+    // 如果还有新鲜橘子没有被腐烂到，说明无法全部腐烂
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (grid[i][j] == 1 && dist[i * m + j] == -1) {
+                return -1;
+            }
+        }
+    }
+
+    return ans;
+}
+```
+#code-switcher
+**1.本题的思路是什么？**
+
+本题本质上就是给定一个2D网格图 , 求多个起点的最短路中的最大值，可以使用BFS解决。我们可以先将所有“腐烂的橘子”塞到队列里，同时记录二维数组dist代表从这些起点到某个点的最短路径，初始化起点位置的dist都是0。然后开始BFS计算最短路径即可。
+
+时间复杂度：$O(n * m)$ , 每个节点最多进入一次队列，每个节点最多有4条边。则计算次数根据乘法原理为 不超过$4nm$次。空间复杂度：$O(n * m)$ , 开销来源于队列。

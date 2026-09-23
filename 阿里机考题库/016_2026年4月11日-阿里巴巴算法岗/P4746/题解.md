@@ -1,0 +1,320 @@
+## 解题思路
+
+题目有一个长度为 $n$ 的字符串 $s$，接下来进行 $q$ 次操作，每次给出一个替换规则 $x \to y$，表示把当前字符串中所有字符 $x$ 都替换成字符 $y$。要求输出所有操作结束后的最终字符串。
+
+一个很自然的想法是每次真的去修改整个字符串，但这样一次操作最坏要扫一遍字符串，总复杂度会达到 $O(nq)$，显然无法通过。
+
+这里要用到的核心算法思想是 映射维护。
+
+由于字符串只由 $26$ 个小写字母组成，我们不必真的反复修改整个字符串，只需要维护：
+
+* 原始字符最终会变成什么字符
+
+设数组 $mp$，其中 $mp[c]$ 表示原串中的字符 $c$，经过当前所有操作后，最后会变成什么字符。
+
+初始时：
+
+* $mp[a]=a$
+* $mp[b]=b$
+* ...
+* $mp[z]=z$
+
+当进行一次操作 $x \to y$ 时，意味着 当前所有已经会变成 $x$ 的字符，之后都要改成 $y$。
+所以我们只需要把所有满足 $mp[i]=x$ 的位置改成 $y$。
+
+这样每次操作只需要扫描 $26$ 个字母，而不是扫描整个字符串。
+
+全部操作结束后，再把原字符串 $s$ 中每个字符 $c$ 替换为 $mp[c]$，就得到了最终答案。
+
+核心实现步骤如下：
+
+1. 初始化长度为 $26$ 的映射数组 $mp$
+2. 依次处理每个操作 $x \to y$
+3. 每次扫描 $26$ 个字母，把所有当前映射为 $x$ 的字符改为 $y$
+4. 最后遍历原串，按映射生成答案
+
+这样做的关键在于：
+
+* 我们始终维护的是“原串中的每个字符最终会变成什么”
+* 所以中间不需要真的修改字符串本身
+* 最后统一转换一次即可
+
+## 复杂度分析
+
+每次操作只扫描 $26$ 个字母，因此处理操作的复杂度为：
+
+$$
+O(26q)
+$$
+
+最后再扫描一次字符串，复杂度为：
+
+$$
+O(n)
+$$
+
+总时间复杂度为：
+
+$$
+O(26q+n)
+$$
+
+由于 $26$ 是常数，因此也可以看成：
+
+$$
+O(q+n)
+$$
+
+空间复杂度只使用了一个长度为 $26$ 的映射数组，以及答案字符数组，因此空间复杂度为：
+
+$$
+O(26+n)
+$$
+
+也可以看成：
+
+$$
+O(n)
+$$
+
+这个复杂度完全满足题目要求。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 处理一组测试数据，返回最终字符串
+def transform_string(s, ops):
+    # mp[i] 表示原字符 chr(i + ord('a')) 最终会变成什么字符
+    mp = [chr(ord('a') + i) for i in range(26)]
+
+    # 依次处理替换操作
+    for x, y in ops:
+        # 所有当前映射到 x 的字符，之后都要映射到 y
+        for i in range(26):
+            if mp[i] == x:
+                mp[i] = y
+
+    # 根据最终映射生成答案
+    res = []
+    for ch in s:
+        res.append(mp[ord(ch) - ord('a')])
+
+    return ''.join(res)
+
+
+def main():
+    input = sys.stdin.readline
+    t = int(input())
+    ans = []
+
+    for _ in range(t):
+        n, q = map(int, input().split())
+        s = input().strip()
+
+        ops = []
+        for _ in range(q):
+            x, y = input().split()
+            ops.append((x, y))
+
+        ans.append(transform_string(s, ops))
+
+    print('\n'.join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedInputStream;
+import java.io.IOException;
+
+public class Main {
+
+    // 处理一组测试数据，返回最终字符串
+    public static String transformString(String s, char[] xs, char[] ys, int q) {
+        // mp[i] 表示原字符 (char)('a' + i) 最终会变成什么字符
+        char[] mp = new char[26];
+        for (int i = 0; i < 26; i++) {
+            mp[i] = (char) ('a' + i);
+        }
+
+        // 依次处理替换操作
+        for (int k = 0; k < q; k++) {
+            char x = xs[k];
+            char y = ys[k];
+
+            // 所有当前映射为 x 的字符都改成 y
+            for (int i = 0; i < 26; i++) {
+                if (mp[i] == x) {
+                    mp[i] = y;
+                }
+            }
+        }
+
+        // 根据最终映射生成答案
+        char[] res = s.toCharArray();
+        for (int i = 0; i < res.length; i++) {
+            res[i] = mp[res[i] - 'a'];
+        }
+
+        return new String(res);
+    }
+
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner();
+        StringBuilder out = new StringBuilder();
+
+        int t = fs.nextInt();
+        while (t-- > 0) {
+            int n = fs.nextInt();
+            int q = fs.nextInt();
+            String s = fs.next();
+
+            char[] xs = new char[q];
+            char[] ys = new char[q];
+
+            for (int i = 0; i < q; i++) {
+                xs[i] = fs.next().charAt(0);
+                ys[i] = fs.next().charAt(0);
+            }
+
+            out.append(transformString(s, xs, ys, q)).append('\n');
+        }
+
+        System.out.print(out.toString());
+    }
+
+    // 简单快读，适合本题数据范围
+    static class FastScanner {
+        private final BufferedInputStream in = new BufferedInputStream(System.in);
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0, len = 0;
+
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+                if (len <= 0) {
+                    return -1;
+                }
+            }
+            return buffer[ptr++];
+        }
+
+        String next() throws IOException {
+            StringBuilder sb = new StringBuilder();
+            int c;
+
+            // 跳过空白字符
+            do {
+                c = read();
+            } while (c <= ' ' && c != -1);
+
+            // 读取一个单词
+            while (c > ' ') {
+                sb.append((char) c);
+                c = read();
+            }
+
+            return sb.toString();
+        }
+
+        int nextInt() throws IOException {
+            int c;
+            do {
+                c = read();
+            } while (c <= ' ' && c != -1);
+
+            int sign = 1;
+            if (c == '-') {
+                sign = -1;
+                c = read();
+            }
+
+            int val = 0;
+            while (c > ' ') {
+                val = val * 10 + c - '0';
+                c = read();
+            }
+
+            return val * sign;
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+// 处理一组测试数据，返回最终字符串
+string transformString(const string& s, const vector<pair<char, char>>& ops) {
+    // mp[i] 表示原字符 ('a' + i) 最终会变成什么字符
+    vector<char> mp(26);
+    for (int i = 0; i < 26; i++) {
+        mp[i] = 'a' + i;
+    }
+
+    // 依次处理替换操作
+    for (auto& op : ops) {
+        char x = op.first;
+        char y = op.second;
+
+        // 所有当前映射为 x 的字符都改成 y
+        for (int i = 0; i < 26; i++) {
+            if (mp[i] == x) {
+                mp[i] = y;
+            }
+        }
+    }
+
+    // 根据最终映射生成答案
+    string res = s;
+    for (int i = 0; i < (int)res.size(); i++) {
+        res[i] = mp[res[i] - 'a'];
+    }
+
+    return res;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+
+    while (t--) {
+        int n, q;
+        cin >> n >> q;
+
+        string s;
+        cin >> s;
+
+        vector<pair<char, char>> ops;
+        ops.reserve(q);
+
+        for (int i = 0; i < q; i++) {
+            char x, y;
+            cin >> x >> y;
+            ops.push_back({x, y});
+        }
+
+        cout << transformString(s, ops) << '\n';
+    }
+
+    return 0;
+}
+```

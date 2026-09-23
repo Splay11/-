@@ -1,0 +1,39 @@
+RID: 6a8e5707fbe451a8820266cd
+是否完全通过: False
+错误种类: 其他错误
+状态: Time Exceeded
+编译信息: []
+运行信息: 
+失败点: {"id": 9, "subtaskId": 1, "status": "Time Exceeded", "timeMs": 59.811, "memoryBytes": 9932, "message": ""}
+完整返回:
+{
+  "ok": true,
+  "rid": "6a8e5707fbe451a8820266cd",
+  "result": {
+    "isAccepted": false,
+    "status": {
+      "code": 3,
+      "name": "Time Exceeded",
+      "textZh": "Time Exceeded"
+    },
+    "errorType": "其他错误",
+    "score": 90,
+    "timeMs": 595.986,
+    "memoryBytes": 12988,
+    "compilerMessage": [],
+    "runtimeMessage": "",
+    "firstFailedCase": {
+      "id": 9,
+      "subtaskId": 1,
+      "status": "Time Exceeded",
+      "timeMs": 59.811,
+      "memoryBytes": 9932,
+      "message": ""
+    },
+    "caseSummary": {
+      "total": 10,
+      "accepted": 0
+    }
+  }
+}
+

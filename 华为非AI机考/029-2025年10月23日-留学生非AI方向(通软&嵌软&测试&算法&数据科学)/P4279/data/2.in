@@ -1,0 +1,21 @@
+19
+mkdir dir1
+cd ..
+ls
+mkdir dir2
+cd dir2
+ls
+ls
+mkdir dir3
+ls
+cd dir3
+mkdir dir4
+cd dir4
+cd ..
+ls
+ls
+cd dir4
+ls
+ls
+mkdir dir5
+mkdir dir6

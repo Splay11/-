@@ -1,0 +1,6 @@
+LogSystem()
+enter(1, false)
+enter(2, true)
+enter(3, true)
+leave(3)
+log("back")

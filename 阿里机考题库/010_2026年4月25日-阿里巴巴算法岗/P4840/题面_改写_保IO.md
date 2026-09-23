@@ -1,0 +1,54 @@
+# 双产线交叉读数达标统计
+
+# 题目内容
+
+产线侧对两条测点带做交叉比对：构造 $R \times C$ 的交叉表，第 $i$ 行第 $j$ 列元素为 $\textit{pulse}_i \times \textit{gauge}_j$。
+
+给定达标阈值 $\textit{bound}$，统计交叉表中有多少个元素 $\ge \textit{bound}$。
+
+# 输入描述
+
+每个测试文件包含多组测试数据。
+
+- 第一行：整数 $T$（$1 \le T \le 10^5$），测试组数。
+- 每组数据：
+  - 第一行：三个整数 $R,\, C,\, \textit{bound}$（$1 \le R, C \le 2 \times 10^5$，$0 \le \textit{bound} \le 10^{18}$）；
+  - 第二行：$R$ 个非负整数 $\textit{pulse}_1,\ldots,\textit{pulse}_R$（$0 \le \textit{pulse}_i \le 10^9$）；
+  - 第三行：$C$ 个非负整数 $\textit{gauge}_1,\ldots,\textit{gauge}_C$（$0 \le \textit{gauge}_j \le 10^9$）。
+
+所有测试中 $R+C$ 之和不超过 $2 \times 10^5$。
+
+# 输出描述
+
+每组数据输出一行一个整数，表示满足 $\textit{pulse}_i \times \textit{gauge}_j \ge \textit{bound}$ 的元素个数。
+
+## 样例1
+
+**输入**
+
+```
+3
+2 3 4
+2 3
+1 2 3
+2 2 10
+3 4
+2 5
+2 2 0
+1 2
+3 4
+```
+
+**输出**
+
+```
+4
+2
+4
+```
+
+**说明**
+
+- 第一组：交叉乘积 $\ge 4$ 的位置共 $4$ 个（$(2,2),(2,3),(3,2),(3,3)$）。
+- 第二组：仅 $(3,5)$ 与 $(4,5)$ 的乘积 $\ge 10$，答案为 $2$。
+- 第三组：$\textit{bound}=0$，$2 \times 2=4$ 个元素均达标。

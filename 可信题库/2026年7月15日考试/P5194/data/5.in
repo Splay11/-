@@ -1,0 +1,7 @@
+LogSystem()
+enter(1, false)
+enter(2, true)
+enter(10, false)
+enter(11, true)
+leave(10)
+log("remain")

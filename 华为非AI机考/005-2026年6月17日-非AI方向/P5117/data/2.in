@@ -1,0 +1,6 @@
+5
+APPEND abc
+APPEND d
+UNDO
+POP
+REDO

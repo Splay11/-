@@ -1,0 +1,3 @@
+var longestBeautifulLanterns = function(nums) {
+
+};

@@ -1,0 +1,6 @@
+LogSystem()
+enter(1000, false)
+enter(999, true)
+log("123456789012345")
+leave(1000)
+log("z")

@@ -1,0 +1,11 @@
+init 22 35
+createWindow w1 30 9 6 16 4
+resize w1 13 16
+createWindow w2 3 4 19 -1 4
+createWindow w3 -22 1 7 -2 4
+queryVisibility w1
+queryVisibility not_exist_235
+queryAllVisibleWindows 10 9 3 7
+move w1 14 -15
+queryVisibility w1
+move w1 26 -13

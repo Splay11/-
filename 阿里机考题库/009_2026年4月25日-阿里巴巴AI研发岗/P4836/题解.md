@@ -1,0 +1,205 @@
+## 解题思路
+
+从左到右逐位校正标签串。处理第 $i$ 位时，记当前字符为 $glyph$。
+
+维护两个计数数组：
+
+- $leftCnt[\cdot]$：左侧已校正字符中各字母的出现次数；
+- $rightCnt[\cdot]$：右侧原串中各字母的出现次数。
+
+处理当前位时：
+
+1. 将 $glyph$ 从 $rightCnt$ 中删去（该位不再属于右侧）；
+2. 若 $leftCnt[glyph] = rightCnt[glyph]$，将当前位轮询为下一个小写字母（`'z'` 变为 `'a'`）；
+3. 否则保持不变；
+4. 将校正后的字符计入 $leftCnt$。
+
+按题意顺序模拟即可得到最终标签串。
+
+## 复杂度分析
+
+设标签串长度为 $len$。
+
+- 时间复杂度：$O(len)$，每位 $O(1)$ 处理；
+- 空间复杂度：$O(26)=O(1)$。
+
+所有测试中 $\sum len \le 4 \times 10^5$，可通过。
+
+## 代码实现
+
+### Python
+
+```python
+def solve_one(length, tag):
+    # rightCnt 统计当前位右侧尚未处理的原标签字符数量
+    right_cnt = [0] * 26
+    for ch in tag:
+        right_cnt[ord(ch) - ord('a')] += 1
+
+    # leftCnt 统计左侧已校正完成的最终字符数量
+    left_cnt = [0] * 26
+
+    ans = []
+
+    for ch in tag:
+        idx = ord(ch) - ord('a')
+
+        # 当前字符不再属于右侧，先从右侧计数中删去
+        right_cnt[idx] -= 1
+
+        # leftCnt：左侧最终字符中等于当前 glyph 的个数
+        left_cnt_val = left_cnt[idx]
+
+        # rightCnt：右侧原串中等于当前 glyph 的个数
+        right_cnt_val = right_cnt[idx]
+
+        # 两侧计数相等则轮询到下一个小写字母
+        if left_cnt_val == right_cnt_val:
+            new_idx = (idx + 1) % 26
+        else:
+            new_idx = idx
+
+        ans.append(chr(new_idx + ord('a')))
+        left_cnt[new_idx] += 1
+
+    return ''.join(ans)
+
+
+def main():
+    tc = int(input())
+    for _ in range(tc):
+        length = int(input())
+        tag = input().strip()
+        print(solve_one(length, tag))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class Main {
+    public static String solveOne(int length, String tag) {
+        // rightCnt 统计当前位右侧尚未处理的原标签字符数量
+        int[] rightCnt = new int[26];
+        for (int i = 0; i < length; i++) {
+            rightCnt[tag.charAt(i) - 'a']++;
+        }
+
+        // leftCnt 统计左侧已校正完成的最终字符数量
+        int[] leftCnt = new int[26];
+
+        StringBuilder ans = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            char ch = tag.charAt(i);
+            int idx = ch - 'a';
+
+            // 当前字符不再属于右侧，先从右侧计数中删去
+            rightCnt[idx]--;
+
+            // leftCnt：左侧最终字符中等于当前 glyph 的个数
+            int leftCntVal = leftCnt[idx];
+
+            // rightCnt：右侧原串中等于当前 glyph 的个数
+            int rightCntVal = rightCnt[idx];
+
+            int newIdx;
+
+            // 两侧计数相等则轮询到下一个小写字母
+            if (leftCntVal == rightCntVal) {
+                newIdx = (idx + 1) % 26;
+            } else {
+                newIdx = idx;
+            }
+
+            ans.append((char) ('a' + newIdx));
+            leftCnt[newIdx]++;
+        }
+
+        return ans.toString();
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        int tc = Integer.parseInt(br.readLine().trim());
+
+        for (int i = 0; i < tc; i++) {
+            int length = Integer.parseInt(br.readLine().trim());
+            String tag = br.readLine().trim();
+
+            System.out.println(solveOne(length, tag));
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+string solveOne(int length, string tag) {
+    // rightCnt 统计当前位右侧尚未处理的原标签字符数量
+    vector<int> rightCnt(26, 0);
+    for (char ch : tag) {
+        rightCnt[ch - 'a']++;
+    }
+
+    // leftCnt 统计左侧已校正完成的最终字符数量
+    vector<int> leftCnt(26, 0);
+
+    string ans;
+
+    for (char ch : tag) {
+        int idx = ch - 'a';
+
+        // 当前字符不再属于右侧，先从右侧计数中删去
+        rightCnt[idx]--;
+
+        // leftCnt：左侧最终字符中等于当前 glyph 的个数
+        int leftCntVal = leftCnt[idx];
+
+        // rightCnt：右侧原串中等于当前 glyph 的个数
+        int rightCntVal = rightCnt[idx];
+
+        int newIdx;
+
+        // 两侧计数相等则轮询到下一个小写字母
+        if (leftCntVal == rightCntVal) {
+            newIdx = (idx + 1) % 26;
+        } else {
+            newIdx = idx;
+        }
+
+        ans.push_back(char('a' + newIdx));
+        leftCnt[newIdx]++;
+    }
+
+    return ans;
+}
+
+int main() {
+    int tc;
+    cin >> tc;
+
+    while (tc--) {
+        int length;
+        string tag;
+
+        cin >> length;
+        cin >> tag;
+
+        cout << solveOne(length, tag) << '\n';
+    }
+
+    return 0;
+}
+```

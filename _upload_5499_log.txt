@@ -1,0 +1,175 @@
+P5499	比较版本号	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5500	合并两个有序数组	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5501	删除字符 b 和连续的 ac	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5502	比左边都大、比右边都小	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5503	多行有序数组中的第 K 大	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5504	矩阵滑动窗口最大值	zh-fail	data-fail	sol-fail
+  data: ) |   File "C:\Users\98472\AppData\Local\Programs\Python\Python39\lib\site-packages\requests\adapters.py", line 659, in send |     raise ConnectionError(err, request=request) | requests.exceptions.ConnectionError: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5505	反转链表 II	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5506	删除排序链表中的重复元素 II	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5507	重排链表	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5508	奇偶链表	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5509	二叉树的锯齿形层序遍历	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5510	另一棵树的子树	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5511	二叉树最大宽度	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5512	二叉树最高加分	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5513	0-1 背包	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5514	不相邻子集最小和	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5515	打靶凑总分的方案数	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5516	最长山峰子序列	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5517	重复拼接后的最大连续子数组和	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5518	分苹果方案	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5519	等和连续段最多划分	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5520	分割使方差和最大	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5521	三串字典序最小 LCS	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5522	异或和为 k 的子数组个数	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5523	小于 s 的最大整数	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5524	排列恢复升序的最小交换次数	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5525	乘法和开方后的最小值	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5526	有向图判环	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5527	网格最短路	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5528	带过期时间的 LRU 缓存	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5529	二分类 AUC	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5530	K-Means 聚类	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5531	多项式回归	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5532	逻辑回归二分类	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5533	交叉熵损失与梯度	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5534	二分类交叉熵	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5535	数值稳定 Sigmoid	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5536	KL 散度	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5537	梯度下降求平方根	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5538	随机梯度下降线性回归	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5539	两层 MLP	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5540	两层全连接网络前向与反向传播	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5541	线性层	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5542	Transformer FFN	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5543	多通道卷积计算	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5544	im2col 一维卷积	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5545	最大池化	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5546	Batch Normalization	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5547	Adam 优化器	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5548	Multi-Head Attention	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5549	Grouped Query Attention（GQA）	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5550	Cross Attention（交叉注意力）	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5551	Transformer Encoder Block	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5552	InfoNCE（对比学习）	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5553	SFT 交叉熵损失	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5554	PPO 裁剪代理损失	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5555	MLA（Multi-head Latent Attention）	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }
+P5556	LoRA（Low-Rank Adaptation）	zh-fail	data-fail	sol-fail
+  sol: HTTP 401 | { |   "message": "Permission denied." | }
+  stmt: HTTP 401 | { |   "message": "Permission denied." | } | HTTP 401 | { |   "message": "Permission denied." | }

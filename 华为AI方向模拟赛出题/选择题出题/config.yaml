@@ -1,0 +1,9 @@
+type: objective
+answers:
+  '1':
+    - C
+    - 6
+  '16':
+    - - B
+      - D
+    - 12

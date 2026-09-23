@@ -2,10 +2,12 @@
 
 import argparse
 import json
-import os
 from pathlib import Path
 
 import requests
+
+from codefun_auth import api_headers
+
 
 # 核心代码模式约定文件名（可从题目根或 data/ 子目录自动定位）
 CORE_BUNDLE_FILENAMES = (
@@ -78,6 +80,11 @@ def main() -> None:
         help="题目文件夹路径（如 HOT100/两数之和），会自动查找配置文件（支持根目录或 data/ 子目录）",
     )
     parser.add_argument("--ca-cert", default=None)
+    parser.add_argument(
+        "--no-proxy",
+        action="store_true",
+        help="禁用系统代理（Session.trust_env=False）",
+    )
     ow = parser.add_mutually_exclusive_group()
     ow.add_argument(
         "--overwrite",
@@ -95,11 +102,6 @@ def main() -> None:
     args = parser.parse_args()
 
     require_https(args.base_url)
-
-    uname = os.environ.get("HYDRO_API_UNAME")
-    password = os.environ.get("HYDRO_API_PASSWORD")
-    if not uname or not password:
-        raise SystemExit("请设置环境变量 HYDRO_API_UNAME 与 HYDRO_API_PASSWORD")
 
     # 优先使用 --problem-dir（智能解析），否则使用 --data-dir
     if args.problem_dir:
@@ -120,8 +122,6 @@ def main() -> None:
 
     payload = {
         "domainId": args.domain_id,
-        "uname": uname,
-        "password": password,
         "pid": args.pid,
         "files": files,
         "overwrite": bool(args.overwrite),
@@ -129,12 +129,15 @@ def main() -> None:
 
     url = f"{args.base_url.rstrip('/')}/api/problem/upload_testdata"
     verify = args.ca_cert if args.ca_cert else True
-    resp = requests.post(
+    session = requests.Session()
+    if args.no_proxy:
+        session.trust_env = False
+    resp = session.post(
         url,
         json=payload,
-        timeout=(10, 300),
+        timeout=(60, 600),
         verify=verify,
-        headers={"Accept": "application/json", "Content-Type": "application/json"},
+        headers=api_headers(),
     )
     print("HTTP", resp.status_code)
     try:

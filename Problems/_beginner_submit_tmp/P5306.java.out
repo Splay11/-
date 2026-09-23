@@ -1,0 +1,34 @@
+RID: 6a8e515acf294f05182137ef
+是否完全通过: False
+错误种类: 其他错误
+状态: Compile Error
+编译信息: ['./Solution.java:3: error: class LeaseManager is public, should be declared in a file named LeaseManager.java\npublic class LeaseManager {\n       ^\n1 error\n']
+运行信息: 
+失败点: null
+完整返回:
+{
+  "ok": true,
+  "rid": "6a8e515acf294f05182137ef",
+  "result": {
+    "isAccepted": false,
+    "status": {
+      "code": 7,
+      "name": "Compile Error",
+      "textZh": "Compile Error"
+    },
+    "errorType": "其他错误",
+    "score": 0,
+    "timeMs": 0,
+    "memoryBytes": 0,
+    "compilerMessage": [
+      "./Solution.java:3: error: class LeaseManager is public, should be declared in a file named LeaseManager.java\npublic class LeaseManager {\n       ^\n1 error\n"
+    ],
+    "runtimeMessage": "",
+    "firstFailedCase": null,
+    "caseSummary": {
+      "total": 0,
+      "accepted": 0
+    }
+  }
+}
+

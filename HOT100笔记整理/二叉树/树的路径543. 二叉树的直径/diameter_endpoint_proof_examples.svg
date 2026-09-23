@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560">
+  <defs>
+    <style>
+      .title { font: 700 28px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #222; }
+      .subtitle { font: 600 20px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #333; }
+      .note { font: 500 16px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #444; }
+      .label { font: 600 16px Consolas, monospace; fill: #fff; text-anchor: middle; dominant-baseline: middle; }
+      .panel { fill: #fafbff; stroke: #d7dcea; stroke-width: 2; rx: 14; }
+      .edge { stroke: #a0a7b4; stroke-width: 4; }
+      .bad-path { stroke: #ff9800; stroke-width: 6; }
+      .better-path { stroke: #e53935; stroke-width: 6; }
+      .node { fill: #3f6fd9; stroke: #ffffff; stroke-width: 3; }
+      .good-node { fill: #e53935; stroke: #ffffff; stroke-width: 3; }
+      .bad-node { fill: #ff9800; stroke: #ffffff; stroke-width: 3; }
+      .dash { stroke: #777; stroke-width: 2; stroke-dasharray: 7 7; }
+    </style>
+  </defs>
+
+  <text x="600" y="44" class="title" text-anchor="middle">&#19968;&#23450;&#19981;&#20250;&#26159;&#30452;&#24452;&#30340;&#24773;&#20917;</text>
+  <line x1="600" y1="70" x2="600" y2="540" class="dash"/>
+
+  <rect x="40" y="84" width="520" height="440" class="panel"/>
+  <text x="300" y="118" class="subtitle" text-anchor="middle">&#20363;1&#65306;&#31471;&#28857;&#19981;&#26159;&#26681;&#33410;&#28857;</text>
+
+  <line x1="300" y1="190" x2="300" y2="260" class="edge"/>
+  <line x1="300" y1="260" x2="230" y2="340" class="edge"/>
+  <line x1="300" y1="260" x2="370" y2="340" class="edge"/>
+  <line x1="230" y1="340" x2="190" y2="420" class="edge"/>
+  <line x1="230" y1="340" x2="270" y2="420" class="edge"/>
+
+  <line x1="300" y1="190" x2="300" y2="260" class="better-path"/>
+  <line x1="300" y1="260" x2="230" y2="340" class="better-path"/>
+  <line x1="230" y1="340" x2="190" y2="420" class="better-path"/>
+
+  <line x1="230" y1="340" x2="190" y2="420" class="bad-path"/>
+  <line x1="300" y1="260" x2="230" y2="340" class="bad-path"/>
+
+  <circle cx="300" cy="190" r="20" class="good-node"/><text x="300" y="190" class="label">R</text>
+  <circle cx="300" cy="260" r="20" class="bad-node"/><text x="300" y="260" class="label">A</text>
+  <circle cx="230" cy="340" r="20" class="bad-node"/><text x="230" y="340" class="label">B</text>
+  <circle cx="190" cy="420" r="20" class="bad-node"/><text x="190" y="420" class="label">L</text>
+  <circle cx="370" cy="340" r="20" class="node"/><text x="370" y="340" class="label">C</text>
+  <circle cx="270" cy="420" r="20" class="node"/><text x="270" y="420" class="label">D</text>
+
+  <text x="70" y="486" class="note">&#27225;&#33394;&#65288;&#20505;&#36873;&#65289;&#65306;A - B - L</text>
+  <text x="70" y="512" class="note">&#32418;&#33394;&#65288;&#26356;&#38271;&#65289;&#65306;R - A - B - L</text>
+
+  <rect x="640" y="84" width="520" height="440" class="panel"/>
+  <text x="900" y="118" class="subtitle" text-anchor="middle">&#20363;2&#65306;&#31471;&#28857;&#19981;&#26159;&#21494;&#23376;&#33410;&#28857;</text>
+
+  <line x1="900" y1="190" x2="830" y2="270" class="edge"/>
+  <line x1="900" y1="190" x2="970" y2="270" class="edge"/>
+  <line x1="830" y1="270" x2="790" y2="350" class="edge"/>
+  <line x1="830" y1="270" x2="870" y2="350" class="edge"/>
+  <line x1="970" y1="270" x2="1010" y2="350" class="edge"/>
+
+  <line x1="790" y1="350" x2="830" y2="270" class="better-path"/>
+  <line x1="830" y1="270" x2="900" y2="190" class="better-path"/>
+  <line x1="900" y1="190" x2="970" y2="270" class="better-path"/>
+  <line x1="970" y1="270" x2="1010" y2="350" class="better-path"/>
+
+  <line x1="790" y1="350" x2="830" y2="270" class="bad-path"/>
+  <line x1="830" y1="270" x2="900" y2="190" class="bad-path"/>
+  <line x1="900" y1="190" x2="970" y2="270" class="bad-path"/>
+
+  <circle cx="900" cy="190" r="20" class="bad-node"/><text x="900" y="190" class="label">X</text>
+  <circle cx="830" cy="270" r="20" class="bad-node"/><text x="830" y="270" class="label">Y</text>
+  <circle cx="970" cy="270" r="20" class="bad-node"/><text x="970" y="270" class="label">P</text>
+  <circle cx="790" cy="350" r="20" class="bad-node"/><text x="790" y="350" class="label">L1</text>
+  <circle cx="1010" cy="350" r="20" class="good-node"/><text x="1010" y="350" class="label">L2</text>
+  <circle cx="870" cy="350" r="20" class="node"/><text x="870" y="350" class="label">Z</text>
+
+  <text x="670" y="486" class="note">&#27225;&#33394;&#65288;&#20505;&#36873;&#65289;&#65306;L1 - Y - X - P</text>
+  <text x="670" y="512" class="note">&#32418;&#33394;&#65288;&#26356;&#38271;&#65289;&#65306;L1 - Y - X - P - L2</text>
+</svg>

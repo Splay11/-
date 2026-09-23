@@ -1,0 +1,102 @@
+96
+mkdir dir1
+cd dir1
+ls
+mkdir dir2
+cd dir2
+mkdir dir3
+cd ..
+cd ..
+ls
+ls
+cd dir1
+ls
+mkdir dir4
+ls
+cd ..
+mkdir dir5
+mkdir dir6
+cd dir5
+ls
+mkdir dir7
+cd dir7
+mkdir dir8
+cd dir8
+mkdir dir9
+mkdir dir10
+mkdir dir11
+mkdir dir12
+cd dir9
+mkdir dir13
+cd ..
+mkdir dir14
+cd dir10
+cd ..
+mkdir dir15
+ls
+mkdir dir16
+mkdir dir17
+mkdir dir18
+mkdir dir19
+mkdir dir20
+mkdir dir21
+mkdir dir22
+mkdir dir23
+mkdir dir24
+mkdir dir25
+mkdir dir26
+cd ..
+mkdir dir27
+ls
+ls
+cd dir27
+mkdir dir28
+ls
+cd ..
+cd ..
+mkdir dir29
+mkdir dir30
+ls
+cd dir7
+mkdir dir31
+cd ..
+ls
+mkdir dir32
+mkdir dir33
+cd dir30
+cd ..
+ls
+cd dir7
+mkdir dir34
+cd dir27
+ls
+cd dir28
+mkdir dir35
+ls
+cd dir35
+mkdir dir36
+cd dir36
+ls
+mkdir dir37
+cd dir37
+ls
+mkdir dir38
+mkdir dir39
+mkdir dir40
+cd dir38
+mkdir dir41
+ls
+mkdir dir42
+mkdir dir43
+cd dir43
+mkdir dir44
+cd dir44
+cd ..
+cd dir44
+mkdir dir45
+cd ..
+ls
+cd dir44
+cd dir45
+cd ..
+cd dir45

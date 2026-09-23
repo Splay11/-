@@ -1,0 +1,188 @@
+## 解题思路
+
+得分 $val = s \oplus p \oplus q$，统计使 $val$ 取最大值的 $(p,q)$ 个数。
+
+所有数 $< 2^{31}$，从高位到低位贪心：若当前位能取 $1$ 则只保留取 $1$ 的转移，否则保留取 $0$ 的转移。
+
+同时 $p \in [p_L,p_R]$、$q \in [q_L,q_R]$，用数位 DP 维护四个 tight 标记（$p,q$ 前缀是否仍贴上下界）。
+
+状态 $dp[st]$：已处理更高位且异或前缀已为最优时，处于状态 $st$ 的方案数（$st$ 为 $4$ 位二进制）。
+
+每位枚举 $p_i,q_i \in \{0,1\}$，检查区间限制后更新状态；若存在 $s_i\oplus p_i\oplus q_i=1$ 的合法转移则只保留它们。
+
+最终 $\sum dp$ 即为答案。
+
+## 复杂度分析
+
+共 $31$ 位，每位 $16$ 状态、$4$ 种位组合，单组 $O(1)$；$q$ 组总时间 $O(q)$，空间 $O(1)$。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def count_best(s, pL, pR, qL, qR):
+    dp = [0] * 16
+    dp[15] = 1
+    for pos in range(30, -1, -1):
+        sb = (s >> pos) & 1
+        plb, prb = (pL >> pos) & 1, (pR >> pos) & 1
+        qlb, qrb = (qL >> pos) & 1, (qR >> pos) & 1
+        nz, no = [0] * 16, [0] * 16
+        has_one = False
+        for st in range(16):
+            cnt = dp[st]
+            if not cnt: continue
+            eq_pl, eq_pr = st & 1, (st >> 1) & 1
+            eq_ql, eq_qr = (st >> 2) & 1, (st >> 3) & 1
+            for pb in (0, 1):
+                if eq_pl and pb < plb: continue
+                if eq_pr and pb > prb: continue
+                n_pl = 1 if eq_pl and pb == plb else 0
+                n_pr = 1 if eq_pr and pb == prb else 0
+                for qb in (0, 1):
+                    if eq_ql and qb < qlb: continue
+                    if eq_qr and qb > qrb: continue
+                    n_ql = 1 if eq_ql and qb == qlb else 0
+                    n_qr = 1 if eq_qr and qb == qrb else 0
+                    ns = n_pl | (n_pr << 1) | (n_ql << 2) | (n_qr << 3)
+                    cur = sb ^ pb ^ qb
+                    if cur == 1:
+                        no[ns] += cnt
+                        has_one = True
+                    else:
+                        nz[ns] += cnt
+        dp = no if has_one else nz
+    return sum(dp)
+
+data = list(map(int, sys.stdin.buffer.read().split()))
+q, idx = data[0], 1
+out = []
+for _ in range(q):
+    s = data[idx]
+    pL, pR = data[idx + 1], data[idx + 2]
+    qL, qR = data[idx + 3], data[idx + 4]
+    idx += 5
+    out.append(str(count_best(s, pL, pR, qL, qR)))
+sys.stdout.write("\n".join(out))
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+  static long countBest(int s, int pL, int pR, int qL, int qR) {
+    long[] dp = new long[16];
+    dp[15] = 1;
+    for (int pos = 30; pos >= 0; pos--) {
+      int sb = (s >> pos) & 1;
+      int plb = (pL >> pos) & 1, prb = (pR >> pos) & 1;
+      int qlb = (qL >> pos) & 1, qrb = (qR >> pos) & 1;
+      long[] nz = new long[16], no = new long[16];
+      boolean hasOne = false;
+      for (int st = 0; st < 16; st++) {
+        long cnt = dp[st];
+        if (cnt == 0) continue;
+        int eqPL = st & 1, eqPR = (st >> 1) & 1;
+        int eqQL = (st >> 2) & 1, eqQR = (st >> 3) & 1;
+        for (int pb = 0; pb <= 1; pb++) {
+          if (eqPL == 1 && pb < plb) continue;
+          if (eqPR == 1 && pb > prb) continue;
+          int nPL = (eqPL == 1 && pb == plb) ? 1 : 0;
+          int nPR = (eqPR == 1 && pb == prb) ? 1 : 0;
+          for (int qb = 0; qb <= 1; qb++) {
+            if (eqQL == 1 && qb < qlb) continue;
+            if (eqQR == 1 && qb > qrb) continue;
+            int nQL = (eqQL == 1 && qb == qlb) ? 1 : 0;
+            int nQR = (eqQR == 1 && qb == qrb) ? 1 : 0;
+            int ns = nPL | (nPR << 1) | (nQL << 2) | (nQR << 3);
+            int cur = sb ^ pb ^ qb;
+            if (cur == 1) { no[ns] += cnt; hasOne = true; }
+            else nz[ns] += cnt;
+          }
+        }
+      }
+      dp = hasOne ? no : nz;
+    }
+    long ans = 0;
+    for (long v : dp) ans += v;
+    return ans;
+  }
+
+  public static void main(String[] args) throws Exception {
+    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    int q = Integer.parseInt(br.readLine().trim());
+    StringBuilder out = new StringBuilder();
+    while (q-- > 0) {
+      StringTokenizer st = new StringTokenizer(br.readLine());
+      int s = Integer.parseInt(st.nextToken());
+      st = new StringTokenizer(br.readLine());
+      int pL = Integer.parseInt(st.nextToken()), pR = Integer.parseInt(st.nextToken());
+      st = new StringTokenizer(br.readLine());
+      int qL = Integer.parseInt(st.nextToken()), qR = Integer.parseInt(st.nextToken());
+      out.append(countBest(s, pL, pR, qL, qR)).append('\n');
+    }
+    System.out.print(out);
+  }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+long long countBest(int s, int pL, int pR, int qL, int qR) {
+    vector<long long> dp(16, 0);
+    dp[15] = 1;
+    for (int pos = 30; pos >= 0; --pos) {
+        int sb = (s >> pos) & 1;
+        int plb = (pL >> pos) & 1, prb = (pR >> pos) & 1;
+        int qlb = (qL >> pos) & 1, qrb = (qR >> pos) & 1;
+        vector<long long> nz(16, 0), no(16, 0);
+        bool hasOne = false;
+        for (int st = 0; st < 16; ++st) {
+            long long cnt = dp[st];
+            if (!cnt) continue;
+            int eqPL = st & 1, eqPR = (st >> 1) & 1;
+            int eqQL = (st >> 2) & 1, eqQR = (st >> 3) & 1;
+            for (int pb = 0; pb <= 1; ++pb) {
+                if (eqPL && pb < plb) continue;
+                if (eqPR && pb > prb) continue;
+                int nPL = eqPL && pb == plb, nPR = eqPR && pb == prb;
+                for (int qb = 0; qb <= 1; ++qb) {
+                    if (eqQL && qb < qlb) continue;
+                    if (eqQR && qb > qrb) continue;
+                    int nQL = eqQL && qb == qlb, nQR = eqQR && qb == qrb;
+                    int ns = nPL | (nPR << 1) | (nQL << 2) | (nQR << 3);
+                    int cur = sb ^ pb ^ qb;
+                    if (cur == 1) { no[ns] += cnt; hasOne = true; }
+                    else nz[ns] += cnt;
+                }
+            }
+        }
+        dp = hasOne ? no : nz;
+    }
+    long long ans = 0;
+    for (long long v : dp) ans += v;
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int q; cin >> q;
+    while (q--) {
+        int s, pL, pR, qL, qR;
+        cin >> s >> pL >> pR >> qL >> qR;
+        cout << countBest(s, pL, pR, qL, qR) << '\n';
+    }
+    return 0;
+}
+```

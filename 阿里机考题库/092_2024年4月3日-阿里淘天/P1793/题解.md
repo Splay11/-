@@ -1,0 +1,69 @@
+## 题解
+
+抽象一下题意，从 $n$ 个数里面选择 $k$ 个数，问最多能选几个不同的
+
+可以用 set 将 数组去重后，set 的大小即为所有不同数的个数。
+
+最终的答案为 $min(set.size(), k)$ 
+
+## AC代码
+### python
+```python
+import sys
+input = lambda:sys.stdin.readline().strip()
+n, k = map(int, input().split())
+s = set(list(map(int, input().split())))
+print(min(k, len(s)))
+```
+### java
+``` java
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // 读取n和k的值
+        int n = scanner.nextInt();
+        int k = scanner.nextInt();
+
+        // 用Set来存储不同的数字
+        Set<Integer> set = new HashSet<>();
+
+        // 读取输入的数字并存入Set中
+        for (int i = 0; i < n; i++) {
+            int num = scanner.nextInt();
+            set.add(num);
+        }
+
+        // 输出k和Set大小中的较小值
+        System.out.println(Math.min(k, set.size()));
+
+        scanner.close();
+    }
+}
+```
+
+### java
+``` java
+import java.util.*;
+// 注意类名必须为Main
+class Main {
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int n = in.nextInt();
+        int k = in.nextInt();
+        HashSet<Integer> set = new HashSet<>();
+        for (int i = 0; i < n; i++) {
+            set.add(in.nextInt());
+        }
+        if(set.size() >= k){
+            System.out.println(k);
+        }else{
+            System.out.println(set.size());
+        }
+    }
+}
+```

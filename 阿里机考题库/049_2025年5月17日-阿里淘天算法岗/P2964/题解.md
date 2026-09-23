@@ -1,0 +1,193 @@
+# 题解
+
+## 题目描述  
+给定正整数 $n,k$，要求构造长度为 $n$ 的排列 $p$（即包含 $1$～$n$ 的每个数恰好一次），定义数组  
+$a_i$ =|$p_{i+1}$ - $p_i$|,($1$$\le$ $i$$\le$ $n-1$).  
+如果数组 $a$ 是公差为 $k$ 的等差数列，就称 $p$ 是一个“好排列”。  
+输出任意一个好排列，若不存在则输出 `NO`。
+
+### 思路概述
+
+1. **分析差值序列的取值范围**  
+   - 差值 $a_i$ 必须满足 $1\le a_i \le n-1$。  
+   - 设等差数列首项为 $A$，公差为 $k$，共有 $n-1$ 项，则  
+     $$
+     a_i = A + (i-1)\,k,\quad i=1,2,\dots,n-1.
+     $$
+   - 要保证对所有 $i$，都有 $1\le A+(i-1)k\le n-1$。  
+   - 解得只有三种可能的 $k$：  
+     $$
+     k = -1,\quad k=0,\quad k=1.
+     $$  
+
+2. **三种情况分别构造**  
+   - **$k=0$**：所有差值都相同。取最简单的 $a_i\equiv1$，令 $p=[1,2,\dots,n]$，则差值序列全为 $1$，公差 $0$。  
+   - **$k=-1$**：需要差值序列 $a_i=n-1,n-2,\dots,1$。可以令
+     $$
+     p = [1,n,2,n-1,3,n-2,\dots]
+     $$
+     即交替从两端取数。验证可得
+     $a_i$ = |$p_{i+1}$-$p_i$| = $n$ - $i$,$i=1,2,\dots,n-1,$
+     正好首项 $A=n-1$，公差 $-1$。  
+   - **$k=1$**：需要差值序列 $a_i=1,2,\dots,n-1$。只需将上述 $k=-1$ 的排列取**逆序**即可。  
+
+若 $k\notin\{-1,0,1\}$，则不存在满足条件的排列，直接输出 `NO`。
+
+## C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    long long n, k;
+    cin >> n >> k;
+
+    if (k == 0) {
+        // k=0 时，直接输出 1..n
+        cout << "YES\n";
+        for (int i = 1; i <= n; i++) {
+            cout << i << (i == n ? '\n' : ' ');
+        }
+    }
+    else if (k == -1) {
+        // k=-1 时，交替从两端取数，构造差值 n-1, n-2, ...,1
+        cout << "YES\n";
+        int L = 1, R = n;
+        for (int i = 1; i <= n; i++) {
+            if (i & 1) {
+                cout << L++;
+            } else {
+                cout << R--;
+            }
+            cout << (i == n ? '\n' : ' ');
+        }
+    }
+    else if (k == 1) {
+        // k=1 时，先按照 k=-1 构造，再逆序
+        vector<int> p;
+        int L = 1, R = n;
+        for (int i = 1; i <= n; i++) {
+            if (i & 1) p.push_back(L++);
+            else       p.push_back(R--);
+        }
+        reverse(p.begin(), p.end());
+        cout << "YES\n";
+        for (int i = 0; i < n; i++) {
+            cout << p[i] << (i+1 == n ? '\n' : ' ');
+        }
+    }
+    else {
+        // 其他 k 无解
+        cout << "NO\n";
+    }
+
+    return 0;
+}
+```
+## Python
+
+```python
+# -*- coding: utf-8 -*-
+import sys
+
+def main():
+    data = sys.stdin.read().strip().split()
+    n, k = map(int, data)
+
+    if k == 0:
+        # k=0，输出升序
+        print("YES")
+        print(*range(1, n+1))
+    elif k == -1:
+        # k=-1，交替出两端
+        print("YES")
+        L, R = 1, n
+        res = []
+        for i in range(1, n+1):
+            if i % 2 == 1:
+                res.append(L)
+                L += 1
+            else:
+                res.append(R)
+                R -= 1
+        print(*res)
+    elif k == 1:
+        # k=1，先构造 k=-1，再逆序
+        L, R = 1, n
+        res = []
+        for i in range(1, n+1):
+            if i % 2 == 1:
+                res.append(L)
+                L += 1
+            else:
+                res.append(R)
+                R -= 1
+        res.reverse()
+        print("YES")
+        print(*res)
+    else:
+        # 其他情况无解
+        print("NO")
+
+if __name__ == "__main__":
+    main()
+```
+## Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int n = Integer.parseInt(st.nextToken());
+        int k = Integer.parseInt(st.nextToken());
+        br.close();
+
+        if (k == 0) {
+            // k=0，输出 1..n
+            System.out.println("YES");
+            for (int i = 1; i <= n; i++) {
+                System.out.print(i + (i == n ? "\n" : " "));
+            }
+        } else if (k == -1) {
+            // k=-1，交替取两端
+            System.out.println("YES");
+            int L = 1, R = n;
+            for (int i = 1; i <= n; i++) {
+                if ((i & 1) == 1) {
+                    System.out.print(L++);
+                } else {
+                    System.out.print(R--);
+                }
+                System.out.print(i == n ? "\n" : " ");
+            }
+        } else if (k == 1) {
+            // k=1，先构造 k=-1，再逆序
+            List<Integer> p = new ArrayList<>();
+            int L = 1, R = n;
+            for (int i = 1; i <= n; i++) {
+                if ((i & 1) == 1) {
+                    p.add(L++);
+                } else {
+                    p.add(R--);
+                }
+            }
+            Collections.reverse(p);
+            System.out.println("YES");
+            for (int i = 0; i < n; i++) {
+                System.out.print(p.get(i) + (i+1 == n ? "\n" : " "));
+            }
+        } else {
+            // 其他 k 无解
+            System.out.println("NO");
+        }
+    }
+}
+```

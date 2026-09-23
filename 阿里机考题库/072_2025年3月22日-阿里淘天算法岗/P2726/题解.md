@@ -1,0 +1,190 @@
+# 二进制数组
+
+## 题目描述
+
+给定一个正整数数组构造二进制数 `n`，计算 `(n XOR (n >> 1)) % m`。其中二进制数的构造规则为：数组中第 `i` 个元素表示连续 `a_i` 个 `i%2` 的二进制位（从高位到低位排列）。
+
+## 算法思路
+
+### 核心观察
+1. **异或特性**：`n XOR (n >> 1)` 的二进制中，只有相邻位不同的位置会产生1
+2. **段边界规则**：相邻段的奇偶性不同时，交界处会生成1
+3. **快速幂优化**：直接计算大数不可行，需用快速幂逐位处理
+
+### 关键步骤
+1. **前缀和预处理**：快速定位每个段的边界位置
+2. **最高位处理**：二进制最高位总是由第一个段决定，直接计算贡献
+3. **段边界筛选**：只处理奇偶性变化的段边界
+4. **模运算优化**：使用快速幂算法处理大指数取模
+
+
+## 复杂度分析
+- **时间复杂度**：O(k + k*logL)
+  - 前缀和计算 O(k)
+  - 快速幂计算 O(k*logL)，L为二进制总位数
+- **空间复杂度**：O(k) 用于存储前缀和数组
+
+## Python 代码
+
+```python
+k, m = map(int, input().split())  # 输入k和m
+a = list(map(int, input().split()))  # 输入数组a
+
+b = []  # 用来存储二进制序列
+current_value = a[-1] % 2  # 记录当前段的奇偶性，0表示偶数，1表示奇数
+count = 0  # 记录当前段的长度
+
+for i in range(k-1,-1,-1):
+    if a[i] % 2 == current_value:  # 当前元素与上一段的奇偶性相同
+        count += a[i]  # 累加当前段的长度
+    else:
+        b.append(count)  # 将上一段的长度存入b
+        current_value = a[i] % 2  # 更新当前段的奇偶性
+        count = a[i]  # 重置当前段的长度为当前元素的值
+
+# 将最后一段的长度也加到b中
+if count != 0:
+    b.append(count)
+
+if a[0] % 2 == 0:
+    b.pop()
+result = 0  # 最终结果
+exponent = 0
+# 遍历b数组进行计算
+for i in range(len(b)):
+    exponent += b[i] 
+    contribution = pow(2, exponent-1, m)  # 计算贡献值，模m
+    result = (result + contribution) % m  # 累加结果
+
+print(result % m)  # 输出最终结果
+
+```
+## C++
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+long long fast_pow(long long base, long long exp, long long mod) {
+    long long res = 1;
+    base %= mod;
+    while (exp > 0) {
+        if (exp & 1) {
+            res = res * base % mod;
+        }
+        base = base * base % mod;
+        exp >>= 1;
+    }
+    return res;
+}
+
+int main() {
+    int k;
+    long long m;
+    cin >> k >> m;
+    vector<int> a(k);
+    for (int i = 0; i < k; ++i) {
+        cin >> a[i];
+    }
+
+    vector<long long> b;
+    int current_value = a[k-1] % 2;  // 记录当前段的奇偶性，0表示偶数，1表示奇数
+    long long count = 0;
+
+    for (int i = k-1; i >= 0; --i) {
+        if (a[i] % 2 == current_value) {  // 当前元素与上一段的奇偶性相同
+            count += a[i];
+        } else {
+            b.push_back(count);
+            current_value = a[i] % 2;
+            count = a[i];
+        }
+    }
+
+    // 将最后一段的长度也加到b中
+    if (count != 0) {
+        b.push_back(count);
+    }
+    
+
+    // 如果首位是偶数，移除第一个元素
+    if (a[0] % 2 == 0) {
+        b.pop_back();
+    }
+
+    long long result = 0;
+    long long exponent = 0;
+
+    // 遍历b数组进行计算
+    for (int i = 0; i < b.size(); ++i) {
+        exponent += b[i];
+        long long contribution = fast_pow(2, exponent - 1, m);  // 计算贡献值，模m
+        result = (result + contribution) % m;
+    }
+
+    cout << result % m << endl;
+    return 0;
+}
+```
+
+## Java
+```java
+import java.util.*;
+
+public class Main {
+    
+    static long fastPow(long base, long exp, long mod) {
+        long res = 1;
+        base %= mod;
+        while (exp > 0) {
+            if ((exp & 1) == 1)
+                res = res * base % mod;
+            base = base * base % mod;
+            exp >>= 1;
+        }
+        return res;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int k = sc.nextInt();
+        long m = sc.nextLong();
+        int[] a = new int[k];
+        for (int i = 0; i < k; i++) a[i] = sc.nextInt();
+
+        List<Long> b = new ArrayList<>();
+        int currentValue = a[k-1] % 2;  
+        long count = 0;
+
+        for (int i = k-1; i >= 0; i--) {
+            if (a[i] % 2 == currentValue) {  
+                count += a[i];
+            } else {
+                b.add(count);
+                currentValue = a[i] % 2;
+                count = a[i];
+            }
+        }
+
+        if (count != 0) {
+            b.add(count);
+        }
+        
+
+        if (a[0] % 2 == 0) {
+            b.remove(b.size() - 1);
+        }
+
+        long result = 0;
+        long exponent = 0;
+
+        for (long val : b) {
+            exponent += val;
+            long contribution = fastPow(2, exponent - 1, m); 
+            result = (result + contribution) % m;
+        }
+
+        System.out.println(result % m);
+    }
+}
+
+```

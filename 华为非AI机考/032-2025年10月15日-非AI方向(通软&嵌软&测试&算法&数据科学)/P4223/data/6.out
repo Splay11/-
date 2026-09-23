@@ -1,0 +1,100 @@
+mem_bad 7 hard_bad 6 mem_over 7 dbms_error 7 low_power 8 power_off 6 err_9 6 r_los 6 bit_error 2 storage_fail 2
+mem_bad 2 r_los 2 mem_over 3 bit_error 4 power_off 4 storage_fail 2 low_power 1 hard_bad 1 err_9 2
+power_off 8 err_9 9 mem_bad 4 bit_error 7 low_power 3 r_los 5 hard_bad 6 storage_fail 6 mem_over 5 dbms_error 2
+mem_over 4 storage_fail 7 hard_bad 4 power_off 7 mem_bad 8 err_9 6 low_power 7 dbms_error 5 bit_error 8 r_los 3
+hard_bad 4 r_los 2 err_9 3 bit_error 2 mem_bad 1 mem_over 2 dbms_error 1 power_off 1
+r_los 5 dbms_error 2 err_9 4 storage_fail 2 mem_over 4 low_power 4 bit_error 2 power_off 1 hard_bad 3 mem_bad 1
+hard_bad 3 dbms_error 6 mem_over 7 bit_error 6 storage_fail 2 power_off 4 low_power 8 mem_bad 6 err_9 3 r_los 4
+err_9 3 mem_bad 1 low_power 2 dbms_error 1 hard_bad 1 storage_fail 2 bit_error 1 r_los 1
+storage_fail 1 r_los 2
+hard_bad 4 storage_fail 3 r_los 8 bit_error 8 power_off 6 err_9 4 mem_bad 5 mem_over 4 dbms_error 2 low_power 3
+storage_fail 1 mem_bad 2 mem_over 3 r_los 1 dbms_error 2 low_power 2 err_9 2
+r_los 5 storage_fail 4 bit_error 7 power_off 8 mem_bad 4 err_9 2 low_power 6 hard_bad 4 mem_over 4
+r_los 5 mem_over 5 bit_error 8 hard_bad 2 low_power 5 dbms_error 6 mem_bad 10 storage_fail 6 power_off 7 err_9 1
+err_9 3 storage_fail 4 low_power 2 mem_over 2 r_los 4 power_off 1 hard_bad 1
+mem_over 3 hard_bad 1 bit_error 2 err_9 1 mem_bad 3 storage_fail 1 power_off 1 low_power 1 dbms_error 1 r_los 1
+r_los 4 dbms_error 7 err_9 5 bit_error 3 power_off 1 mem_over 4 hard_bad 3 storage_fail 1 low_power 2 mem_bad 1
+hard_bad 6 mem_bad 4 r_los 4 low_power 6 mem_over 4 bit_error 5 storage_fail 3 power_off 6 err_9 4 dbms_error 2
+bit_error 7 low_power 5 dbms_error 7 mem_bad 5 storage_fail 5 power_off 9 err_9 6 mem_over 7 hard_bad 3 r_los 4
+r_los 4 power_off 1 err_9 1 hard_bad 1 bit_error 1 dbms_error 1 mem_over 3 low_power 1 mem_bad 2 storage_fail 1
+dbms_error 4 mem_over 5 storage_fail 3 r_los 5 hard_bad 7 bit_error 7 power_off 4 mem_bad 2 err_9 2 low_power 3
+mem_over 6 low_power 3 mem_bad 1 dbms_error 4 hard_bad 3 storage_fail 3 err_9 1 r_los 1
+dbms_error 2 bit_error 7 storage_fail 3 power_off 4 mem_bad 3 hard_bad 4 err_9 1 low_power 3 r_los 3
+hard_bad 1 dbms_error 1 mem_over 4 bit_error 3 mem_bad 4 power_off 4 storage_fail 4 r_los 2 low_power 1 err_9 1
+power_off 6 bit_error 5 hard_bad 9 storage_fail 9 mem_bad 2 mem_over 2 r_los 4 err_9 1 low_power 3 dbms_error 4
+mem_bad 1
+mem_over 7 hard_bad 3 storage_fail 5 bit_error 3 r_los 4 low_power 5 dbms_error 3 power_off 2 mem_bad 9 err_9 5
+dbms_error 6 power_off 9 low_power 5 hard_bad 6 mem_bad 5 err_9 5 r_los 6 storage_fail 4 mem_over 5 bit_error 6
+mem_bad 4 mem_over 1 power_off 3 hard_bad 3 err_9 1 dbms_error 2 bit_error 1 low_power 1
+storage_fail 3 mem_over 5 r_los 2 bit_error 2 dbms_error 2 low_power 2 mem_bad 1 err_9 1
+r_los 6 bit_error 7 mem_over 6 mem_bad 2 err_9 4 hard_bad 3 storage_fail 5 low_power 3 dbms_error 3 power_off 1
+low_power 7 dbms_error 2 err_9 6 r_los 5 hard_bad 5 mem_bad 4 storage_fail 3 mem_over 3 power_off 2 bit_error 1
+dbms_error 3 storage_fail 2 power_off 1 err_9 4 hard_bad 1 low_power 2
+power_off 3 r_los 1 storage_fail 1 err_9 1 low_power 3 bit_error 2 dbms_error 1 mem_bad 1 mem_over 1
+low_power 5 power_off 5 storage_fail 5 dbms_error 9 r_los 4 mem_bad 5 bit_error 7 mem_over 6 err_9 3 hard_bad 4
+hard_bad 3 r_los 2 power_off 7 dbms_error 6 storage_fail 3 mem_bad 6 low_power 3 bit_error 1 mem_over 2 err_9 2
+dbms_error 1 err_9 6 r_los 7 low_power 5 hard_bad 7 power_off 6 bit_error 9 mem_bad 4 storage_fail 2 mem_over 1
+r_los 3 hard_bad 3 storage_fail 3 bit_error 3 mem_over 1 power_off 1 dbms_error 1 err_9 1
+mem_bad 1
+mem_over 9 r_los 7 mem_bad 3 power_off 5 err_9 6 hard_bad 5 low_power 9 storage_fail 5 dbms_error 2 bit_error 4
+r_los 3 storage_fail 6 low_power 7 hard_bad 10 mem_over 2 power_off 6 mem_bad 3 bit_error 3 err_9 8 dbms_error 4
+mem_bad 2 dbms_error 5 low_power 1 power_off 2 mem_over 1 storage_fail 4 bit_error 1 err_9 1 r_los 3
+r_los 2 power_off 5 low_power 3 mem_bad 4 storage_fail 2 err_9 2 mem_over 4 bit_error 3 hard_bad 1
+hard_bad 2 dbms_error 1 r_los 3 low_power 2 mem_over 1 power_off 2 err_9 3 mem_bad 1
+hard_bad 4 mem_over 2 mem_bad 2 low_power 4 r_los 3 dbms_error 1 bit_error 2 power_off 2 err_9 1
+hard_bad 5 storage_fail 3 bit_error 3 mem_bad 3 r_los 2 low_power 3 power_off 3 dbms_error 2 mem_over 2 err_9 2
+r_los 2 dbms_error 3 power_off 4 bit_error 3 mem_over 2 low_power 7 err_9 1 mem_bad 2 hard_bad 1
+mem_over 3 hard_bad 1 dbms_error 2 power_off 1 mem_bad 3 bit_error 1
+storage_fail 1 power_off 1
+r_los 2 storage_fail 3 mem_bad 4 low_power 2 mem_over 1 hard_bad 1
+err_9 2 storage_fail 5 hard_bad 7 r_los 4 mem_bad 4 mem_over 5 low_power 3 dbms_error 7 bit_error 3 power_off 3
+dbms_error 5 err_9 3 r_los 4 bit_error 5 power_off 2 low_power 3 hard_bad 1 storage_fail 3 mem_over 2 mem_bad 1
+mem_bad 1 mem_over 1 power_off 1 storage_fail 1 r_los 1
+power_off 1
+mem_bad 1 storage_fail 2 power_off 4 low_power 1 dbms_error 2 bit_error 1 err_9 1 hard_bad 1
+err_9 5 dbms_error 4 storage_fail 1 low_power 6 bit_error 4 mem_bad 4 hard_bad 1 power_off 5 mem_over 2 r_los 1
+bit_error 2 r_los 1 hard_bad 5 storage_fail 5 err_9 2 low_power 2 mem_bad 4 power_off 3 dbms_error 1
+mem_over 1 mem_bad 1 storage_fail 1
+mem_over 3 power_off 4 dbms_error 2 err_9 3 low_power 5 bit_error 2 storage_fail 3 r_los 1 hard_bad 2 mem_bad 2
+hard_bad 4 bit_error 3 r_los 6 low_power 4 err_9 1 storage_fail 2 mem_bad 3 mem_over 3 power_off 1 dbms_error 4
+low_power 6 mem_bad 2 err_9 2 r_los 4 bit_error 5 storage_fail 6 dbms_error 7 power_off 6 hard_bad 2
+storage_fail 9 err_9 2 power_off 5 dbms_error 5 hard_bad 2 mem_over 1 low_power 2 r_los 4 bit_error 1 mem_bad 1
+bit_error 5 power_off 1 dbms_error 8 hard_bad 2 low_power 3 storage_fail 4 mem_bad 5 mem_over 1 err_9 5
+hard_bad 6 power_off 6 r_los 9 err_9 5 bit_error 3 mem_over 5 low_power 4 storage_fail 2 dbms_error 9 mem_bad 3
+dbms_error 4 mem_bad 5 err_9 6 mem_over 2 power_off 3 low_power 2 bit_error 5 r_los 1 hard_bad 1
+dbms_error 7 bit_error 10 mem_over 4 hard_bad 7 storage_fail 4 low_power 2 r_los 3 mem_bad 4 power_off 8 err_9 4
+storage_fail 7 low_power 3 mem_bad 4 hard_bad 3 err_9 5 bit_error 3 mem_over 1 power_off 4 r_los 2
+storage_fail 4 err_9 7 mem_over 3 bit_error 2 mem_bad 2 r_los 1 dbms_error 2 power_off 3 low_power 1
+mem_over 3 bit_error 4 err_9 5 low_power 5 power_off 2 r_los 7 hard_bad 2 mem_bad 5 storage_fail 3 dbms_error 3
+storage_fail 5 bit_error 2 err_9 3 hard_bad 3 mem_over 1 r_los 2 low_power 3 power_off 1 mem_bad 2
+mem_bad 6 bit_error 4 low_power 5 power_off 4 r_los 5 hard_bad 4 mem_over 5 dbms_error 2 storage_fail 3
+bit_error 5 storage_fail 3 err_9 5 r_los 6 dbms_error 3 power_off 2 hard_bad 1 low_power 1 mem_bad 1 mem_over 1
+r_los 6 hard_bad 3 bit_error 2 low_power 4 power_off 1 mem_over 5 err_9 3 dbms_error 2 mem_bad 2 storage_fail 2
+r_los 4 power_off 7 dbms_error 3 mem_over 5 err_9 6 mem_bad 5 low_power 5 bit_error 3 storage_fail 3 hard_bad 3
+mem_over 3 r_los 2 err_9 5 low_power 1 power_off 3 hard_bad 2 dbms_error 4 mem_bad 4 storage_fail 2
+dbms_error 9 r_los 8 storage_fail 9 mem_over 8 hard_bad 3 low_power 6 mem_bad 5 err_9 1 bit_error 4 power_off 3
+r_los 1 dbms_error 1 bit_error 1 power_off 1
+power_off 4 low_power 5 hard_bad 7 r_los 5 storage_fail 13 bit_error 6 mem_over 3 mem_bad 3 dbms_error 4 err_9 4
+dbms_error 6 bit_error 9 err_9 5 hard_bad 7 storage_fail 5 r_los 8 power_off 4 mem_over 6 mem_bad 1 low_power 5
+mem_bad 1 bit_error 3 err_9 3 low_power 3 hard_bad 3 power_off 2
+err_9 3 storage_fail 6 dbms_error 4 r_los 6 power_off 3 mem_bad 3 hard_bad 5 low_power 5 bit_error 5 mem_over 2
+dbms_error 3 low_power 4 bit_error 1 power_off 4 err_9 1 mem_over 2 storage_fail 4 r_los 1
+r_los 6 err_9 3 bit_error 3 power_off 7 mem_bad 2 hard_bad 3 storage_fail 3 low_power 7 dbms_error 5 mem_over 3
+power_off 2 r_los 9 dbms_error 5 mem_bad 4 err_9 4 low_power 7 hard_bad 4 mem_over 6 storage_fail 4
+bit_error 1 mem_bad 2
+bit_error 7 low_power 9 hard_bad 5 r_los 4 mem_bad 3 dbms_error 3 err_9 2 power_off 4 mem_over 2 storage_fail 1
+mem_over 1 r_los 3 power_off 3 low_power 1 hard_bad 4 bit_error 4 mem_bad 2 dbms_error 1 storage_fail 2
+storage_fail 5 r_los 2 hard_bad 8 power_off 4 bit_error 6 mem_bad 7 dbms_error 5 err_9 4 mem_over 2 low_power 9
+power_off 1 hard_bad 2 low_power 1 r_los 1
+mem_bad 1 hard_bad 1
+dbms_error 2 err_9 8 storage_fail 1 mem_bad 2 power_off 3 low_power 3 hard_bad 2 mem_over 2 r_los 2 bit_error 1
+mem_bad 6 r_los 4 mem_over 7 err_9 5 low_power 8 bit_error 4 dbms_error 5 storage_fail 5 power_off 3 hard_bad 4
+hard_bad 1
+mem_bad 9 hard_bad 6 bit_error 4 low_power 6 mem_over 1 err_9 4 storage_fail 2 dbms_error 7 r_los 2 power_off 1
+mem_bad 6 mem_over 3 storage_fail 3 power_off 7 r_los 3 err_9 3 low_power 2 hard_bad 3
+mem_bad 3 low_power 1 storage_fail 2 r_los 4 power_off 1 bit_error 3 hard_bad 2 dbms_error 1 mem_over 2 err_9 1
+low_power 4 r_los 4 err_9 4 bit_error 5 storage_fail 2 mem_bad 4 power_off 2 hard_bad 5 dbms_error 3 mem_over 4
+power_off 4 mem_bad 4 dbms_error 5 mem_over 5 low_power 7 bit_error 1 storage_fail 3 err_9 4 hard_bad 3 r_los 4
+mem_bad 3 dbms_error 4 err_9 2 r_los 3 low_power 2 bit_error 3 storage_fail 4 mem_over 2 hard_bad 2
+mem_bad 1 storage_fail 4 bit_error 5 mem_over 2 power_off 3 dbms_error 3 err_9 2 hard_bad 2 low_power 3 r_los 4
+power_off 10 err_9 3 hard_bad 3 dbms_error 3 r_los 5 low_power 6 mem_bad 3 storage_fail 8 mem_over 5 bit_error 2

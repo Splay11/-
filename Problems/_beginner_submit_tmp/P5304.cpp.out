@@ -1,0 +1,34 @@
+RID: 6a8e56fc5cfbd448c76760ff
+是否完全通过: False
+错误种类: 其他错误
+状态: Compile Error
+编译信息: ["In file included from \x1b[01m\x1b[Ktemplate.cc:1\x1b[m\x1b[K:\n\x1b[01m\x1b[Kfoo.cc:\x1b[m\x1b[K In member function '\x1b[01m\x1b[Kint Solution::\x1b[01;32m\x1b[KmaxBreachReach\x1b[m\x1b[K(int, std::vector<std::vector<int> >&, std::vector<int>&)\x1b[m\x1b[K':\n\x1b[01m\x1b[Kfoo.cc:23:16:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K'\x1b[01m\x1b[Karray\x1b[m\x1b[K' was not declared in this scope\n   23 |         vector<\x1b[01;31m\x1b[Karray\x1b[m\x1b[K<char,2>> vis(n);\n      |                \x1b[01;31m\x1b[K^~~~~\x1b[m\x1b[K\n\x1b[01m\x1b[Kfoo.cc:3:1:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K'\x1b[01m\x1b[Kstd::array\x1b[m\x1b[K' is defined in header '\x1b[01m\x1b[K<array>\x1b[m\x1b[K'; did you forget to '\x1b[01m\x1b[K#include <array>\x1b[m\x1b[K'?\n    2 | #include <queue>\n  +++ |+\x1b[32m\x1b[K#include <array>\x1b[m\x1b[K\n    3 | using namespace std;\n\x1b[01m\x1b[Kfoo.cc:23:28:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Ktemplate argument 1 is invalid\n   23 |         vector<array<char,2\x1b[01;31m\x1b[K>>\x1b[m\x1b[K vis(n);\n      |                            \x1b[01;31m\x1b[K^~\x1b[m\x1b[K\n\x1b[01m\x1b[Kfoo.cc:23:28:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Ktemplate argument 2 is invalid\n\x1b[01m\x1b[Kfoo.cc:27:12:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kinvalid types '\x1b[01m\x1b[Kint[int]\x1b[m\x1b[K' for array subscript\n   27 |         vis\x1b[01;31m\x1b[K[\x1b[m\x1b[K0][0] = 1;\n      |            \x1b[01;31m\x1b[K^\x1b[m\x1b[K\n\x1b[01m\x1b[Kfoo.cc:29:18:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kstructured bindings only available with '\x1b[01m\x1b[K-std=c++17\x1b[m\x1b[K' or '\x1b[01m\x1b[K-std=gnu++17\x1b[m\x1b[K' [\x1b[01;35m\x1b[K-Wc++17-extensions\x1b[m\x1b[K]\n   29 |             auto \x1b[01;35m\x1b[K[\x1b[m\x1b[Ku, used] = st.back(); st.pop_back();\n      |                  \x1b[01;35m\x1b[K^\x1b[m\x1b[K\n\x1b[01m\x1b[Kfoo.cc:36:25:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kinvalid types '\x1b[01m\x1b[Kint[int]\x1b[m\x1b[K' for array subscript\n   36 |                 if (!vis\x1b[01;31m\x1b[K[\x1b[m\x1b[Kv][nu]) {\n      |                         \x1b[01;31m\x1b[K^\x1b[m\x1b[K\n\x1b[01m\x1b[Kfoo.cc:37:24:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kinvalid types '\x1b[01m\x1b[Kint[int]\x1b[m\x1b[K' for array subscript\n   37 |                     vis\x1b[01;31m\x1b[K[\x1b[m\x1b[Kv][nu] = 1;\n      |                        \x1b[01;31m\x1b[K^\x1b[m\x1b[K\n"]
+运行信息: 
+失败点: null
+完整返回:
+{
+  "ok": true,
+  "rid": "6a8e56fc5cfbd448c76760ff",
+  "result": {
+    "isAccepted": false,
+    "status": {
+      "code": 7,
+      "name": "Compile Error",
+      "textZh": "Compile Error"
+    },
+    "errorType": "其他错误",
+    "score": 0,
+    "timeMs": 0,
+    "memoryBytes": 0,
+    "compilerMessage": [
+      "In file included from \u001b[01m\u001b[Ktemplate.cc:1\u001b[m\u001b[K:\n\u001b[01m\u001b[Kfoo.cc:\u001b[m\u001b[K In member function '\u001b[01m\u001b[Kint Solution::\u001b[01;32m\u001b[KmaxBreachReach\u001b[m\u001b[K(int, std::vector<std::vector<int> >&, std::vector<int>&)\u001b[m\u001b[K':\n\u001b[01m\u001b[Kfoo.cc:23:16:\u001b[m\u001b[K \u001b[01;31m\u001b[Kerror: \u001b[m\u001b[K'\u001b[01m\u001b[Karray\u001b[m\u001b[K' was not declared in this scope\n   23 |         vector<\u001b[01;31m\u001b[Karray\u001b[m\u001b[K<char,2>> vis(n);\n      |                \u001b[01;31m\u001b[K^~~~~\u001b[m\u001b[K\n\u001b[01m\u001b[Kfoo.cc:3:1:\u001b[m\u001b[K \u001b[01;36m\u001b[Knote: \u001b[m\u001b[K'\u001b[01m\u001b[Kstd::array\u001b[m\u001b[K' is defined in header '\u001b[01m\u001b[K<array>\u001b[m\u001b[K'; did you forget to '\u001b[01m\u001b[K#include <array>\u001b[m\u001b[K'?\n    2 | #include <queue>\n  +++ |+\u001b[32m\u001b[K#include <array>\u001b[m\u001b[K\n    3 | using namespace std;\n\u001b[01m\u001b[Kfoo.cc:23:28:\u001b[m\u001b[K \u001b[01;31m\u001b[Kerror: \u001b[m\u001b[Ktemplate argument 1 is invalid\n   23 |         vector<array<char,2\u001b[01;31m\u001b[K>>\u001b[m\u001b[K vis(n);\n      |                            \u001b[01;31m\u001b[K^~\u001b[m\u001b[K\n\u001b[01m\u001b[Kfoo.cc:23:28:\u001b[m\u001b[K \u001b[01;31m\u001b[Kerror: \u001b[m\u001b[Ktemplate argument 2 is invalid\n\u001b[01m\u001b[Kfoo.cc:27:12:\u001b[m\u001b[K \u001b[01;31m\u001b[Kerror: \u001b[m\u001b[Kinvalid types '\u001b[01m\u001b[Kint[int]\u001b[m\u001b[K' for array subscript\n   27 |         vis\u001b[01;31m\u001b[K[\u001b[m\u001b[K0][0] = 1;\n      |            \u001b[01;31m\u001b[K^\u001b[m\u001b[K\n\u001b[01m\u001b[Kfoo.cc:29:18:\u001b[m\u001b[K \u001b[01;35m\u001b[Kwarning: \u001b[m\u001b[Kstructured bindings only available with '\u001b[01m\u001b[K-std=c++17\u001b[m\u001b[K' or '\u001b[01m\u001b[K-std=gnu++17\u001b[m\u001b[K' [\u001b[01;35m\u001b[K-Wc++17-extensions\u001b[m\u001b[K]\n   29 |             auto \u001b[01;35m\u001b[K[\u001b[m\u001b[Ku, used] = st.back(); st.pop_back();\n      |                  \u001b[01;35m\u001b[K^\u001b[m\u001b[K\n\u001b[01m\u001b[Kfoo.cc:36:25:\u001b[m\u001b[K \u001b[01;31m\u001b[Kerror: \u001b[m\u001b[Kinvalid types '\u001b[01m\u001b[Kint[int]\u001b[m\u001b[K' for array subscript\n   36 |                 if (!vis\u001b[01;31m\u001b[K[\u001b[m\u001b[Kv][nu]) {\n      |                         \u001b[01;31m\u001b[K^\u001b[m\u001b[K\n\u001b[01m\u001b[Kfoo.cc:37:24:\u001b[m\u001b[K \u001b[01;31m\u001b[Kerror: \u001b[m\u001b[Kinvalid types '\u001b[01m\u001b[Kint[int]\u001b[m\u001b[K' for array subscript\n   37 |                     vis\u001b[01;31m\u001b[K[\u001b[m\u001b[Kv][nu] = 1;\n      |                        \u001b[01;31m\u001b[K^\u001b[m\u001b[K\n"
+    ],
+    "runtimeMessage": "",
+    "firstFailedCase": null,
+    "caseSummary": {
+      "total": 0,
+      "accepted": 0
+    }
+  }
+}
+

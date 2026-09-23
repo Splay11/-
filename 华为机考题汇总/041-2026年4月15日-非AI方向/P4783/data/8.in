@@ -1,0 +1,90 @@
+init 486 531
+queryAllVisibleWindows 369 132 57 390
+createWindow w1 -206 -3 396 123 17
+queryVisibility w1
+removeWindow not_exist_718
+removeWindow not_exist_594
+createWindow w2 938 888 105 264 8
+move not_exist_696 207 48
+createWindow w1 702 250 363 123 18
+move w2 690 -982
+queryAllVisibleWindows 452 159 25 317
+move not_exist_171 50 -331
+resize not_exist_605 436 68
+move w2 44 -603
+move w2 161 819
+createWindow w3 -106 869 291 244 2
+resize w3 114 53
+queryAllVisibleWindows 158 343 116 158
+resize w3 416 381
+move w2 0 -370
+move w1 -963 661
+move w2 614 -648
+queryAllVisibleWindows 373 126 8 158
+queryVisibility not_exist_187
+createWindow w4 23 491 134 287 11
+queryVisibility w2
+queryVisibility w3
+createWindow w5 178 -496 11 312 3
+queryVisibility not_exist_966
+move w4 -634 263
+move w4 344 715
+queryAllVisibleWindows 263 503 168 23
+removeWindow not_exist_624
+resize w1 121 257
+move w2 -31 -668
+resize w3 464 86
+move not_exist_594 667 309
+createWindow w6 -460 -154 205 415 17
+removeWindow not_exist_774
+removeWindow w5
+move not_exist_196 738 -17
+queryAllVisibleWindows 105 129 209 253
+createWindow w6 810 -633 395 200 15
+queryAllVisibleWindows 456 483 9 2
+createWindow w7 -459 -696 30 141 18
+removeWindow w7
+move w6 -569 223
+removeWindow w3
+queryVisibility w4
+resize w1 379 305
+removeWindow w4
+queryAllVisibleWindows 103 93 18 63
+move not_exist_906 709 534
+resize w6 130 133
+queryVisibility w6
+queryVisibility w2
+removeWindow w6
+removeWindow w1
+resize w2 86 63
+queryVisibility w2
+queryAllVisibleWindows 174 95 121 83
+removeWindow w2
+createWindow w8 320 -413 206 196 0
+move w8 582 281
+move w8 -902 -898
+createWindow w9 -912 -710 281 92 7
+queryAllVisibleWindows 471 93 6 374
+queryAllVisibleWindows 483 73 1 110
+removeWindow w8
+queryVisibility w9
+move w9 781 -640
+move not_exist_94 726 -339
+queryVisibility not_exist_564
+move w9 -31 -798
+resize w9 268 252
+removeWindow w9
+queryAllVisibleWindows 167 392 224 10
+createWindow w10 20 -239 -2 472 17
+queryAllVisibleWindows 384 370 64 147
+queryAllVisibleWindows 196 99 39 313
+queryAllVisibleWindows 446 125 22 280
+createWindow w11 -297 646 196 9 5
+queryAllVisibleWindows 369 408 64 56
+queryVisibility w11
+createWindow w12 -8 295 85 369 7
+removeWindow w11
+removeWindow w12
+createWindow w13 -592 759 403 146 18
+removeWindow not_exist_298
+removeWindow not_exist_214

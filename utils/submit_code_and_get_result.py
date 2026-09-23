@@ -2,8 +2,10 @@ import os
 import sys
 import argparse
 from pathlib import Path
-import requests
 import json
+import requests
+
+from codefun_auth import api_headers, hydro_submit_account
 def require_https(url: str):
     if not url.startswith("https://"):
         raise ValueError("出于通信安全考虑，BASE_URL 必须是 https:// 开头")
@@ -35,10 +37,7 @@ def main():
     if args.poll_interval_ms <= 0:
         fail("--poll-interval-ms 必须为正整数")
 
-    uname = os.getenv("HYDRO_API_UNAME")
-    password = os.getenv("HYDRO_API_PASSWORD")
-    if not uname or not password:
-        fail("请先设置环境变量 HYDRO_API_UNAME / HYDRO_API_PASSWORD")
+    uname, password = hydro_submit_account()
 
     code_path = Path(args.code_file)
     if not code_path.is_file():
@@ -73,10 +72,12 @@ def main():
     verify = args.ca_cert if args.ca_cert else True
     timeout = (8, 180)
     url = f"{args.base_url.rstrip('/')}/api/problem/submit_proxy"
+    session = requests.Session()
+    session.trust_env = False
     try:
-        session = requests.Session()
-        session.trust_env = False
-        resp = session.post(url, json=payload, timeout=timeout, verify=verify)
+        resp = session.post(
+            url, json=payload, timeout=timeout, verify=verify, headers=api_headers()
+        )
         resp.raise_for_status()
     except requests.exceptions.RequestException as e:
         fail(f"提交接口请求失败：{e}")
@@ -88,6 +89,7 @@ def main():
 
     if not isinstance(body, dict):
         fail(f"接口返回格式错误，期望对象，实际：{type(body).__name__}")
+
     # 输出关键信息
     print("RID:", body.get("rid"))
     result = body.get("result", {})
@@ -101,5 +103,6 @@ def main():
     print("失败点:", json.dumps(result.get("firstFailedCase"), ensure_ascii=False))
     print("完整返回:")
     print(json.dumps(body, ensure_ascii=False, indent=2))
+
 if __name__ == "__main__":
     main()

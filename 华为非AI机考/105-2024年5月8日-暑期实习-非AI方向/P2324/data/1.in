@@ -1,0 +1,5 @@
+MOV a0 68
+PRINT a0
+SUB a17 a0 28
+DIV a15 a0 84
+MUL a2 a0 a0

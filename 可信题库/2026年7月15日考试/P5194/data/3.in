@@ -1,0 +1,5 @@
+LogSystem()
+enter(0, true)
+log("x")
+leave(0)
+log("y")

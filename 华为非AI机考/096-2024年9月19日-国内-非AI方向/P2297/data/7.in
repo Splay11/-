@@ -1,0 +1,23 @@
+20 2
+(atenoynjgh = 'NW10' OR atenoynjgh = 'SE10') OR (pftsjxzocm = 'SW10' OR pftsjxzocm = 'N10')
+atenoynjgh = 'N10' AND (pftsjxzocm = 'NE10' OR pftsjxzocm = 'SW10')
+(atenoynjgh = 'SW10' OR atenoynjgh = 'N10') OR (pftsjxzocm = 'NW10' OR pftsjxzocm = 'N10')
+atenoynjgh = 'SE10' OR (pftsjxzocm = 'NW10' OR pftsjxzocm = 'NE10')
+atenoynjgh = 'NW10' AND (pftsjxzocm = 'S10' OR pftsjxzocm = 'SW10' OR pftsjxzocm = 'NE10')
+(atenoynjgh = 'NW10' OR atenoynjgh = 'SE10') OR (pftsjxzocm = 'S10' OR pftsjxzocm = 'NE10' OR pftsjxzocm = 'SW10')
+(atenoynjgh = 'N10' OR atenoynjgh = 'SE10') AND pftsjxzocm = 'NE10'
+atenoynjgh = 'NW10' OR (pftsjxzocm = 'NE10' OR pftsjxzocm = 'SW10' OR pftsjxzocm = 'S10')
+(atenoynjgh = 'SW10' OR atenoynjgh = 'S10') AND pftsjxzocm = 'NW10'
+atenoynjgh = 'NE10' OR (pftsjxzocm = 'N10' OR pftsjxzocm = 'SW10' OR pftsjxzocm = 'SE10')
+atenoynjgh = 'NE10' AND (pftsjxzocm = 'NW10' OR pftsjxzocm = 'SW10')
+atenoynjgh = 'SW10' OR (pftsjxzocm = 'NE10' OR pftsjxzocm = 'NW10' OR pftsjxzocm = 'S10')
+(atenoynjgh = 'SW10' OR atenoynjgh = 'N10' OR atenoynjgh = 'SE10') AND (pftsjxzocm = 'N10' OR pftsjxzocm = 'NE10')
+(atenoynjgh = 'NW10' OR atenoynjgh = 'S10') OR (pftsjxzocm = 'S10' OR pftsjxzocm = 'SW10')
+(atenoynjgh = 'S10' OR atenoynjgh = 'SW10') OR (pftsjxzocm = 'NE10' OR pftsjxzocm = 'NW10' OR pftsjxzocm = 'S10')
+(atenoynjgh = 'N10' OR atenoynjgh = 'NW10' OR atenoynjgh = 'SE10') OR (pftsjxzocm = 'SE10' OR pftsjxzocm = 'NW10')
+(atenoynjgh = 'NW10' OR atenoynjgh = 'SE10') AND (pftsjxzocm = 'N10' OR pftsjxzocm = 'NE10')
+atenoynjgh = 'NE10' AND pftsjxzocm = 'S10'
+atenoynjgh = 'N10' AND pftsjxzocm = 'SE10'
+atenoynjgh = 'NW10' OR (pftsjxzocm = 'S10' OR pftsjxzocm = 'NW10' OR pftsjxzocm = 'SE10')
+atenoynjgh SW10
+pftsjxzocm SW10

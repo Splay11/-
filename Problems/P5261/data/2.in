@@ -1,0 +1,10 @@
+2 7
+pkg_x sceneA build-1
+pkg_y sceneA build-1
+pkg_x build-1 android FAIL
+pkg_x build-1 android READY
+pkg_x build-1 ios READY
+pkg_x build-1 pc READY
+pkg_y build-1 android READY
+pkg_y build-1 ios READY
+pkg_y build-1 pc READY

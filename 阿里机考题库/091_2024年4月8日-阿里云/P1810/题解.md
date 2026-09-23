@@ -1,0 +1,113 @@
+## 题目思路
+
+直接模拟，维护当前的位置以及走过的格子数量，越过边界即可以退出。对于四角边界，只要其第一次经过的时候没有出去，那么第二次到达必然出去，由于不可能存在不经过四角边界的循环，所以一定有解。
+
+这里可以用到一个方便的技巧，将每个符号映射为下标0,1,2,3，其中0和1相反，2和3相反，每次下标x取反只需要x和1异或。
+
+## 代码
+
+**Java**
+
+~~~java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();
+        String t = "^v><";
+        int[][] ne = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+        int[][] s = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            String line = scanner.next();
+            for (int j = 0; j < n; j++) {
+                s[i][j] = t.indexOf(line.charAt(j));
+            }
+        }
+        int x = scanner.nextInt() - 1;
+        int y = scanner.nextInt() - 1;
+        int ans = 0;
+        while (ans <= 1e6) {
+            int j = s[x][y];
+            s[x][y] ^= 1;
+            x += ne[j][0];
+            y += ne[j][1];
+            ans++;
+            if (x < 0 || y < 0 || x >= n || y >= n) {
+                System.out.println(ans);
+                return;
+            }
+        }
+        System.out.println(-1);
+    }
+}
+
+~~~
+
+**C++**
+
+~~~c++
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    char t[] = "^v><";
+    int ne[][2] = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+    vector<vector<int>> s(n, vector<int>(n, 0));
+    for (int i = 0; i < n; ++i) {
+        string line;
+        cin >> line;
+        for (int j = 0; j < n; ++j) {
+            s[i][j] = strchr(t, line[j]) - t;
+        }
+    }
+    int x, y;
+    cin >> x >> y;
+    x -= 1;
+    y -= 1;
+    int ans = 0;
+    while (ans <= 1e6) {
+        int j = s[x][y];
+        s[x][y] ^= 1;
+        x += ne[j][0];
+        y += ne[j][1];
+        ans++;
+        if (x < 0 || y < 0 || x >= n || y >= n) {
+            cout << ans << endl;
+            return 0;
+        }
+    }
+    cout << -1 << endl;
+    return 0;
+}
+~~~
+
+**Python**
+
+~~~python
+n = int(input())
+t = "^v><"
+ne = [[-1, 0], [1, 0], [0, 1], [0, -1]]
+s = [[t.find(ch) for ch in input()] for _ in range(n)]
+x, y = map(int, input().split(" "))
+x -= 1
+y -= 1
+ans = 0
+while ans <= int(1e6):
+	j = s[x][y]
+	s[x][y] ^= 1
+	x += ne[j][0]
+	y += ne[j][1]
+	ans += 1
+	if x < 0 or y < 0 or x >= n or y >= n:
+		print(ans)
+		exit()
+print(-1)
+~~~
+
+**会员可通过查看《已通过》的提交记录来查看其他语言哦~**

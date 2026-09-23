@@ -1,0 +1,142 @@
+## 解题思路
+
+构造长度 $m$ 的序列 $w$，使 $\{|w_i|\}$ 为 $1\sim m$ 的排列且总和为 $0$。
+
+等价于给 $1,2,\dots,m$ 分配正负号，正数部分之和等于负数绝对值部分之和，故
+
+$$
+1+2+\cdots+m=\frac{m(m+1)}{2}
+$$
+
+必须为偶数，即 $m \bmod 4 \in \{0,3\}$；否则输出 $-1$。
+
+构造：每四个连续数 $x,x+1,x+2,x+3$ 取
+
+$$
+x,\ -(x+1),\ -(x+2),\ x+3
+$$
+
+组和为 $0$。
+
+- $m \bmod 4 = 0$：从 $1$ 起每 $4$ 个一组；
+- $m \bmod 4 = 3$：先用 $1,2,-3$，再从 $4$ 起按四元组拼接。
+
+## 复杂度分析
+
+每组 $O(m)$ 时间，$O(m)$ 空间；全体 $\sum m \le 2\times 10^5$，可通过。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+def build(m):
+    # m mod 4 为 1 或 2 时 1..m 总和为奇数，无解
+    if m % 4 in (1, 2):
+        return None
+    w = []
+    if m % 4 == 3:
+        w.extend([1, 2, -3])
+        start = 4
+    else:
+        start = 1
+    for x in range(start, m + 1, 4):
+        w.extend([x, -(x + 1), -(x + 2), x + 3])
+    return w
+
+q = int(input())
+out = []
+for _ in range(q):
+    m = int(input())
+    w = build(m)
+    out.append("-1" if w is None else " ".join(map(str, w)))
+sys.stdout.write("\n".join(out))
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+  static int[] build(int m) {
+    if (m % 4 == 1 || m % 4 == 2) return null;
+    int[] w = new int[m];
+    int idx = 0, start;
+    if (m % 4 == 3) {
+      w[idx++] = 1; w[idx++] = 2; w[idx++] = -3;
+      start = 4;
+    } else start = 1;
+    for (int x = start; x <= m; x += 4) {
+      w[idx++] = x;
+      w[idx++] = -(x + 1);
+      w[idx++] = -(x + 2);
+      w[idx++] = x + 3;
+    }
+    return w;
+  }
+
+  public static void main(String[] args) throws Exception {
+    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    int q = Integer.parseInt(br.readLine().trim());
+    StringBuilder out = new StringBuilder();
+    while (q-- > 0) {
+      int m = Integer.parseInt(br.readLine().trim());
+      int[] w = build(m);
+      if (w == null) out.append("-1\n");
+      else {
+        for (int i = 0; i < m; i++) {
+          if (i > 0) out.append(' ');
+          out.append(w[i]);
+        }
+        out.append('\n');
+      }
+    }
+    System.out.print(out);
+  }
+}
+```
+
+### C++
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<int> build(int m) {
+    if (m % 4 == 1 || m % 4 == 2) return {};
+    vector<int> w;
+    int start;
+    if (m % 4 == 3) { w = {1, 2, -3}; start = 4; }
+    else start = 1;
+    for (int x = start; x <= m; x += 4) {
+        w.push_back(x);
+        w.push_back(-(x + 1));
+        w.push_back(-(x + 2));
+        w.push_back(x + 3);
+    }
+    return w;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int q; cin >> q;
+    while (q--) {
+        int m; cin >> m;
+        vector<int> w = build(m);
+        if (w.empty()) cout << -1 << '\n';
+        else {
+            for (int i = 0; i < m; ++i) {
+                if (i) cout << ' ';
+                cout << w[i];
+            }
+            cout << '\n';
+        }
+    }
+    return 0;
+}
+```

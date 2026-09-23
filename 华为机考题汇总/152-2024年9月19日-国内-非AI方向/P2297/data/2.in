@@ -1,0 +1,10 @@
+8 1
+(xekbojytkd = 'SW10' OR xekbojytkd = 'N10')
+(xekbojytkd = 'N10' OR xekbojytkd = 'SE10')
+(xekbojytkd = 'S10' OR xekbojytkd = 'SE10')
+xekbojytkd = 'NW10'
+(xekbojytkd = 'SW10' OR xekbojytkd = 'N10')
+(xekbojytkd = 'S10' OR xekbojytkd = 'SE10')
+xekbojytkd = 'S10'
+xekbojytkd = 'N10'
+xekbojytkd SE10

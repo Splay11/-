@@ -1,0 +1,280 @@
+## 解题思路
+
+在线性串中，如果一个前缀恰好包含 $k$ 个字符 `'1'`，那么这个前缀的最短长度，其实就是“第 $k$ 个 `'1'` 出现的位置”。
+
+因此，本题等价于：
+
+* 先把环形串断开，得到某个旋转后的线性串；
+* 设这个线性串中第 $k$ 个 `'1'` 出现的位置为 $p$，那么该旋转的答案就是 $p$；
+* 在所有旋转中，求这个值的最小值。
+
+下面把它转化成更容易处理的形式。
+
+### 关键转化
+
+假设我们选择某个位置作为起点，顺时针读到第 $k$ 个 `'1'` 为止，这一段前缀中恰好有 $k$ 个 `'1'`。
+
+也就是说，我们其实是在环上找一段连续区间，使得：
+
+* 这段区间中恰好有 $k$ 个 `'1'`
+* 区间长度尽可能短
+
+那么答案就是：
+
+* 环上“包含恰好 $k$ 个 `'1'` 的最短连续段长度”
+
+
+
+### 进一步观察
+
+因为串只由 `0/1` 组成，若某一段连续区间恰好有 $k$ 个 `'1'`，并且长度最短，那么：
+
+* 这段区间的左端一定可以放在某个 `'1'` 上
+  因为如果左端是 `'0'`，去掉前面的若干个 `'0'` 后，`'1'` 的个数不变，区间会更短。
+* 这段区间的右端也一定是某个 `'1'`
+
+所以，最优区间一定是：
+
+* 从某个 `'1'` 开始
+* 到顺时针方向第 $k$ 个 `'1'` 结束
+
+于是问题就变成：
+
+* 设环上所有 `'1'` 的位置依次为 $p_0, p_1, \dots, p_{m-1}$，其中 $m$ 是串中 `'1'` 的总数
+* 若 $m < k$，显然任意旋转都不可能得到包含 $k$ 个 `'1'` 的前缀，答案为 $-1$
+* 否则，枚举每个 `'1'` 作为区间起点，取它后面第 $k-1$ 个 `'1'` 作为终点
+* 区间长度为：
+  $$
+  p_{i+k-1} - p_i + 1
+  $$
+  但因为是环，所以需要把位置数组复制一份：后一份位置加上 $n$
+
+
+
+### 具体做法
+
+1. 扫描字符串，记录所有 `'1'` 的下标到数组 `pos`
+2. 若 `len(pos) < k`，输出 `-1`
+3. 构造扩展数组：
+
+   * 前半部分是原位置
+   * 后半部分是每个位置加上 $n$
+4. 枚举每个原始 `'1'` 作为起点：
+
+   * 终点是扩展数组中第 `i + k - 1` 个 `'1'`
+   * 长度为 `ext[i + k - 1] - ext[i] + 1`
+   * 取最小值即可
+
+
+## 复杂度分析
+
+设某组数据中 `'1'` 的个数为 $m$。
+
+* 记录所有 `'1'` 的位置：$O(n)$
+* 构造扩展数组：$O(m)$
+* 枚举每组连续的 $k$ 个 `'1'`：$O(m)$
+
+因此单组时间复杂度为：
+
+$$
+O(n)
+$$
+
+空间复杂度为：
+
+$$
+O(m)
+$$
+
+由于所有测试数据的 $n$ 之和不超过 $2\times 10^5$，所以总复杂度为：
+
+* 时间复杂度：$O\left(\sum n\right)$
+* 空间复杂度：$O\left(\sum n\right)$ 的单组上界内，完全可通过
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+
+
+# 计算单组测试数据的答案
+def min_k_prefix_length(n, k, s):
+    # 记录所有字符 '1' 的下标
+    pos = []
+    for i, ch in enumerate(s):
+        if ch == '1':
+            pos.append(i)
+
+    m = len(pos)
+
+    # 如果整个环中都不足 k 个 '1'，则无论怎么旋转都不可能满足要求
+    if m < k:
+        return -1
+
+    # 把位置数组复制一份，第二份全部加上 n
+    # 这样就把环形问题转化成了线性问题
+    ext = pos + [x + n for x in pos]
+
+    ans = n + 1
+
+    # 枚举每个 '1' 作为区间起点
+    # 终点取它后面的第 k 个 '1'（下标是 i + k - 1）
+    for i in range(m):
+        length = ext[i + k - 1] - ext[i] + 1
+        if length < ans:
+            ans = length
+
+    return ans
+
+
+def main():
+    input = sys.stdin.readline
+    t = int(input().strip())
+    out = []
+
+    for _ in range(t):
+        n, k = map(int, input().split())
+        s = input().strip()
+        out.append(str(min_k_prefix_length(n, k, s)))
+
+    sys.stdout.write("\n".join(out))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+public class Main {
+
+    // 计算单组测试数据的答案
+    public static int minKPrefixLength(int n, int k, String s) {
+        // 记录所有字符 '1' 的下标
+        ArrayList<Integer> posList = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (s.charAt(i) == '1') {
+                posList.add(i);
+            }
+        }
+
+        int m = posList.size();
+
+        // 如果总共不足 k 个 '1'，则答案为 -1
+        if (m < k) {
+            return -1;
+        }
+
+        // 构造扩展数组，把环展开成链
+        int[] ext = new int[m * 2];
+        for (int i = 0; i < m; i++) {
+            ext[i] = posList.get(i);
+            ext[i + m] = posList.get(i) + n;
+        }
+
+        int ans = n + 1;
+
+        // 枚举连续的 k 个 '1'
+        for (int i = 0; i < m; i++) {
+            int length = ext[i + k - 1] - ext[i] + 1;
+            if (length < ans) {
+                ans = length;
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+
+        int T = Integer.parseInt(br.readLine().trim());
+
+        for (int caseId = 0; caseId < T; caseId++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            int k = Integer.parseInt(st.nextToken());
+
+            String s = br.readLine().trim();
+
+            sb.append(minKPrefixLength(n, k, s)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+// 计算单组测试数据的答案
+int min_k_prefix_length(int n, int k, const string& s) {
+    // 记录所有字符 '1' 的下标
+    vector<int> pos;
+    for (int i = 0; i < n; i++) {
+        if (s[i] == '1') {
+            pos.push_back(i);
+        }
+    }
+
+    int m = (int)pos.size();
+
+    // 如果总共不足 k 个 '1'，则无解
+    if (m < k) {
+        return -1;
+    }
+
+    // 构造扩展数组，把环形下标拉直
+    vector<int> ext(2 * m);
+    for (int i = 0; i < m; i++) {
+        ext[i] = pos[i];
+        ext[i + m] = pos[i] + n;
+    }
+
+    int ans = n + 1;
+
+    // 枚举每个 '1' 作为起点，统计连续 k 个 '1' 的覆盖长度
+    for (int i = 0; i < m; i++) {
+        int length = ext[i + k - 1] - ext[i] + 1;
+        if (length < ans) {
+            ans = length;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int n, k;
+        string s;
+        cin >> n >> k >> s;
+
+        cout << min_k_prefix_length(n, k, s) << '\n';
+    }
+
+    return 0;
+}
+```

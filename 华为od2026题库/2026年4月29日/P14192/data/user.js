@@ -1,0 +1,3 @@
+var countValidPatterns = function(L) {
+
+};

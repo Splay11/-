@@ -1,0 +1,1247 @@
+import {
+    Context, db, DocumentModel, Handler,  SystemModel,  UserModel, ProblemModel, ObjectId, PERM,  SolutionModel, RecordModel, STATUS_TEXTS,
+    StorageModel, streamToBuffer,
+} from 'hydrooj';
+import { BaseUtil } from '../src/utils/base';
+import { problemSetColl } from '../src/service/ProblemSetService';
+import { ProblemInfoModel } from '../src/model/ProblemInfoModel';
+import { generateAndSaveAiAlgTagsForProblem } from '../AI-addon/tagging';
+const ADMINSOL_UIDS = [2, 3, 9];
+
+async function isUrl(url: string) {
+  try {
+    new URL(url);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function login(uname: string, password: string) {
+    /*
+    const body = {
+        uname: uname, password: password, rememberme: 'on',
+    }
+    // const body_json = JSON.stringify(body)
+    const headers = {
+        'Accept': 'application/json',
+    }
+    return await axios.post("https://codefun2000.com/login", body, {headers})*/
+    // 防止频繁登录
+    if (uname === "luti" && password === "lutilutiluti1014lutilutiluti") {
+        return { data: { success: "Login success." } }
+    }
+    return { data: { error: "Invalid username or password." } }
+}
+
+function statusNameToChinese(statusName: string) {
+    const map: Record<string, string> = {
+        STATUS_ACCEPTED: "完全通过",
+        STATUS_WRONG_ANSWER: "答案错误",
+        STATUS_TIME_LIMIT_EXCEEDED: "时间超限",
+        STATUS_MEMORY_LIMIT_EXCEEDED: "内存超限",
+        STATUS_OUTPUT_LIMIT_EXCEEDED: "输出超限",
+        STATUS_RUNTIME_ERROR: "运行时错误",
+        STATUS_COMPILE_ERROR: "编译错误",
+        STATUS_SYSTEM_ERROR: "系统错误",
+        STATUS_CANCELED: "评测取消",
+        STATUS_JUDGING: "评测中",
+        STATUS_COMPILING: "编译中",
+        STATUS_WAITING: "等待评测",
+        STATUS_FETCHED: "已取到任务",
+        STATUS_IGNORED: "忽略",
+        STATUS_HACK_SUCCESSFUL: "Hack 成功",
+        STATUS_HACK_UNSUCCESSFUL: "Hack 失败",
+    };
+    return map[statusName] || statusName;
+}
+
+function classifyErrorType(statusName: string) {
+    if (statusName === "STATUS_ACCEPTED") return "无";
+    if (statusName === "STATUS_COMPILE_ERROR") return "编译错误";
+    if (statusName === "STATUS_RUNTIME_ERROR") return "运行时错误";
+    if (statusName === "STATUS_WRONG_ANSWER") return "答案错误";
+    if (statusName === "STATUS_TIME_LIMIT_EXCEEDED") return "时间超限";
+    if (statusName === "STATUS_MEMORY_LIMIT_EXCEEDED") return "内存超限";
+    if (statusName === "STATUS_OUTPUT_LIMIT_EXCEEDED") return "输出超限";
+    if (statusName === "STATUS_SYSTEM_ERROR") return "系统错误";
+    return "其他错误";
+}
+
+function extractCookiesFromResponse(response: Response) {
+    const headerAny = response.headers as any;
+    let setCookies: string[] = [];
+    if (typeof headerAny.getSetCookie === 'function') {
+        setCookies = headerAny.getSetCookie() || [];
+    } else {
+        const single = response.headers.get('set-cookie');
+        if (single) setCookies = [single];
+    }
+    return setCookies
+        .map((item) => item.split(';')[0].trim())
+        .filter(Boolean)
+        .join('; ');
+}
+
+async function sleep(ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function getProblemByPid(domainId: string, pid: string) {
+    var pdoc = await ProblemModel.get(domainId, pid);
+    if (BaseUtil.isJson(pdoc.content))
+        pdoc.content = JSON.parse(pdoc.content)['zh'];
+
+    const docId = pdoc.docId
+    var redocs = JSON.parse(SystemModel.get('codefun2000.recommend') || '');
+    for (var rpdoc of redocs) {
+        if (rpdoc.pids.includes(docId)) {
+            pdoc.re_type = rpdoc.type
+            break
+        }
+    }
+    if (!pdoc.re_type) {
+        pdoc.re_type = "待归类"
+    }
+    return pdoc
+}
+
+async function getAllProblem(domainId) {
+    var startPid = 1000
+    var cnt = 0;
+    var res: string[] = [];
+    for (var i = startPid; i < 3000 && cnt <= 50; i++) {
+        if (await ProblemModel.get(domainId, "P" + i)) {
+            res.push("P" + i);
+            cnt = 0;
+        } else cnt += 1;
+    }
+    return res
+}
+
+async function getTitleFromSet(domainId: string, pid: string, ps) {
+    // console.log(domainId,pid);
+    if (ps) {
+        for (const tn of ps.dag) {
+            let title: string = tn.title;
+            let ls = tn.pids;
+
+            for (let j = 0; j < ls.length; j++) {
+                const pdoc = await ProblemModel.get(domainId, ls[j]);
+                //console.log(pdoc.pid);
+                if (pdoc.pid == pid) {
+                    // 返回title里的日期
+                    let index = title.indexOf('日');
+                    // 如果找到了 '日' 字符，则返回该位置之前的子字符串
+                    if (index !== -1) {
+                        return title;  // 或者使用 title
+                    }
+                    // console.log("no date");
+                    // 如果没有找到日期
+                    return "";
+                }
+            }
+        }
+    }
+    // console.log("no set of psid");
+    return "";
+}
+
+/**
+ * 给外界提供API，获取OJ相关信息
+ *
+ */
+class ProblemSetDetailAPIHandler extends Handler {
+    async get() {
+        // 身份验证 ?
+        const { domainId, uname, password, psid } = this.request.query;
+        //console.log(this.request.query);
+        if (uname != "luti" || password != "lutilutiluti1014lutilutiluti") {
+            this.response.body = {
+                message: "Permission denied."
+            }
+            return;
+        }
+
+        let ps = await problemSetColl.findOne({ _id: new ObjectId(psid) });
+        const extraDataByPid: Record<string, any> = {};
+        const pidsWithExtra = await ProblemInfoModel.getAllPidsWithExtra(domainId, psid);
+        for (const item of pidsWithExtra) {
+            extraDataByPid[item.pid] = item.extra;
+        }
+        if (ps) {
+            const pdocs = [];
+            for (const tn of ps.dag) {
+                const dag_node = {title: tn.title, items: []};
+                let id = 1;
+                for (let pid of tn.pids) {
+                    const item = {id: id++, diff: 0, alg_tag: ""};
+                    let pdoc = await ProblemModel.get(domainId, pid);
+                    if (pdoc) {
+                        item.diff = typeof pdoc.difficulty === 'number' ? pdoc.difficulty : null;
+                        item.alg_tag = extraDataByPid[pdoc.pid]?.ai_alg_tags?.[0] || "未知";
+                    } else {
+                        item.diff = null;
+                        item.alg_tag = "未知";
+                    }
+
+                    dag_node.items.push(item);
+                }
+                pdocs.push(dag_node);
+            }
+            console.log(pdocs);
+            this.response.body = {
+                introduction: ps.introduction,
+                profile: ps.profile,
+                data: pdocs
+            };
+        }
+        else {
+            this.response.body = {
+                message: `${psid} in ${domainId} not found`
+            };
+        }        
+        return;
+    }
+}
+
+class ProblemDetailAPIHandler extends Handler {
+    async get() {
+        // 身份验证 ?
+        const { domainId,uname, password, pid} = this.request.query;
+        if (uname != "luti" || password != "lutilutiluti1014lutilutiluti") {
+            this.response.body = {
+                message: "Permission denied."
+            }
+            return;
+        }
+        var pdoc = await ProblemModel.get(domainId, pid);
+        this.response.body.message = ""
+        if (!pdoc) {
+            this.response.body.message += `${pid} in ${domainId} not found\n`
+            return;
+        }
+        let data = await JSON.parse(pdoc.content.trim())["zh"] || "";
+        this.response.body = {
+            data: data
+        };
+        return;
+    }
+}
+
+class ProblemSetChineseProblemListAPIHandler extends Handler {
+    async get() {
+        const { domainId, uname, password, psid } = this.request.query;
+        if (uname != "luti" || password != "lutilutiluti1014lutilutiluti") {
+            this.response.body = {
+                message: "Permission denied."
+            };
+            return;
+        }
+
+        const ps = await problemSetColl.findOne({ _id: new ObjectId(psid) });
+        if (!ps) {
+            this.response.body = {
+                message: `${psid} in ${domainId} not found`
+            };
+            return;
+        }
+
+        const data = [];
+        for (const tn of ps.dag) {
+            for (const pid of tn.pids) {
+                const pdoc = await ProblemModel.get(domainId, pid);
+                if (!pdoc) continue;
+
+                let contentZh = "";
+                try {
+                    const parsed = JSON.parse((pdoc.content || "").trim());
+                    contentZh = parsed?.zh || "";
+                } catch (_) {
+                    contentZh = "";
+                }
+                data.push({
+                    pid: pdoc.pid,
+                    content: contentZh
+                });
+            }
+        }
+
+        this.response.body = { data };
+        return;
+    }
+}
+
+class ProblemAdminSolutionAPIHandler extends Handler {
+    async get() {
+        // 身份验证 ?
+        const { domainId, uname, password, pid = undefined, query = undefined, cp } = this.request.query;
+        const res = await login(uname, password)
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error
+            return
+        }
+        const user = await UserModel.getByUname(domainId, uname)
+        if (!user) {
+            this.response.body = {
+                message: "Invalid domain."
+            }
+            return
+        }
+        if (!user.hasPerm(PERM.PERM_EDIT_PROBLEM)) {
+            this.response.body = {
+                message: "Permission denied."
+            }
+            return
+        }
+        var pdoc = await ProblemModel.get(domainId, pid);
+        if (!pdoc) {
+            this.response.body = {
+                message: `problem ${pid} in ${domainId} not found`
+            }
+            return;
+        }
+        // 查询数据库
+        const psdocs = await DocumentModel.getMulti(
+            domainId, DocumentModel.TYPE_PROBLEM_SOLUTION,
+            {
+                parentType: DocumentModel.TYPE_PROBLEM, parentId: pdoc.docId,
+                owner: {
+                    $in: ADMINSOL_UIDS
+                },
+            },
+        ).toArray();
+        if (!psdocs.length) {
+            this.response.body = {
+                message: `problem ${pid}'s admin solution not found`
+            }
+            return;
+        }
+        for (const psdoc of psdocs) {
+            if (BaseUtil.isJson(psdoc.content))
+                psdoc.content = JSON.parse(psdoc.content)['zh'];
+        }
+        this.response.body = { "data": psdocs };
+        return;
+    }
+}
+
+class HydroSubmitProxyAPIHandler extends Handler {
+    async post() {
+        const {
+            domainId,
+            uname,
+            password,
+            pid,
+            lang,
+            code,
+            pretest = false,
+            input = "",
+            baseUrl = "",
+            timeoutMs = 60000,
+            pollIntervalMs = 1000,
+        } = this.request.body || {};
+
+        if (!domainId || !uname || !password || !pid || !lang || !code) {
+            this.response.body = {
+                message: "缺少必要参数，需要 domainId, uname, password, pid, lang, code"
+            };
+            return;
+        }
+        
+        const proto = String((this.request.headers as any)?.['x-forwarded-proto'] || 'https');
+        const site = String(baseUrl || `${proto}://${this.request.host}`).replace(/\/+$/, '');
+        const loginUrl = `${site}/login`;
+        const submitUrl = `${site}/p/${pid}/submit`;
+
+        let cookie = "";
+        try {
+            const loginForm = new URLSearchParams({
+                uname: String(uname),
+                password: String(password),
+                rememberme: "on",
+                login_submit: "Login",
+            });
+            const loginResp = await fetch(loginUrl, {
+                method: "POST",
+                redirect: "manual",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "text/html,application/json",
+                },
+                body: loginForm.toString(),
+            });
+            cookie = extractCookiesFromResponse(loginResp);
+            if (!cookie) {
+                this.response.body = {
+                    message: "调用 Hydro 登录接口失败: 未获取到登录 cookie，请检查账号密码或登录策略",
+                    raw: {
+                        status: loginResp.status,
+                        location: loginResp.headers.get("location") || "",
+                    },
+                };
+                return;
+            }
+        } catch (e: any) {
+            this.response.body = {
+                message: `调用 Hydro 登录接口失败: ${e?.message || e}`
+            };
+            return;
+        }
+
+        let rid = "";
+        try {
+            const submitPayload: Record<string, any> = {
+                lang: String(lang),
+                code: String(code),
+                pretest: Boolean(pretest),
+            };
+            if (Boolean(pretest)) {
+                submitPayload.input = String(input || "");
+            }
+
+            const submitResp = await fetch(submitUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    ...(cookie ? { "Cookie": cookie } : {}),
+                },
+                body: JSON.stringify(submitPayload),
+            });
+            const submitJson: any = await submitResp.json();
+            rid = String(submitJson?.rid || "");
+            if (!rid) {
+                this.response.body = {
+                    message: "提交失败，Hydro 未返回 rid",
+                    raw: submitJson,
+                };
+                return;
+            }
+        } catch (e: any) {
+            this.response.body = {
+                message: `调用 Hydro 提交接口失败: ${e?.message || e}`
+            };
+            return;
+        }
+
+        const startedAt = Date.now();
+        let rdoc: any = null;
+        while (Date.now() - startedAt <= Number(timeoutMs)) {
+            try {
+                rdoc = await RecordModel.get(new ObjectId(rid));
+            } catch {
+                rdoc = null;
+            }
+            if (rdoc && rdoc.judgeAt) break;
+            await sleep(Number(pollIntervalMs));
+        }
+
+        if (!rdoc || !rdoc.judgeAt) {
+            this.response.body = {
+                ok: false,
+                rid,
+                message: "提交已创建，但等待评测结果超时",
+                errorType: "超时",
+            };
+            return;
+        }
+
+        const statusCode = Number(rdoc.status);
+        const statusName = (STATUS_TEXTS as any)[statusCode] || `STATUS_${statusCode}`;
+        /** HydroOJ 中 AC 通常是 status=1；优先用状态码判定，名称仅作为兜底 */
+        const isAccepted = statusCode === 1 || statusName === "STATUS_ACCEPTED";
+        const testCases = Array.isArray(rdoc.testCases) ? rdoc.testCases : [];
+        const firstFailed = isAccepted ? null : (
+            testCases.find((tc: any) => {
+                const s = Number(tc?.status);
+                if (!Number.isFinite(s)) return false;
+                return s !== 1;
+            }) || null
+        );
+
+        this.response.body = {
+            ok: true,
+            rid,
+            result: {
+                isAccepted,
+                status: {
+                    code: statusCode,
+                    name: statusName,
+                    textZh: statusNameToChinese(statusName),
+                },
+                errorType: isAccepted ? "无" : classifyErrorType(statusName),
+                score: typeof rdoc.score === 'number' ? rdoc.score : null,
+                timeMs: typeof rdoc.time === 'number' ? rdoc.time : null,
+                memoryBytes: typeof rdoc.memory === 'number' ? rdoc.memory : null,
+                compilerMessage: rdoc.compilerText || rdoc.compilerTexts || "",
+                runtimeMessage: isAccepted ? "" : (firstFailed?.message || ""),
+                firstFailedCase: firstFailed ? {
+                    id: firstFailed.id ?? null,
+                    subtaskId: firstFailed.subtaskId ?? null,
+                    status: (STATUS_TEXTS as any)[Number(firstFailed.status)] || `STATUS_${firstFailed.status}`,
+                    timeMs: firstFailed.time ?? null,
+                    memoryBytes: firstFailed.memory ?? null,
+                    message: firstFailed.message || "",
+                } : null,
+                caseSummary: {
+                    total: testCases.length,
+                    accepted: testCases.filter((tc: any) => ((STATUS_TEXTS as any)[Number(tc?.status)] || `STATUS_${tc?.status}`) === "STATUS_ACCEPTED").length,
+                },
+            }
+        };
+    }
+}
+
+class ProblemAndSolutionAPIHandler extends Handler {
+    async post() {
+        // 身份验证 ?
+        var { domainId, uname, password, pids = undefined, query = undefined, latest = undefined } = this.request.body;
+        const res = await login(uname, password)
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error
+            return
+        }
+        const user = await UserModel.getByUname(domainId, uname)
+        if (!user) {
+            this.response.body = {
+                message: "Invalid domain."
+            }
+            return
+        }
+        if (!user.hasPerm(PERM.PERM_EDIT_PROBLEM)) {
+            this.response.body = {
+                message: "Permission denied."
+            }
+            return
+        }
+        if (query) {
+            if (query.tag === "all") {
+                pids = await getAllProblem(domainId);
+            } else {
+                var tmpDocs = await ProblemModel.getMulti(domainId, query).toArray();
+                pids = tmpDocs.map(doc => doc.pid);
+            }
+            // 过滤掉被隐藏的题目以及不存在管理员题解的题目
+            let filteredPids: any = [];
+            for (const pid of pids) {
+                var pdoc = await ProblemModel.get(domainId, pid);
+                if (!pdoc) continue;
+                if (pdoc.hidden) continue;
+                const psdocs = await DocumentModel.getMulti(
+                    domainId, DocumentModel.TYPE_PROBLEM_SOLUTION,
+                    {
+                        parentType: DocumentModel.TYPE_PROBLEM, parentId: pdoc.docId,
+                        owner: {
+                            $in: ADMINSOL_UIDS
+                        },
+                    },
+                ).toArray();
+                if (!psdocs.length) continue;
+                filteredPids.push(pid);
+            }
+            pids = filteredPids;
+            if (latest) {
+                pids = pids.sort((a, b) => {
+                    return parseInt(b.slice(1)) - parseInt(a.slice(1));
+                });
+                pids = pids.slice(0, Math.min(latest, pids.length));
+            }
+        }
+        let pdocs = [];
+        this.response.body.message = ""
+        for (const pid of pids) {
+            var pdoc = await getProblemByPid(domainId, pid)
+            if (!pdoc) {
+                this.response.body.message += `${pid} in ${domainId} not found\n`
+                return;
+            } else {
+                const psdocs = await DocumentModel.getMulti(
+                    domainId, DocumentModel.TYPE_PROBLEM_SOLUTION,
+                    {
+                        parentType: DocumentModel.TYPE_PROBLEM, parentId: pdoc.docId,
+                        owner: {
+                            $in: ADMINSOL_UIDS
+                        },
+                    },
+                ).toArray();
+                if (!psdocs.length) {
+                    this.response.body.message += `problem ${pid}'s admin solution not found\n`
+                } else {
+                    pdoc.psdocs = psdocs
+                }
+                for (const psdoc of psdocs) {
+                    if (BaseUtil.isJson(psdoc.content))
+                        psdoc.content = JSON.parse(psdoc.content)['zh'];
+                }
+                // 获得alg_tag
+                // 更新rpdocs
+                //rpdocs = RecommendService.getrpDocs(SystemModel.get('codefun2000.recommend') || '');
+                //var alg_Tag = RecommendService.getTpyeBydocId(pdoc.docId);
+                pdoc['alg_tag'] = await ProblemInfoModel.getAlgTag(domainId, pid);
+                pdocs.push(pdoc)
+            }
+        }
+        this.response.body.data = pdocs
+        return;
+    }
+}
+// -----------------------------
+
+// -----------上传API-----------
+
+class uploadSolAPIHandler extends Handler {
+    async post() {
+        const { domainId, uname, password, pid, solution } = this.request.body || {};
+        const res = await login(uname, password);
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error;
+            return;
+        }
+        const user = await UserModel.getByUname(domainId, uname);
+        if (!user) {
+            this.response.body = { message: "Invalid domain." };
+            return;
+        }
+        if (!user.hasPerm(PERM.PERM_EDIT_PROBLEM)) {
+            this.response.body = { message: "Permission denied." };
+            return;
+        }
+        if (!pid) {
+            this.response.body = { message: "pid is required." };
+            return;
+        }
+        if (solution === undefined || solution === null || solution === "") {
+            this.response.body = { message: "solution is required." };
+            return;
+        }
+        const pdoc = await ProblemModel.get(domainId, pid);
+        if (!pdoc) {
+            this.response.body = pid + " not found";
+            return;
+        }
+        const psdocs = await DocumentModel.getMulti(
+            domainId, DocumentModel.TYPE_PROBLEM_SOLUTION, {
+            parentType: DocumentModel.TYPE_PROBLEM,
+            parentId: pdoc.docId,
+            owner: {
+                $in: ADMINSOL_UIDS
+            },
+        },
+        ).toArray();
+        if (!psdocs.length) {
+            await SolutionModel.add(domainId, pdoc.docId, ADMINSOL_UIDS[0], solution);
+        } else {
+            await SolutionModel.edit(domainId, psdocs[0].docId, solution);
+        }
+        this.response.body = pid + " solution upload success";
+    }
+}
+
+class getTestdataAPIHandler extends Handler {
+    async get() {
+        const { domainId, uname, password, pid } = this.request.query;
+
+        const res = await login(uname, password);
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error;
+            return;
+        }
+
+        const user = await UserModel.getByUname(domainId, uname);
+        if (!user) {
+            this.response.body = { message: "Invalid domain." };
+            return;
+        }
+        if (!user.hasPerm(PERM.PERM_EDIT_PROBLEM)) {
+            this.response.body = { message: "Permission denied." };
+            return;
+        }
+
+        if (!pid) {
+            this.response.body = { message: "pid is required." };
+            return;
+        }
+
+        const pdoc = await ProblemModel.get(domainId, pid);
+        if (!pdoc) {
+            this.response.body = { message: `${pid} in ${domainId} not found` };
+            return;
+        }
+
+        const existingData = Array.isArray((pdoc as any).data) ? (pdoc as any).data : [];
+        const fileNames = existingData
+            .map((item: any) => item?.name)
+            .filter((name: unknown): name is string => typeof name === 'string' && name.length > 0)
+            .sort((a, b) => String(a).localeCompare(String(b)));
+
+        const files: Record<string, string> = {};
+        await Promise.all(fileNames.map(async (name) => {
+            try {
+                const stream = await StorageModel.get(
+                    `problem/${domainId}/${pdoc.docId}/testdata/${name}`,
+                );
+                const buf = await streamToBuffer(stream);
+                files[name] = buf.toString('utf8');
+            } catch {
+                // metadata 存在但存储缺失时跳过
+            }
+        }));
+
+        const ioPairs: Array<{ id: string; input: string; output: string }> = [];
+        const pairIds = new Set<string>();
+        for (const name of fileNames) {
+            const match = /^(.+)\.in$/.exec(name);
+            if (match) pairIds.add(match[1]);
+        }
+        for (const id of [...pairIds].sort((a, b) => String(a).localeCompare(String(b)))) {
+            const inKey = `${id}.in`;
+            const outKey = `${id}.out`;
+            if (files[inKey] !== undefined && files[outKey] !== undefined) {
+                ioPairs.push({ id, input: files[inKey], output: files[outKey] });
+            }
+        }
+
+        this.response.body = {
+            pid: pdoc.pid,
+            fileCount: Object.keys(files).length,
+            files,
+            ioPairs,
+        };
+    }
+}
+
+class uploadTestdataAPIHandler extends Handler {
+    async post() {
+        const {
+            domainId, uname, password, pid,
+            files = undefined,
+            ioPairs = undefined,
+            overwrite = true,
+        } = this.request.body || {};
+
+        const res = await login(uname, password);
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error;
+            return;
+        }
+
+        const user = await UserModel.getByUname(domainId, uname);
+        if (!user) {
+            this.response.body = { message: "Invalid domain." };
+            return;
+        }
+        if (!user.hasPerm(PERM.PERM_EDIT_PROBLEM)) {
+            this.response.body = { message: "Permission denied." };
+            return;
+        }
+
+        if (!pid) {
+            this.response.body = { message: "pid is required." };
+            return;
+        }
+        const pdoc = await ProblemModel.get(domainId, pid);
+        if (!pdoc) {
+            this.response.body = { message: `${pid} in ${domainId} not found` };
+            return;
+        }
+
+        const normalizedFiles: Record<string, string> = {};
+        if (files && typeof files === 'object') {
+            for (const [fname, content] of Object.entries(files)) {
+                if (typeof fname !== 'string') continue;
+                if (typeof content !== 'string') continue;
+                normalizedFiles[fname] = content;
+            }
+        }
+        if (Array.isArray(ioPairs)) {
+            for (const pair of ioPairs) {
+                const id = String(pair?.id ?? '').trim();
+                const input = pair?.input;
+                const output = pair?.output;
+                if (!id || typeof input !== 'string' || typeof output !== 'string') continue;
+                normalizedFiles[`${id}.in`] = input;
+                normalizedFiles[`${id}.out`] = output;
+            }
+        }
+
+        const fileNames = Object.keys(normalizedFiles);
+        if (!fileNames.length) {
+            this.response.body = {
+                message: "No valid testdata found. Please provide files or ioPairs."
+            };
+            return;
+        }
+
+        const existingData = Array.isArray((pdoc as any).data) ? (pdoc as any).data : [];
+        const existingTestdata = existingData.filter((item: any) => {
+            const n = item?.name;
+            return typeof n === 'string' && n.length > 0;
+        });
+        if (overwrite === false && existingTestdata.length > 0) {
+            this.response.body = {
+                message: "testdata already exists, skip upload (overwrite is false).",
+                pid: pdoc.pid,
+                skipped: true,
+                existingTestdataCount: existingTestdata.length,
+            };
+            return;
+        }
+
+        /** 必须用 ProblemModel.addTestdata：会同步存储与 document sub（含 _id/size/etag/lastModified）。
+         * 若仅用 edit({ data: [{name,size}] })，缺少 _id 等结构，题目文件页删除时 pull 对不上，会出现「列表仍有项但文件已删」。 */
+        const uploadedFiles: string[] = [];
+        const sortedNames = [...fileNames].sort((a, b) => String(a).localeCompare(String(b)));
+        for (const name of sortedNames) {
+            const buf = Buffer.from(normalizedFiles[name], 'utf8');
+            await ProblemModel.addTestdata(domainId, pdoc.docId, name, buf, user._id);
+            uploadedFiles.push(name);
+        }
+
+        this.response.body = {
+            message: "testdata upload success",
+            pid: pdoc.pid,
+            uploadedCount: uploadedFiles.length,
+            uploadedFiles: uploadedFiles.sort(),
+        };
+        return;
+    }
+}
+
+function buildZhContentJson(rawContent: string | undefined, existingRaw?: string): string | null {
+    if (typeof rawContent !== "string" || !rawContent.trim()) return null;
+    let merged: Record<string, string> = { zh: rawContent };
+    if (typeof existingRaw === "string" && existingRaw.trim() && BaseUtil.isJson(existingRaw)) {
+        try {
+            const parsed = JSON.parse(existingRaw.trim()) as unknown;
+            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+                merged = { ...(parsed as Record<string, string>), zh: rawContent };
+            }
+        } catch {
+            // 非法 JSON 则退化为仅 zh
+        }
+    }
+    return JSON.stringify(merged);
+}
+
+/** 解析编辑页 Tags / AlgTag / AIAlgTag 等逗号分隔标签。 */
+function splitCommaSeparatedTags(value: unknown): string[] {
+    if (value === undefined || value === null) return [];
+    if (Array.isArray(value)) {
+        return value.map((x) => String(x).trim()).filter(Boolean);
+    }
+    if (typeof value === "string") {
+        return value.split(/,|，/).map((x) => x.trim()).filter(Boolean);
+    }
+    return [];
+}
+
+type ProblemInfoWriteFields = {
+    alg_tag?: unknown;
+    ai_alg_tags?: unknown;
+    videosol?: unknown;
+    trial_videosol?: unknown;
+};
+
+async function applyProblemInfoFields(
+    domainId: string,
+    pid: string,
+    fields: ProblemInfoWriteFields,
+    mode: "create" | "update",
+) {
+    const promises: Promise<unknown>[] = [];
+
+    if (fields.alg_tag !== undefined) {
+        const algTag = typeof fields.alg_tag === "string" ? fields.alg_tag : String(fields.alg_tag ?? "");
+        if (mode === "update" || algTag) {
+            promises.push(ProblemInfoModel.setAlgTag(domainId, pid, algTag));
+        }
+    }
+
+    if (fields.ai_alg_tags !== undefined) {
+        const aiTags = splitCommaSeparatedTags(fields.ai_alg_tags);
+        if (mode === "update" || aiTags.length > 0) {
+            promises.push(ProblemInfoModel.setAiAlgTag(domainId, pid, aiTags));
+        }
+    }
+
+    if (fields.videosol !== undefined) {
+        const videosol = typeof fields.videosol === "string" ? fields.videosol : String(fields.videosol ?? "");
+        if (mode === "update" || videosol) {
+            promises.push(ProblemInfoModel.setVideoSolution(domainId, pid, videosol));
+        }
+    }
+
+    if (fields.trial_videosol !== undefined) {
+        const trialVideosol = typeof fields.trial_videosol === "string"
+            ? fields.trial_videosol
+            : String(fields.trial_videosol ?? "");
+        if (mode === "update" || trialVideosol) {
+            promises.push(ProblemInfoModel.setTrialVideoSolution(domainId, pid, trialVideosol));
+        }
+    }
+
+    if (promises.length) {
+        await Promise.all(promises);
+    }
+}
+
+function hasProblemInfoFieldInput(fields: ProblemInfoWriteFields): boolean {
+    return fields.alg_tag !== undefined
+        || fields.ai_alg_tags !== undefined
+        || fields.videosol !== undefined
+        || fields.trial_videosol !== undefined;
+}
+
+async function readProblemInfoSnapshot(domainId: string, pid: string) {
+    const [alg_tag, ai_alg_tags, videosol, trial_videosol] = await Promise.all([
+        ProblemInfoModel.getAlgTag(domainId, pid),
+        ProblemInfoModel.getAiAlgTag(domainId, pid),
+        ProblemInfoModel.getVideoSolution(domainId, pid),
+        ProblemInfoModel.getTrialVideoSolution(domainId, pid),
+    ]);
+    return {
+        alg_tag,
+        ai_alg_tags: ai_alg_tags.join(","),
+        videosol,
+        trial_videosol,
+    };
+}
+
+/** 新建题目：题目编号、题目标题、题面、隐藏、难度及编辑页扩展字段。 */
+class createProblemAPIHandler extends Handler {
+    async post() {
+        const {
+            domainId,
+            uname,
+            password,
+            pid,
+            title,
+            content,
+            hidden = false,
+            difficulty = 0,
+            tag,
+            tags,
+            alg_tag,
+            ai_alg_tags,
+            videosol,
+            trial_videosol,
+        } = this.request.body || {};
+
+        const res = await login(uname, password);
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error;
+            return;
+        }
+        const user = await UserModel.getByUname(domainId, uname);
+        if (!user) {
+            this.response.body = { message: "Invalid domain." };
+            return;
+        }
+        if (!user.hasPerm(PERM.PERM_EDIT_PROBLEM)) {
+            this.response.body = { message: "Permission denied." };
+            return;
+        }
+
+        if (!pid || typeof pid !== "string") {
+            this.response.body = { message: "pid is required." };
+            return;
+        }
+        const contentJson = buildZhContentJson(content);
+        if (!contentJson) {
+            this.response.body = { message: "content (zh markdown) is required and must be non-empty." };
+            return;
+        }
+        if (await ProblemModel.get(domainId, pid)) {
+            this.response.body = { message: `${pid} in ${domainId} already exists` };
+            return;
+        }
+
+        const hydroTags = tag !== undefined || tags !== undefined
+            ? splitCommaSeparatedTags(tag ?? tags)
+            : [];
+
+        const problemTitle = typeof title === "string" && title.trim() ? title.trim() : pid;
+
+        const docId = await ProblemModel.add(
+            domainId,
+            pid,
+            problemTitle,
+            contentJson,
+            user._id,
+            hydroTags,
+            {
+                hidden: Boolean(hidden),
+                difficulty: Number(difficulty) || 0,
+            },
+        );
+
+        const diff = Number(difficulty);
+        if (Number.isFinite(diff) && diff === 0) {
+            await ProblemModel.edit(domainId, docId, { difficulty: 0 });
+        }
+
+        await applyProblemInfoFields(domainId, pid, {
+            alg_tag,
+            ai_alg_tags,
+            videosol,
+            trial_videosol,
+        }, "create");
+
+        const created = await ProblemModel.get(domainId, pid);
+        const infoSnapshot = await readProblemInfoSnapshot(domainId, pid);
+
+        this.response.body = {
+            message: "problem create success",
+            pid: created?.pid ?? pid,
+            title: created?.title ?? problemTitle,
+            docId,
+            hidden: Boolean(hidden),
+            difficulty: Number.isFinite(diff) ? diff : 0,
+            tag: hydroTags,
+            ...infoSnapshot,
+        };
+    }
+}
+
+/** 修改题目：题目编号（可改）、题目标题、题面、隐藏、难度及编辑页扩展字段。 */
+class updateProblemAPIHandler extends Handler {
+    async post() {
+        const {
+            domainId,
+            uname,
+            password,
+            pid,
+            newPid,
+            title,
+            content,
+            hidden,
+            difficulty,
+            tag,
+            tags,
+            alg_tag,
+            ai_alg_tags,
+            videosol,
+            trial_videosol,
+        } = this.request.body || {};
+
+        const res = await login(uname, password);
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error;
+            return;
+        }
+        const user = await UserModel.getByUname(domainId, uname);
+        if (!user) {
+            this.response.body = { message: "Invalid domain." };
+            return;
+        }
+        if (!user.hasPerm(PERM.PERM_EDIT_PROBLEM)) {
+            this.response.body = { message: "Permission denied." };
+            return;
+        }
+
+        if (!pid || typeof pid !== "string") {
+            this.response.body = { message: "pid is required." };
+            return;
+        }
+
+        const pdoc = await ProblemModel.get(domainId, pid);
+        if (!pdoc) {
+            this.response.body = { message: `${pid} in ${domainId} not found` };
+            return;
+        }
+
+        const problemInfoFields: ProblemInfoWriteFields = {
+            alg_tag,
+            ai_alg_tags,
+            videosol,
+            trial_videosol,
+        };
+        const hasTagInput = tag !== undefined || tags !== undefined;
+        const hasProblemInfoInput = hasProblemInfoFieldInput(problemInfoFields);
+
+        const $set: Record<string, unknown> = {};
+        if (typeof newPid === "string" && newPid.trim() && newPid !== pid) {
+            if (await ProblemModel.get(domainId, newPid)) {
+                this.response.body = { message: `${newPid} in ${domainId} already exists` };
+                return;
+            }
+            $set.pid = newPid;
+        }
+        if (title !== undefined) {
+            if (typeof title !== "string" || !title.trim()) {
+                this.response.body = { message: "title must be a non-empty string when provided." };
+                return;
+            }
+            $set.title = title.trim();
+        }
+        if (content !== undefined) {
+            const contentJson = buildZhContentJson(content, (pdoc as { content?: string }).content);
+            if (!contentJson) {
+                this.response.body = { message: "content (zh markdown) must be non-empty when provided." };
+                return;
+            }
+            $set.content = contentJson;
+        }
+        if (hidden !== undefined) {
+            $set.hidden = Boolean(hidden);
+        }
+        if (difficulty !== undefined) {
+            const diff = Number(difficulty);
+            if (!Number.isFinite(diff)) {
+                this.response.body = { message: "difficulty must be a number." };
+                return;
+            }
+            $set.difficulty = diff;
+        }
+        if (hasTagInput) {
+            $set.tag = splitCommaSeparatedTags(tag ?? tags);
+        }
+
+        if (!Object.keys($set).length && !hasProblemInfoInput) {
+            this.response.body = {
+                message: "No fields to update. Provide newPid, title, content, hidden, difficulty, tag, alg_tag, ai_alg_tags, videosol, or trial_videosol.",
+            };
+            return;
+        }
+
+        const updated = Object.keys($set).length
+            ? await ProblemModel.edit(domainId, pdoc.docId, $set as any)
+            : pdoc;
+        const finalPid = updated.pid;
+
+        await applyProblemInfoFields(domainId, finalPid, problemInfoFields, "update");
+        const infoSnapshot = await readProblemInfoSnapshot(domainId, finalPid);
+
+        this.response.body = {
+            message: "problem update success",
+            pid: updated.pid,
+            title: updated.title,
+            docId: updated.docId,
+            hidden: updated.hidden,
+            difficulty: typeof updated.difficulty === "number" ? updated.difficulty : null,
+            tag: Array.isArray((updated as { tag?: string[] }).tag) ? (updated as { tag: string[] }).tag : [],
+            ...infoSnapshot,
+        };
+    }
+}
+
+/** 写入题目 `content` 中的中文 Markdown（与 MarkdownEdit 一致：`JSON.stringify({ ... , zh })`）。 */
+class uploadZhContentAPIHandler extends Handler {
+    async post() {
+        const { domainId, uname, password, pid, content } = this.request.body || {};
+
+        const res = await login(uname, password);
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error;
+            return;
+        }
+
+        if (!pid) {
+            this.response.body = { message: "pid is required." };
+            return;
+        }
+        if (typeof content !== "string" || !content.trim()) {
+            this.response.body = { message: "content (zh markdown) is required and must be non-empty." };
+            return;
+        }
+
+        const pdoc = await ProblemModel.get(domainId, pid);
+        if (!pdoc) {
+            this.response.body = { message: `${pid} in ${domainId} not found` };
+            return;
+        }
+
+        const contentJson = buildZhContentJson(content, (pdoc as { content?: string }).content);
+        if (!contentJson) {
+            this.response.body = { message: "content (zh markdown) is required and must be non-empty." };
+            return;
+        }
+
+        await ProblemModel.edit(domainId, pdoc.docId, {
+            content: contentJson,
+        });
+
+        this.response.body = {
+            message: "zh problem content upload success",
+            pid: pdoc.pid,
+        };
+    }
+}
+
+
+/** 调用编辑页同款 AI 生成算法标签，并写入 problem_info.extra.ai_alg_tags。 */
+class generateAiAlgTagAPIHandler extends Handler {
+    async post() {
+        const {
+            domainId,
+            uname,
+            password,
+            pid,
+            cover = false,
+        } = this.request.body || {};
+
+        const res = await login(uname, password);
+        if (res?.data?.error) {
+            this.response.body = res?.data?.error;
+            return;
+        }
+        const user = await UserModel.getByUname(domainId, uname);
+        if (!user) {
+            this.response.body = { message: "Invalid domain." };
+            return;
+        }
+        if (!user.hasPerm(PERM.PERM_EDIT_PROBLEM)) {
+            this.response.body = { message: "Permission denied." };
+            return;
+        }
+        if (!pid || typeof pid !== "string") {
+            this.response.body = { message: "pid is required." };
+            return;
+        }
+
+        const pdoc = await ProblemModel.get(domainId, pid);
+        if (!pdoc) {
+            this.response.body = { message: `${pid} in ${domainId} not found` };
+            return;
+        }
+
+        try {
+            const result = await generateAndSaveAiAlgTagsForProblem(domainId, pid, {
+                cover: Boolean(cover),
+            });
+            this.response.body = {
+                status: true,
+                pid,
+                tags: result.tags,
+                confidence: result.confidence,
+                saved: result.saved,
+                skipped: result.skipped ?? false,
+                reason: result.reason,
+                ai_alg_tags: result.tags.join(','),
+            };
+        } catch (e: any) {
+            this.response.body = {
+                status: false,
+                message: e?.message || "AI 算法标签生成失败",
+            };
+        }
+    }
+}
+
+
+export async function apply(ctx: Context) {
+    ctx.Route('problemSetDetailAPI', '/api/problems/detail', ProblemSetDetailAPIHandler);
+    ctx.Route('problemDetailAPI', '/api/problem/detail', ProblemDetailAPIHandler);
+    ctx.Route('problemSetChineseProblemListAPI', '/api/problems/chinese_list', ProblemSetChineseProblemListAPIHandler);
+    ctx.Route('problemAdminSolutionAPI', '/api/problem/admin_solution', ProblemAdminSolutionAPIHandler);
+    ctx.Route('problemAndSolutionAPI', '/api/problem/list', ProblemAndSolutionAPIHandler);
+    ctx.Route('hydroSubmitProxyAPI', '/api/problem/submit_proxy', HydroSubmitProxyAPIHandler);
+    ctx.Route('uploadSolAPI', '/api/problem/upload_sol', uploadSolAPIHandler);
+    ctx.Route('getTestdataAPI', '/api/problem/get_testdata', getTestdataAPIHandler);
+    ctx.Route('uploadTestdataAPI', '/api/problem/upload_testdata', uploadTestdataAPIHandler);
+    ctx.Route('uploadZhContentAPI', '/api/problem/upload_zh_content', uploadZhContentAPIHandler);
+    ctx.Route('createProblemAPI', '/api/problem/create', createProblemAPIHandler);
+    ctx.Route('updateProblemAPI', '/api/problem/update', updateProblemAPIHandler);
+    ctx.Route('generateAiAlgTagAPI', '/api/problem/generate_ai_alg_tag', generateAiAlgTagAPIHandler);
+}

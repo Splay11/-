@@ -1,0 +1,188 @@
+## 解题思路
+
+设数列为 $a_i=a_0+i\cdot d$，我们关心的是所有
+$a_i \bmod m$ 的取值。
+
+先把问题转化到模 $m$ 的意义下：
+
+* 起点变成 $a_0 \bmod m$
+* 公差变成 $d \bmod m$
+
+于是我们实际在看序列：
+
+$$
+(a_0 + i\cdot d)\bmod m
+$$
+
+这类序列在模意义下只会落在一个循环集合里。根据数论结论：
+
+* 所有能取到的值，恰好是满足
+  $x \equiv a_0 \pmod{\gcd(d,m)}$ 的那些模 $m$ 的数
+* 也就是说，这些值构成一个公差为 $g=\gcd(d,m)$ 的等差序列
+
+所以可取值集合为：
+
+$$
+a_0 \bmod g,\ a_0 \bmod g + g,\ a_0 \bmod g + 2g,\ \dots
+$$
+
+直到小于 $m$ 为止。
+
+显然其中最大值就是最后一项。设
+
+$$
+r=a_0 \bmod g
+$$
+
+那么最大值为：
+
+$$
+r+\left\lfloor \frac{m-1-r}{g}\right\rfloor \cdot g
+$$
+
+这个式子其实等价于：
+
+$$
+m-g+r
+$$
+
+因为 $m$ 一定是 $g$ 的倍数。
+
+所以答案直接为：
+
+1. 先求 $g=\gcd(d,m)$
+2. 再求 $r=a_0 \bmod g$
+3. 输出 $m-g+r$
+
+这里用到的核心算法是 $gcd$。
+
+## 复杂度分析
+
+每组数据只需要计算一次最大公约数和若干次取模运算。
+
+* 时间复杂度：$O(\log \min(d,m))$
+* 空间复杂度：$O(1)$
+
+在 $T\le 10^5$ 的范围内完全可行。
+
+## 代码实现
+
+### Python
+
+```python
+import sys
+import math
+
+
+# 计算答案
+def solve_one(a0, d, m):
+    # g 为 d 和 m 的最大公约数
+    g = math.gcd(d, m)
+    # r 为 a0 对 g 取模后的结果
+    r = a0 % g
+    # 最大值公式：m - g + r
+    return m - g + r
+
+
+def main():
+    data = sys.stdin.read().split()
+    t = int(data[0])
+    idx = 1
+    ans = []
+
+    for _ in range(t):
+        a0 = int(data[idx])
+        d = int(data[idx + 1])
+        m = int(data[idx + 2])
+        idx += 3
+        ans.append(str(solve_one(a0, d, m)))
+
+    sys.stdout.write("\n".join(ans))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Java
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    // 计算最大公约数
+    static long gcd(long a, long b) {
+        while (b != 0) {
+            long t = a % b;
+            a = b;
+            b = t;
+        }
+        return a;
+    }
+
+    // 计算答案
+    static long solveOne(long a0, long d, long m) {
+        // g 为 d 和 m 的最大公约数
+        long g = gcd(d, m);
+        // r 为 a0 对 g 取模后的结果
+        long r = a0 % g;
+        // 最大值公式：m - g + r
+        return m - g + r;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < T; i++) {
+            long a0 = sc.nextLong();
+            long d = sc.nextLong();
+            long m = sc.nextLong();
+
+            sb.append(solveOne(a0, d, m)).append('\n');
+        }
+
+        System.out.print(sb.toString());
+        sc.close();
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <numeric>
+using namespace std;
+using int64 = long long;
+
+// 计算答案
+int64 solve_one(int64 a0, int64 d, int64 m) {
+    // g 为 d 和 m 的最大公约数
+    int64 g = gcd(d, m);
+    // r 为 a0 对 g 取模后的结果
+    int64 r = a0 % g;
+    // 最大值公式：m - g + r
+    return m - g + r;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+
+    while (T--) {
+        int64 a0, d, m;
+        cin >> a0 >> d >> m;
+
+        cout << solve_one(a0, d, m) << '\n';
+    }
+
+    return 0;
+}
+```
